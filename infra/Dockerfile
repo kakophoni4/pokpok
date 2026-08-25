@@ -33,6 +33,11 @@ ARG VITE_API_URL=""
 ENV VITE_TELEGRAM_BOT_USERNAME=$VITE_TELEGRAM_BOT_USERNAME
 ENV VITE_API_URL=$VITE_API_URL
 
+# Generating the Prisma client reads the schema and connects to nothing, but the
+# config file it loads insists on a URL being present. This placeholder satisfies
+# that check during the build; the real credentials arrive at runtime.
+ENV DATABASE_URL="postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder"
+
 RUN pnpm run build
 
 # ─── API ───────────────────────────────────────────────────────────────────────
