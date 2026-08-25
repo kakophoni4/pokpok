@@ -1,0 +1,38 @@
+{
+  "name": "poker-league",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@poker/api --filter=@poker/web",
+    "dev:api": "pnpm --filter @poker/api run dev",
+    "dev:web": "pnpm --filter @poker/web run dev",
+    "dev:bot": "pnpm --filter @poker/bot-telegram run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "smoke": "pnpm --filter @poker/api run smoke",
+    "icons": "pnpm --filter @poker/web run generate:icons",
+    "db:migrate": "pnpm --filter @poker/api exec prisma migrate dev",
+    "db:generate": "pnpm --filter @poker/api exec prisma generate",
+    "db:studio": "pnpm --filter @poker/api exec prisma studio",
+    "db:seed": "pnpm --filter @poker/api run db:seed",
+    "db:reset": "pnpm --filter @poker/api exec prisma migrate reset",
+    "infra:up": "docker compose -f infra/docker-compose.dev.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.dev.yml down",
+    "deploy:build": "docker compose -f infra/docker-compose.yml build",
+    "deploy:up": "docker compose -f infra/docker-compose.yml up -d",
+    "deploy:logs": "docker compose -f infra/docker-compose.yml logs -f --tail=100",
+    "deploy:down": "docker compose -f infra/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "turbo": "^2.10.11",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // No "type" field in package.json, so NodeNext resolves and emits CommonJS,
+    // which is what Nest's decorator-based DI expects.
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "isolatedModules": false,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts", "prisma/**/*.ts", "prisma.config.ts"]
+}

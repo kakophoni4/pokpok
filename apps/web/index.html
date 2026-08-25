@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Клуб спортивного покера</title>
+    <meta
+      name="description"
+      content="Расписание игр, запись на турниры, рейтинг и достижения клуба спортивного покера. Игра без денежных ставок."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0b1210" />
+
+    <!-- iOS: makes "На экран «Домой»" open as a standalone app without Safari chrome. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Покер клуб" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Loaded lazily: only the Mini App shell needs it, and it must come from Telegram. -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

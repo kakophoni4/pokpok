@@ -1,0 +1,241 @@
+import type {
+  Achievement,
+  AdminUpdateUserInput,
+  CreateAchievementInput,
+  CreateTournamentInput,
+  GrantAchievementInput,
+  LeaderboardRow,
+  MeUser,
+  Paginated,
+  PlayerStats,
+  PublicUser,
+  RegistrationView,
+  Season,
+  SubmitResultsInput,
+  TournamentDetail,
+  TournamentSummary,
+  UpdateAchievementInput,
+  UpdateTournamentInput,
+  UserAchievementView,
+} from "@poker/contracts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, query } from "./api";
+
+/**
+ * Query keys are grouped so a mutation can invalidate exactly the slice it
+ * affects, e.g. signing up refreshes the schedule but not the leaderboard.
+ */
+export const keys = {
+  tournaments: (scope: string) => ["tournaments", scope] as const,
+  tournament: (id: string) => ["tournament", id] as const,
+  registrations: (id: string) => ["registrations", id] as const,
+  leaderboard: (scope: string, search: string) => ["leaderboard", scope, search] as const,
+  myStats: () => ["rating", "me"] as const,
+  playerStats: (userId: string) => ["rating", "player", userId] as const,
+  achievements: (includeInactive: boolean) => ["achievements", includeInactive] as const,
+  userAchievements: (userId: string) => ["achievements", "user", userId] as const,
+  seasons: () => ["seasons"] as const,
+  activeSeason: () => ["seasons", "active"] as const,
+  players: (search: string) => ["players", search] as const,
+};
+
+export function useTournaments(scope: "upcoming" | "past" | "all", enabled = true) {
+  return useQuery({
+    queryKey: keys.tournaments(scope),
+    queryFn: () => api.get<TournamentSummary[]>(`/tournaments${query({ scope })}`),
+    enabled,
+  });
+}
+
+export function useTournament(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.tournament(id ?? ""),
+    queryFn: () => api.get<TournamentDetail>(`/tournaments/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useRegistrations(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.registrations(id ?? ""),
+    queryFn: () => api.get<RegistrationView[]>(`/tournaments/${id}/registrations`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useLeaderboard(scope: "season" | "all_time", search = "") {
+  return useQuery({
+    queryKey: keys.leaderboard(scope, search),
+    queryFn: () => api.get<LeaderboardRow[]>(`/rating/leaderboard${query({ scope, search })}`),
+  });
+}
+
+export function useMyStats(enabled: boolean) {
+  return useQuery({
+    queryKey: keys.myStats(),
+    queryFn: () => api.get<PlayerStats>("/rating/me"),
+    enabled,
+  });
+}
+
+export function usePlayerStats(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.playerStats(userId ?? ""),
+    queryFn: () => api.get<PlayerStats>(`/rating/player/${userId}`),
+    enabled: Boolean(userId),
+  });
+}
+
+export function useAchievements(includeInactive = false) {
+  return useQuery({
+    queryKey: keys.achievements(includeInactive),
+    queryFn: () => api.get<Achievement[]>(`/achievements${query({ includeInactive })}`),
+  });
+}
+
+export function useUserAchievements(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.userAchievements(userId ?? ""),
+    queryFn: () => api.get<UserAchievementView[]>(`/achievements/user/${userId}`),
+    enabled: Boolean(userId),
+  });
+}
+
+export function useActiveSeason() {
+  return useQuery({
+    queryKey: keys.activeSeason(),
+    queryFn: () => api.get<Season | null>("/seasons/active"),
+  });
+}
+
+export function usePlayers(search: string, enabled: boolean) {
+  return useQuery({
+    queryKey: keys.players(search),
+    queryFn: () =>
+      api.get<Paginated<PublicUser & { status: string; createdAt: string }>>(
+        `/users${query({ search, perPage: 100 })}`,
+      ),
+    enabled,
+  });
+}
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+export function useRegister(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (source: "web" | "miniapp" = "web") =>
+      api.post<{ status: string; waitlistPosition: number | null }>(
+        `/tournaments/${tournamentId}/register`,
+        { source },
+      ),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useCancelRegistration(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.delete(`/tournaments/${tournamentId}/register`),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useCreateTournament() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateTournamentInput) =>
+      api.post<TournamentSummary>("/tournaments", input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["tournaments"] }),
+  });
+}
+
+export function useUpdateTournament(id: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateTournamentInput) =>
+      api.patch<TournamentSummary>(`/tournaments/${id}`, input),
+    onSuccess: () => invalidateSchedule(client, id),
+  });
+}
+
+export function useDeleteTournament() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/tournaments/${id}`),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["tournaments"] }),
+  });
+}
+
+export function useSubmitResults(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SubmitResultsInput) =>
+      api.post(`/tournaments/${tournamentId}/results`, input),
+    onSuccess: () => {
+      invalidateSchedule(client, tournamentId);
+      // Standings and every player's history change; refetch them all.
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+      void client.invalidateQueries({ queryKey: ["rating"] });
+    },
+  });
+}
+
+export function useSetRegistrationStatus(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, status }: { userId: string; status: string }) =>
+      api.patch(`/tournaments/${tournamentId}/registrations/${userId}`, { status }),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useCreateAchievement() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateAchievementInput) => api.post<Achievement>("/achievements", input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["achievements"] }),
+  });
+}
+
+export function useUpdateAchievement() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateAchievementInput }) =>
+      api.patch<Achievement>(`/achievements/${id}`, input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["achievements"] }),
+  });
+}
+
+export function useGrantAchievement() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: GrantAchievementInput) => api.post("/achievements/grant", input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["achievements"] });
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+      void client.invalidateQueries({ queryKey: ["rating"] });
+    },
+  });
+}
+
+export function useUpdatePlayer() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: AdminUpdateUserInput }) =>
+      api.patch<MeUser>(`/users/${id}`, input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["players"] });
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
+}
+
+function invalidateSchedule(
+  client: ReturnType<typeof useQueryClient>,
+  tournamentId: string,
+): void {
+  void client.invalidateQueries({ queryKey: ["tournaments"] });
+  void client.invalidateQueries({ queryKey: keys.tournament(tournamentId) });
+  void client.invalidateQueries({ queryKey: keys.registrations(tournamentId) });
+}

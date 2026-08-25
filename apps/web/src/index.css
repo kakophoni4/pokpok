@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/*
+ * Poker-club palette: deep felt green as the base, warm gold for anything the
+ * player earns. Tokens are declared here so the Telegram Mini App shell can
+ * later override them with Telegram's own theme variables.
+ */
+@theme {
+  --color-felt-950: #070d0b;
+  --color-felt-900: #0b1210;
+  --color-felt-850: #101a17;
+  --color-felt-800: #16241f;
+  --color-felt-700: #1e3229;
+  --color-felt-600: #2a4638;
+  --color-felt-500: #37604a;
+
+  --color-gold-400: #e5c07b;
+  --color-gold-500: #d4a94e;
+  --color-gold-600: #b08a34;
+
+  --color-chip-red: #d1495b;
+  --color-chip-blue: #4a7ba7;
+
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-felt-900 text-stone-100 antialiased;
+    font-family: var(--font-display);
+    /* Respect the iPhone notch and home indicator in standalone mode. */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    min-height: 100dvh;
+  }
+
+  /* Tabular figures keep rating columns from jittering as numbers change. */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-felt-700/70 bg-felt-850/80 backdrop-blur-sm;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-felt-700 bg-felt-900 px-3 py-2 text-sm
+      text-stone-100 outline-none transition
+      placeholder:text-stone-500
+      focus:border-gold-500/70 focus:ring-2 focus:ring-gold-500/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-stone-400 uppercase;
+  }
+}

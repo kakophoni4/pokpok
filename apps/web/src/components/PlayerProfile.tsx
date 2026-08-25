@@ -1,0 +1,155 @@
+import type { PlayerStats, UserAchievementView } from "@poker/contracts";
+import { Link } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { formatFullDate, formatPoints, placeLabel, plural } from "../lib/format";
+import { Avatar, Badge, Card, EmptyState, Stat, cx } from "./ui";
+
+// The charting library is by far the heaviest dependency; keep it out of the
+// initial bundle so the schedule opens fast on a phone.
+const RatingChart = lazy(() =>
+  import("./RatingChart").then((module) => ({ default: module.RatingChart })),
+);
+
+/**
+ * Shared by the personal cabinet and any public player page: the same numbers
+ * should read identically wherever they appear.
+ */
+export function PlayerProfile({
+  stats,
+  achievements,
+  extra,
+}: {
+  stats: PlayerStats;
+  achievements: UserAchievementView[] | undefined;
+  extra?: React.ReactNode;
+}) {
+  return (
+    <>
+      <Card className="mb-4">
+        <div className="flex items-center gap-3">
+          <Avatar nickname={stats.user.nickname} url={stats.user.avatarUrl} size={56} />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-xl font-semibold">{stats.user.nickname}</h1>
+            <p className="mt-0.5 text-sm text-stone-400">
+              {stats.rank ? (
+                <>
+                  <span className="text-gold-400">{stats.rank} место</span> в сезоне ·{" "}
+                </>
+              ) : null}
+              <span className="nums">{stats.points}</span> очков
+            </p>
+          </div>
+          {stats.user.role !== "player" && (
+            <Badge tone="gold">
+              {stats.user.role === "admin" ? "Администратор" : "Организатор"}
+            </Badge>
+          )}
+        </div>
+        {extra}
+      </Card>
+
+      <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <Stat label="Очки" value={stats.points} />
+        <Stat label="Игр" value={stats.gamesPlayed} />
+        <Stat label="Побед" value={stats.wins} />
+        <Stat label="Топ-3" value={stats.top3} />
+        <Stat label="В призах" value={stats.itm} />
+        <Stat
+          label="Ср. место"
+          value={stats.avgPlace == null ? "—" : stats.avgPlace.toFixed(1)}
+          hint={stats.bestPlace ? `лучшее: ${stats.bestPlace}` : undefined}
+        />
+      </div>
+
+      <div className="mb-4">
+        <Suspense fallback={<div className="card h-[200px] animate-pulse" />}>
+          <RatingChart progression={stats.progression} />
+        </Suspense>
+      </div>
+
+      {achievements && achievements.length > 0 && (
+        <section className="mb-4">
+          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+            Достижения ({achievements.length})
+          </h2>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {achievements.map((granted) => (
+              <li key={granted.id} className="card flex items-start gap-2.5 p-3">
+                <span aria-hidden className="text-2xl leading-none">
+                  {granted.achievement.icon ?? "🏅"}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{granted.achievement.title}</p>
+                  <p className="nums text-xs text-gold-500">
+                    {formatPoints(granted.achievement.ratingPoints)} рейтинга
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section>
+        <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          История
+        </h2>
+
+        {stats.history.length === 0 ? (
+          <EmptyState
+            icon="🃏"
+            title="Игр пока не было"
+            description="Запишитесь на ближайший турнир — он появится в этой истории вместе с полученным рейтингом."
+          />
+        ) : (
+          <ul className="card divide-y divide-felt-800">
+            {stats.history.map((event) => (
+              <li key={event.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="w-8 shrink-0 text-center">
+                  {event.place ? (
+                    <span className={cx("nums font-semibold", event.place <= 3 && "text-lg")}>
+                      {placeLabel(event.place)}
+                    </span>
+                  ) : (
+                    <span aria-hidden className="text-lg">
+                      {event.achievement?.icon ?? (event.points < 0 ? "⚠️" : "✳️")}
+                    </span>
+                  )}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  {event.tournament ? (
+                    <Link
+                      to={`/t/${event.tournament.id}`}
+                      className="block truncate text-sm hover:text-gold-400"
+                    >
+                      {event.tournament.title}
+                    </Link>
+                  ) : (
+                    <p className="truncate text-sm">
+                      {event.achievement?.title ?? event.comment ?? "Корректировка"}
+                    </p>
+                  )}
+                  <p className="text-xs text-stone-500">
+                    {event.tournament
+                      ? `${formatFullDate(event.tournament.startsAt)} · ${event.tournament.fieldSize} ${plural(event.tournament.fieldSize, "участник", "участника", "участников")}`
+                      : formatFullDate(event.createdAt)}
+                  </p>
+                </div>
+
+                <span
+                  className={cx(
+                    "nums shrink-0 font-semibold",
+                    event.points >= 0 ? "text-gold-400" : "text-chip-red",
+                  )}
+                >
+                  {formatPoints(event.points)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+}

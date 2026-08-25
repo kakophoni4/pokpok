@@ -1,0 +1,35 @@
+# Keeping these out is not just about build speed: copying host node_modules into
+# the image would break pnpm's symlink layout, and copying .env would bake local
+# development secrets into a published image.
+node_modules
+**/node_modules
+
+dist
+**/dist
+build
+**/build
+.turbo
+**/.turbo
+**/generated
+
+# Patterns are anchored at the context root, so the ** forms matter: without them
+# infra/.env — the file holding the production secrets — would land in a layer.
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+.git
+.github
+.vscode
+.idea
+
+*.log
+npm-debug.log*
+coverage
+**/coverage
+
+README.md
+infra/README.md

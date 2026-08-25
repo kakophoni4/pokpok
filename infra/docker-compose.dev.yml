@@ -1,0 +1,34 @@
+# Local development: just the database, published to the host so `pnpm dev`
+# reaches it. The applications themselves run outside Docker, where hot reload
+# and the debugger work normally.
+#
+#   pnpm infra:up      # start
+#   pnpm infra:down    # stop
+#
+# Credentials match DATABASE_URL in the root .env.example. Skip this file
+# entirely if Postgres is already installed natively.
+
+name: poker-league-dev
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: poker_dev_pwd
+      POSTGRES_DB: poker_league
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+      # Runs once, when the data directory is empty.
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dev-db-data:
