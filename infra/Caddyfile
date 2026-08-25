@@ -9,6 +9,15 @@
 {$PUBLIC_URL} {
 	encode zstd gzip
 
+	# Certificates are obtained over TLS-ALPN on 443 instead of the usual HTTP
+	# challenge on 80. That port is often already taken on a shared server, and
+	# insisting on it would mean rearranging whatever is already listening there.
+	tls {
+		issuer acme {
+			disable_http_challenge
+		}
+	}
+
 	# Everything the browser is allowed to do. The Telegram widget and the Mini App
 	# SDK both load scripts from telegram.org, and avatars come from Telegram's CDN.
 	header {

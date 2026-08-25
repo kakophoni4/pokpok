@@ -96,8 +96,11 @@ services:
     environment:
       PUBLIC_URL: ${PUBLIC_URL}
     ports:
-      - "80:80"
-      - "443:443"
+      # Overridable because port 80 is frequently occupied on a server that
+      # already hosts something. 443 is what actually matters: certificates are
+      # issued over TLS-ALPN, so the stack works with 80 mapped anywhere.
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
       # Certificates survive restarts; losing them means re-issuing on every
       # deploy and running into Let's Encrypt rate limits.
