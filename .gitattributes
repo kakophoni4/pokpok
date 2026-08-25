@@ -1,0 +1,16 @@
+# Text files are normalised to LF in the repository.
+* text=auto eol=lf
+
+# These are read by Linux tools that treat a stray carriage return as part of the
+# command, so a Windows checkout must never introduce CRLF here.
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf
+*.yml text eol=lf
+*.sql text eol=lf
+
+# Never touched by newline conversion.
+*.png binary
+*.ico binary
+*.woff2 binary
+pnpm-lock.yaml -diff
