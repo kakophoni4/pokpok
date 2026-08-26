@@ -85,8 +85,7 @@ export function LoginPage() {
             </Button>
           </div>
           <p className="mt-2 text-xs text-stone-500">
-            Админ: <code>Ferz</code> · организатор: <code>Kate_AA</code> · игрок:{" "}
-            <code>Sanya_River</code>
+            Админы: <code>Ferz</code>, <code>Kate_AA</code> · игрок: <code>Sanya_River</code>
           </p>
         </Card>
       )}
