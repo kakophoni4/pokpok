@@ -82,8 +82,10 @@ export class Api {
     try {
       return (await this.request(method, path, { token: session.accessToken, body })) as T;
     } catch (error) {
-      // The API restarted or revoked the token: drop it and try once more.
-      if (error instanceof ApiError && error.status === 401) {
+      // A revoked token, or an account that no longer exists because the database
+      // was reseeded under us. Either way the cached session is worthless: drop it
+      // and let the internal endpoint mint a new account before giving up.
+      if (error instanceof ApiError && (error.status === 401 || error.code === "USER_NOT_FOUND")) {
         this.sessions.delete(profile.id);
         const fresh = await this.session(profile);
         return (await this.request(method, path, { token: fresh.accessToken, body })) as T;
