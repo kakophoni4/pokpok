@@ -104,6 +104,15 @@ describe("nextPlace", () => {
     const withGap = detail({ entriesPaid: ["a", "b", "c", "d"], places: [["d", 4]] });
     expect(nextPlace(withGap)).toBe(3);
   });
+
+  it("treats a place on the cash-desk row as taken even without a results row", () => {
+    const evening = detail({ entriesPaid: ["a", "b", "c"] });
+    evening.results = [];
+    evening.players = evening.players!.map((player, index) =>
+      index === 0 ? { ...player, place: 3 } : player,
+    );
+    expect(nextPlace(evening)).toBe(2);
+  });
 });
 
 describe("freePlaces", () => {

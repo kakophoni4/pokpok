@@ -252,7 +252,9 @@ export class AdminScreens {
       const prize = seat.place <= detail.paidPlaces ? "" : " · вне призов";
       lines.push(`Место: <b>${seat.place}</b>${earned}${prize}`);
     } else {
-      lines.push(`<i>в игре · за столом ${fieldSize(detail)}</i>`);
+      lines.push(
+        `<i>в игре · за столом ${fieldSize(detail)} · следующий: ${nextPlace(detail)} место</i>`,
+      );
     }
 
     const keyboard = new InlineKeyboard();

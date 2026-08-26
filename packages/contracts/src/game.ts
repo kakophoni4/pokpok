@@ -29,9 +29,13 @@ export function fieldSize(detail: TournamentDetail): number {
 
 /** Places nobody holds yet, deepest first — the order they get handed out in. */
 export function freePlaces(detail: TournamentDetail): number[] {
-  const taken = new Set(detail.results.map((row) => row.place));
-  const places: number[] = [];
+  const taken = new Set<number>();
+  for (const row of detail.results) taken.add(row.place);
+  for (const player of detail.players ?? []) {
+    if (player.place != null) taken.add(player.place);
+  }
 
+  const places: number[] = [];
   for (let place = fieldSize(detail); place >= 1; place -= 1) {
     if (!taken.has(place)) places.push(place);
   }

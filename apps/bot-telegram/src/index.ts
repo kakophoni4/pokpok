@@ -50,19 +50,31 @@ async function editById(
   messageId: number,
   screen: Screen,
 ): Promise<void> {
-  try {
-    await bot.api.editMessageText(chatId, messageId, screen.text, {
-      parse_mode: "HTML",
-      reply_markup: screen.keyboard,
-    });
-  } catch (error) {
-    if (error instanceof GrammyError && error.description.includes("not modified")) return;
-    // A card whose message was deleted by hand must not break the whole update.
-    if (error instanceof GrammyError && error.description.includes("message to edit not found")) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      await bot.api.editMessageText(chatId, messageId, screen.text, {
+        parse_mode: "HTML",
+        reply_markup: screen.keyboard,
+      });
+      return;
+    } catch (error) {
+      if (error instanceof GrammyError && error.description.includes("not modified")) return;
+      if (error instanceof GrammyError && error.description.includes("message to edit not found")) {
+        return;
+      }
+      if (error instanceof GrammyError && error.error_code === 429) {
+        const wait = Math.max(1, error.parameters.retry_after ?? 1);
+        await delay(wait * 1000);
+        continue;
+      }
+      console.error(`[bot] could not edit message ${messageId}:`, error);
       return;
     }
-    throw error;
   }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // ─── Player: one screen, rewritten in place ───────────────────────────────────
@@ -250,6 +262,7 @@ async function refresh(
   for (const card of detail.adminScreens?.cards ?? []) {
     const seat = seatFor(detail, card.userId);
     if (seat) await editById(chatId, card.msgId, admin.card(seat, detail, prices));
+    await delay(50);
   }
 }
 
@@ -397,7 +410,11 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const place = nextPlace(detail);
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
-    await redrawEvening(chatId, profile, detail.id);
+    const fresh = await admin.detail(profile, detail.id);
+    const prices = await admin.settings(profile);
+    const seat = seatFor(fresh, userId);
+    if (seat) await edit(ctx, admin.card(seat, fresh, prices));
+    await refresh(chatId, profile, fresh, true);
     return;
   }
 
@@ -421,7 +438,11 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const place = Number(chosenPlace[1]);
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
-    await redrawEvening(chatId, profile, detail.id);
+    const fresh = await admin.detail(profile, detail.id);
+    const prices = await admin.settings(profile);
+    const seat = seatFor(fresh, userId);
+    if (seat) await edit(ctx, admin.card(seat, fresh, prices));
+    await refresh(chatId, profile, fresh, true);
     return;
   }
 
