@@ -1,4 +1,5 @@
 import type { PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
+import { fieldSize, freePlaces, nextPlace } from "@poker/contracts";
 import { useMemo, useState } from "react";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, cx } from "../../components/ui";
 import {
@@ -135,6 +136,13 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
 
           <p className="flex-1 text-xs text-stone-500">
             Можно менять по ходу игры — рейтинг считается в момент завершения.
+            {!isFinished && (
+              <>
+                <br />
+                За столом {fieldSize(detail)}, мест проставлено{" "}
+                {detail.results.length}. Следующий выбывший займёт {nextPlace(detail)} место.
+              </>
+            )}
           </p>
 
           {isFinished ? (
@@ -259,26 +267,35 @@ function PlayerRow({
             </Button>
           ))}
 
-          {seat.place == null ? (
+          {seat.place == null && (
             <Button
               size="sm"
               disabled={busy}
-              onClick={() =>
-                setPlace.mutate({ userId: seat.user.id, place: nextPlace(detail) })
-              }
+              onClick={() => setPlace.mutate({ userId: seat.user.id, place: nextPlace(detail) })}
             >
               Выбыл — {nextPlace(detail)} место
             </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => setPlace.mutate({ userId: seat.user.id, place: null })}
-            >
-              Вернуть в игру
-            </Button>
           )}
+
+          <select
+            aria-label={`Место игрока ${seat.user.nickname}`}
+            className="field h-8 w-auto py-0 text-sm"
+            disabled={busy}
+            value={seat.place ?? ""}
+            onChange={(event) =>
+              setPlace.mutate({
+                userId: seat.user.id,
+                place: event.target.value ? Number(event.target.value) : null,
+              })
+            }
+          >
+            <option value="">в игре</option>
+            {placeOptions(detail, seat.place).map((place) => (
+              <option key={place} value={place}>
+                {place} место{place <= detail.paidPlaces ? " · в призах" : ""}
+              </option>
+            ))}
+          </select>
 
           {seat.lastPaymentId && (
             <Button
@@ -310,6 +327,12 @@ function Stat({ label, value }: { label: string; value: string }) {
       <dd className="nums mt-0.5 font-medium">{value}</dd>
     </div>
   );
+}
+
+/** Free places plus the one this player already holds, deepest first. */
+function placeOptions(detail: TournamentDetail, current: number | null): number[] {
+  const open = freePlaces(detail);
+  return current == null ? open : [current, ...open].sort((a, b) => b - a);
 }
 
 type Seat = {
@@ -364,20 +387,3 @@ function seatsOf(detail: TournamentDetail): Seat[] {
   });
 }
 
-/**
- * The place the next player to bust takes: the lowest one still free. The first
- * player out of twelve finishes twelfth, which is how a table actually works and
- * means nobody has to type a number.
- */
-function nextPlace(detail: TournamentDetail): number {
-  const taken = new Set(detail.results.map((row) => row.place));
-  const playing = (detail.players ?? []).filter((player) =>
-    player.payments.some((payment) => payment.kind === "entry"),
-  ).length;
-
-  const start = Math.max(playing, ...[...taken, 0]);
-  for (let place = start; place >= 1; place -= 1) {
-    if (!taken.has(place)) return place;
-  }
-  return 1;
-}

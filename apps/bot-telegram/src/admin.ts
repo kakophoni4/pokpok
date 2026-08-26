@@ -7,6 +7,7 @@ import type {
   TournamentPlayer,
   TournamentSummary,
 } from "@poker/contracts";
+import { fieldSize, freePlaces, nextPlace } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import { clubDate, clubClock, escapeHtml, fit, num, points, rub } from "./format.js";
@@ -178,7 +179,10 @@ export class AdminScreens {
       `Играют: <b>${playing.length}</b> · Фишек в игре: <b>${num(detail.chipsInPlay)}</b>`,
       `Касса: <b>${rub(detail.totalRub ?? 0)}</b>`,
       `Призовых мест: <b>${detail.paidPlaces}</b> · Первое место: <b>${points(detail.ratingPool)}</b>`,
-      `Мест проставлено: <b>${placed.length}</b>`,
+      `Мест проставлено: <b>${placed.length}</b> из <b>${fieldSize(detail)}</b>`,
+      ...(finished
+        ? []
+        : [`Следующий выбывший займёт <b>${nextPlace(detail)}</b> место`]),
       ...(finished ? ["", "🏁 <b>Турнир завершён, рейтинг начислен.</b>"] : []),
       ...(confirmFinish
         ? ["", "Завершить турнир и начислить рейтинг? Это действие обратимо."]
@@ -243,7 +247,10 @@ export class AdminScreens {
     if (seat.chips > 0) lines.push(`Фишек: <b>${num(seat.chips)}</b>`);
     if (seat.place != null) {
       const earned = seat.ratingPoints != null ? ` · ${points(seat.ratingPoints)}` : "";
-      lines.push(`Место: <b>${seat.place}</b>${earned}`);
+      const prize = seat.place <= detail.paidPlaces ? "" : " · вне призов";
+      lines.push(`Место: <b>${seat.place}</b>${earned}${prize}`);
+    } else {
+      lines.push(`<i>в игре · за столом ${fieldSize(detail)}</i>`);
     }
 
     const keyboard = new InlineKeyboard();
@@ -256,9 +263,10 @@ export class AdminScreens {
         .row();
 
       if (seat.place == null) {
-        keyboard.text(`🚪 Выбыл — ${nextPlace(detail)} место`, "bust");
+        keyboard.text(`🚪 Выбыл — ${nextPlace(detail)} место`, "bust").row();
+        keyboard.text("✏️ Другое место", "place");
       } else {
-        keyboard.text("↩️ Вернуть в игру", "unbust");
+        keyboard.text("✏️ Изменить место", "place").text("↩️ Вернуть в игру", "unbust");
       }
 
       keyboard.row().text("🏅 Ачивка", "ach");
@@ -266,6 +274,35 @@ export class AdminScreens {
     }
 
     return { text: lines.join("\n"), keyboard };
+  }
+
+  /**
+   * Every place still free, deepest first, so a correction is a tap rather than
+   * a retyped number. The player's current place is offered too — reselecting it
+   * is harmless, and leaving it out would make the grid jump around.
+   */
+  placeChooser(seat: Seat, detail: TournamentDetail): Screen {
+    const open = freePlaces(detail);
+    const offered = seat.place == null ? open : [seat.place, ...open].sort((a, b) => b - a);
+
+    const keyboard = new InlineKeyboard();
+    offered.forEach((place, index) => {
+      const paid = place <= detail.paidPlaces;
+      keyboard.text(`${paid ? "🏅" : ""}${place}`, `pl:${place}`);
+      if (index % 5 === 4) keyboard.row();
+    });
+
+    keyboard.row().text("← Назад", "card");
+
+    return {
+      text: [
+        `✏️ <b>${escapeHtml(seat.user.nickname)}</b>`,
+        "",
+        `За столом ${fieldSize(detail)}, призовых мест ${detail.paidPlaces}.`,
+        "🏅 — место в призах. Выберите, каким игрок закончил вечер.",
+      ].join("\n"),
+      keyboard,
+    };
   }
 
   achievementChooser(seat: Seat, list: Achievement[]): Screen {
@@ -331,26 +368,6 @@ export function seats(detail: TournamentDetail): Seat[] {
     if (b.place != null) return 1;
     return a.user.nickname.localeCompare(b.user.nickname, "ru");
   });
-}
-
-/**
- * The place the next player to bust out takes: the lowest one still free.
- *
- * Counting down from the field size is what a live table actually does — the
- * first player out of twelve finishes twelfth — and it means the admin never
- * types a number.
- */
-export function nextPlace(detail: TournamentDetail): number {
-  const taken = new Set(detail.results.map((row) => row.place));
-  const playing = (detail.players ?? []).filter((player) =>
-    player.payments.some((payment) => payment.kind === "entry"),
-  ).length;
-
-  const start = Math.max(playing, ...[...taken, 0]);
-  for (let place = start; place >= 1; place -= 1) {
-    if (!taken.has(place)) return place;
-  }
-  return 1;
 }
 
 /** Turns a seat back into the player it belongs to, for the card renderer. */

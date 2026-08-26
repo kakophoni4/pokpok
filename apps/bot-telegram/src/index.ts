@@ -1,7 +1,8 @@
 import type { PaymentKind, TournamentDetail } from "@poker/contracts";
+import { nextPlace } from "@poker/contracts";
 import { Bot, GrammyError } from "grammy";
 import type { Context } from "grammy";
-import { AdminScreens, nextPlace, seatFor, seats } from "./admin.js";
+import { AdminScreens, seatFor, seats } from "./admin.js";
 import { Api, ApiError, type TelegramProfile } from "./api.js";
 import { ClubInfo } from "./club.js";
 import { loadConfig } from "./config.js";
@@ -366,6 +367,23 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   if (data === "unbust") {
     await admin.setPlace(profile, detail.id, userId, null);
     await ctx.answerCallbackQuery({ text: "Место снято" });
+    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    return;
+  }
+
+  if (data === "place") {
+    const seat = seatFor(detail, userId);
+    if (!seat) return;
+    await ctx.answerCallbackQuery();
+    await edit(ctx, admin.placeChooser(seat, detail));
+    return;
+  }
+
+  const chosenPlace = data.match(/^pl:(\d+)$/);
+  if (chosenPlace) {
+    const place = Number(chosenPlace[1]);
+    await admin.setPlace(profile, detail.id, userId, place);
+    await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
     await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
     return;
   }

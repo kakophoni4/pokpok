@@ -3,6 +3,7 @@ export * from "./common.js";
 export * from "./club.js";
 export * from "./user.js";
 export * from "./tournament.js";
+export * from "./game.js";
 export * from "./rating.js";
 export * from "./achievement.js";
 export * from "./auth.js";
