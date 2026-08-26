@@ -63,6 +63,15 @@ export type Session = Prisma.SessionModel
  */
 export type LinkToken = Prisma.LinkTokenModel
 /**
+ * Model LoginTicket
+ * A browser waiting for a tap in Telegram.
+ * 
+ * The site opens one of these, sends the visitor into the bot with `code` in the
+ * deep link, and polls until the bot marks it confirmed. `userId` is filled in
+ * at that moment, which is also when we learn who was logging in at all.
+ */
+export type LoginTicket = Prisma.LoginTicketModel
+/**
  * Model Season
  * 
  */

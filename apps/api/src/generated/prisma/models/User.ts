@@ -217,6 +217,7 @@ export type UserWhereInput = {
   identities?: Prisma.IdentityListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   linkTokens?: Prisma.LinkTokenListRelationFilter
+  loginTickets?: Prisma.LoginTicketListRelationFilter
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
@@ -243,6 +244,7 @@ export type UserOrderByWithRelationInput = {
   identities?: Prisma.IdentityOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   linkTokens?: Prisma.LinkTokenOrderByRelationAggregateInput
+  loginTickets?: Prisma.LoginTicketOrderByRelationAggregateInput
   registrations?: Prisma.RegistrationOrderByRelationAggregateInput
   results?: Prisma.ResultOrderByRelationAggregateInput
   payments?: Prisma.PaymentOrderByRelationAggregateInput
@@ -272,6 +274,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   identities?: Prisma.IdentityListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   linkTokens?: Prisma.LinkTokenListRelationFilter
+  loginTickets?: Prisma.LoginTicketListRelationFilter
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
@@ -328,6 +331,7 @@ export type UserCreateInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -354,6 +358,7 @@ export type UserUncheckedCreateInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -380,6 +385,7 @@ export type UserUpdateInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -406,6 +412,7 @@ export type UserUncheckedUpdateInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -565,6 +572,22 @@ export type UserUpdateOneRequiredWithoutLinkTokensNestedInput = {
   upsert?: Prisma.UserUpsertWithoutLinkTokensInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLinkTokensInput, Prisma.UserUpdateWithoutLinkTokensInput>, Prisma.UserUncheckedUpdateWithoutLinkTokensInput>
+}
+
+export type UserCreateNestedOneWithoutLoginTicketsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginTicketsInput, Prisma.UserUncheckedCreateWithoutLoginTicketsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginTicketsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutLoginTicketsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginTicketsInput, Prisma.UserUncheckedCreateWithoutLoginTicketsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginTicketsInput
+  upsert?: Prisma.UserUpsertWithoutLoginTicketsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLoginTicketsInput, Prisma.UserUpdateWithoutLoginTicketsInput>, Prisma.UserUncheckedUpdateWithoutLoginTicketsInput>
 }
 
 export type UserCreateNestedOneWithoutRegistrationsInput = {
@@ -741,6 +764,7 @@ export type UserCreateWithoutIdentitiesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -766,6 +790,7 @@ export type UserUncheckedCreateWithoutIdentitiesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -807,6 +832,7 @@ export type UserUpdateWithoutIdentitiesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -832,6 +858,7 @@ export type UserUncheckedUpdateWithoutIdentitiesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -857,6 +884,7 @@ export type UserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -882,6 +910,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -923,6 +952,7 @@ export type UserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -948,6 +978,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -973,6 +1004,7 @@ export type UserCreateWithoutLinkTokensInput = {
   updatedAt?: Date | string
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -998,6 +1030,7 @@ export type UserUncheckedCreateWithoutLinkTokensInput = {
   updatedAt?: Date | string
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1039,6 +1072,7 @@ export type UserUpdateWithoutLinkTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1064,6 +1098,127 @@ export type UserUncheckedUpdateWithoutLinkTokensInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLoginTicketsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLoginTicketsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLoginTicketsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginTicketsInput, Prisma.UserUncheckedCreateWithoutLoginTicketsInput>
+}
+
+export type UserUpsertWithoutLoginTicketsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLoginTicketsInput, Prisma.UserUncheckedUpdateWithoutLoginTicketsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginTicketsInput, Prisma.UserUncheckedCreateWithoutLoginTicketsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLoginTicketsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLoginTicketsInput, Prisma.UserUncheckedUpdateWithoutLoginTicketsInput>
+}
+
+export type UserUpdateWithoutLoginTicketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLoginTicketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -1090,6 +1245,7 @@ export type UserCreateWithoutRegistrationsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
@@ -1115,6 +1271,7 @@ export type UserUncheckedCreateWithoutRegistrationsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1156,6 +1313,7 @@ export type UserUpdateWithoutRegistrationsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
@@ -1181,6 +1339,7 @@ export type UserUncheckedUpdateWithoutRegistrationsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1206,6 +1365,7 @@ export type UserCreateWithoutResultsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
@@ -1231,6 +1391,7 @@ export type UserUncheckedCreateWithoutResultsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1272,6 +1433,7 @@ export type UserUpdateWithoutResultsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
@@ -1297,6 +1459,7 @@ export type UserUncheckedUpdateWithoutResultsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1322,6 +1485,7 @@ export type UserCreateWithoutPaymentsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
@@ -1347,6 +1511,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1377,6 +1542,7 @@ export type UserCreateWithoutAuthoredPaymentsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -1402,6 +1568,7 @@ export type UserUncheckedCreateWithoutAuthoredPaymentsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1432,6 +1599,7 @@ export type UserCreateWithoutVoidedPaymentsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -1457,6 +1625,7 @@ export type UserUncheckedCreateWithoutVoidedPaymentsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1498,6 +1667,7 @@ export type UserUpdateWithoutPaymentsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
@@ -1523,6 +1693,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1559,6 +1730,7 @@ export type UserUpdateWithoutAuthoredPaymentsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1584,6 +1756,7 @@ export type UserUncheckedUpdateWithoutAuthoredPaymentsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -1620,6 +1793,7 @@ export type UserUpdateWithoutVoidedPaymentsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1645,6 +1819,7 @@ export type UserUncheckedUpdateWithoutVoidedPaymentsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -1670,6 +1845,7 @@ export type UserCreateWithoutAchievementsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -1695,6 +1871,7 @@ export type UserUncheckedCreateWithoutAchievementsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1725,6 +1902,7 @@ export type UserCreateWithoutGrantedAchievementsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -1750,6 +1928,7 @@ export type UserUncheckedCreateWithoutGrantedAchievementsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1791,6 +1970,7 @@ export type UserUpdateWithoutAchievementsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1816,6 +1996,7 @@ export type UserUncheckedUpdateWithoutAchievementsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -1852,6 +2033,7 @@ export type UserUpdateWithoutGrantedAchievementsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1877,6 +2059,7 @@ export type UserUncheckedUpdateWithoutGrantedAchievementsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -1902,6 +2085,7 @@ export type UserCreateWithoutRatingEventsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -1927,6 +2111,7 @@ export type UserUncheckedCreateWithoutRatingEventsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -1968,6 +2153,7 @@ export type UserUpdateWithoutRatingEventsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -1993,6 +2179,7 @@ export type UserUncheckedUpdateWithoutRatingEventsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -2018,6 +2205,7 @@ export type UserCreateWithoutSeasonStatsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -2043,6 +2231,7 @@ export type UserUncheckedCreateWithoutSeasonStatsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -2084,6 +2273,7 @@ export type UserUpdateWithoutSeasonStatsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -2109,6 +2299,7 @@ export type UserUncheckedUpdateWithoutSeasonStatsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -2134,6 +2325,7 @@ export type UserCreateWithoutAuditEntriesInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -2159,6 +2351,7 @@ export type UserUncheckedCreateWithoutAuditEntriesInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -2200,6 +2393,7 @@ export type UserUpdateWithoutAuditEntriesInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -2225,6 +2419,7 @@ export type UserUncheckedUpdateWithoutAuditEntriesInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -2250,6 +2445,7 @@ export type UserCreateWithoutNotificationsInput = {
   identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
@@ -2275,6 +2471,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  loginTickets?: Prisma.LoginTicketUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -2316,6 +2513,7 @@ export type UserUpdateWithoutNotificationsInput = {
   identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
@@ -2341,6 +2539,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  loginTickets?: Prisma.LoginTicketUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -2362,6 +2561,7 @@ export type UserCountOutputType = {
   identities: number
   sessions: number
   linkTokens: number
+  loginTickets: number
   registrations: number
   results: number
   payments: number
@@ -2379,6 +2579,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   identities?: boolean | UserCountOutputTypeCountIdentitiesArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   linkTokens?: boolean | UserCountOutputTypeCountLinkTokensArgs
+  loginTickets?: boolean | UserCountOutputTypeCountLoginTicketsArgs
   registrations?: boolean | UserCountOutputTypeCountRegistrationsArgs
   results?: boolean | UserCountOutputTypeCountResultsArgs
   payments?: boolean | UserCountOutputTypeCountPaymentsArgs
@@ -2421,6 +2622,13 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
  */
 export type UserCountOutputTypeCountLinkTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LinkTokenWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLoginTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoginTicketWhereInput
 }
 
 /**
@@ -2514,6 +2722,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   identities?: boolean | Prisma.User$identitiesArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   linkTokens?: boolean | Prisma.User$linkTokensArgs<ExtArgs>
+  loginTickets?: boolean | Prisma.User$loginTicketsArgs<ExtArgs>
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.User$resultsArgs<ExtArgs>
   payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
@@ -2569,6 +2778,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   identities?: boolean | Prisma.User$identitiesArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   linkTokens?: boolean | Prisma.User$linkTokensArgs<ExtArgs>
+  loginTickets?: boolean | Prisma.User$loginTicketsArgs<ExtArgs>
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.User$resultsArgs<ExtArgs>
   payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
@@ -2591,6 +2801,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     identities: Prisma.$IdentityPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     linkTokens: Prisma.$LinkTokenPayload<ExtArgs>[]
+    loginTickets: Prisma.$LoginTicketPayload<ExtArgs>[]
     registrations: Prisma.$RegistrationPayload<ExtArgs>[]
     results: Prisma.$ResultPayload<ExtArgs>[]
     payments: Prisma.$PaymentPayload<ExtArgs>[]
@@ -3010,6 +3221,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   identities<T extends Prisma.User$identitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$identitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   linkTokens<T extends Prisma.User$linkTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$linkTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loginTickets<T extends Prisma.User$loginTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   registrations<T extends Prisma.User$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   results<T extends Prisma.User$resultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payments<T extends Prisma.User$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3521,6 +3733,30 @@ export type User$linkTokensArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.LinkTokenScalarFieldEnum | Prisma.LinkTokenScalarFieldEnum[]
+}
+
+/**
+ * User.loginTickets
+ */
+export type User$loginTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginTicket
+   */
+  select?: Prisma.LoginTicketSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginTicket
+   */
+  omit?: Prisma.LoginTicketOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginTicketInclude<ExtArgs> | null
+  where?: Prisma.LoginTicketWhereInput
+  orderBy?: Prisma.LoginTicketOrderByWithRelationInput | Prisma.LoginTicketOrderByWithRelationInput[]
+  cursor?: Prisma.LoginTicketWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoginTicketScalarFieldEnum | Prisma.LoginTicketScalarFieldEnum[]
 }
 
 /**

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   AuthProvider,
+  LoginTicketState,
   PaymentKind,
   RatingSourceType,
   RegistrationSource,
@@ -51,6 +52,7 @@ const PAIRS = [
   ["PaymentKind", PaymentKind],
   ["RegistrationSource", RegistrationSource],
   ["RatingSourceType", RatingSourceType],
+  ["LoginTicketState", LoginTicketState],
 ] as const;
 
 describe("enum parity with the Prisma schema", () => {

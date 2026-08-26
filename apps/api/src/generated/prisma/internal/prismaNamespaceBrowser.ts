@@ -55,6 +55,7 @@ export const ModelName = {
   Identity: 'Identity',
   Session: 'Session',
   LinkToken: 'LinkToken',
+  LoginTicket: 'LoginTicket',
   Season: 'Season',
   Venue: 'Venue',
   Tournament: 'Tournament',
@@ -140,6 +141,22 @@ export const LinkTokenScalarFieldEnum = {
 } as const
 
 export type LinkTokenScalarFieldEnum = (typeof LinkTokenScalarFieldEnum)[keyof typeof LinkTokenScalarFieldEnum]
+
+
+export const LoginTicketScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  phrase: 'phrase',
+  state: 'state',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  ip: 'ip',
+  userAgent: 'userAgent'
+} as const
+
+export type LoginTicketScalarFieldEnum = (typeof LoginTicketScalarFieldEnum)[keyof typeof LoginTicketScalarFieldEnum]
 
 
 export const SeasonScalarFieldEnum = {

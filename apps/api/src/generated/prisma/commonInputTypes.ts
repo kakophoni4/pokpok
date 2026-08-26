@@ -250,6 +250,23 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type EnumLoginTicketStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.LoginTicketState | Prisma.EnumLoginTicketStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel> | $Enums.LoginTicketState
+}
+
+export type EnumLoginTicketStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LoginTicketState | Prisma.EnumLoginTicketStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLoginTicketStateWithAggregatesFilter<$PrismaModel> | $Enums.LoginTicketState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel>
+}
+
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -714,6 +731,23 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLoginTicketStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.LoginTicketState | Prisma.EnumLoginTicketStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel> | $Enums.LoginTicketState
+}
+
+export type NestedEnumLoginTicketStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LoginTicketState | Prisma.EnumLoginTicketStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LoginTicketState[] | Prisma.ListEnumLoginTicketStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLoginTicketStateWithAggregatesFilter<$PrismaModel> | $Enums.LoginTicketState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLoginTicketStateFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =

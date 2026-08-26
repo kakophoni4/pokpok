@@ -41,6 +41,13 @@ export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
 export const PaymentKind = z.enum(["entry", "addon", "drink", "other"]);
 export type PaymentKind = z.infer<typeof PaymentKind>;
 
+/**
+ * A website login waiting on a tap in the bot. Expiry is a timestamp rather than
+ * a state, so nothing has to sweep abandoned tickets into place.
+ */
+export const LoginTicketState = z.enum(["pending", "confirmed", "declined"]);
+export type LoginTicketState = z.infer<typeof LoginTicketState>;
+
 /** Which client created the registration; used for analytics and audit. */
 export const RegistrationSource = z.enum(["web", "miniapp", "tg_bot", "vk_bot", "admin"]);
 export type RegistrationSource = z.infer<typeof RegistrationSource>;

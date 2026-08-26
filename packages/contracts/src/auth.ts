@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Id } from "./common.js";
-import { AuthProvider, UserRole } from "./enums.js";
+import { Id, IsoDateTime } from "./common.js";
+import { AuthProvider, LoginTicketState, UserRole } from "./enums.js";
 import { MeUser } from "./user.js";
 
 /**
@@ -70,3 +70,45 @@ export const ConfirmLinkInput = z.object({
   provider: AuthProvider,
 });
 export type ConfirmLinkInput = z.infer<typeof ConfirmLinkInput>;
+
+/**
+ * Signing in without leaving Telegram behind: the site opens a ticket, sends the
+ * browser into the bot with the code attached, and waits for the tap.
+ *
+ * Unlike the Login Widget this needs nothing registered with BotFather and asks
+ * for no phone number — the bot already knows who is pressing the button.
+ */
+export const StartLoginResponse = z.object({
+  /** Secret the browser polls with. Also travels in the deep link. */
+  code: z.string(),
+  /**
+   * Two words shown on both screens. The bot asks the player to check they
+   * match, so a link forwarded by somebody else cannot be confirmed blindly.
+   */
+  phrase: z.string(),
+  /** Where to send the browser: the bot, with the code attached. */
+  url: z.string(),
+  expiresAt: IsoDateTime,
+});
+export type StartLoginResponse = z.infer<typeof StartLoginResponse>;
+
+/** What the waiting browser is told. A ticket past its deadline reads as expired. */
+export const LoginTicketOutcome = z.enum([...LoginTicketState.options, "expired"]);
+export type LoginTicketOutcome = z.infer<typeof LoginTicketOutcome>;
+
+export const LoginTicketStatus = z.object({
+  state: LoginTicketOutcome,
+  /** Present exactly once, on the poll that finds the ticket confirmed. */
+  session: SessionResponse.nullable(),
+});
+export type LoginTicketStatus = z.infer<typeof LoginTicketStatus>;
+
+/** What the bot reads before asking the player to confirm. */
+export const LoginTicketPrompt = z.object({
+  phrase: z.string(),
+  expiresAt: IsoDateTime,
+});
+export type LoginTicketPrompt = z.infer<typeof LoginTicketPrompt>;
+
+export const LoginTicketLookupInput = z.object({ code: z.string().min(16) });
+export type LoginTicketLookupInput = z.infer<typeof LoginTicketLookupInput>;

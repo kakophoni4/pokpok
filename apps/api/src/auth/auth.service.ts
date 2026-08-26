@@ -1,7 +1,14 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { AuthProvider, SessionResponse, StartLinkResponse } from "@poker/contracts";
+import type {
+  AuthProvider,
+  LoginTicketPrompt,
+  LoginTicketStatus,
+  SessionResponse,
+  StartLinkResponse,
+  StartLoginResponse,
+} from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import type { Env } from "../config/env";
@@ -22,7 +29,26 @@ export type ProviderProfile = {
 
 export type LoginResult = SessionResponse & { refreshToken: string };
 
+/** Same states the browser sees, but the confirmed one still carries the cookie. */
+export type LoginTicketOutcome =
+  | { state: Exclude<LoginTicketStatus["state"], "confirmed">; session: null }
+  | { state: "confirmed"; session: LoginResult };
+
 const LINK_TOKEN_TTL_MS = 10 * 60 * 1000;
+
+/** Long enough to find the phone, short enough that a leaked link is stale. */
+const LOGIN_TICKET_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Words for the check phrase. Kept short, unmistakable when read aloud, and free
+ * of pairs that look alike on a phone screen.
+ */
+const PHRASE_WORDS = [
+  "туз", "король", "дама", "валет", "джокер", "флеш", "стрит", "каре",
+  "банк", "дилер", "стол", "кубок", "финал", "чип", "рейз", "колл",
+  "флоп", "терн", "ривер", "борд", "блайнд", "сплит", "пика", "бубна",
+  "черва", "крест", "куш", "фишка", "жетон", "азарт", "фарт", "рука",
+] as const;
 
 @Injectable()
 export class AuthService {
@@ -56,6 +82,18 @@ export class AuthService {
     audience: Audience,
     meta: SessionMeta = {},
   ): Promise<LoginResult> {
+    const { user, isNewUser } = await this.resolveProviderUser(profile);
+    return this.issueFor(user, audience, meta, isNewUser);
+  }
+
+  /**
+   * Turns a provider profile into our user, creating one on first sight. Split
+   * out from the login because the bot-confirmed flow needs the account long
+   * before anyone hands a session to a browser.
+   */
+  private async resolveProviderUser(
+    profile: ProviderProfile,
+  ): Promise<{ user: UserWithIdentities; isNewUser: boolean }> {
     const existing = await this.prisma.identity.findUnique({
       where: {
         provider_providerUserId: {
@@ -73,29 +111,13 @@ export class AuthService {
 
       // Provider usernames and avatars change; keep our copy fresh but never
       // touch the nickname, which staff may have set deliberately.
-      const user = await this.refreshIdentity(existing.id, existing.user.id, profile);
-      const session = await this.tokens.issue(
-        { id: user.id, role: user.role, nickname: user.nickname },
-        audience,
-        meta,
-      );
-
       return {
-        accessToken: session.accessToken,
-        refreshToken: session.refreshToken,
-        expiresIn: session.expiresIn,
-        user: toMeUser(user),
+        user: await this.refreshIdentity(existing.id, existing.user.id, profile),
         isNewUser: false,
       };
     }
 
     const created = await this.createUserWithIdentity(profile);
-    const session = await this.tokens.issue(
-      { id: created.id, role: created.role, nickname: created.nickname },
-      audience,
-      meta,
-    );
-
     await this.audit.record({
       actorId: created.id,
       action: "auth.register",
@@ -104,12 +126,27 @@ export class AuthService {
       after: { provider: profile.provider, nickname: created.nickname },
     });
 
+    return { user: created, isNewUser: true };
+  }
+
+  private async issueFor(
+    user: UserWithIdentities,
+    audience: Audience,
+    meta: SessionMeta,
+    isNewUser: boolean,
+  ): Promise<LoginResult> {
+    const session = await this.tokens.issue(
+      { id: user.id, role: user.role, nickname: user.nickname },
+      audience,
+      meta,
+    );
+
     return {
       accessToken: session.accessToken,
       refreshToken: session.refreshToken,
       expiresIn: session.expiresIn,
-      user: toMeUser(created),
-      isNewUser: true,
+      user: toMeUser(user),
+      isNewUser,
     };
   }
 
@@ -267,4 +304,128 @@ export class AuthService {
       after: { provider: profile.provider },
     });
   }
+
+  // ─── Signing in by confirming in the bot ────────────────────────────────────
+
+  /**
+   * Opens a ticket for a browser nobody has identified yet. We hand back the
+   * deep link and then know nothing until the bot reports a tap.
+   */
+  async startLoginTicket(meta: SessionMeta = {}): Promise<StartLoginResponse> {
+    const botUsername = this.config.get("TELEGRAM_BOT_USERNAME", { infer: true });
+    if (!botUsername) {
+      throw new NotFoundException({
+        code: "TELEGRAM_LOGIN_UNAVAILABLE",
+        message: "Вход через Telegram не настроен",
+      });
+    }
+
+    const code = randomBytes(24).toString("hex");
+    const phrase = `${pickWord()} ${pickWord()}`;
+    const expiresAt = new Date(Date.now() + LOGIN_TICKET_TTL_MS);
+
+    await this.prisma.loginTicket.create({
+      data: {
+        code,
+        phrase,
+        expiresAt,
+        ip: meta.ip ?? null,
+        userAgent: meta.userAgent ?? null,
+      },
+    });
+
+    return {
+      code,
+      phrase,
+      url: `https://t.me/${botUsername}?start=login_${code}`,
+      expiresAt: expiresAt.toISOString(),
+    };
+  }
+
+  /** What the bot shows before asking for the tap. */
+  async loginTicketPrompt(code: string): Promise<LoginTicketPrompt> {
+    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
+    if (!ticket || ticket.usedAt || ticket.state !== "pending" || ticket.expiresAt < new Date()) {
+      throw new NotFoundException({
+        code: "LOGIN_TICKET_INVALID",
+        message: "Ссылка для входа устарела. Откройте сайт и начните заново",
+      });
+    }
+    return { phrase: ticket.phrase, expiresAt: ticket.expiresAt.toISOString() };
+  }
+
+  /**
+   * The tap itself, relayed by the bot. Confirming only records who it was —
+   * tokens are minted later, for the browser that comes asking.
+   */
+  async settleLoginTicket(
+    code: string,
+    profile: ProviderProfile,
+    approve: boolean,
+  ): Promise<LoginTicketPrompt> {
+    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
+    if (!ticket || ticket.usedAt || ticket.state !== "pending" || ticket.expiresAt < new Date()) {
+      throw new NotFoundException({
+        code: "LOGIN_TICKET_INVALID",
+        message: "Ссылка для входа устарела. Откройте сайт и начните заново",
+      });
+    }
+
+    if (!approve) {
+      await this.prisma.loginTicket.update({
+        where: { id: ticket.id },
+        data: { state: "declined" },
+      });
+      return { phrase: ticket.phrase, expiresAt: ticket.expiresAt.toISOString() };
+    }
+
+    const { user } = await this.resolveProviderUser(profile);
+    await this.prisma.loginTicket.update({
+      where: { id: ticket.id },
+      data: { state: "confirmed", userId: user.id },
+    });
+
+    await this.audit.record({
+      actorId: user.id,
+      action: "auth.login.confirm",
+      entity: "LoginTicket",
+      entityId: ticket.id,
+      after: { provider: profile.provider, ip: ticket.ip },
+    });
+
+    return { phrase: ticket.phrase, expiresAt: ticket.expiresAt.toISOString() };
+  }
+
+  /**
+   * Polled by the waiting browser. A confirmed ticket pays out exactly once: the
+   * claim is a conditional update, so two tabs racing cannot both walk away with
+   * a session.
+   */
+  async loginTicketStatus(code: string, meta: SessionMeta = {}): Promise<LoginTicketOutcome> {
+    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
+    if (!ticket || ticket.usedAt || ticket.expiresAt < new Date()) {
+      return { state: "expired", session: null };
+    }
+    if (ticket.state === "declined") return { state: "declined", session: null };
+    if (ticket.state === "pending") return { state: "pending", session: null };
+
+    const claimed = await this.prisma.loginTicket.updateMany({
+      where: { id: ticket.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+    if (claimed.count !== 1 || !ticket.userId) return { state: "expired", session: null };
+
+    const user = (await this.prisma.user.findUnique({
+      where: { id: ticket.userId },
+      include: { identities: true },
+    })) as UserWithIdentities | null;
+    if (!user) return { state: "expired", session: null };
+
+    const session = await this.issueFor(user, "web", meta, false);
+    return { state: "confirmed", session };
+  }
+}
+
+function pickWord(): string {
+  return PHRASE_WORDS[randomInt(PHRASE_WORDS.length)] as string;
 }

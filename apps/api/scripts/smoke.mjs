@@ -76,10 +76,20 @@ async function main() {
   check("a waiting list exists in the seed", Boolean(withWaitlist), "no oversubscribed event");
 
   console.log("\nregistration");
-  const free = upcoming.payload.find(
-    (t) => t.status === "reg_open" && !t.myRegistration && t.waitlistCount === 0,
-  );
-  if (!free) throw new Error("seed has no tournament this player can join");
+  // Its own event rather than a seeded one: repeated runs and the passage of time
+  // both leave the demo schedule in states where nobody can sign up.
+  const opened = await call("POST", "/tournaments", {
+    token: admin.accessToken,
+    body: {
+      title: `Smoke Signup ${Date.now()}`,
+      startsAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      capacity: 6,
+      paidPlaces: 3,
+      status: "reg_open",
+    },
+  });
+  check("admin opens an event for sign-ups", Boolean(opened.payload?.id), JSON.stringify(opened.payload));
+  const free = opened.payload;
 
   const registered = await call("POST", `/tournaments/${free.id}/register`, {
     token: player.accessToken,
@@ -413,9 +423,101 @@ async function main() {
       again.user?.id === botSession.user?.id && again.isNewUser === false,
       `${botSession.user?.id} vs ${again.user?.id}`,
     );
+
+    console.log("\nlogin confirmed in the bot");
+    const internal = (path, body) =>
+      fetch(`${BASE}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-internal-token": internalToken },
+        body: JSON.stringify(body),
+      });
+    const profile = {
+      provider: "telegram",
+      providerUserId: telegramId,
+      username: "smoke_bot_user",
+      firstName: "Смоук",
+      lastName: null,
+      photoUrl: null,
+      raw: { source: "tg_bot" },
+    };
+
+    const ticket = await call("POST", "/auth/telegram/login");
+    check(
+      "site opens a login ticket with a deep link",
+      ticket.status === 201 && ticket.payload?.url?.includes(`start=login_${ticket.payload?.code}`),
+      JSON.stringify(ticket.payload),
+    );
+
+    const beforeTap = await call("GET", `/auth/telegram/login/${ticket.payload.code}`);
+    check(
+      "an untouched ticket keeps the browser waiting",
+      beforeTap.payload?.state === "pending" && beforeTap.payload?.session === null,
+      JSON.stringify(beforeTap.payload),
+    );
+
+    const prompt = await internal("/auth/internal/login/prompt", { code: ticket.payload.code });
+    const promptBody = await prompt.json();
+    check(
+      "bot reads the same check phrase the site shows",
+      promptBody.phrase === ticket.payload.phrase,
+      `${ticket.payload.phrase} vs ${promptBody.phrase}`,
+    );
+
+    const settled = await internal("/auth/internal/login/settle", {
+      code: ticket.payload.code,
+      approve: true,
+      profile,
+    });
+    check("bot confirms the login", settled.status === 201, `status ${settled.status}`);
+
+    const afterTap = await call("GET", `/auth/telegram/login/${ticket.payload.code}`);
+    check(
+      "the waiting browser gets a session for the Telegram account",
+      afterTap.payload?.state === "confirmed" &&
+        afterTap.payload?.session?.user?.id === botSession.user.id,
+      JSON.stringify(afterTap.payload?.state),
+    );
+
+    const replay = await call("GET", `/auth/telegram/login/${ticket.payload.code}`);
+    check(
+      "a spent ticket cannot be redeemed twice",
+      replay.payload?.state === "expired" && replay.payload?.session === null,
+      JSON.stringify(replay.payload),
+    );
+
+    const declinedTicket = await call("POST", "/auth/telegram/login");
+    await internal("/auth/internal/login/settle", {
+      code: declinedTicket.payload.code,
+      approve: false,
+      profile,
+    });
+    const refused = await call("GET", `/auth/telegram/login/${declinedTicket.payload.code}`);
+    check(
+      "«это не я» hands out nothing",
+      refused.payload?.state === "declined" && refused.payload?.session === null,
+      JSON.stringify(refused.payload),
+    );
+
+    const unknown = await call("GET", "/auth/telegram/login/deadbeefdeadbeefdeadbeef");
+    check(
+      "a made-up code looks exactly like an expired one",
+      unknown.payload?.state === "expired",
+      JSON.stringify(unknown.payload),
+    );
+
+    const settleWithoutSecret = await call("POST", "/auth/internal/login/settle", {
+      body: { code: ticket.payload.code, approve: true, profile },
+    });
+    check(
+      "confirming a login needs the internal secret",
+      settleWithoutSecret.status === 401 || settleWithoutSecret.status === 403,
+      `status ${settleWithoutSecret.status}`,
+    );
   }
 
   console.log("\ncleanup");
+  const signupGone = await call("DELETE", `/tournaments/${free.id}`, { token: admin.accessToken });
+  check("the sign-up event is removed", signupGone.status === 200, `status ${signupGone.status}`);
   await call("DELETE", `/tournaments/${tournamentId}/results`, { token: admin.accessToken });
   // An evening the cash desk touched keeps its paper trail; cancelling is the way out.
   const removed = await call("DELETE", `/tournaments/${tournamentId}`, { token: admin.accessToken });

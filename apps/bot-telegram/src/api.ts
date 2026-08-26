@@ -48,15 +48,7 @@ export class Api {
 
     const response = await this.request("POST", "/auth/internal/provider-session", {
       internal: true,
-      body: {
-        provider: "telegram",
-        providerUserId: String(profile.id),
-        username: profile.username ?? null,
-        firstName: profile.firstName ?? null,
-        lastName: profile.lastName ?? null,
-        photoUrl: null,
-        raw: { source: "tg_bot" },
-      },
+      body: Api.profilePayload(profile),
     });
 
     const session = response as SessionResponse;
@@ -97,6 +89,27 @@ export class Api {
   /** Endpoints that need no identity, e.g. the public schedule. */
   async public<T>(path: string): Promise<T> {
     return (await this.request("GET", path, {})) as T;
+  }
+
+  /**
+   * Server-to-server calls that speak about a Telegram user without acting as
+   * them — confirming a website login, for instance.
+   */
+  async internal<T>(path: string, body: unknown): Promise<T> {
+    return (await this.request("POST", path, { internal: true, body })) as T;
+  }
+
+  /** The identity payload the server turns into a user account. */
+  static profilePayload(profile: TelegramProfile): Record<string, unknown> {
+    return {
+      provider: "telegram",
+      providerUserId: String(profile.id),
+      username: profile.username ?? null,
+      firstName: profile.firstName ?? null,
+      lastName: profile.lastName ?? null,
+      photoUrl: null,
+      raw: { source: "tg_bot" },
+    };
   }
 
   private async request(

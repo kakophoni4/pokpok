@@ -15,9 +15,13 @@ import { ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   AuthProvider,
   ConfirmLinkInput,
+  LoginTicketLookupInput,
+  type LoginTicketPrompt,
+  type LoginTicketStatus,
   type MeUser,
   type SessionResponse,
   type StartLinkResponse,
+  type StartLoginResponse,
   TelegramMiniAppAuthInput,
   TelegramWidgetAuthInput,
 } from "@poker/contracts";
@@ -47,6 +51,12 @@ const ProviderProfileSchema = z.object({
 });
 
 const ConfirmLinkBody = ConfirmLinkInput.extend({ profile: ProviderProfileSchema });
+
+const SettleLoginBody = LoginTicketLookupInput.extend({
+  profile: ProviderProfileSchema,
+  approve: z.boolean(),
+});
+type SettleLoginBody = z.infer<typeof SettleLoginBody>;
 
 const DevLoginInput = z.object({ nickname: z.string().trim().min(2).max(24) });
 
@@ -93,6 +103,31 @@ export class AuthController {
       metaOf(request),
     );
     return this.finishLogin(result, response);
+  }
+
+  /**
+   * Login by confirming in the bot: the browser opens a ticket, walks the player
+   * into Telegram, then polls. Needs no domain registered with BotFather and no
+   * phone number typed into a popup, which is why it is the front door.
+   */
+  @Public()
+  @Post("telegram/login")
+  @ApiOperation({ summary: "Start a login the player confirms inside the bot" })
+  startTelegramLogin(@Req() request: Request): Promise<StartLoginResponse> {
+    return this.auth.startLoginTicket(metaOf(request));
+  }
+
+  @Public()
+  @Get("telegram/login/:code")
+  @ApiOperation({ summary: "Has the player confirmed the login yet?" })
+  async telegramLoginStatus(
+    @Param("code") code: string,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<LoginTicketStatus> {
+    const outcome = await this.auth.loginTicketStatus(code, metaOf(request));
+    if (outcome.state !== "confirmed") return { state: outcome.state, session: null };
+    return { state: "confirmed", session: this.finishLogin(outcome.session, response) };
   }
 
   @Public()
@@ -195,6 +230,27 @@ export class AuthController {
   ): Promise<{ ok: true }> {
     await this.auth.confirmLink(body.token, body.profile);
     return { ok: true };
+  }
+
+  /** The bot reads the check phrase before it asks anyone to press anything. */
+  @Public()
+  @UseGuards(InternalTokenGuard)
+  @Post("internal/login/prompt")
+  @ApiExcludeEndpoint()
+  loginPrompt(
+    @Body(zodPipe(LoginTicketLookupInput)) body: LoginTicketLookupInput,
+  ): Promise<LoginTicketPrompt> {
+    return this.auth.loginTicketPrompt(body.code);
+  }
+
+  @Public()
+  @UseGuards(InternalTokenGuard)
+  @Post("internal/login/settle")
+  @ApiExcludeEndpoint()
+  settleLogin(
+    @Body(zodPipe(SettleLoginBody)) body: SettleLoginBody,
+  ): Promise<LoginTicketPrompt> {
+    return this.auth.settleLoginTicket(body.code, body.profile, body.approve);
   }
 
   private finishLogin(result: LoginResult, response: Response): SessionResponse {

@@ -76,6 +76,15 @@ export const RegistrationSource = {
 export type RegistrationSource = (typeof RegistrationSource)[keyof typeof RegistrationSource]
 
 
+export const LoginTicketState = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  declined: 'declined'
+} as const
+
+export type LoginTicketState = (typeof LoginTicketState)[keyof typeof LoginTicketState]
+
+
 export const RatingSourceType = {
   tournament_result: 'tournament_result',
   achievement: 'achievement',

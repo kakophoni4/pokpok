@@ -7,6 +7,7 @@ import { Api, ApiError, type TelegramProfile } from "./api.js";
 import { ClubInfo } from "./club.js";
 import { loadConfig } from "./config.js";
 import { clubDate, escapeHtml, points, rub } from "./format.js";
+import { LOGIN_CALLBACK, LoginConfirm } from "./login.js";
 import { PlayerScreens, type Screen } from "./player.js";
 
 const config = loadConfig();
@@ -14,6 +15,7 @@ const api = new Api(config);
 const club = new ClubInfo(api);
 const player = new PlayerScreens(api, club);
 const admin = new AdminScreens(api);
+const login = new LoginConfirm(api);
 const bot = new Bot(config.botToken);
 
 function profileOf(ctx: Context): TelegramProfile | null {
@@ -72,7 +74,28 @@ async function sendHome(ctx: Context, profile: TelegramProfile): Promise<void> {
 
 bot.chatType("private").command(["start", "menu"], async (ctx) => {
   const profile = profileOf(ctx);
-  if (profile) await sendHome(ctx, profile);
+  if (!profile) return;
+
+  // The website sends people here with a ticket to confirm.
+  const payload = (typeof ctx.match === "string" ? ctx.match : "").trim();
+  if (payload.startsWith("login_")) {
+    const screen = await login.ask(payload.slice("login_".length));
+    await ctx.reply(screen.text, { parse_mode: "HTML", reply_markup: screen.keyboard });
+    return;
+  }
+
+  await sendHome(ctx, profile);
+});
+
+bot.chatType("private").callbackQuery(LOGIN_CALLBACK, async (ctx) => {
+  const profile = profileOf(ctx);
+  const code = ctx.match?.[2];
+  if (!profile || !code) return;
+
+  const approve = ctx.match?.[1] === "y";
+  await login.settle(code, profile, approve);
+  await ctx.answerCallbackQuery({ text: approve ? "Вход подтверждён" : "Вход отклонён" });
+  await edit(ctx, login.answered(approve));
 });
 
 bot.chatType("private").callbackQuery(/^nav:(.+)$/, async (ctx) => {

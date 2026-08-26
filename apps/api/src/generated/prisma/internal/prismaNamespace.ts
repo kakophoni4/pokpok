@@ -401,6 +401,7 @@ export const ModelName = {
   Identity: 'Identity',
   Session: 'Session',
   LinkToken: 'LinkToken',
+  LoginTicket: 'LoginTicket',
   Season: 'Season',
   Venue: 'Venue',
   Tournament: 'Tournament',
@@ -429,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "identity" | "session" | "linkToken" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "clubSettings" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
+    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "clubSettings" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -726,6 +727,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.LinkTokenCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LinkTokenCountAggregateOutputType> | number
+        }
+      }
+    }
+    LoginTicket: {
+      payload: Prisma.$LoginTicketPayload<ExtArgs>
+      fields: Prisma.LoginTicketFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoginTicketFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoginTicketFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        findFirst: {
+          args: Prisma.LoginTicketFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoginTicketFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        findMany: {
+          args: Prisma.LoginTicketFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>[]
+        }
+        create: {
+          args: Prisma.LoginTicketCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        createMany: {
+          args: Prisma.LoginTicketCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoginTicketCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>[]
+        }
+        delete: {
+          args: Prisma.LoginTicketDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        update: {
+          args: Prisma.LoginTicketUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoginTicketDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoginTicketUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoginTicketUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoginTicketUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginTicketPayload>
+        }
+        aggregate: {
+          args: Prisma.LoginTicketAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoginTicket>
+        }
+        groupBy: {
+          args: Prisma.LoginTicketGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginTicketGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoginTicketCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginTicketCountAggregateOutputType> | number
         }
       }
     }
@@ -1786,6 +1861,22 @@ export const LinkTokenScalarFieldEnum = {
 export type LinkTokenScalarFieldEnum = (typeof LinkTokenScalarFieldEnum)[keyof typeof LinkTokenScalarFieldEnum]
 
 
+export const LoginTicketScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  phrase: 'phrase',
+  state: 'state',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  ip: 'ip',
+  userAgent: 'userAgent'
+} as const
+
+export type LoginTicketScalarFieldEnum = (typeof LoginTicketScalarFieldEnum)[keyof typeof LoginTicketScalarFieldEnum]
+
+
 export const SeasonScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -2137,6 +2228,20 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'LoginTicketState'
+ */
+export type EnumLoginTicketStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoginTicketState'>
+    
+
+
+/**
+ * Reference to a field of type 'LoginTicketState[]'
+ */
+export type ListEnumLoginTicketStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoginTicketState[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2388,6 +2493,7 @@ export type GlobalOmitConfig = {
   identity?: Prisma.IdentityOmit
   session?: Prisma.SessionOmit
   linkToken?: Prisma.LinkTokenOmit
+  loginTicket?: Prisma.LoginTicketOmit
   season?: Prisma.SeasonOmit
   venue?: Prisma.VenueOmit
   tournament?: Prisma.TournamentOmit

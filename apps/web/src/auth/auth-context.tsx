@@ -1,4 +1,11 @@
-import type { MeUser, SessionResponse, UserRole } from "@poker/contracts";
+import type {
+  LoginTicketOutcome,
+  LoginTicketStatus,
+  MeUser,
+  SessionResponse,
+  StartLoginResponse,
+  UserRole,
+} from "@poker/contracts";
 import { hasRole } from "@poker/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -11,6 +18,10 @@ type AuthState = {
   status: "loading" | "authenticated" | "anonymous";
   can: (role: UserRole) => boolean;
   loginWithTelegramWidget: (payload: Record<string, unknown>) => Promise<void>;
+  /** Opens a ticket to confirm in the bot; returns the deep link to follow. */
+  startTelegramLogin: () => Promise<StartLoginResponse>;
+  /** Asks whether the tap happened. A confirmed ticket signs us in on the spot. */
+  pollTelegramLogin: (code: string) => Promise<LoginTicketOutcome>;
   loginAsDev: (nickname: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -85,6 +96,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       loginWithTelegramWidget: async (payload) => {
         applySession(await api.post<SessionResponse>("/auth/telegram/widget", payload));
+      },
+
+      startTelegramLogin: () => api.post<StartLoginResponse>("/auth/telegram/login"),
+
+      pollTelegramLogin: async (code) => {
+        const status = await api.get<LoginTicketStatus>(
+          `/auth/telegram/login/${encodeURIComponent(code)}`,
+        );
+        if (status.state === "confirmed" && status.session) applySession(status.session);
+        return status.state;
       },
 
       loginAsDev: async (nickname) => {

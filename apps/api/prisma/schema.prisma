@@ -69,6 +69,14 @@ enum RegistrationSource {
   admin
 }
 
+/// A login waiting on the bot. Expiry is a timestamp, not a state, so a ticket
+/// nobody ever answered needs no sweeper to move it along.
+enum LoginTicketState {
+  pending
+  confirmed
+  declined
+}
+
 enum RatingSourceType {
   tournament_result
   achievement
@@ -90,6 +98,7 @@ model User {
   identities          Identity[]
   sessions            Session[]
   linkTokens          LinkToken[]
+  loginTickets        LoginTicket[]
   registrations       Registration[]
   results             Result[]
   payments            Payment[]
@@ -154,6 +163,30 @@ model LinkToken {
   createdAt DateTime     @default(now())
 
   @@index([userId])
+}
+
+/// A browser waiting for a tap in Telegram.
+///
+/// The site opens one of these, sends the visitor into the bot with `code` in the
+/// deep link, and polls until the bot marks it confirmed. `userId` is filled in
+/// at that moment, which is also when we learn who was logging in at all.
+model LoginTicket {
+  id        String           @id @default(cuid(2))
+  code      String           @unique
+  /// Shown on both screens so a forwarded link cannot be confirmed by mistake.
+  phrase    String
+  state     LoginTicketState @default(pending)
+  userId    String?
+  user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  /// Set when the session is handed to the browser; makes the ticket single-use.
+  usedAt    DateTime?
+  createdAt DateTime         @default(now())
+  ip        String?
+  userAgent String?
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Season {
