@@ -10,7 +10,7 @@ import type { AuthedRequest } from "./auth.types";
 import { ROLES_KEY } from "./decorators";
 
 /**
- * Roles are hierarchical: admin satisfies a moderator requirement.
+ * Roles are hierarchical, so a higher role satisfies a lower requirement.
  * Runs after JwtAuthGuard, so req.user is already populated.
  */
 @Injectable()

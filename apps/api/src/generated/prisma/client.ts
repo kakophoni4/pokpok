@@ -89,6 +89,22 @@ export type Registration = Prisma.RegistrationModel
  */
 export type Result = Prisma.ResultModel
 /**
+ * Model Payment
+ * The cash desk. Every line the admin registers during the evening lands here:
+ * entry, add-on, drink. Two jobs at once — it is the club's takings report, and
+ * it is what participation means, since whoever paid an entry played.
+ * 
+ * Nothing is ever edited or deleted. A mistake is voided, which keeps the
+ * original line visible and makes any evening reconstructable afterwards.
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model ClubSettings
+ * Club-wide settings, exactly one row. The timezone lives here because it is
+ * what every date shown to a human is rendered in, on the site and in the bot.
+ */
+export type ClubSettings = Prisma.ClubSettingsModel
+/**
  * Model Achievement
  * 
  */

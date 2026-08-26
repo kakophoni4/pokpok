@@ -5,7 +5,6 @@ import { usePlayers, useUpdatePlayer } from "../../lib/queries";
 
 const ROLE_LABELS: Record<UserRole, string> = {
   player: "Игрок",
-  moderator: "Организатор",
   admin: "Администратор",
 };
 

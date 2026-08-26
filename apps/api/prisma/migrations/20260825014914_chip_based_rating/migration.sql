@@ -2,19 +2,19 @@
 CREATE TYPE "AuthProvider" AS ENUM ('telegram', 'vk');
 
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('player', 'moderator', 'admin');
+CREATE TYPE "UserRole" AS ENUM ('player', 'admin');
 
 -- CreateEnum
 CREATE TYPE "UserStatus" AS ENUM ('active', 'blocked');
 
 -- CreateEnum
-CREATE TYPE "GameType" AS ENUM ('nlh', 'plo', 'plo5', 'mixed', 'other');
-
--- CreateEnum
 CREATE TYPE "TournamentStatus" AS ENUM ('draft', 'announced', 'reg_open', 'reg_closed', 'running', 'finished', 'cancelled');
 
 -- CreateEnum
-CREATE TYPE "RegistrationStatus" AS ENUM ('registered', 'waitlist', 'checked_in', 'cancelled', 'no_show');
+CREATE TYPE "RegistrationStatus" AS ENUM ('registered', 'waitlist', 'cancelled');
+
+-- CreateEnum
+CREATE TYPE "PaymentKind" AS ENUM ('entry', 'addon', 'drink', 'other');
 
 -- CreateEnum
 CREATE TYPE "RegistrationSource" AS ENUM ('web', 'miniapp', 'tg_bot', 'vk_bot', 'admin');
@@ -111,14 +111,17 @@ CREATE TABLE "Tournament" (
     "venueId" TEXT,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "gameType" "GameType" NOT NULL DEFAULT 'nlh',
     "startsAt" TIMESTAMP(3) NOT NULL,
     "regOpensAt" TIMESTAMP(3),
     "regClosesAt" TIMESTAMP(3),
     "capacity" INTEGER,
-    "buyinChips" INTEGER,
+    "paidPlaces" INTEGER,
+    "startingStack" INTEGER,
+    "addonChips" INTEGER,
     "ratingMultiplier" DOUBLE PRECISION NOT NULL DEFAULT 1,
     "status" "TournamentStatus" NOT NULL DEFAULT 'draft',
+    "adminTopicId" INTEGER,
+    "adminBoardMsgId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -133,6 +136,7 @@ CREATE TABLE "Registration" (
     "status" "RegistrationStatus" NOT NULL DEFAULT 'registered',
     "source" "RegistrationSource" NOT NULL DEFAULT 'web',
     "waitlistPosition" INTEGER,
+    "adminCardMsgId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -145,11 +149,40 @@ CREATE TABLE "Result" (
     "tournamentId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "place" INTEGER NOT NULL,
-    "knockouts" INTEGER,
-    "rebuys" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Result_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Payment" (
+    "id" TEXT NOT NULL,
+    "tournamentId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "kind" "PaymentKind" NOT NULL,
+    "amountRub" INTEGER NOT NULL,
+    "chips" INTEGER NOT NULL DEFAULT 0,
+    "note" TEXT,
+    "createdById" TEXT,
+    "voidedAt" TIMESTAMP(3),
+    "voidedById" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ClubSettings" (
+    "id" TEXT NOT NULL DEFAULT 'club',
+    "infoText" TEXT NOT NULL DEFAULT '',
+    "entryPriceRub" INTEGER NOT NULL DEFAULT 500,
+    "addonPriceRub" INTEGER NOT NULL DEFAULT 500,
+    "drinkPriceRub" INTEGER NOT NULL DEFAULT 200,
+    "adminChatId" TEXT,
+    "timezone" TEXT NOT NULL DEFAULT 'Europe/Samara',
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ClubSettings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -314,6 +347,15 @@ CREATE UNIQUE INDEX "Result_tournamentId_userId_key" ON "Result"("tournamentId",
 CREATE UNIQUE INDEX "Result_tournamentId_place_key" ON "Result"("tournamentId", "place");
 
 -- CreateIndex
+CREATE INDEX "Payment_tournamentId_userId_idx" ON "Payment"("tournamentId", "userId");
+
+-- CreateIndex
+CREATE INDEX "Payment_userId_idx" ON "Payment"("userId");
+
+-- CreateIndex
+CREATE INDEX "Payment_createdAt_idx" ON "Payment"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Achievement_code_key" ON "Achievement"("code");
 
 -- CreateIndex
@@ -375,6 +417,18 @@ ALTER TABLE "Result" ADD CONSTRAINT "Result_tournamentId_fkey" FOREIGN KEY ("tou
 
 -- AddForeignKey
 ALTER TABLE "Result" ADD CONSTRAINT "Result_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_tournamentId_fkey" FOREIGN KEY ("tournamentId") REFERENCES "Tournament"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_voidedById_fkey" FOREIGN KEY ("voidedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserAchievement" ADD CONSTRAINT "UserAchievement_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

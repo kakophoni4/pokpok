@@ -11,28 +11,27 @@ import {
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
+  AddPaymentInput,
   CreateTournamentInput,
   hasRole,
   RegisterInput,
-  RegistrationStatus,
   type RegistrationView,
+  SaveAdminScreensInput,
+  SetPlaceInput,
   SubmitResultsInput,
   type TournamentDetail,
   TournamentListQuery,
+  type TournamentPlayer,
   type TournamentSummary,
   UpdateTournamentInput,
 } from "@poker/contracts";
-import { z } from "zod";
 import type { RequestUser } from "../common/auth/auth.types";
 import { CurrentUser, OptionalAuth, Public, Roles } from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
+import { PaymentsService } from "./payments.service";
 import { RegistrationsService, type RegisterResult } from "./registrations.service";
-import { ResultsService } from "./results.service";
+import { type FinishSummary, ResultsService } from "./results.service";
 import { TournamentsService } from "./tournaments.service";
-
-const SetRegistrationStatusInput = z.object({
-  status: RegistrationStatus.extract(["registered", "checked_in", "no_show"]),
-});
 
 @ApiTags("tournaments")
 @Controller("tournaments")
@@ -41,6 +40,7 @@ export class TournamentsController {
     private readonly tournaments: TournamentsService,
     private readonly registrations: RegistrationsService,
     private readonly results: ResultsService,
+    private readonly payments: PaymentsService,
   ) {}
 
   @OptionalAuth()
@@ -53,19 +53,30 @@ export class TournamentsController {
     return this.tournaments.list(query, viewer?.id);
   }
 
+  // Declared before ":id" so the literal segment wins the match.
+  @Roles("admin")
+  @Get("by-topic/:topicId")
+  @ApiOperation({ summary: "Tournament bound to a forum topic in the admin group (admin)" })
+  byTopic(
+    @Param("topicId") topicId: string,
+    @CurrentUser() viewer: RequestUser,
+  ): Promise<TournamentDetail> {
+    return this.tournaments.byAdminTopic(Number(topicId), viewer);
+  }
+
   @OptionalAuth()
   @Get(":id")
-  @ApiOperation({ summary: "Tournament card with participants and standings" })
+  @ApiOperation({ summary: "Tournament card. The cash desk is included for admins only" })
   detail(
     @Param("id") id: string,
     @CurrentUser() viewer?: RequestUser,
   ): Promise<TournamentDetail> {
-    return this.tournaments.detail(id, viewer?.id);
+    return this.tournaments.detail(id, viewer);
   }
 
-  @Roles("moderator")
+  @Roles("admin")
   @Post()
-  @ApiOperation({ summary: "Create a tournament (staff)" })
+  @ApiOperation({ summary: "Create a tournament (admin)" })
   create(
     @CurrentUser() actor: RequestUser,
     @Body(zodPipe(CreateTournamentInput)) body: CreateTournamentInput,
@@ -73,9 +84,9 @@ export class TournamentsController {
     return this.tournaments.create(actor.id, body);
   }
 
-  @Roles("moderator")
+  @Roles("admin")
   @Patch(":id")
-  @ApiOperation({ summary: "Edit a tournament (staff)" })
+  @ApiOperation({ summary: "Edit a tournament, including the paid-place count (admin)" })
   update(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -86,7 +97,7 @@ export class TournamentsController {
 
   @Roles("admin")
   @Delete(":id")
-  @ApiOperation({ summary: "Delete a tournament that has no results (admin)" })
+  @ApiOperation({ summary: "Delete a tournament with no history (admin)" })
   remove(@CurrentUser() actor: RequestUser, @Param("id") id: string): Promise<{ ok: true }> {
     return this.tournaments.remove(actor.id, id);
   }
@@ -100,11 +111,11 @@ export class TournamentsController {
     @Param("id") id: string,
     @Body(zodPipe(RegisterInput)) body: RegisterInput,
   ): Promise<RegisterResult> {
-    // Signing somebody else up is a staff action.
-    if (body.userId && body.userId !== actor.id && !hasRole(actor.role, "moderator")) {
+    // Signing somebody else up is an admin action.
+    if (body.userId && body.userId !== actor.id && !hasRole(actor.role, "admin")) {
       throw new ForbiddenException({
         code: "FORBIDDEN",
-        message: "Записать другого игрока может только организатор",
+        message: "Записать другого игрока может только администратор",
       });
     }
 
@@ -120,7 +131,7 @@ export class TournamentsController {
     @Param("id") id: string,
     @Query("userId") userId?: string,
   ): Promise<{ promotedUserId: string | null }> {
-    if (userId && userId !== actor.id && !hasRole(actor.role, "moderator")) {
+    if (userId && userId !== actor.id && !hasRole(actor.role, "admin")) {
       throw new ForbiddenException({ code: "FORBIDDEN", message: "Недостаточно прав" });
     }
     return this.registrations.cancel(id, userId ?? actor.id, actor.id);
@@ -128,28 +139,81 @@ export class TournamentsController {
 
   @Public()
   @Get(":id/registrations")
-  @ApiOperation({ summary: "Who is signed up — used by the site and both bots" })
+  @ApiOperation({ summary: "Who is signed up — used by the site and the bot" })
   listRegistrations(@Param("id") id: string): Promise<RegistrationView[]> {
     return this.registrations.listForTournament(id);
   }
 
-  @Roles("moderator")
-  @Patch(":id/registrations/:userId")
-  @ApiOperation({ summary: "Check in an arrival or mark a no-show (staff)" })
-  setRegistrationStatus(
+  @Roles("admin")
+  @Post(":id/admin-screens")
+  @ApiOperation({ summary: "Remember where the bot posted its live screens (admin)" })
+  saveAdminScreens(
+    @Param("id") id: string,
+    @Body(zodPipe(SaveAdminScreensInput)) body: SaveAdminScreensInput,
+  ): Promise<{ ok: true }> {
+    return this.tournaments.saveAdminScreens(id, body);
+  }
+
+  // ─── Cash desk ──────────────────────────────────────────────────────────────
+
+  @Roles("admin")
+  @Post(":id/payments")
+  @ApiOperation({ summary: "Charge an entry, an add-on or a drink (admin)" })
+  addPayment(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
-    @Param("userId") userId: string,
-    @Body(zodPipe(SetRegistrationStatusInput)) body: { status: "registered" | "checked_in" | "no_show" },
-  ): Promise<RegistrationView> {
-    return this.registrations.setStatus(id, userId, body.status, actor.id);
+    @Body(zodPipe(AddPaymentInput)) body: AddPaymentInput,
+  ): Promise<TournamentPlayer> {
+    return this.payments.add(id, body, actor.id);
+  }
+
+  @Roles("admin")
+  @Delete(":id/payments/:paymentId")
+  @ApiOperation({ summary: "Void a mistaken line without erasing it (admin)" })
+  voidPayment(
+    @CurrentUser() actor: RequestUser,
+    @Param("paymentId") paymentId: string,
+  ): Promise<TournamentPlayer> {
+    return this.payments.voidPayment(paymentId, actor.id);
   }
 
   // ─── Results ────────────────────────────────────────────────────────────────
 
-  @Roles("moderator")
+  @Roles("admin")
+  @Post(":id/place")
+  @ApiOperation({ summary: "Record where one player finished as they bust out (admin)" })
+  setPlace(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+    @Body(zodPipe(SetPlaceInput)) body: SetPlaceInput,
+  ): Promise<TournamentPlayer> {
+    return this.results.setPlace(id, body.userId, body.place, actor.id);
+  }
+
+  @Roles("admin")
+  @Post(":id/finish")
+  @ApiOperation({ summary: "Award rating for the evening; repeatable and reversible (admin)" })
+  finish(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+  ): Promise<FinishSummary> {
+    return this.results.finish(id, actor.id);
+  }
+
+  @Roles("admin")
+  @Post(":id/reopen")
+  @ApiOperation({ summary: "Withdraw the rating and put the tournament back in play (admin)" })
+  async reopen(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+  ): Promise<{ ok: true }> {
+    await this.results.reopen(id, actor.id);
+    return { ok: true };
+  }
+
+  @Roles("admin")
   @Post(":id/results")
-  @ApiOperation({ summary: "Submit the full standings; awards rating (staff)" })
+  @ApiOperation({ summary: "Submit the whole standings table at once (admin)" })
   async submitResults(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,

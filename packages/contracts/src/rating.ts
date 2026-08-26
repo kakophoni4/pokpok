@@ -4,23 +4,26 @@ import { RatingSourceType } from "./enums.js";
 import { PublicUser } from "./user.js";
 
 /**
- * Tunable per season, so the formula can be corrected without a deploy.
- * The engine that consumes this lives in @poker/rating.
+ * The rating follows the chips, the way a prize pool does: every entry and every
+ * add-on adds chips to the table, the total divided by `divisor` is what the
+ * winner takes, and each paid place below takes a share of that.
+ *
+ * Tunable per season, so the numbers can be corrected without a deploy. The
+ * engine that consumes this lives in @poker/rating.
  */
 export const RatingConfig = z.object({
-  /** points = basePoints * multiplier * sqrt(fieldSize) / place^placeExponent */
-  basePoints: z.number().positive().default(10),
-  placeExponent: z.number().min(0).max(2).default(0.5),
-  /** Floor so that showing up is always worth something. */
-  participationPoints: z.number().int().nonnegative().default(5),
-  /** Extra flat bonus for finishing in the money-equivalent zone. */
-  itmBonus: z.number().int().nonnegative().default(10),
-  /** Share of the field that counts as "in the money", e.g. 0.2 = top 20%. */
-  itmShare: z.number().min(0).max(1).default(0.2),
-  /** Flat bonus per knockout, if the club tracks them. */
-  knockoutPoints: z.number().int().nonnegative().default(0),
-  /** Deducted when a player signs up and does not show. */
-  noShowPenalty: z.number().int().nonnegative().default(10),
+  /** Chips handed out for the entry fee. */
+  startingStack: z.number().int().positive().default(40_000),
+  /** Chips an add-on adds. */
+  addonChips: z.number().int().positive().default(80_000),
+  /** Chips in play divided by this is what first place is worth. */
+  divisor: z.number().positive().default(200),
+  /** How many places earn rating, unless the tournament overrides it. */
+  defaultPaidPlaces: z.number().int().positive().default(9),
+  /** The last paid place gets this fraction of the winner's award. */
+  lastPlaceShare: z.number().min(0).max(1).default(0.1),
+  /** Above 1 the top places pull ahead; at 1 the shares fall in even steps. */
+  shareCurve: z.number().min(0.2).max(5).default(2),
   /** Only the N best results count toward the season standings; 0 means all count. */
   bestOfCount: z.number().int().nonnegative().default(0),
 });

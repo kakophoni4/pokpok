@@ -1,6 +1,8 @@
 import type {
   Achievement,
+  AddPaymentInput,
   AdminUpdateUserInput,
+  ClubSettings,
   CreateAchievementInput,
   CreateTournamentInput,
   GrantAchievementInput,
@@ -13,8 +15,10 @@ import type {
   Season,
   SubmitResultsInput,
   TournamentDetail,
+  TournamentPlayer,
   TournamentSummary,
   UpdateAchievementInput,
+  UpdateClubSettingsInput,
   UpdateTournamentInput,
   UserAchievementView,
 } from "@poker/contracts";
@@ -37,6 +41,8 @@ export const keys = {
   seasons: () => ["seasons"] as const,
   activeSeason: () => ["seasons", "active"] as const,
   players: (search: string) => ["players", search] as const,
+  clubInfo: () => ["club", "info"] as const,
+  clubSettings: () => ["club", "settings"] as const,
 };
 
 export function useTournaments(scope: "upcoming" | "past" | "all", enabled = true) {
@@ -119,6 +125,23 @@ export function usePlayers(search: string, enabled: boolean) {
   });
 }
 
+export function useClubInfo() {
+  return useQuery({
+    queryKey: keys.clubInfo(),
+    queryFn: () => api.get<{ infoText: string; timezone: string }>("/club/info"),
+    // The club does not move; refetching this on every mount is pointless.
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useClubSettings(enabled: boolean) {
+  return useQuery({
+    queryKey: keys.clubSettings(),
+    queryFn: () => api.get<ClubSettings>("/club/settings"),
+    enabled,
+  });
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export function useRegister(tournamentId: string) {
@@ -181,12 +204,53 @@ export function useSubmitResults(tournamentId: string) {
   });
 }
 
-export function useSetRegistrationStatus(tournamentId: string) {
+export function useAddPayment(tournamentId: string) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, status }: { userId: string; status: string }) =>
-      api.patch(`/tournaments/${tournamentId}/registrations/${userId}`, { status }),
+    mutationFn: (input: AddPaymentInput) =>
+      api.post<TournamentPlayer>(`/tournaments/${tournamentId}/payments`, input),
     onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useVoidPayment(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (paymentId: string) =>
+      api.delete(`/tournaments/${tournamentId}/payments/${paymentId}`),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useSetPlace(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, place }: { userId: string; place: number | null }) =>
+      api.post<TournamentPlayer>(`/tournaments/${tournamentId}/place`, { userId, place }),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+/** Awarding the rating, and taking it back — both are ordinary operations. */
+export function useFinishTournament(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (reopen: boolean) =>
+      api.post(`/tournaments/${tournamentId}/${reopen ? "reopen" : "finish"}`),
+    onSuccess: () => {
+      invalidateSchedule(client, tournamentId);
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+      void client.invalidateQueries({ queryKey: ["rating"] });
+    },
+  });
+}
+
+export function useUpdateClubSettings() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateClubSettingsInput) =>
+      api.patch<ClubSettings>("/club/settings", input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
   });
 }
 

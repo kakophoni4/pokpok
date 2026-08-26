@@ -35,7 +35,7 @@ export class UsersController {
     return this.users.findPublicById(id);
   }
 
-  @Roles("moderator")
+  @Roles("admin")
   @Get()
   @ApiOperation({ summary: "Player directory (staff)" })
   list(

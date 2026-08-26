@@ -219,6 +219,9 @@ export type UserWhereInput = {
   linkTokens?: Prisma.LinkTokenListRelationFilter
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
+  authoredPayments?: Prisma.PaymentListRelationFilter
+  voidedPayments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
   seasonStats?: Prisma.UserSeasonStatsListRelationFilter
   achievements?: Prisma.UserAchievementListRelationFilter
@@ -242,6 +245,9 @@ export type UserOrderByWithRelationInput = {
   linkTokens?: Prisma.LinkTokenOrderByRelationAggregateInput
   registrations?: Prisma.RegistrationOrderByRelationAggregateInput
   results?: Prisma.ResultOrderByRelationAggregateInput
+  payments?: Prisma.PaymentOrderByRelationAggregateInput
+  authoredPayments?: Prisma.PaymentOrderByRelationAggregateInput
+  voidedPayments?: Prisma.PaymentOrderByRelationAggregateInput
   ratingEvents?: Prisma.RatingEventOrderByRelationAggregateInput
   seasonStats?: Prisma.UserSeasonStatsOrderByRelationAggregateInput
   achievements?: Prisma.UserAchievementOrderByRelationAggregateInput
@@ -268,6 +274,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   linkTokens?: Prisma.LinkTokenListRelationFilter
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
+  authoredPayments?: Prisma.PaymentListRelationFilter
+  voidedPayments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
   seasonStats?: Prisma.UserSeasonStatsListRelationFilter
   achievements?: Prisma.UserAchievementListRelationFilter
@@ -321,6 +330,9 @@ export type UserCreateInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -344,6 +356,9 @@ export type UserUncheckedCreateInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -367,6 +382,9 @@ export type UserUpdateInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -390,6 +408,9 @@ export type UserUncheckedUpdateInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -574,6 +595,52 @@ export type UserUpdateOneRequiredWithoutResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutResultsInput, Prisma.UserUpdateWithoutResultsInput>, Prisma.UserUncheckedUpdateWithoutResultsInput>
 }
 
+export type UserCreateNestedOneWithoutPaymentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentsInput, Prisma.UserUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutAuthoredPaymentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedCreateWithoutAuthoredPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthoredPaymentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutVoidedPaymentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVoidedPaymentsInput, Prisma.UserUncheckedCreateWithoutVoidedPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVoidedPaymentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPaymentsInput, Prisma.UserUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPaymentsInput
+  upsert?: Prisma.UserUpsertWithoutPaymentsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentsInput, Prisma.UserUpdateWithoutPaymentsInput>, Prisma.UserUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type UserUpdateOneWithoutAuthoredPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedCreateWithoutAuthoredPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthoredPaymentsInput
+  upsert?: Prisma.UserUpsertWithoutAuthoredPaymentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuthoredPaymentsInput, Prisma.UserUpdateWithoutAuthoredPaymentsInput>, Prisma.UserUncheckedUpdateWithoutAuthoredPaymentsInput>
+}
+
+export type UserUpdateOneWithoutVoidedPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVoidedPaymentsInput, Prisma.UserUncheckedCreateWithoutVoidedPaymentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVoidedPaymentsInput
+  upsert?: Prisma.UserUpsertWithoutVoidedPaymentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutVoidedPaymentsInput, Prisma.UserUpdateWithoutVoidedPaymentsInput>, Prisma.UserUncheckedUpdateWithoutVoidedPaymentsInput>
+}
+
 export type UserCreateNestedOneWithoutAchievementsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAchievementsInput, Prisma.UserUncheckedCreateWithoutAchievementsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAchievementsInput
@@ -676,6 +743,9 @@ export type UserCreateWithoutIdentitiesInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -698,6 +768,9 @@ export type UserUncheckedCreateWithoutIdentitiesInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -736,6 +809,9 @@ export type UserUpdateWithoutIdentitiesInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -758,6 +834,9 @@ export type UserUncheckedUpdateWithoutIdentitiesInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -780,6 +859,9 @@ export type UserCreateWithoutSessionsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -802,6 +884,9 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -840,6 +925,9 @@ export type UserUpdateWithoutSessionsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -862,6 +950,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -884,6 +975,9 @@ export type UserCreateWithoutLinkTokensInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -906,6 +1000,9 @@ export type UserUncheckedCreateWithoutLinkTokensInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -944,6 +1041,9 @@ export type UserUpdateWithoutLinkTokensInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -966,6 +1066,9 @@ export type UserUncheckedUpdateWithoutLinkTokensInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -988,6 +1091,9 @@ export type UserCreateWithoutRegistrationsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -1010,6 +1116,9 @@ export type UserUncheckedCreateWithoutRegistrationsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -1048,6 +1157,9 @@ export type UserUpdateWithoutRegistrationsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -1070,6 +1182,9 @@ export type UserUncheckedUpdateWithoutRegistrationsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -1092,6 +1207,9 @@ export type UserCreateWithoutResultsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -1114,6 +1232,9 @@ export type UserUncheckedCreateWithoutResultsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -1152,6 +1273,9 @@ export type UserUpdateWithoutResultsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -1174,6 +1298,357 @@ export type UserUncheckedUpdateWithoutResultsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPaymentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentsInput, Prisma.UserUncheckedCreateWithoutPaymentsInput>
+}
+
+export type UserCreateWithoutAuthoredPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAuthoredPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAuthoredPaymentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedCreateWithoutAuthoredPaymentsInput>
+}
+
+export type UserCreateWithoutVoidedPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutVoidedPaymentsInput = {
+  id?: string
+  nickname: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  notifyBeforeTournament?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  identities?: Prisma.IdentityUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
+  auditEntries?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  notifications?: Prisma.OutboxUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutVoidedPaymentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutVoidedPaymentsInput, Prisma.UserUncheckedCreateWithoutVoidedPaymentsInput>
+}
+
+export type UserUpsertWithoutPaymentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPaymentsInput, Prisma.UserUncheckedUpdateWithoutPaymentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPaymentsInput, Prisma.UserUncheckedCreateWithoutPaymentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPaymentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPaymentsInput, Prisma.UserUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type UserUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutAuthoredPaymentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedUpdateWithoutAuthoredPaymentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedCreateWithoutAuthoredPaymentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAuthoredPaymentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAuthoredPaymentsInput, Prisma.UserUncheckedUpdateWithoutAuthoredPaymentsInput>
+}
+
+export type UserUpdateWithoutAuthoredPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAuthoredPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutVoidedPaymentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutVoidedPaymentsInput, Prisma.UserUncheckedUpdateWithoutVoidedPaymentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutVoidedPaymentsInput, Prisma.UserUncheckedCreateWithoutVoidedPaymentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutVoidedPaymentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutVoidedPaymentsInput, Prisma.UserUncheckedUpdateWithoutVoidedPaymentsInput>
+}
+
+export type UserUpdateWithoutVoidedPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
+  seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
+  grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
+  auditEntries?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  notifications?: Prisma.OutboxUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutVoidedPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nickname?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  notifyBeforeTournament?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  identities?: Prisma.IdentityUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -1197,6 +1672,9 @@ export type UserCreateWithoutAchievementsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
@@ -1219,6 +1697,9 @@ export type UserUncheckedCreateWithoutAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1246,6 +1727,9 @@ export type UserCreateWithoutGrantedAchievementsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -1268,6 +1752,9 @@ export type UserUncheckedCreateWithoutGrantedAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -1306,6 +1793,9 @@ export type UserUpdateWithoutAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
@@ -1328,6 +1818,9 @@ export type UserUncheckedUpdateWithoutAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1361,6 +1854,9 @@ export type UserUpdateWithoutGrantedAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -1383,6 +1879,9 @@ export type UserUncheckedUpdateWithoutGrantedAchievementsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -1405,6 +1904,9 @@ export type UserCreateWithoutRatingEventsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
@@ -1427,6 +1929,9 @@ export type UserUncheckedCreateWithoutRatingEventsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1465,6 +1970,9 @@ export type UserUpdateWithoutRatingEventsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
@@ -1487,6 +1995,9 @@ export type UserUncheckedUpdateWithoutRatingEventsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1509,6 +2020,9 @@ export type UserCreateWithoutSeasonStatsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementCreateNestedManyWithoutGrantedByInput
@@ -1531,6 +2045,9 @@ export type UserUncheckedCreateWithoutSeasonStatsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
   grantedAchievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutGrantedByInput
@@ -1569,6 +2086,9 @@ export type UserUpdateWithoutSeasonStatsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUpdateManyWithoutGrantedByNestedInput
@@ -1591,6 +2111,9 @@ export type UserUncheckedUpdateWithoutSeasonStatsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
   grantedAchievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutGrantedByNestedInput
@@ -1613,6 +2136,9 @@ export type UserCreateWithoutAuditEntriesInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -1635,6 +2161,9 @@ export type UserUncheckedCreateWithoutAuditEntriesInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -1673,6 +2202,9 @@ export type UserUpdateWithoutAuditEntriesInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -1695,6 +2227,9 @@ export type UserUncheckedUpdateWithoutAuditEntriesInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -1717,6 +2252,9 @@ export type UserCreateWithoutNotificationsInput = {
   linkTokens?: Prisma.LinkTokenCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutUserInput
   results?: Prisma.ResultCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutUserInput
@@ -1739,6 +2277,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedCreateNestedManyWithoutUserInput
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutUserInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  authoredPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  voidedPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutVoidedByInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutUserInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedCreateNestedManyWithoutUserInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutUserInput
@@ -1777,6 +2318,9 @@ export type UserUpdateWithoutNotificationsInput = {
   linkTokens?: Prisma.LinkTokenUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutUserNestedInput
@@ -1799,6 +2343,9 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   linkTokens?: Prisma.LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutUserNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  authoredPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  voidedPayments?: Prisma.PaymentUncheckedUpdateManyWithoutVoidedByNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutUserNestedInput
   seasonStats?: Prisma.UserSeasonStatsUncheckedUpdateManyWithoutUserNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutUserNestedInput
@@ -1817,6 +2364,9 @@ export type UserCountOutputType = {
   linkTokens: number
   registrations: number
   results: number
+  payments: number
+  authoredPayments: number
+  voidedPayments: number
   ratingEvents: number
   seasonStats: number
   achievements: number
@@ -1831,6 +2381,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   linkTokens?: boolean | UserCountOutputTypeCountLinkTokensArgs
   registrations?: boolean | UserCountOutputTypeCountRegistrationsArgs
   results?: boolean | UserCountOutputTypeCountResultsArgs
+  payments?: boolean | UserCountOutputTypeCountPaymentsArgs
+  authoredPayments?: boolean | UserCountOutputTypeCountAuthoredPaymentsArgs
+  voidedPayments?: boolean | UserCountOutputTypeCountVoidedPaymentsArgs
   ratingEvents?: boolean | UserCountOutputTypeCountRatingEventsArgs
   seasonStats?: boolean | UserCountOutputTypeCountSeasonStatsArgs
   achievements?: boolean | UserCountOutputTypeCountAchievementsArgs
@@ -1882,6 +2435,27 @@ export type UserCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.Ty
  */
 export type UserCountOutputTypeCountResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ResultWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAuthoredPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountVoidedPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
 }
 
 /**
@@ -1942,6 +2516,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   linkTokens?: boolean | Prisma.User$linkTokensArgs<ExtArgs>
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.User$resultsArgs<ExtArgs>
+  payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
+  authoredPayments?: boolean | Prisma.User$authoredPaymentsArgs<ExtArgs>
+  voidedPayments?: boolean | Prisma.User$voidedPaymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.User$ratingEventsArgs<ExtArgs>
   seasonStats?: boolean | Prisma.User$seasonStatsArgs<ExtArgs>
   achievements?: boolean | Prisma.User$achievementsArgs<ExtArgs>
@@ -1994,6 +2571,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   linkTokens?: boolean | Prisma.User$linkTokensArgs<ExtArgs>
   registrations?: boolean | Prisma.User$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.User$resultsArgs<ExtArgs>
+  payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
+  authoredPayments?: boolean | Prisma.User$authoredPaymentsArgs<ExtArgs>
+  voidedPayments?: boolean | Prisma.User$voidedPaymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.User$ratingEventsArgs<ExtArgs>
   seasonStats?: boolean | Prisma.User$seasonStatsArgs<ExtArgs>
   achievements?: boolean | Prisma.User$achievementsArgs<ExtArgs>
@@ -2013,6 +2593,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     linkTokens: Prisma.$LinkTokenPayload<ExtArgs>[]
     registrations: Prisma.$RegistrationPayload<ExtArgs>[]
     results: Prisma.$ResultPayload<ExtArgs>[]
+    payments: Prisma.$PaymentPayload<ExtArgs>[]
+    authoredPayments: Prisma.$PaymentPayload<ExtArgs>[]
+    voidedPayments: Prisma.$PaymentPayload<ExtArgs>[]
     ratingEvents: Prisma.$RatingEventPayload<ExtArgs>[]
     seasonStats: Prisma.$UserSeasonStatsPayload<ExtArgs>[]
     achievements: Prisma.$UserAchievementPayload<ExtArgs>[]
@@ -2429,6 +3012,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   linkTokens<T extends Prisma.User$linkTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$linkTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   registrations<T extends Prisma.User$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   results<T extends Prisma.User$resultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payments<T extends Prisma.User$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  authoredPayments<T extends Prisma.User$authoredPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$authoredPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  voidedPayments<T extends Prisma.User$voidedPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$voidedPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ratingEvents<T extends Prisma.User$ratingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ratingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RatingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   seasonStats<T extends Prisma.User$seasonStatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$seasonStatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSeasonStatsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   achievements<T extends Prisma.User$achievementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$achievementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAchievementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2983,6 +3569,78 @@ export type User$resultsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.ResultScalarFieldEnum | Prisma.ResultScalarFieldEnum[]
+}
+
+/**
+ * User.payments
+ */
+export type User$paymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
+}
+
+/**
+ * User.authoredPayments
+ */
+export type User$authoredPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
+}
+
+/**
+ * User.voidedPayments
+ */
+export type User$voidedPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
 }
 
 /**

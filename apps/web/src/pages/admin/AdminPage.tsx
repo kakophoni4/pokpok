@@ -3,40 +3,41 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../../auth/auth-context";
 import { Loading, PageHeader, Tabs } from "../../components/ui";
 import { AdminAchievements } from "./AdminAchievements";
+import { AdminGame } from "./AdminGame";
 import { AdminPlayers } from "./AdminPlayers";
-import { AdminResults } from "./AdminResults";
+import { AdminSettings } from "./AdminSettings";
 import { AdminTournaments } from "./AdminTournaments";
 
-type Tab = "tournaments" | "results" | "players" | "achievements";
+type Tab = "tournaments" | "game" | "players" | "achievements" | "settings";
 
 export function AdminPage() {
   const { status, can } = useAuth();
-  const [tab, setTab] = useState<Tab>("tournaments");
+  const [tab, setTab] = useState<Tab>("game");
 
   if (status === "loading") return <Loading />;
-  if (!can("moderator")) return <Navigate to="/" replace />;
-
-  const isAdmin = can("admin");
+  if (!can("admin")) return <Navigate to="/" replace />;
 
   return (
     <>
-      <PageHeader title="Управление клубом" subtitle="Турниры, результаты, игроки и достижения" />
+      <PageHeader title="Управление клубом" subtitle="Игровой вечер, расписание, игроки и ачивки" />
 
       <Tabs
         value={tab}
         onChange={setTab}
         options={[
-          { value: "tournaments", label: "Турниры" },
-          { value: "results", label: "Результаты" },
+          { value: "game", label: "Вечер" },
+          { value: "tournaments", label: "Расписание" },
           { value: "players", label: "Игроки" },
           { value: "achievements", label: "Ачивки" },
+          { value: "settings", label: "Клуб" },
         ]}
       />
 
-      {tab === "tournaments" && <AdminTournaments canDelete={isAdmin} />}
-      {tab === "results" && <AdminResults />}
-      {tab === "players" && <AdminPlayers canEdit={isAdmin} />}
-      {tab === "achievements" && <AdminAchievements canEdit={isAdmin} />}
+      {tab === "game" && <AdminGame />}
+      {tab === "tournaments" && <AdminTournaments canDelete />}
+      {tab === "players" && <AdminPlayers canEdit />}
+      {tab === "achievements" && <AdminAchievements canEdit />}
+      {tab === "settings" && <AdminSettings />}
     </>
   );
 }

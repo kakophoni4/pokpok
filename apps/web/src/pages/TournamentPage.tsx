@@ -11,10 +11,10 @@ import {
 } from "../components/ui";
 import {
   formatFullDate,
+  formatNumber,
   formatPoints,
   formatTime,
   formatWeekday,
-  GAME_TYPE_LABELS,
   placeLabel,
   REGISTRATION_STATUS_LABELS,
   TOURNAMENT_STATUS_LABELS,
@@ -69,16 +69,26 @@ export function TournamentPage() {
         )}
 
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-          <Detail label="Дисциплина" value={GAME_TYPE_LABELS[data.gameType] ?? data.gameType} />
           <Detail
             label="Участники"
             value={`${data.registeredCount}${data.capacity != null ? ` / ${data.capacity}` : ""}`}
           />
-          <Detail label="Коэффициент" value={`×${data.ratingMultiplier}`} />
-          {data.buyinChips != null && (
-            <Detail label="Стартовый стек" value={data.buyinChips.toLocaleString("ru-RU")} />
+          <Detail label="Призовых мест" value={String(data.paidPlaces)} />
+          <Detail label="Стартовый стек" value={formatNumber(data.startingStack)} />
+          {data.ratingMultiplier !== 1 ? (
+            <Detail label="Коэффициент" value={`×${data.ratingMultiplier}`} />
+          ) : (
+            <Detail label="Адон" value={formatNumber(data.addonChips)} />
           )}
         </dl>
+
+        {data.chipsInPlay > 0 && (
+          <p className="mt-3 text-sm text-stone-400">
+            Фишек в игре: <span className="nums text-stone-200">{formatNumber(data.chipsInPlay)}</span>
+            {" · первое место: "}
+            <span className="nums text-gold-400">{formatNumber(data.ratingPool)}</span> очков
+          </p>
+        )}
 
         {data.description && (
           <p className="mt-4 border-t border-felt-800 pt-3 text-sm whitespace-pre-line text-stone-300">
@@ -113,10 +123,7 @@ export function TournamentPage() {
                 <Link to={`/player/${row.user.id}`} className="flex-1 truncate hover:text-gold-400">
                   {row.user.nickname}
                 </Link>
-                {row.knockouts != null && row.knockouts > 0 && (
-                  <span className="text-xs text-stone-500">🎣 {row.knockouts}</span>
-                )}
-                <span className="nums w-14 shrink-0 text-right font-medium text-gold-400">
+                <span className="nums w-20 shrink-0 text-right font-medium text-gold-400">
                   {formatPoints(row.ratingPoints)}
                 </span>
               </li>
@@ -139,8 +146,6 @@ export function TournamentPage() {
                 <Link to={`/player/${row.user.id}`} className="flex-1 truncate hover:text-gold-400">
                   {row.user.nickname}
                 </Link>
-                {row.status === "checked_in" && <Badge tone="green">Пришёл</Badge>}
-                {row.status === "no_show" && <Badge tone="red">Не явился</Badge>}
               </li>
             ))}
           </ul>

@@ -11,7 +11,6 @@ export const AchievementRule = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("games_played"), threshold: z.number().int().positive() }),
   z.object({ kind: z.literal("top3_count"), threshold: z.number().int().positive() }),
   z.object({ kind: z.literal("attendance_streak"), threshold: z.number().int().positive() }),
-  z.object({ kind: z.literal("knockouts_total"), threshold: z.number().int().positive() }),
   z.object({ kind: z.literal("season_rank"), maxRank: z.number().int().positive() }),
 ]);
 export type AchievementRule = z.infer<typeof AchievementRule>;

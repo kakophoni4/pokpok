@@ -1,20 +1,35 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   type CreateTournamentInput,
+  hasRole,
   OCCUPYING_STATUSES,
+  type RatingConfig,
+  type SaveAdminScreensInput,
   type TournamentDetail,
   type TournamentListQuery,
+  type TournamentPlayer,
   type TournamentSummary,
   type UpdateTournamentInput,
+  type UserRole,
 } from "@poker/contracts";
+import { ratingPool } from "@poker/rating";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import type { Prisma, Tournament, Venue } from "../generated/prisma/client";
+import { parseRatingConfig } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
+import { effectiveConfig } from "./tournament-config";
 
 type TournamentWithVenue = Tournament & { venue: Venue | null };
 
 type CountsByTournament = Map<string, { registered: number; waitlist: number }>;
+
+export type Viewer = { id: string; role: UserRole };
 
 @Injectable()
 export class TournamentsService {
@@ -33,17 +48,40 @@ export class TournamentsService {
     });
 
     const ids = tournaments.map((tournament) => tournament.id);
-    const [counts, mine] = await Promise.all([
+    const [counts, mine, configs] = await Promise.all([
       this.countRegistrations(ids),
       this.myRegistrations(ids, viewerId),
+      this.seasonConfigs(),
     ]);
 
     return tournaments.map((tournament) =>
-      toSummary(tournament, counts, mine.get(tournament.id) ?? null),
+      toSummary(tournament, counts, mine.get(tournament.id) ?? null, configs),
     );
   }
 
-  async detail(id: string, viewerId?: string): Promise<TournamentDetail> {
+  /**
+   * The tournament whose live screens live in a given forum topic.
+   *
+   * This is what lets the bot's buttons carry an action and nothing else: the
+   * topic identifies the evening, the message identifies the player, and neither
+   * has to be squeezed into Telegram's 64 bytes of callback data.
+   */
+  async byAdminTopic(topicId: number, viewer?: Viewer): Promise<TournamentDetail> {
+    const found = await this.prisma.tournament.findFirst({
+      where: { adminTopicId: topicId },
+      orderBy: { startsAt: "desc" },
+      select: { id: true },
+    });
+    if (!found) {
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "К этому топику не привязан турнир",
+      });
+    }
+    return this.detail(found.id, viewer);
+  }
+
+  async detail(id: string, viewer?: Viewer): Promise<TournamentDetail> {
     const tournament = await this.prisma.tournament.findUnique({
       where: { id },
       include: {
@@ -53,6 +91,7 @@ export class TournamentsService {
           orderBy: [{ status: "asc" }, { createdAt: "asc" }],
         },
         results: { include: { user: true }, orderBy: { place: "asc" } },
+        payments: { include: { user: true }, orderBy: { createdAt: "asc" } },
       },
     });
 
@@ -60,8 +99,12 @@ export class TournamentsService {
       throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
     }
 
-    const counts = await this.countRegistrations([id]);
-    const mine = tournament.registrations.find((row) => row.userId === viewerId) ?? null;
+    const [counts, configs] = await Promise.all([
+      this.countRegistrations([id]),
+      this.seasonConfigs(),
+    ]);
+    const config = effectiveConfig(tournament, configs.get(tournament.seasonId) ?? configs.get(null)!);
+    const mine = tournament.registrations.find((row) => row.userId === viewer?.id) ?? null;
 
     // Rating earned per player is read from the ledger, not recomputed here,
     // so the page always shows exactly what was actually awarded.
@@ -71,11 +114,26 @@ export class TournamentsService {
     });
     const pointsByUser = new Map(ratingEvents.map((event) => [event.userId, event.points]));
 
+    const live = tournament.payments.filter((payment) => payment.voidedAt == null);
+    const chipsInPlay = live.reduce((sum, payment) => sum + payment.chips, 0);
+    const placeByUser = new Map(tournament.results.map((row) => [row.userId, row.place]));
+
+    const isStaff = viewer != null && hasRole(viewer.role, "admin");
+
     return {
-      ...toSummary(tournament, counts, mine),
+      ...toSummary(tournament, counts, mine, configs),
       description: tournament.description,
-      buyinChips: tournament.buyinChips,
       seasonId: tournament.seasonId,
+      startingStack: config.startingStack,
+      addonChips: config.addonChips,
+      chipsInPlay,
+      ratingPool: Math.round(
+        ratingPool({
+          chipsInPlay,
+          divisor: config.divisor,
+          multiplier: tournament.ratingMultiplier,
+        }),
+      ),
       registrations: tournament.registrations.map((row) => ({
         id: row.id,
         user: toPublicUser(row.user),
@@ -87,11 +145,54 @@ export class TournamentsService {
       results: tournament.results.map((row) => ({
         place: row.place,
         user: toPublicUser(row.user),
-        knockouts: row.knockouts,
-        rebuys: row.rebuys,
         ratingPoints: pointsByUser.get(row.userId) ?? 0,
       })),
+      // The cash desk is staff-only. Everyone else gets the same card without it.
+      players: isStaff ? groupPlayers(live, placeByUser, pointsByUser) : null,
+      totalRub: isStaff ? live.reduce((sum, payment) => sum + payment.amountRub, 0) : null,
+      adminScreens: isStaff
+        ? {
+            topicId: tournament.adminTopicId,
+            boardMsgId: tournament.adminBoardMsgId,
+            cards: tournament.registrations
+              .filter((row) => row.adminCardMsgId != null)
+              .map((row) => ({ userId: row.userId, msgId: row.adminCardMsgId as number })),
+          }
+        : null,
     };
+  }
+
+  /** Remembers where the bot put its live screens for this tournament. */
+  async saveAdminScreens(id: string, input: SaveAdminScreensInput): Promise<{ ok: true }> {
+    await this.prisma.$transaction(async (tx) => {
+      if (input.topicId !== undefined || input.boardMsgId !== undefined) {
+        await tx.tournament.update({
+          where: { id },
+          data: {
+            ...(input.topicId === undefined ? {} : { adminTopicId: input.topicId ?? null }),
+            ...(input.boardMsgId === undefined
+              ? {}
+              : { adminBoardMsgId: input.boardMsgId ?? null }),
+          },
+        });
+      }
+
+      for (const card of input.cards ?? []) {
+        await tx.registration.upsert({
+          where: { tournamentId_userId: { tournamentId: id, userId: card.userId } },
+          create: {
+            tournamentId: id,
+            userId: card.userId,
+            status: "registered",
+            source: "admin",
+            adminCardMsgId: card.msgId,
+          },
+          update: { adminCardMsgId: card.msgId },
+        });
+      }
+    });
+
+    return { ok: true };
   }
 
   async create(actorId: string, input: CreateTournamentInput): Promise<TournamentSummary> {
@@ -101,14 +202,15 @@ export class TournamentsService {
       data: {
         title: input.title,
         description: input.description ?? null,
-        gameType: input.gameType,
         seasonId,
         venueId: input.venueId ?? null,
         startsAt: new Date(input.startsAt),
         regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null,
         regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null,
         capacity: input.capacity ?? null,
-        buyinChips: input.buyinChips ?? null,
+        paidPlaces: input.paidPlaces ?? null,
+        startingStack: input.startingStack ?? null,
+        addonChips: input.addonChips ?? null,
         ratingMultiplier: input.ratingMultiplier,
         status: input.status,
       },
@@ -123,7 +225,7 @@ export class TournamentsService {
       after: { title: tournament.title, startsAt: tournament.startsAt },
     });
 
-    return toSummary(tournament, new Map(), null);
+    return toSummary(tournament, new Map(), null, await this.seasonConfigs());
   }
 
   async update(
@@ -153,7 +255,6 @@ export class TournamentsService {
       data: {
         ...(input.title === undefined ? {} : { title: input.title }),
         ...(input.description === undefined ? {} : { description: input.description ?? null }),
-        ...(input.gameType === undefined ? {} : { gameType: input.gameType }),
         ...(input.seasonId === undefined ? {} : { seasonId: input.seasonId ?? null }),
         ...(input.venueId === undefined ? {} : { venueId: input.venueId ?? null }),
         ...(input.startsAt === undefined ? {} : { startsAt: new Date(input.startsAt) }),
@@ -164,7 +265,11 @@ export class TournamentsService {
           ? {}
           : { regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null }),
         ...(input.capacity === undefined ? {} : { capacity: input.capacity ?? null }),
-        ...(input.buyinChips === undefined ? {} : { buyinChips: input.buyinChips ?? null }),
+        ...(input.paidPlaces === undefined ? {} : { paidPlaces: input.paidPlaces ?? null }),
+        ...(input.startingStack === undefined
+          ? {}
+          : { startingStack: input.startingStack ?? null }),
+        ...(input.addonChips === undefined ? {} : { addonChips: input.addonChips ?? null }),
         ...(input.ratingMultiplier === undefined
           ? {}
           : { ratingMultiplier: input.ratingMultiplier }),
@@ -178,26 +283,39 @@ export class TournamentsService {
       action: "tournament.update",
       entity: "Tournament",
       entityId: id,
-      before: { title: before.title, startsAt: before.startsAt, status: before.status },
-      after: { title: tournament.title, startsAt: tournament.startsAt, status: tournament.status },
+      before: {
+        title: before.title,
+        startsAt: before.startsAt,
+        status: before.status,
+        paidPlaces: before.paidPlaces,
+      },
+      after: {
+        title: tournament.title,
+        startsAt: tournament.startsAt,
+        status: tournament.status,
+        paidPlaces: tournament.paidPlaces,
+      },
     });
 
-    const counts = await this.countRegistrations([id]);
-    return toSummary(tournament, counts, null);
+    const [counts, configs] = await Promise.all([
+      this.countRegistrations([id]),
+      this.seasonConfigs(),
+    ]);
+    return toSummary(tournament, counts, null, configs);
   }
 
   async remove(actorId: string, id: string): Promise<{ ok: true }> {
     const tournament = await this.prisma.tournament.findUnique({
       where: { id },
-      include: { results: { select: { id: true } } },
+      include: { results: { select: { id: true } }, payments: { select: { id: true } } },
     });
     if (!tournament) {
       throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
     }
-    if (tournament.results.length > 0) {
-      throw new BadRequestException({
-        code: "TOURNAMENT_HAS_RESULTS",
-        message: "У турнира есть результаты — отмените его вместо удаления",
+    if (tournament.results.length > 0 || tournament.payments.length > 0) {
+      throw new ConflictException({
+        code: "TOURNAMENT_HAS_HISTORY",
+        message: "По турниру уже есть места или оплаты — отмените его вместо удаления",
       });
     }
 
@@ -266,6 +384,22 @@ export class TournamentsService {
     return new Map(rows.map((row) => [row.tournamentId, row]));
   }
 
+  /**
+   * Every season's rating settings in one map, plus the defaults under `null` for
+   * tournaments that belong to no season. Seasons are counted in single digits,
+   * so loading them all beats a query per tournament in the schedule.
+   */
+  private async seasonConfigs(): Promise<Map<string | null, RatingConfig>> {
+    const seasons = await this.prisma.season.findMany({
+      select: { id: true, ratingConfig: true },
+    });
+
+    const map = new Map<string | null, RatingConfig>();
+    map.set(null, parseRatingConfig(undefined));
+    for (const season of seasons) map.set(season.id, parseRatingConfig(season.ratingConfig));
+    return map;
+  }
+
   private async defaultSeasonId(): Promise<string | null> {
     const active = await this.prisma.season.findFirst({
       where: { isActive: true },
@@ -283,23 +417,76 @@ type MyRegistrationRow = {
   tournamentId: string;
 };
 
+type PaymentRow = {
+  id: string;
+  userId: string;
+  kind: TournamentPlayer["payments"][number]["kind"];
+  amountRub: number;
+  chips: number;
+  note: string | null;
+  createdAt: Date;
+  user: Parameters<typeof toPublicUser>[0];
+};
+
+/** One row per player, with their tab, their place and what it earned. */
+function groupPlayers(
+  payments: PaymentRow[],
+  placeByUser: Map<string, number>,
+  pointsByUser: Map<string, number>,
+): TournamentPlayer[] {
+  const byUser = new Map<string, TournamentPlayer>();
+
+  for (const payment of payments) {
+    const existing = byUser.get(payment.userId) ?? {
+      user: toPublicUser(payment.user),
+      payments: [],
+      totalRub: 0,
+      chips: 0,
+      place: placeByUser.get(payment.userId) ?? null,
+      ratingPoints: pointsByUser.get(payment.userId) ?? null,
+    };
+
+    existing.payments.push({
+      id: payment.id,
+      kind: payment.kind,
+      amountRub: payment.amountRub,
+      chips: payment.chips,
+      note: payment.note,
+      createdAt: payment.createdAt.toISOString(),
+    });
+    existing.totalRub += payment.amountRub;
+    existing.chips += payment.chips;
+    byUser.set(payment.userId, existing);
+  }
+
+  return [...byUser.values()].sort((a, b) => {
+    // Finished players first, in finishing order; everyone still playing after.
+    if (a.place != null && b.place != null) return a.place - b.place;
+    if (a.place != null) return -1;
+    if (b.place != null) return 1;
+    return a.user.nickname.localeCompare(b.user.nickname, "ru");
+  });
+}
+
 function toSummary(
   tournament: TournamentWithVenue,
   counts: CountsByTournament,
   mine: MyRegistrationRow | null,
+  configs: Map<string | null, RatingConfig>,
 ): TournamentSummary {
   const count = counts.get(tournament.id) ?? { registered: 0, waitlist: 0 };
+  const season = configs.get(tournament.seasonId) ?? configs.get(null)!;
 
   return {
     id: tournament.id,
     title: tournament.title,
-    gameType: tournament.gameType,
     status: tournament.status,
     startsAt: tournament.startsAt.toISOString(),
     regOpensAt: tournament.regOpensAt?.toISOString() ?? null,
     regClosesAt: tournament.regClosesAt?.toISOString() ?? null,
     capacity: tournament.capacity,
     ratingMultiplier: tournament.ratingMultiplier,
+    paidPlaces: tournament.paidPlaces ?? season.defaultPaidPlaces,
     venue: tournament.venue
       ? { id: tournament.venue.id, title: tournament.venue.title, address: tournament.venue.address }
       : null,

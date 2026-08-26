@@ -2,8 +2,8 @@
  * End-to-end smoke test against a running API with seeded data.
  *
  * Exercises the paths that matter most and are annoying to check by hand:
- * login, sign-up with a waiting list, submitting standings, and the rating
- * actually moving afterwards.
+ * login, sign-up with a waiting list, the cash desk handing out chips, places
+ * as players bust out, and finishing an evening — then taking it all back.
  *
  * Usage: node scripts/smoke.mjs   (API must be running, database seeded)
  */
@@ -76,7 +76,9 @@ async function main() {
   check("a waiting list exists in the seed", Boolean(withWaitlist), "no oversubscribed event");
 
   console.log("\nregistration");
-  const free = upcoming.payload.find((t) => !t.myRegistration && t.waitlistCount === 0);
+  const free = upcoming.payload.find(
+    (t) => t.status === "reg_open" && !t.myRegistration && t.waitlistCount === 0,
+  );
   if (!free) throw new Error("seed has no tournament this player can join");
 
   const registered = await call("POST", `/tournaments/${free.id}/register`, {
@@ -103,43 +105,122 @@ async function main() {
   });
   check("player cancels", cancelled.status === 200, `status ${cancelled.status}`);
 
-  console.log("\nresults and rating");
+  console.log("\nclub settings");
+  const publicInfo = await call("GET", "/club/info");
+  check("club info is public", typeof publicInfo.payload?.infoText === "string");
+  check(
+    "times are pinned to the club's timezone",
+    publicInfo.payload?.timezone === "Europe/Samara",
+    publicInfo.payload?.timezone,
+  );
+  const closedSettings = await call("GET", "/club/settings", { token: player.accessToken });
+  check("prices are staff-only", closedSettings.status === 403, `status ${closedSettings.status}`);
+  const prices = await call("GET", "/club/settings", { token: admin.accessToken });
+  check("admin reads the price list", prices.payload?.entryPriceRub > 0);
+
+  console.log("\ncash desk");
   const created = await call("POST", "/tournaments", {
     token: admin.accessToken,
     body: {
       title: `Smoke Test Cup ${Date.now()}`,
       startsAt: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
       capacity: 8,
+      paidPlaces: 3,
       ratingMultiplier: 1,
       status: "reg_open",
     },
   });
   check("admin creates a tournament", Boolean(created.payload?.id), JSON.stringify(created.payload));
   const tournamentId = created.payload.id;
+  check("paid places are stored", created.payload?.paidPlaces === 3, created.payload?.paidPlaces);
 
   const board = await call("GET", "/rating/leaderboard");
   check("leaderboard is populated", (board.payload?.length ?? 0) > 0);
   const contenders = board.payload.slice(0, 4);
   const pointsBefore = new Map(contenders.map((row) => [row.user.id, row.points]));
 
-  const submitted = await call("POST", `/tournaments/${tournamentId}/results`, {
+  // Paying the entry is what makes somebody a participant.
+  for (const row of contenders) {
+    await call("POST", `/tournaments/${tournamentId}/payments`, {
+      token: admin.accessToken,
+      body: { userId: row.user.id, kind: "entry", amountRub: prices.payload.entryPriceRub },
+    });
+  }
+  const afterEntries = await call("GET", `/tournaments/${tournamentId}`, {
     token: admin.accessToken,
-    body: {
-      entries: contenders.map((row, index) => ({ userId: row.user.id, place: index + 1 })),
-    },
   });
-  check("standings are accepted", submitted.status === 201, JSON.stringify(submitted.payload));
+  check(
+    "entries put chips on the table",
+    afterEntries.payload?.chipsInPlay === 4 * afterEntries.payload?.startingStack,
+    `${afterEntries.payload?.chipsInPlay} chips`,
+  );
+  check(
+    "paying for the entry also signs the player up",
+    afterEntries.payload?.registeredCount === 4,
+    `${afterEntries.payload?.registeredCount} registered`,
+  );
+  check("first place is already worth something", afterEntries.payload?.ratingPool > 0);
 
-  const badStandings = await call("POST", `/tournaments/${tournamentId}/results`, {
+  const addon = await call("POST", `/tournaments/${tournamentId}/payments`, {
     token: admin.accessToken,
-    body: {
-      entries: [
-        { userId: contenders[0].user.id, place: 1 },
-        { userId: contenders[1].user.id, place: 3 },
-      ],
-    },
+    body: { userId: contenders[0].user.id, kind: "addon", amountRub: prices.payload.addonPriceRub },
   });
-  check("gaps in places are rejected", badStandings.status === 400, `status ${badStandings.status}`);
+  check(
+    "an add-on adds its own chips",
+    addon.payload?.chips ===
+      afterEntries.payload.startingStack + afterEntries.payload.addonChips,
+    `${addon.payload?.chips} chips`,
+  );
+
+  const drink = await call("POST", `/tournaments/${tournamentId}/payments`, {
+    token: admin.accessToken,
+    body: { userId: contenders[0].user.id, kind: "drink", amountRub: prices.payload.drinkPriceRub },
+  });
+  const drinkLine = drink.payload.payments.find((row) => row.kind === "drink");
+  check("a drink is money, not chips", drinkLine?.chips === 0, JSON.stringify(drinkLine));
+
+  const voided = await call(
+    "DELETE",
+    `/tournaments/${tournamentId}/payments/${drinkLine.id}`,
+    { token: admin.accessToken },
+  );
+  check(
+    "a mistaken line can be voided",
+    !voided.payload.payments.some((row) => row.id === drinkLine.id),
+    JSON.stringify(voided.payload.payments),
+  );
+
+  const money = await call("GET", `/tournaments/${tournamentId}`, { token: admin.accessToken });
+  check(
+    "the till counts only live lines",
+    money.payload?.totalRub ===
+      4 * prices.payload.entryPriceRub + prices.payload.addonPriceRub,
+    `${money.payload?.totalRub} ₽`,
+  );
+  const asPlayer = await call("GET", `/tournaments/${tournamentId}`, {
+    token: player.accessToken,
+  });
+  check("players never see the money", asPlayer.payload?.totalRub == null);
+  check("players never see the tab", asPlayer.payload?.players == null);
+
+  console.log("\nplaces and finishing");
+  for (const [index, row] of contenders.entries()) {
+    await call("POST", `/tournaments/${tournamentId}/place`, {
+      token: admin.accessToken,
+      body: { userId: row.user.id, place: index + 1 },
+    });
+  }
+
+  const taken = await call("POST", `/tournaments/${tournamentId}/place`, {
+    token: admin.accessToken,
+    body: { userId: contenders[3].user.id, place: 1 },
+  });
+  check("the same place cannot go to two players", taken.status === 409, `status ${taken.status}`);
+
+  const finished = await call("POST", `/tournaments/${tournamentId}/finish`, {
+    token: admin.accessToken,
+  });
+  check("the evening can be closed", finished.status === 201, JSON.stringify(finished.payload));
 
   const boardAfter = await call("GET", "/rating/leaderboard");
   const winnerAfter = boardAfter.payload.find((row) => row.user.id === contenders[0].user.id);
@@ -148,23 +229,51 @@ async function main() {
     winnerAfter.points > pointsBefore.get(contenders[0].user.id),
     `${pointsBefore.get(contenders[0].user.id)} -> ${winnerAfter?.points}`,
   );
+  const outsidePrizes = boardAfter.payload.find((row) => row.user.id === contenders[3].user.id);
+  check(
+    "fourth place earns nothing when three places pay",
+    outsidePrizes.points === pointsBefore.get(contenders[3].user.id),
+    `${pointsBefore.get(contenders[3].user.id)} -> ${outsidePrizes?.points}`,
+  );
 
   const winnerStats = await call("GET", `/rating/player/${contenders[0].user.id}`);
   check("player history records the finish", winnerStats.payload?.history?.[0]?.place === 1);
   check("rating curve has points", (winnerStats.payload?.progression?.length ?? 0) > 0);
 
-  console.log("\nre-submitting corrected standings");
-  const corrected = await call("POST", `/tournaments/${tournamentId}/results`, {
+  const lockedDesk = await call("POST", `/tournaments/${tournamentId}/payments`, {
+    token: admin.accessToken,
+    body: { userId: contenders[0].user.id, kind: "drink", amountRub: 100 },
+  });
+  check(
+    "a closed evening will not take more money",
+    lockedDesk.status === 409,
+    `status ${lockedDesk.status}`,
+  );
+
+  console.log("\nundoing a mistake");
+  const reopened = await call("POST", `/tournaments/${tournamentId}/reopen`, {
+    token: admin.accessToken,
+  });
+  check("closing is reversible", reopened.status === 201, `status ${reopened.status}`);
+
+  const rolledBack = await call("GET", "/rating/leaderboard");
+  const winnerRolledBack = rolledBack.payload.find((row) => row.user.id === contenders[0].user.id);
+  check(
+    "reopening takes the rating back",
+    winnerRolledBack.points === pointsBefore.get(contenders[0].user.id),
+    `${winnerRolledBack?.points} vs ${pointsBefore.get(contenders[0].user.id)}`,
+  );
+
+  // Swap first and second, then close again: the ledger must not grow a second row.
+  await call("POST", `/tournaments/${tournamentId}/results`, {
     token: admin.accessToken,
     body: {
       entries: contenders.map((row, index) => ({
         userId: row.user.id,
-        // Swap first and second place.
         place: index === 0 ? 2 : index === 1 ? 1 : index + 1,
       })),
     },
   });
-  check("correction is accepted", corrected.status === 201);
 
   const afterFix = await call("GET", `/rating/player/${contenders[1].user.id}`);
   check(
@@ -179,6 +288,21 @@ async function main() {
     "correction did not duplicate ledger rows",
     eventsForTournament.length === 1,
     `found ${eventsForTournament.length}`,
+  );
+
+  const doubleBooked = await call("POST", `/tournaments/${tournamentId}/results`, {
+    token: admin.accessToken,
+    body: {
+      entries: [
+        { userId: contenders[0].user.id, place: 1 },
+        { userId: contenders[1].user.id, place: 1 },
+      ],
+    },
+  });
+  check(
+    "a duplicated place is rejected",
+    doubleBooked.status === 400,
+    `status ${doubleBooked.status}`,
   );
 
   console.log("\nachievements");
@@ -293,8 +417,14 @@ async function main() {
 
   console.log("\ncleanup");
   await call("DELETE", `/tournaments/${tournamentId}/results`, { token: admin.accessToken });
+  // An evening the cash desk touched keeps its paper trail; cancelling is the way out.
   const removed = await call("DELETE", `/tournaments/${tournamentId}`, { token: admin.accessToken });
-  check("test tournament removed", removed.status === 200, `status ${removed.status}`);
+  check("an evening with a till is not deletable", removed.status === 409, `status ${removed.status}`);
+  const archived = await call("PATCH", `/tournaments/${tournamentId}`, {
+    token: admin.accessToken,
+    body: { status: "cancelled" },
+  });
+  check("test tournament cancelled", archived.status === 200, `status ${archived.status}`);
 
   console.log(failures === 0 ? "\nAll checks passed.\n" : `\n${failures} check(s) failed.\n`);
   process.exitCode = failures === 0 ? 0 : 1;

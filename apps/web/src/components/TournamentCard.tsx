@@ -1,12 +1,6 @@
 import type { TournamentSummary } from "@poker/contracts";
 import { Link } from "react-router-dom";
-import {
-  formatRelativeDay,
-  formatTime,
-  formatWeekday,
-  GAME_TYPE_LABELS,
-  plural,
-} from "../lib/format";
+import { formatRelativeDay, formatTime, formatWeekday, plural } from "../lib/format";
 import { RegisterButton } from "./RegisterButton";
 import { Badge, cx } from "./ui";
 
@@ -35,7 +29,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentSummary }
             {tournament.ratingMultiplier > 1 && (
               <Badge tone="gold">×{tournament.ratingMultiplier} рейтинг</Badge>
             )}
-            <Badge>{GAME_TYPE_LABELS[tournament.gameType] ?? tournament.gameType}</Badge>
+            <Badge>{tournament.paidPlaces} призовых</Badge>
           </div>
         </div>
 

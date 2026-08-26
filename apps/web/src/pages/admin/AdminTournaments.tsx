@@ -9,7 +9,8 @@ import { Badge, Button, Card, ErrorState, Loading, cx } from "../../components/u
 import {
   formatFullDate,
   formatTime,
-  GAME_TYPE_LABELS,
+  fromClubParts,
+  toClubParts,
   TOURNAMENT_STATUS_LABELS,
 } from "../../lib/format";
 import {
@@ -68,7 +69,7 @@ function TournamentRow({
           </Link>
           <p className="nums mt-0.5 text-xs text-stone-400">
             {formatFullDate(tournament.startsAt)} · {formatTime(tournament.startsAt)} ·{" "}
-            {GAME_TYPE_LABELS[tournament.gameType]} · ×{tournament.ratingMultiplier}
+            {tournament.paidPlaces} призовых · ×{tournament.ratingMultiplier}
           </p>
           <p className="nums mt-0.5 text-xs text-stone-500">
             {tournament.registeredCount}
@@ -181,25 +182,26 @@ function TournamentForm({
         time: "19:00",
         capacity: "16",
         ratingMultiplier: "1",
-        gameType: "nlh",
+        paidPlaces: "9",
         description: "",
       };
     }
 
-    const local = toLocalParts(tournament.startsAt);
+    const parts = toClubParts(tournament.startsAt);
     return {
       title: tournament.title,
-      date: local.date,
-      time: local.time,
+      date: parts.date,
+      time: parts.time,
       capacity: tournament.capacity == null ? "" : String(tournament.capacity),
       ratingMultiplier: String(tournament.ratingMultiplier),
-      gameType: tournament.gameType,
+      paidPlaces: String(tournament.paidPlaces),
       description: "",
     };
   });
 
   function submit(): void {
-    const startsAt = new Date(`${form.date}T${form.time}:00`);
+    // The typed time is the club's wall clock, not the browser's.
+    const startsAt = fromClubParts(form.date, form.time);
 
     const shared = {
       title: form.title.trim(),
@@ -208,7 +210,7 @@ function TournamentForm({
       regClosesAt: startsAt.toISOString(),
       capacity: form.capacity ? Number(form.capacity) : null,
       ratingMultiplier: Number(form.ratingMultiplier),
-      gameType: form.gameType,
+      paidPlaces: form.paidPlaces ? Number(form.paidPlaces) : null,
       // Editing keeps whatever description exists unless something was typed.
       ...(form.description.trim() || !isEdit
         ? { description: form.description.trim() || null }
@@ -296,21 +298,17 @@ function TournamentForm({
           />
         </div>
         <div>
-          <label className="label" htmlFor="t-game">
-            Дисциплина
+          <label className="label" htmlFor="t-places">
+            Призовых мест
           </label>
-          <select
-            id="t-game"
-            className="field"
-            value={form.gameType}
-            onChange={(event) => setForm({ ...form, gameType: event.target.value })}
-          >
-            {Object.entries(GAME_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <input
+            id="t-places"
+            type="number"
+            min={1}
+            className="field nums"
+            value={form.paidPlaces}
+            onChange={(event) => setForm({ ...form, paidPlaces: event.target.value })}
+          />
         </div>
       </div>
 
@@ -358,16 +356,5 @@ function TournamentForm({
 function defaultDate(): string {
   const date = new Date();
   date.setDate(date.getDate() + 7);
-  return toLocalParts(date.toISOString()).date;
-}
-
-/** Splits an instant into the date and time strings the native inputs expect. */
-function toLocalParts(iso: string): { date: string; time: string } {
-  const value = new Date(iso);
-  const pad = (part: number) => String(part).padStart(2, "0");
-
-  return {
-    date: `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`,
-    time: `${pad(value.getHours())}:${pad(value.getMinutes())}`,
-  };
+  return toClubParts(date.toISOString()).date;
 }

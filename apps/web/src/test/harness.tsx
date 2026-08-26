@@ -73,13 +73,12 @@ export const SEASON = {
   endsAt: null,
   isActive: true,
   ratingConfig: {
-    baseParticipation: 10,
-    placementWeight: 100,
-    fieldSizeWeight: 0.5,
-    itmShare: 0.2,
-    itmBonus: 15,
-    knockoutPoints: 2,
-    noShowPenalty: 5,
+    startingStack: 40_000,
+    addonChips: 80_000,
+    divisor: 200,
+    defaultPaidPlaces: 9,
+    lastPlaceShare: 0.1,
+    shareCurve: 2,
     bestOfCount: 10,
   },
 };
@@ -88,7 +87,7 @@ export function tournament(overrides: Record<string, unknown> = {}) {
   return {
     id: "t1",
     title: "Weekly Freezeout #16",
-    gameType: "nlh",
+    paidPlaces: 9,
     status: "reg_open",
     startsAt: "2099-06-01T16:00:00.000Z",
     regOpensAt: null,

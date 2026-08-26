@@ -28,21 +28,12 @@ enum AuthProvider {
 
 enum UserRole {
   player
-  moderator
   admin
 }
 
 enum UserStatus {
   active
   blocked
-}
-
-enum GameType {
-  nlh
-  plo
-  plo5
-  mixed
-  other
 }
 
 enum TournamentStatus {
@@ -58,9 +49,16 @@ enum TournamentStatus {
 enum RegistrationStatus {
   registered
   waitlist
-  checked_in
   cancelled
-  no_show
+}
+
+/// What the club took money for. Entry and add-on also hand out chips, which is
+/// what the rating is computed from; a drink is money only.
+enum PaymentKind {
+  entry
+  addon
+  drink
+  other
 }
 
 enum RegistrationSource {
@@ -94,6 +92,9 @@ model User {
   linkTokens          LinkToken[]
   registrations       Registration[]
   results             Result[]
+  payments            Payment[]
+  authoredPayments    Payment[]         @relation("paymentAuthor")
+  voidedPayments      Payment[]         @relation("paymentVoider")
   ratingEvents        RatingEvent[]
   seasonStats         UserSeasonStats[]
   achievements        UserAchievement[] @relation("achievementHolder")
@@ -192,20 +193,28 @@ model Tournament {
   venue            Venue?           @relation(fields: [venueId], references: [id], onDelete: SetNull)
   title            String
   description      String?
-  gameType         GameType         @default(nlh)
   startsAt         DateTime
   regOpensAt       DateTime?
   regClosesAt      DateTime?
   capacity         Int?
-  buyinChips       Int?
+  /// Null on all three means "use the season's rating config". Kept per
+  /// tournament because the paid-place count changes while the game is running.
+  paidPlaces       Int?
+  startingStack    Int?
+  addonChips       Int?
   /// Weight of the event: 1 for a regular game, 2 for a major.
   ratingMultiplier Float            @default(1)
   status           TournamentStatus @default(draft)
+  /// Forum topic in the admin supergroup and the pinned summary inside it, so
+  /// the bot edits the same screens instead of posting new ones.
+  adminTopicId     Int?
+  adminBoardMsgId  Int?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
   registrations Registration[]
   results       Result[]
+  payments      Payment[]
   ratingEvents  RatingEvent[]
   achievements  UserAchievement[]
 
@@ -224,6 +233,9 @@ model Registration {
   source           RegistrationSource @default(web)
   /// Set only while the player waits for a seat; null once promoted.
   waitlistPosition Int?
+  /// The player's card in the game's topic. Stored so the bot edits that message
+  /// rather than posting a new one on every action at the cash desk.
+  adminCardMsgId   Int?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
@@ -241,13 +253,55 @@ model Result {
   userId       String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   place        Int
-  knockouts    Int?
-  rebuys       Int?
   createdAt    DateTime   @default(now())
 
   @@unique([tournamentId, userId])
   @@unique([tournamentId, place])
   @@index([userId])
+}
+
+/// The cash desk. Every line the admin registers during the evening lands here:
+/// entry, add-on, drink. Two jobs at once — it is the club's takings report, and
+/// it is what participation means, since whoever paid an entry played.
+///
+/// Nothing is ever edited or deleted. A mistake is voided, which keeps the
+/// original line visible and makes any evening reconstructable afterwards.
+model Payment {
+  id           String      @id @default(cuid(2))
+  tournamentId String
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind         PaymentKind
+  amountRub    Int
+  /// Chips this line handed out, copied in at the time: later changes to the
+  /// stack size must not silently rewrite a finished evening.
+  chips        Int         @default(0)
+  note         String?
+  createdById  String?
+  createdBy    User?       @relation("paymentAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  voidedAt     DateTime?
+  voidedById   String?
+  voidedBy     User?       @relation("paymentVoider", fields: [voidedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+
+  @@index([tournamentId, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/// Club-wide settings, exactly one row. The timezone lives here because it is
+/// what every date shown to a human is rendered in, on the site and in the bot.
+model ClubSettings {
+  id            String   @id @default("club")
+  infoText      String   @default("")
+  entryPriceRub Int      @default(500)
+  addonPriceRub Int      @default(500)
+  drinkPriceRub Int      @default(200)
+  /// Supergroup the bot runs the live admin screens in.
+  adminChatId   String?
+  timezone      String   @default("Europe/Samara")
+  updatedAt     DateTime @updatedAt
 }
 
 model Achievement {

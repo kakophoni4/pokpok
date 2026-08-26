@@ -3,86 +3,107 @@ import type { RatingConfig } from "@poker/contracts";
 export { DEFAULT_RATING_CONFIG } from "@poker/contracts";
 export type { RatingConfig } from "@poker/contracts";
 
+/**
+ * The rating mirrors a prize pool. Every entry and every add-on puts chips on the
+ * table; the total divided by `divisor` is what the winner takes, and each paid
+ * place below takes a share of the winner's award. Finishing outside the paid
+ * places is worth nothing, which is what makes the standings mean something.
+ *
+ * Nothing here reads the database or the clock: the same numbers in always give
+ * the same numbers out, which is what lets a finished tournament be recomputed
+ * from its ledger at any time.
+ */
+
+/** What first place is worth, before the per-place share is applied. */
+export function ratingPool(params: {
+  chipsInPlay: number;
+  divisor: number;
+  multiplier?: number;
+}): number {
+  const { chipsInPlay, divisor, multiplier = 1 } = params;
+  if (divisor <= 0) return 0;
+  return (Math.max(0, chipsInPlay) / divisor) * multiplier;
+}
+
+/**
+ * Fraction of the winner's award that a place receives: 1 for first, exactly
+ * `lastPlaceShare` for the last paid place, 0 below it. `shareCurve` above 1
+ * bends the curve towards the top places.
+ */
+export function placeShare(params: {
+  place: number;
+  paidPlaces: number;
+  lastPlaceShare: number;
+  shareCurve: number;
+}): number {
+  const { place, paidPlaces, lastPlaceShare, shareCurve } = params;
+
+  if (place < 1 || place > paidPlaces) return 0;
+  // A single paid place cannot have a gradient, and dividing by paidPlaces - 1
+  // below would be a division by zero.
+  if (paidPlaces === 1) return 1;
+
+  const fromBottom = (paidPlaces - place) / (paidPlaces - 1);
+  return lastPlaceShare + (1 - lastPlaceShare) * Math.pow(fromBottom, shareCurve);
+}
+
+/** Points a single place earns. Rounded once, at the end. */
+export function pointsForPlace(params: {
+  place: number;
+  paidPlaces: number;
+  chipsInPlay: number;
+  multiplier?: number;
+  config: RatingConfig;
+}): number {
+  const { place, paidPlaces, chipsInPlay, multiplier = 1, config } = params;
+
+  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier });
+  const share = placeShare({
+    place,
+    paidPlaces,
+    lastPlaceShare: config.lastPlaceShare,
+    shareCurve: config.shareCurve,
+  });
+
+  return Math.round(pool * share);
+}
+
 export type StandingInput = {
   userId: string;
   place: number;
-  knockouts?: number | null;
 };
 
 export type StandingOutput = StandingInput & {
   points: number;
-  isItm: boolean;
+  /** Kept for display: it explains the number without re-deriving it. */
+  share: number;
 };
 
 /**
- * How many places count as "in the money" for a field of this size.
- * Always at least the winner, so a heads-up match still has an ITM zone.
- */
-export function itmCutoff(fieldSize: number, itmShare: number): number {
-  return Math.max(1, Math.ceil(fieldSize * itmShare));
-}
-
-/**
- * Rating awarded for a single finish.
- *
- *   base  = basePoints * sqrt(fieldSize) / place^placeExponent
- *   total = round(multiplier * (base + itmBonus + knockoutBonus))
- *
- * Scaling by sqrt(fieldSize) means beating a big field is worth more than beating
- * a small one, while the place exponent controls how steeply the reward decays.
- * Every finisher is guaranteed `participationPoints` so attendance is never punished.
- */
-export function pointsForPlace(params: {
-  place: number;
-  fieldSize: number;
-  multiplier?: number;
-  knockouts?: number | null;
-  config: RatingConfig;
-}): number {
-  const { place, fieldSize, multiplier = 1, knockouts = 0, config } = params;
-
-  if (!Number.isInteger(place) || place < 1) {
-    throw new RangeError(`place must be a positive integer, got ${place}`);
-  }
-  if (!Number.isInteger(fieldSize) || fieldSize < 1) {
-    throw new RangeError(`fieldSize must be a positive integer, got ${fieldSize}`);
-  }
-  if (place > fieldSize) {
-    throw new RangeError(`place ${place} exceeds fieldSize ${fieldSize}`);
-  }
-
-  const base = (config.basePoints * Math.sqrt(fieldSize)) / Math.pow(place, config.placeExponent);
-  const itm = place <= itmCutoff(fieldSize, config.itmShare) ? config.itmBonus : 0;
-  const ko = config.knockoutPoints * (knockouts ?? 0);
-
-  const total = Math.round(multiplier * (base + itm + ko));
-  return Math.max(total, config.participationPoints);
-}
-
-/**
- * Scores a whole tournament at once. The field size is derived from the standings
- * themselves, which is why results are always submitted as a complete table.
+ * Scores a whole tournament. `chipsInPlay` is the sum of the chips every payment
+ * handed out, so a table where nobody took an add-on scores lower than the same
+ * table where everybody did.
  */
 export function scoreTournament(params: {
   standings: StandingInput[];
+  chipsInPlay: number;
+  paidPlaces: number;
   multiplier?: number;
   config: RatingConfig;
 }): StandingOutput[] {
-  const { standings, multiplier = 1, config } = params;
-  const fieldSize = standings.length;
-  const cutoff = itmCutoff(fieldSize, config.itmShare);
+  const { standings, chipsInPlay, paidPlaces, multiplier = 1, config } = params;
+  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier });
 
-  return standings.map((entry) => ({
-    ...entry,
-    isItm: entry.place <= cutoff,
-    points: pointsForPlace({
-      place: entry.place,
-      fieldSize,
-      multiplier,
-      knockouts: entry.knockouts,
-      config,
-    }),
-  }));
+  return standings.map((standing) => {
+    const share = placeShare({
+      place: standing.place,
+      paidPlaces,
+      lastPlaceShare: config.lastPlaceShare,
+      shareCurve: config.shareCurve,
+    });
+
+    return { ...standing, share, points: Math.round(pool * share) };
+  });
 }
 
 export type RatingSource = "tournament_result" | "achievement" | "manual_adjustment" | "penalty";
@@ -94,7 +115,7 @@ export type SeasonEvent = {
 };
 
 /**
- * Season total. With `bestOfCount > 0` only the player's strongest N tournament
+ * Season total. With `bestOfCount` set, only that many of the best tournament
  * results count, so missing a week does not knock somebody out of the race.
  * Achievements, manual corrections and penalties always count in full.
  */
@@ -103,11 +124,8 @@ export function seasonTotal(events: SeasonEvent[], config: RatingConfig): number
   let other = 0;
 
   for (const event of events) {
-    if (event.sourceType === "tournament_result") {
-      tournamentPoints.push(event.points);
-    } else {
-      other += event.points;
-    }
+    if (event.sourceType === "tournament_result") tournamentPoints.push(event.points);
+    else other += event.points;
   }
 
   const counted =
@@ -120,7 +138,6 @@ export function seasonTotal(events: SeasonEvent[], config: RatingConfig): number
 
 export type LedgerEvent = SeasonEvent & {
   place?: number | null;
-  fieldSize?: number | null;
 };
 
 export type PlayerSummary = {
@@ -128,6 +145,7 @@ export type PlayerSummary = {
   gamesPlayed: number;
   wins: number;
   top3: number;
+  /** Finishes that earned rating, i.e. inside the paid places. */
   itm: number;
   avgPlace: number | null;
   bestPlace: number | null;
@@ -149,9 +167,9 @@ export function summarizeLedger(events: LedgerEvent[], config: RatingConfig): Pl
     gamesPlayed: finishes.length,
     wins: places.filter((place) => place === 1).length,
     top3: places.filter((place) => place <= 3).length,
-    itm: finishes.filter(
-      (event) => (event.place as number) <= itmCutoff(event.fieldSize ?? 1, config.itmShare),
-    ).length,
+    // A paid finish is simply one that was worth points; the paid-place count of
+    // that particular tournament is already baked into the stored number.
+    itm: finishes.filter((event) => event.points > 0).length,
     avgPlace: places.length > 0 ? places.reduce((a, b) => a + b, 0) / places.length : null,
     bestPlace: places.length > 0 ? Math.min(...places) : null,
   };

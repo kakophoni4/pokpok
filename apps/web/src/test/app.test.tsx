@@ -21,7 +21,6 @@ describe("schedule", () => {
           tournament({
             id: "t2",
             title: "PLO Night",
-            gameType: "plo",
             capacity: 8,
             registeredCount: 8,
             waitlistCount: 2,

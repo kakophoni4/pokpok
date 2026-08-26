@@ -1,159 +1,90 @@
-import type { LeaderboardRow, RegistrationView, TournamentSummary } from "@poker/contracts";
 import { describe, expect, it } from "vitest";
-import { escapeHtml, formatLeaderboard, formatRoster, formatSchedule, plural } from "./format.js";
+import {
+  clubClock,
+  clubDate,
+  clubWhen,
+  escapeHtml,
+  fit,
+  isToday,
+  num,
+  plural,
+  points,
+  rub,
+  setTimezone,
+} from "./format.js";
 
-function tournament(overrides: Partial<TournamentSummary> = {}): TournamentSummary {
-  return {
-    id: "t1",
-    title: "Weekly Freezeout #16",
-    gameType: "nlh",
-    status: "reg_open",
-    startsAt: "2026-09-01T16:00:00.000Z",
-    regOpensAt: null,
-    regClosesAt: null,
-    capacity: 12,
-    ratingMultiplier: 1,
-    venue: null,
-    registeredCount: 9,
-    waitlistCount: 0,
-    myRegistration: null,
-    ...overrides,
-  } as TournamentSummary;
-}
+/** 19:00 in Samara, which is 15:00 UTC — the club plays at UTC+4 all year. */
+const GAME_START = "2026-08-25T15:00:00.000Z";
 
-function registration(nickname: string, overrides: Partial<RegistrationView> = {}): RegistrationView {
-  return {
-    id: `r-${nickname}`,
-    user: { id: `u-${nickname}`, nickname, avatarUrl: null, role: "player" },
-    status: "registered",
-    source: "tg_bot",
-    waitlistPosition: null,
-    createdAt: "2026-08-01T10:00:00.000Z",
-    ...overrides,
-  } as RegistrationView;
-}
+describe("club clock", () => {
+  it("renders the hour the game starts in Samara, not on the reader's device", () => {
+    expect(clubClock(GAME_START)).toBe("19:00");
+  });
 
-describe("escapeHtml", () => {
-  it("neutralises markup so a nickname cannot break the message", () => {
-    expect(escapeHtml('<b>Bad</b> & "quoted"')).toBe('&lt;b&gt;Bad&lt;/b&gt; &amp; "quoted"');
+  it("keeps rendering Samara time whatever the process timezone is", () => {
+    // The bot may run on a server set to UTC; the club still plays at 19:00.
+    expect(clubClock("2026-01-10T15:00:00.000Z")).toBe("19:00");
+  });
+
+  it("names the date and the weekday", () => {
+    expect(clubDate(GAME_START)).toContain("август");
+  });
+
+  it("packs date and time into one button-sized string", () => {
+    expect(clubWhen(GAME_START)).toContain("19:00");
+    expect(clubWhen(GAME_START).length).toBeLessThan(24);
+  });
+
+  it("falls back to the club timezone when handed nonsense", () => {
+    setTimezone("Mars/Olympus");
+    expect(clubClock(GAME_START)).toBe("19:00");
+  });
+
+  it("switches when the club really does move", () => {
+    setTimezone("UTC");
+    expect(clubClock(GAME_START)).toBe("15:00");
+    setTimezone("Europe/Samara");
+    expect(clubClock(GAME_START)).toBe("19:00");
+  });
+
+  it("knows what today means in the club's timezone", () => {
+    expect(isToday(new Date().toISOString())).toBe(true);
+    expect(isToday("2020-01-01T00:00:00.000Z")).toBe(false);
   });
 });
 
-describe("plural", () => {
-  it("picks the right Russian form", () => {
-    expect(plural(1, "игра", "игры", "игр")).toBe("игра");
-    expect(plural(3, "игра", "игры", "игр")).toBe("игры");
-    expect(plural(11, "игра", "игры", "игр")).toBe("игр");
-    expect(plural(21, "игра", "игры", "игр")).toBe("игра");
+describe("numbers", () => {
+  it("groups thousands so a chip count stays readable", () => {
+    expect(num(800_000)).toBe("800 000");
+    expect(num(1_234_567)).toBe("1 234 567");
+    expect(num(999)).toBe("999");
+  });
+
+  it("formats money with the sign", () => {
+    expect(rub(7400)).toBe("7 400 ₽");
+  });
+
+  it("declines the Russian word for points", () => {
+    expect(points(1)).toBe("1 очко");
+    expect(points(3)).toBe("3 очка");
+    expect(points(11)).toBe("11 очков");
+    expect(points(4000)).toBe("4 000 очков");
+  });
+
+  it("handles the teens, where Russian plurals go wrong most often", () => {
+    expect(plural(12, "турнир", "турнира", "турниров")).toBe("турниров");
+    expect(plural(22, "турнир", "турнира", "турниров")).toBe("турнира");
+    expect(plural(21, "турнир", "турнира", "турниров")).toBe("турнир");
   });
 });
 
-describe("formatSchedule", () => {
-  it("says so plainly when nothing is scheduled", () => {
-    expect(formatSchedule([])).toContain("Пока нет запланированных турниров");
+describe("text safety", () => {
+  it("escapes what would otherwise break the HTML markup", () => {
+    expect(escapeHtml('<b>&"')).toBe("&lt;b&gt;&amp;&quot;");
   });
 
-  it("shows seats, waiting list and the rating multiplier", () => {
-    const text = formatSchedule([
-      tournament({ waitlistCount: 2, ratingMultiplier: 2, registeredCount: 12 }),
-    ]);
-
-    expect(text).toContain("12/12 мест");
-    expect(text).toContain("+2 в ожидании");
-    expect(text).toContain("×2 рейтинг");
-  });
-
-  it("marks the tournaments the player already joined", () => {
-    const joined = formatSchedule([
-      tournament({
-        myRegistration: {
-          id: "r1",
-          status: "registered",
-          waitlistPosition: null,
-          createdAt: "2026-08-01T10:00:00.000Z",
-        },
-      }),
-    ]);
-    expect(joined).toContain("✅ вы записаны");
-
-    const waiting = formatSchedule([
-      tournament({
-        myRegistration: {
-          id: "r2",
-          status: "waitlist",
-          waitlistPosition: 3,
-          createdAt: "2026-08-01T10:00:00.000Z",
-        },
-      }),
-    ]);
-    expect(waiting).toContain("🕓 вы в ожидании №3");
-  });
-
-  it("does not advertise a cancelled registration as active", () => {
-    const text = formatSchedule([
-      tournament({
-        myRegistration: {
-          id: "r3",
-          status: "cancelled",
-          waitlistPosition: null,
-          createdAt: "2026-08-01T10:00:00.000Z",
-        },
-      }),
-    ]);
-    expect(text).not.toContain("вы записаны");
-  });
-});
-
-describe("formatRoster", () => {
-  it("numbers the seated players and lists the waiting ones separately", () => {
-    const text = formatRoster(tournament(), [
-      registration("Ferz", { status: "checked_in" }),
-      registration("Kate_AA"),
-      registration("Late_Guy", { status: "waitlist", waitlistPosition: 1 }),
-    ]);
-
-    expect(text).toContain("Записались (2)");
-    expect(text).toContain("1. Ferz ✅");
-    expect(text).toContain("2. Kate_AA");
-    expect(text).toContain("Лист ожидания");
-    expect(text).toContain("1. Late_Guy");
-  });
-
-  it("handles an empty field", () => {
-    expect(formatRoster(tournament(), [])).toContain("Пока никто не записался");
-  });
-});
-
-describe("formatLeaderboard", () => {
-  const rows: LeaderboardRow[] = Array.from({ length: 20 }, (_, index) => ({
-    rank: index + 1,
-    user: { id: `u${index + 1}`, nickname: `Player${index + 1}`, avatarUrl: null, role: "player" },
-    points: 500 - index * 10,
-    gamesPlayed: 6,
-    wins: index === 0 ? 2 : 0,
-    top3: 1,
-    itm: 2,
-    avgPlace: 5,
-    bestPlace: 1,
-  })) as LeaderboardRow[];
-
-  it("medals the podium and cuts the list at fifteen", () => {
-    const text = formatLeaderboard(rows);
-    expect(text).toContain("🥇 Player1");
-    expect(text).toContain("🥉 Player3");
-    expect(text).toContain("15. Player15");
-    expect(text).not.toContain("Player16");
-  });
-
-  it("appends the player's own row when they are outside the top", () => {
-    const text = formatLeaderboard(rows, "u18");
-    expect(text).toContain("18. Player18");
-    expect(text).toContain("← вы");
-  });
-
-  it("marks the player inline when they are inside the top", () => {
-    const text = formatLeaderboard(rows, "u2");
-    expect(text).toContain("Player2 — <b>490</b> (6 игр) ← вы");
-    expect(text).not.toContain("…");
+  it("trims labels to fit on a button", () => {
+    expect(fit("a".repeat(80))).toHaveLength(60);
+    expect(fit("короткая")).toBe("короткая");
   });
 });

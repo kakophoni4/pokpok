@@ -6,6 +6,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AchievementsModule } from "./achievements/achievements.module";
 import { AuthModule } from "./auth/auth.module";
+import { ClubModule } from "./club/club.module";
 import { AuditModule } from "./common/audit/audit.module";
 import { JwtAuthGuard } from "./common/auth/jwt-auth.guard";
 import { RolesGuard } from "./common/auth/roles.guard";
@@ -38,6 +39,7 @@ import { UsersModule } from "./users/users.module";
     AuditModule,
     UsersModule,
     AuthModule,
+    ClubModule,
     SeasonsModule,
     RatingModule,
     TournamentsModule,

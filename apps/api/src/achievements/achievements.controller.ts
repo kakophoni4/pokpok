@@ -52,7 +52,7 @@ export class AchievementsController {
     return this.achievements.update(actor.id, id, body);
   }
 
-  @Roles("moderator")
+  @Roles("admin")
   @Post("grant")
   @ApiOperation({ summary: "Give an achievement to a player (staff)" })
   grant(

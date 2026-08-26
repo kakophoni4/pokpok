@@ -1,31 +1,77 @@
-import type {
-  LeaderboardRow,
-  PlayerStats,
-  RegistrationView,
-  TournamentSummary,
-} from "@poker/contracts";
+import { CLUB_TIMEZONE } from "@poker/contracts";
 
 /**
- * Message rendering, kept as pure functions so it can be unit-tested without a
- * Telegram connection. Everything uses HTML parse mode; user-supplied text
- * (nicknames, tournament titles) must go through `escapeHtml`.
+ * Everything a human reads is rendered on the club's wall clock, never on the
+ * reader's. A player checking the schedule from a phone in another timezone must
+ * see the hour the game actually starts in Samara.
  */
+let timezone = CLUB_TIMEZONE;
 
-export function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+export function setTimezone(value: string): void {
+  // A bad value from the settings row would throw on every render, so it is
+  // tried once here and ignored if the runtime does not know it.
+  try {
+    new Intl.DateTimeFormat("ru-RU", { timeZone: value });
+    timezone = value;
+  } catch {
+    timezone = CLUB_TIMEZONE;
+  }
 }
 
-const dateTime = new Intl.DateTimeFormat("ru-RU", {
-  weekday: "short",
-  day: "numeric",
-  month: "long",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Moscow",
-});
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
-export function formatWhen(iso: string): string {
-  return dateTime.format(new Date(iso));
+/** "25 августа, вт" */
+export function clubDate(iso: string): string {
+  return new Intl.DateTimeFormat("ru-RU", {
+    timeZone: timezone,
+    day: "numeric",
+    month: "long",
+    weekday: "short",
+  }).format(new Date(iso));
+}
+
+/** "19:00" */
+export function clubClock(iso: string): string {
+  return new Intl.DateTimeFormat("ru-RU", {
+    timeZone: timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
+/** "25 авг, вт · 19:00" — compact enough to fit on a button. */
+export function clubWhen(iso: string): string {
+  const date = new Intl.DateTimeFormat("ru-RU", {
+    timeZone: timezone,
+    day: "numeric",
+    month: "short",
+    weekday: "short",
+  }).format(new Date(iso));
+  return `${date.replace(".", "")} · ${clubClock(iso)}`;
+}
+
+/** True when the timestamp falls on today's date in the club's timezone. */
+export function isToday(iso: string): boolean {
+  const asDay = (date: Date) =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(date);
+  return asDay(new Date(iso)) === asDay(new Date());
+}
+
+/** 1234567 → "1 234 567", with a narrow space Telegram renders reliably. */
+export function num(value: number): string {
+  return Math.round(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+export function rub(value: number): string {
+  return `${num(value)} ₽`;
 }
 
 export function plural(count: number, one: string, few: string, many: string): string {
@@ -37,130 +83,11 @@ export function plural(count: number, one: string, few: string, many: string): s
   return many;
 }
 
-export function formatSchedule(tournaments: TournamentSummary[]): string {
-  if (tournaments.length === 0) {
-    return "Пока нет запланированных турниров. Как только появятся — сообщу.";
-  }
-
-  const lines = tournaments.map((tournament) => {
-    const seats =
-      tournament.capacity == null
-        ? `${tournament.registeredCount} записались`
-        : `${tournament.registeredCount}/${tournament.capacity} мест`;
-
-    const marks = [
-      tournament.waitlistCount > 0 ? `+${tournament.waitlistCount} в ожидании` : null,
-      tournament.ratingMultiplier > 1 ? `×${tournament.ratingMultiplier} рейтинг` : null,
-      myMark(tournament),
-    ].filter(Boolean);
-
-    return [
-      `<b>${escapeHtml(tournament.title)}</b>`,
-      `${formatWhen(tournament.startsAt)} · ${seats}`,
-      marks.length > 0 ? marks.join(" · ") : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
-  });
-
-  return `<b>Ближайшие турниры</b>\n\n${lines.join("\n\n")}`;
+export function points(value: number): string {
+  return `${num(value)} ${plural(value, "очко", "очка", "очков")}`;
 }
 
-function myMark(tournament: TournamentSummary): string | null {
-  const registration = tournament.myRegistration;
-  if (!registration || registration.status === "cancelled") return null;
-  if (registration.status === "waitlist") {
-    return `🕓 вы в ожидании №${registration.waitlistPosition}`;
-  }
-  return "✅ вы записаны";
+/** Buttons have a hard label limit; cutting mid-word is better than a rejected keyboard. */
+export function fit(value: string, max = 60): string {
+  return value.length <= max ? value : `${value.slice(0, max - 1)}…`;
 }
-
-export function formatRoster(
-  tournament: TournamentSummary,
-  registrations: RegistrationView[],
-): string {
-  const seated = registrations.filter((row) => row.status !== "waitlist");
-  const waiting = registrations.filter((row) => row.status === "waitlist");
-
-  const header = `<b>${escapeHtml(tournament.title)}</b>\n${formatWhen(tournament.startsAt)}`;
-
-  if (registrations.length === 0) {
-    return `${header}\n\nПока никто не записался.`;
-  }
-
-  const list = seated
-    .map((row, index) => `${index + 1}. ${escapeHtml(row.user.nickname)}${checkMark(row)}`)
-    .join("\n");
-
-  const waitingList =
-    waiting.length > 0
-      ? `\n\n<b>Лист ожидания</b>\n${waiting
-          .map((row) => `${row.waitlistPosition}. ${escapeHtml(row.user.nickname)}`)
-          .join("\n")}`
-      : "";
-
-  return `${header}\n\n<b>Записались (${seated.length})</b>\n${list}${waitingList}`;
-}
-
-function checkMark(row: RegistrationView): string {
-  if (row.status === "checked_in") return " ✅";
-  if (row.status === "no_show") return " ❌";
-  return "";
-}
-
-export function formatLeaderboard(rows: LeaderboardRow[], meId?: string): string {
-  if (rows.length === 0) return "Рейтинг пока пуст — очки появятся после первого турнира.";
-
-  const medals = ["🥇", "🥈", "🥉"];
-  const lines = rows.slice(0, 15).map((row) => {
-    const rank = medals[row.rank - 1] ?? `${row.rank}.`;
-    const you = row.user.id === meId ? " ← вы" : "";
-    return `${rank} ${escapeHtml(row.user.nickname)} — <b>${row.points}</b> (${row.gamesPlayed} ${plural(row.gamesPlayed, "игра", "игры", "игр")})${you}`;
-  });
-
-  const outside =
-    meId && !rows.slice(0, 15).some((row) => row.user.id === meId)
-      ? rows.find((row) => row.user.id === meId)
-      : undefined;
-
-  const tail = outside
-    ? `\n…\n${outside.rank}. ${escapeHtml(outside.user.nickname)} — <b>${outside.points}</b> ← вы`
-    : "";
-
-  return `<b>Рейтинг сезона</b>\n\n${lines.join("\n")}${tail}`;
-}
-
-export function formatMyStats(stats: PlayerStats): string {
-  const lines = [
-    `<b>${escapeHtml(stats.user.nickname)}</b>`,
-    stats.rank ? `Место в сезоне: <b>${stats.rank}</b>` : null,
-    `Очки: <b>${stats.points}</b>`,
-    `Турниров: ${stats.gamesPlayed} · побед: ${stats.wins} · топ-3: ${stats.top3}`,
-    stats.avgPlace != null
-      ? `Среднее место: ${stats.avgPlace.toFixed(1)}${stats.bestPlace ? ` · лучшее: ${stats.bestPlace}` : ""}`
-      : null,
-  ].filter(Boolean);
-
-  const recent = stats.history.slice(0, 5).map((event) => {
-    const sign = event.points >= 0 ? "+" : "";
-    const what = event.tournament
-      ? `${escapeHtml(event.tournament.title)}${event.place ? `, ${event.place} место` : ""}`
-      : escapeHtml(event.achievement?.title ?? event.comment ?? "корректировка");
-    return `• ${what}: <b>${sign}${event.points}</b>`;
-  });
-
-  const history = recent.length > 0 ? `\n\n<b>Последнее</b>\n${recent.join("\n")}` : "";
-  return `${lines.join("\n")}${history}`;
-}
-
-export const HELP_TEXT = [
-  "<b>Что я умею</b>",
-  "",
-  "/schedule — ближайшие турниры и запись",
-  "/rating — рейтинг сезона",
-  "/me — ваша статистика",
-  "/who — кто записан на турнир",
-  "/help — эта справка",
-  "",
-  "Ник берётся из вашего Telegram. Изменить его может организатор клуба.",
-].join("\n");

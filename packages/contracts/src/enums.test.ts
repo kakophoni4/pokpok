@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   AuthProvider,
-  GameType,
+  PaymentKind,
   RatingSourceType,
   RegistrationSource,
   RegistrationStatus,
@@ -46,9 +46,9 @@ const PAIRS = [
   ["AuthProvider", AuthProvider],
   ["UserRole", UserRole],
   ["UserStatus", UserStatus],
-  ["GameType", GameType],
   ["TournamentStatus", TournamentStatus],
   ["RegistrationStatus", RegistrationStatus],
+  ["PaymentKind", PaymentKind],
   ["RegistrationSource", RegistrationSource],
   ["RatingSourceType", RatingSourceType],
 ] as const;

@@ -28,10 +28,12 @@ export type AggregateRegistration = {
 
 export type RegistrationAvgAggregateOutputType = {
   waitlistPosition: number | null
+  adminCardMsgId: number | null
 }
 
 export type RegistrationSumAggregateOutputType = {
   waitlistPosition: number | null
+  adminCardMsgId: number | null
 }
 
 export type RegistrationMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type RegistrationMinAggregateOutputType = {
   status: $Enums.RegistrationStatus | null
   source: $Enums.RegistrationSource | null
   waitlistPosition: number | null
+  adminCardMsgId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +55,7 @@ export type RegistrationMaxAggregateOutputType = {
   status: $Enums.RegistrationStatus | null
   source: $Enums.RegistrationSource | null
   waitlistPosition: number | null
+  adminCardMsgId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -63,6 +67,7 @@ export type RegistrationCountAggregateOutputType = {
   status: number
   source: number
   waitlistPosition: number
+  adminCardMsgId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -71,10 +76,12 @@ export type RegistrationCountAggregateOutputType = {
 
 export type RegistrationAvgAggregateInputType = {
   waitlistPosition?: true
+  adminCardMsgId?: true
 }
 
 export type RegistrationSumAggregateInputType = {
   waitlistPosition?: true
+  adminCardMsgId?: true
 }
 
 export type RegistrationMinAggregateInputType = {
@@ -84,6 +91,7 @@ export type RegistrationMinAggregateInputType = {
   status?: true
   source?: true
   waitlistPosition?: true
+  adminCardMsgId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -95,6 +103,7 @@ export type RegistrationMaxAggregateInputType = {
   status?: true
   source?: true
   waitlistPosition?: true
+  adminCardMsgId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +115,7 @@ export type RegistrationCountAggregateInputType = {
   status?: true
   source?: true
   waitlistPosition?: true
+  adminCardMsgId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -204,6 +214,7 @@ export type RegistrationGroupByOutputType = {
   status: $Enums.RegistrationStatus
   source: $Enums.RegistrationSource
   waitlistPosition: number | null
+  adminCardMsgId: number | null
   createdAt: Date
   updatedAt: Date
   _count: RegistrationCountAggregateOutputType | null
@@ -238,6 +249,7 @@ export type RegistrationWhereInput = {
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFilter<"Registration"> | $Enums.RegistrationSource
   waitlistPosition?: Prisma.IntNullableFilter<"Registration"> | number | null
+  adminCardMsgId?: Prisma.IntNullableFilter<"Registration"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
@@ -251,6 +263,7 @@ export type RegistrationOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   source?: Prisma.SortOrder
   waitlistPosition?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tournament?: Prisma.TournamentOrderByWithRelationInput
@@ -268,6 +281,7 @@ export type RegistrationWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFilter<"Registration"> | $Enums.RegistrationSource
   waitlistPosition?: Prisma.IntNullableFilter<"Registration"> | number | null
+  adminCardMsgId?: Prisma.IntNullableFilter<"Registration"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
@@ -281,6 +295,7 @@ export type RegistrationOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   source?: Prisma.SortOrder
   waitlistPosition?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RegistrationCountOrderByAggregateInput
@@ -300,6 +315,7 @@ export type RegistrationScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumRegistrationStatusWithAggregatesFilter<"Registration"> | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceWithAggregatesFilter<"Registration"> | $Enums.RegistrationSource
   waitlistPosition?: Prisma.IntNullableWithAggregatesFilter<"Registration"> | number | null
+  adminCardMsgId?: Prisma.IntNullableWithAggregatesFilter<"Registration"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Registration"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Registration"> | Date | string
 }
@@ -309,6 +325,7 @@ export type RegistrationCreateInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tournament: Prisma.TournamentCreateNestedOneWithoutRegistrationsInput
@@ -322,6 +339,7 @@ export type RegistrationUncheckedCreateInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -331,6 +349,7 @@ export type RegistrationUpdateInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -344,6 +363,7 @@ export type RegistrationUncheckedUpdateInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +375,7 @@ export type RegistrationCreateManyInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -364,6 +385,7 @@ export type RegistrationUpdateManyMutationInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -375,6 +397,7 @@ export type RegistrationUncheckedUpdateManyInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -401,12 +424,14 @@ export type RegistrationCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   source?: Prisma.SortOrder
   waitlistPosition?: Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RegistrationAvgOrderByAggregateInput = {
   waitlistPosition?: Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrder
 }
 
 export type RegistrationMaxOrderByAggregateInput = {
@@ -416,6 +441,7 @@ export type RegistrationMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   source?: Prisma.SortOrder
   waitlistPosition?: Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -427,12 +453,14 @@ export type RegistrationMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   source?: Prisma.SortOrder
   waitlistPosition?: Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RegistrationSumOrderByAggregateInput = {
   waitlistPosition?: Prisma.SortOrder
+  adminCardMsgId?: Prisma.SortOrder
 }
 
 export type RegistrationCreateNestedManyWithoutUserInput = {
@@ -532,6 +560,7 @@ export type RegistrationCreateWithoutUserInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tournament: Prisma.TournamentCreateNestedOneWithoutRegistrationsInput
@@ -543,6 +572,7 @@ export type RegistrationUncheckedCreateWithoutUserInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -583,6 +613,7 @@ export type RegistrationScalarWhereInput = {
   status?: Prisma.EnumRegistrationStatusFilter<"Registration"> | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFilter<"Registration"> | $Enums.RegistrationSource
   waitlistPosition?: Prisma.IntNullableFilter<"Registration"> | number | null
+  adminCardMsgId?: Prisma.IntNullableFilter<"Registration"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Registration"> | Date | string
 }
@@ -592,6 +623,7 @@ export type RegistrationCreateWithoutTournamentInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRegistrationsInput
@@ -603,6 +635,7 @@ export type RegistrationUncheckedCreateWithoutTournamentInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -639,6 +672,7 @@ export type RegistrationCreateManyUserInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -648,6 +682,7 @@ export type RegistrationUpdateWithoutUserInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -659,6 +694,7 @@ export type RegistrationUncheckedUpdateWithoutUserInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -669,6 +705,7 @@ export type RegistrationUncheckedUpdateManyWithoutUserInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -679,6 +716,7 @@ export type RegistrationCreateManyTournamentInput = {
   status?: $Enums.RegistrationStatus
   source?: $Enums.RegistrationSource
   waitlistPosition?: number | null
+  adminCardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -688,6 +726,7 @@ export type RegistrationUpdateWithoutTournamentInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRegistrationsNestedInput
@@ -699,6 +738,7 @@ export type RegistrationUncheckedUpdateWithoutTournamentInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -709,6 +749,7 @@ export type RegistrationUncheckedUpdateManyWithoutTournamentInput = {
   status?: Prisma.EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
   source?: Prisma.EnumRegistrationSourceFieldUpdateOperationsInput | $Enums.RegistrationSource
   waitlistPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminCardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -722,6 +763,7 @@ export type RegistrationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   status?: boolean
   source?: boolean
   waitlistPosition?: boolean
+  adminCardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
@@ -735,6 +777,7 @@ export type RegistrationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   source?: boolean
   waitlistPosition?: boolean
+  adminCardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
@@ -748,6 +791,7 @@ export type RegistrationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   status?: boolean
   source?: boolean
   waitlistPosition?: boolean
+  adminCardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
@@ -761,11 +805,12 @@ export type RegistrationSelectScalar = {
   status?: boolean
   source?: boolean
   waitlistPosition?: boolean
+  adminCardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "status" | "source" | "waitlistPosition" | "createdAt" | "updatedAt", ExtArgs["result"]["registration"]>
+export type RegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "status" | "source" | "waitlistPosition" | "adminCardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["registration"]>
 export type RegistrationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -795,6 +840,11 @@ export type $RegistrationPayload<ExtArgs extends runtime.Types.Extensions.Intern
      * Set only while the player waits for a seat; null once promoted.
      */
     waitlistPosition: number | null
+    /**
+     * The player's card in the game's topic. Stored so the bot edits that message
+     * rather than posting a new one on every action at the cash desk.
+     */
+    adminCardMsgId: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["registration"]>
@@ -1228,6 +1278,7 @@ export interface RegistrationFieldRefs {
   readonly status: Prisma.FieldRef<"Registration", 'RegistrationStatus'>
   readonly source: Prisma.FieldRef<"Registration", 'RegistrationSource'>
   readonly waitlistPosition: Prisma.FieldRef<"Registration", 'Int'>
+  readonly adminCardMsgId: Prisma.FieldRef<"Registration", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Registration", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Registration", 'DateTime'>
 }

@@ -1,114 +1,184 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_RATING_CONFIG, itmCutoff, pointsForPlace, scoreTournament, seasonTotal } from "./index.js";
+import {
+  DEFAULT_RATING_CONFIG,
+  placeShare,
+  pointsForPlace,
+  ratingPool,
+  scoreTournament,
+  seasonTotal,
+  summarizeLedger,
+} from "./index.js";
 
 const config = DEFAULT_RATING_CONFIG;
 
-describe("pointsForPlace", () => {
-  it("rewards better places more", () => {
-    const scores = [1, 2, 5, 10, 20, 30].map((place) =>
-      pointsForPlace({ place, fieldSize: 30, config }),
-    );
+/** Twelve entries, four add-ons — the worked example the club settled on. */
+const CHIPS = 12 * 40_000 + 4 * 80_000;
 
-    for (let i = 1; i < scores.length; i += 1) {
-      expect(scores[i]!).toBeLessThanOrEqual(scores[i - 1]!);
+describe("ratingPool", () => {
+  it("is the chips on the table divided by the divisor", () => {
+    expect(ratingPool({ chipsInPlay: CHIPS, divisor: 200 })).toBe(4000);
+  });
+
+  it("scales with the tournament multiplier", () => {
+    expect(ratingPool({ chipsInPlay: CHIPS, divisor: 200, multiplier: 2 })).toBe(8000);
+  });
+
+  it("grows when players take add-ons", () => {
+    const without = ratingPool({ chipsInPlay: 12 * 40_000, divisor: 200 });
+    const with4 = ratingPool({ chipsInPlay: CHIPS, divisor: 200 });
+    expect(with4).toBeGreaterThan(without);
+  });
+
+  it("never returns a negative pool or divides by zero", () => {
+    expect(ratingPool({ chipsInPlay: -5, divisor: 200 })).toBe(0);
+    expect(ratingPool({ chipsInPlay: CHIPS, divisor: 0 })).toBe(0);
+  });
+});
+
+describe("placeShare", () => {
+  const shares = { lastPlaceShare: 0.1, shareCurve: 2 };
+
+  it("gives first place the whole award", () => {
+    expect(placeShare({ place: 1, paidPlaces: 9, ...shares })).toBe(1);
+  });
+
+  it("gives the last paid place exactly the configured floor", () => {
+    expect(placeShare({ place: 9, paidPlaces: 9, ...shares })).toBeCloseTo(0.1, 10);
+  });
+
+  it("pays nothing below the paid places", () => {
+    expect(placeShare({ place: 10, paidPlaces: 9, ...shares })).toBe(0);
+    expect(placeShare({ place: 28, paidPlaces: 27, ...shares })).toBe(0);
+  });
+
+  it("never rises as the place gets worse", () => {
+    for (const paidPlaces of [9, 18, 27]) {
+      const values = Array.from({ length: paidPlaces }, (_, index) =>
+        placeShare({ place: index + 1, paidPlaces, ...shares }),
+      );
+      const sorted = [...values].sort((a, b) => b - a);
+      expect(values).toEqual(sorted);
     }
-    expect(scores[0]!).toBeGreaterThan(scores.at(-1)!);
   });
 
-  it("rewards winning a bigger field more", () => {
-    const small = pointsForPlace({ place: 1, fieldSize: 8, config });
-    const large = pointsForPlace({ place: 1, fieldSize: 64, config });
-    expect(large).toBeGreaterThan(small);
+  it("works when only the winner is paid", () => {
+    expect(placeShare({ place: 1, paidPlaces: 1, ...shares })).toBe(1);
+    expect(placeShare({ place: 2, paidPlaces: 1, ...shares })).toBe(0);
   });
 
-  it("never drops below the participation floor", () => {
-    const last = pointsForPlace({ place: 200, fieldSize: 200, config });
-    expect(last).toBeGreaterThanOrEqual(config.participationPoints);
+  it("falls in even steps when the curve is 1", () => {
+    const flat = { lastPlaceShare: 0, shareCurve: 1 };
+    expect(placeShare({ place: 2, paidPlaces: 3, ...flat })).toBeCloseTo(0.5, 10);
   });
 
-  it("scales with the tournament multiplier, up to rounding", () => {
-    const single = pointsForPlace({ place: 3, fieldSize: 40, multiplier: 1, config });
-    const major = pointsForPlace({ place: 3, fieldSize: 40, multiplier: 2, config });
-    expect(Math.abs(major - single * 2)).toBeLessThanOrEqual(1);
+  it("holds the endpoints whatever the curve", () => {
+    for (const shareCurve of [0.5, 1, 2, 4]) {
+      expect(placeShare({ place: 1, paidPlaces: 18, lastPlaceShare: 0.2, shareCurve })).toBe(1);
+      expect(
+        placeShare({ place: 18, paidPlaces: 18, lastPlaceShare: 0.2, shareCurve }),
+      ).toBeCloseTo(0.2, 10);
+    }
+  });
+});
+
+describe("pointsForPlace", () => {
+  it("hands the winner the whole pool", () => {
+    expect(pointsForPlace({ place: 1, paidPlaces: 9, chipsInPlay: CHIPS, config })).toBe(4000);
   });
 
-  it("pays the ITM bonus exactly at the cutoff and not past it", () => {
-    const fieldSize = 20;
-    const cutoff = itmCutoff(fieldSize, config.itmShare);
-    expect(cutoff).toBe(4);
-
-    const inside = pointsForPlace({ place: cutoff, fieldSize, config });
-    const outside = pointsForPlace({ place: cutoff + 1, fieldSize, config });
-    expect(inside - outside).toBeGreaterThan(config.itmBonus - 1);
+  it("hands the last paid place the floor share of it", () => {
+    expect(pointsForPlace({ place: 9, paidPlaces: 9, chipsInPlay: CHIPS, config })).toBe(400);
   });
 
-  it("rejects impossible standings", () => {
-    expect(() => pointsForPlace({ place: 0, fieldSize: 10, config })).toThrow(RangeError);
-    expect(() => pointsForPlace({ place: 11, fieldSize: 10, config })).toThrow(RangeError);
-    expect(() => pointsForPlace({ place: 1.5, fieldSize: 10, config })).toThrow(RangeError);
+  it("hands unpaid places nothing", () => {
+    expect(pointsForPlace({ place: 10, paidPlaces: 9, chipsInPlay: CHIPS, config })).toBe(0);
   });
 
-  it("is deterministic", () => {
-    const args = { place: 7, fieldSize: 33, multiplier: 1.5, config } as const;
-    expect(pointsForPlace(args)).toBe(pointsForPlace(args));
+  it("reacts to the paid-place count changing mid-game", () => {
+    const short = pointsForPlace({ place: 9, paidPlaces: 9, chipsInPlay: CHIPS, config });
+    const long = pointsForPlace({ place: 9, paidPlaces: 18, chipsInPlay: CHIPS, config });
+    // Ninth of eighteen is a better finish than ninth of nine.
+    expect(long).toBeGreaterThan(short);
   });
 });
 
 describe("scoreTournament", () => {
-  const standings = Array.from({ length: 12 }, (_, i) => ({ userId: `u${i + 1}`, place: i + 1 }));
+  const standings = Array.from({ length: 12 }, (_, index) => ({
+    userId: `u${index + 1}`,
+    place: index + 1,
+  }));
 
-  it("scores every participant and derives the field size", () => {
-    const scored = scoreTournament({ standings, config });
+  it("scores every place and explains the share", () => {
+    const scored = scoreTournament({ standings, chipsInPlay: CHIPS, paidPlaces: 9, config });
+
     expect(scored).toHaveLength(12);
-    expect(scored.every((row) => row.points > 0)).toBe(true);
+    expect(scored[0]).toMatchObject({ userId: "u1", place: 1, points: 4000, share: 1 });
+    expect(scored[8]?.points).toBe(400);
+    expect(scored[9]?.points).toBe(0);
+    expect(scored[11]?.points).toBe(0);
   });
 
-  it("marks the ITM zone", () => {
-    const scored = scoreTournament({ standings, config });
-    const itmCount = scored.filter((row) => row.isItm).length;
-    expect(itmCount).toBe(itmCutoff(12, config.itmShare));
-  });
-
-  it("adds knockout points when the club tracks them", () => {
-    const withKo = { ...config, knockoutPoints: 5 };
-    const [first] = scoreTournament({
-      standings: [
-        { userId: "a", place: 1, knockouts: 3 },
-        { userId: "b", place: 2, knockouts: 0 },
-      ],
-      config: withKo,
-    });
-    const [firstNoKo] = scoreTournament({
-      standings: [
-        { userId: "a", place: 1, knockouts: 0 },
-        { userId: "b", place: 2, knockouts: 0 },
-      ],
-      config: withKo,
-    });
-    expect(first!.points - firstNoKo!.points).toBe(15);
+  it("orders points the same way as places", () => {
+    const scored = scoreTournament({ standings, chipsInPlay: CHIPS, paidPlaces: 9, config });
+    const points = scored.map((row) => row.points);
+    expect(points).toEqual([...points].sort((a, b) => b - a));
   });
 });
 
 describe("seasonTotal", () => {
-  const results = [40, 30, 25, 10, 5].map((points) => ({
-    sourceType: "tournament_result" as const,
-    points,
-  }));
-
   it("sums everything when bestOfCount is 0", () => {
-    expect(seasonTotal(results, { ...config, bestOfCount: 0 })).toBe(110);
-  });
-
-  it("keeps only the strongest results when bestOfCount is set", () => {
-    expect(seasonTotal(results, { ...config, bestOfCount: 3 })).toBe(95);
-  });
-
-  it("always counts achievements and corrections in full", () => {
     const events = [
-      ...results,
-      { sourceType: "achievement" as const, points: 50 },
-      { sourceType: "penalty" as const, points: -10 },
+      { sourceType: "tournament_result" as const, points: 100 },
+      { sourceType: "tournament_result" as const, points: 50 },
+      { sourceType: "achievement" as const, points: 25 },
     ];
-    expect(seasonTotal(events, { ...config, bestOfCount: 3 })).toBe(95 + 50 - 10);
+    expect(seasonTotal(events, { ...config, bestOfCount: 0 })).toBe(175);
+  });
+
+  it("keeps only the best tournament results, but every achievement", () => {
+    const events = [
+      { sourceType: "tournament_result" as const, points: 100 },
+      { sourceType: "tournament_result" as const, points: 80 },
+      { sourceType: "tournament_result" as const, points: 10 },
+      { sourceType: "achievement" as const, points: 25 },
+    ];
+    expect(seasonTotal(events, { ...config, bestOfCount: 2 })).toBe(100 + 80 + 25);
+  });
+
+  it("subtracts penalties in full", () => {
+    const events = [
+      { sourceType: "tournament_result" as const, points: 100 },
+      { sourceType: "penalty" as const, points: -30 },
+    ];
+    expect(seasonTotal(events, { ...config, bestOfCount: 1 })).toBe(70);
+  });
+});
+
+describe("summarizeLedger", () => {
+  it("counts wins, podiums and paid finishes", () => {
+    const summary = summarizeLedger(
+      [
+        { sourceType: "tournament_result", points: 4000, place: 1 },
+        { sourceType: "tournament_result", points: 900, place: 3 },
+        { sourceType: "tournament_result", points: 0, place: 11 },
+        { sourceType: "achievement", points: 50 },
+      ],
+      { ...config, bestOfCount: 0 },
+    );
+
+    expect(summary).toMatchObject({
+      points: 4950,
+      gamesPlayed: 3,
+      wins: 1,
+      top3: 2,
+      itm: 2,
+      bestPlace: 1,
+    });
+    expect(summary.avgPlace).toBeCloseTo(5, 10);
+  });
+
+  it("reports nulls rather than zeros for a player who never finished a game", () => {
+    const summary = summarizeLedger([{ sourceType: "achievement", points: 10 }], config);
+    expect(summary).toMatchObject({ gamesPlayed: 0, avgPlace: null, bestPlace: null, points: 10 });
   });
 });

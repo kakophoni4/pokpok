@@ -60,6 +60,8 @@ export const ModelName = {
   Tournament: 'Tournament',
   Registration: 'Registration',
   Result: 'Result',
+  Payment: 'Payment',
+  ClubSettings: 'ClubSettings',
   Achievement: 'Achievement',
   UserAchievement: 'UserAchievement',
   RatingEvent: 'RatingEvent',
@@ -172,14 +174,17 @@ export const TournamentScalarFieldEnum = {
   venueId: 'venueId',
   title: 'title',
   description: 'description',
-  gameType: 'gameType',
   startsAt: 'startsAt',
   regOpensAt: 'regOpensAt',
   regClosesAt: 'regClosesAt',
   capacity: 'capacity',
-  buyinChips: 'buyinChips',
+  paidPlaces: 'paidPlaces',
+  startingStack: 'startingStack',
+  addonChips: 'addonChips',
   ratingMultiplier: 'ratingMultiplier',
   status: 'status',
+  adminTopicId: 'adminTopicId',
+  adminBoardMsgId: 'adminBoardMsgId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -194,6 +199,7 @@ export const RegistrationScalarFieldEnum = {
   status: 'status',
   source: 'source',
   waitlistPosition: 'waitlistPosition',
+  adminCardMsgId: 'adminCardMsgId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -206,12 +212,41 @@ export const ResultScalarFieldEnum = {
   tournamentId: 'tournamentId',
   userId: 'userId',
   place: 'place',
-  knockouts: 'knockouts',
-  rebuys: 'rebuys',
   createdAt: 'createdAt'
 } as const
 
 export type ResultScalarFieldEnum = (typeof ResultScalarFieldEnum)[keyof typeof ResultScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  userId: 'userId',
+  kind: 'kind',
+  amountRub: 'amountRub',
+  chips: 'chips',
+  note: 'note',
+  createdById: 'createdById',
+  voidedAt: 'voidedAt',
+  voidedById: 'voidedById',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const ClubSettingsScalarFieldEnum = {
+  id: 'id',
+  infoText: 'infoText',
+  entryPriceRub: 'entryPriceRub',
+  addonPriceRub: 'addonPriceRub',
+  drinkPriceRub: 'drinkPriceRub',
+  adminChatId: 'adminChatId',
+  timezone: 'timezone',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClubSettingsScalarFieldEnum = (typeof ClubSettingsScalarFieldEnum)[keyof typeof ClubSettingsScalarFieldEnum]
 
 
 export const AchievementScalarFieldEnum = {

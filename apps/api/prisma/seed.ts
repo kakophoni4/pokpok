@@ -1,16 +1,16 @@
 /**
  * Demo data for local development.
  *
- * Produces a season that already looks lived-in: past tournaments with real
- * standings, rating computed by the same engine the API uses, upcoming events
- * with sign-ups and a waiting list, plus an achievement catalogue.
+ * Produces a season that already looks lived-in: past evenings with a full cash
+ * desk, places, and rating computed by the same engine the API uses; upcoming
+ * events with sign-ups and a waiting list; an achievement catalogue.
  *
  * Run with: pnpm db:seed
  */
 import { config as loadEnv } from "dotenv";
 import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { DEFAULT_RATING_CONFIG, RatingConfig } from "@poker/contracts";
+import { CLUB_TIMEZONE, DEFAULT_RATING_CONFIG, RatingConfig } from "@poker/contracts";
 import { scoreTournament, summarizeLedger } from "@poker/rating";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -31,9 +31,12 @@ function makeRandom(seed: number): () => number {
 
 const random = makeRandom(20260824);
 
+/** Samara is UTC+4 all year, so the club's wall clock never shifts. */
+const CLUB_UTC_OFFSET_HOURS = 4;
+
 const PLAYERS = [
   { nickname: "Ferz", displayName: "Артём Фёдоров", role: "admin" as const },
-  { nickname: "Kate_AA", displayName: "Екатерина Лапина", role: "moderator" as const },
+  { nickname: "Kate_AA", displayName: "Екатерина Лапина", role: "admin" as const },
   { nickname: "Sanya_River", displayName: "Александр Крылов", role: "player" as const },
   { nickname: "Nikita_NL", displayName: "Никита Орлов", role: "player" as const },
   { nickname: "MashaBluff", displayName: "Мария Гущина", role: "player" as const },
@@ -49,6 +52,33 @@ const PLAYERS = [
 ];
 
 const ACHIEVEMENTS = [
+  {
+    code: "hand_of_the_day",
+    title: "Рука дня",
+    description: "Собрал руку дня — ту, что выиграла финал прошлого турнира",
+    icon: "🃏",
+    ratingPoints: 100,
+    isRepeatable: true,
+    rule: null,
+  },
+  {
+    code: "royal_flush",
+    title: "Роял-флеш",
+    description: "Собрал роял-флеш за столом",
+    icon: "👑",
+    ratingPoints: 200,
+    isRepeatable: true,
+    rule: null,
+  },
+  {
+    code: "quads",
+    title: "Каре",
+    description: "Собрал каре",
+    icon: "🎰",
+    ratingPoints: 50,
+    isRepeatable: true,
+    rule: null,
+  },
   {
     code: "first_win",
     title: "Первая победа",
@@ -95,19 +125,10 @@ const ACHIEVEMENTS = [
     rule: { kind: "attendance_streak", threshold: 5 } as const,
   },
   {
-    code: "bounty_hunter",
-    title: "Охотник за головами",
-    description: "20 нокаутов суммарно",
-    icon: "🎣",
-    ratingPoints: 70,
-    isRepeatable: false,
-    rule: { kind: "knockouts_total", threshold: 20 } as const,
-  },
-  {
     code: "season_champion",
     title: "Чемпион сезона",
     description: "Первое место в итоговом рейтинге сезона",
-    icon: "👑",
+    icon: "🌟",
     ratingPoints: 300,
     isRepeatable: true,
     rule: { kind: "season_rank", maxRank: 1 } as const,
@@ -124,20 +145,24 @@ const ACHIEVEMENTS = [
 ];
 
 const PAST_TOURNAMENTS = [
-  { title: "Weekly Freezeout #12", daysAgo: 42, multiplier: 1, field: 14 },
-  { title: "Weekly Freezeout #13", daysAgo: 35, multiplier: 1, field: 12 },
-  { title: "Deepstack Sunday", daysAgo: 28, multiplier: 1.5, field: 13 },
-  { title: "Weekly Freezeout #14", daysAgo: 21, multiplier: 1, field: 11 },
-  { title: "Клубный мейджор «Осень»", daysAgo: 14, multiplier: 2, field: 14 },
-  { title: "Weekly Freezeout #15", daysAgo: 7, multiplier: 1, field: 12 },
+  { title: "Вечерний турнир #12", daysAgo: 42, multiplier: 1, field: 14, paidPlaces: 9 },
+  { title: "Вечерний турнир #13", daysAgo: 35, multiplier: 1, field: 12, paidPlaces: 9 },
+  { title: "Дипстек по воскресеньям", daysAgo: 28, multiplier: 1.5, field: 13, paidPlaces: 9 },
+  { title: "Вечерний турнир #14", daysAgo: 21, multiplier: 1, field: 11, paidPlaces: 9 },
+  { title: "Клубный мейджор «Осень»", daysAgo: 14, multiplier: 2, field: 14, paidPlaces: 18 },
+  { title: "Вечерний турнир #15", daysAgo: 7, multiplier: 1, field: 12, paidPlaces: 9 },
 ];
 
 const UPCOMING_TOURNAMENTS = [
-  { title: "Weekly Freezeout #16", inDays: 2, capacity: 12, multiplier: 1, signUps: 9 },
-  { title: "PLO Night", inDays: 5, capacity: 8, multiplier: 1, signUps: 10, gameType: "plo" as const },
-  { title: "Deepstack Sunday", inDays: 9, capacity: 16, multiplier: 1.5, signUps: 5 },
+  { title: "Вечерний турнир #16", inDays: 2, capacity: 12, multiplier: 1, signUps: 9 },
+  { title: "Дипстек по воскресеньям", inDays: 5, capacity: 8, multiplier: 1, signUps: 10 },
+  { title: "Вечерний турнир #17", inDays: 9, capacity: 16, multiplier: 1, signUps: 5 },
   { title: "Клубный мейджор «Зима»", inDays: 23, capacity: 24, multiplier: 2, signUps: 3 },
 ];
+
+const ENTRY_PRICE = 500;
+const ADDON_PRICE = 500;
+const DRINK_PRICE = 200;
 
 async function main(): Promise<void> {
   console.log("Cleaning previous demo data…");
@@ -148,6 +173,7 @@ async function main(): Promise<void> {
   await prisma.userSeasonStats.deleteMany();
   await prisma.userAchievement.deleteMany();
   await prisma.achievement.deleteMany();
+  await prisma.payment.deleteMany();
   await prisma.result.deleteMany();
   await prisma.registration.deleteMany();
   await prisma.tournament.deleteMany();
@@ -162,8 +188,27 @@ async function main(): Promise<void> {
     ...DEFAULT_RATING_CONFIG,
     // Only the ten strongest results count, so missing a week is survivable.
     bestOfCount: 10,
-    knockoutPoints: 2,
   };
+
+  await prisma.clubSettings.upsert({
+    where: { id: "club" },
+    create: {
+      id: "club",
+      timezone: CLUB_TIMEZONE,
+      entryPriceRub: ENTRY_PRICE,
+      addonPriceRub: ADDON_PRICE,
+      drinkPriceRub: DRINK_PRICE,
+      infoText: [
+        "Самара, ул. Молодогвардейская, 204, второй этаж, вход со двора.",
+        "",
+        "Играем по вторникам и воскресеньям, сбор в 18:30, старт в 19:00 по Самаре.",
+        "Вход 500 ₽, адон 500 ₽. Ставки не денежные — играем на рейтинг клуба.",
+        "",
+        "Вопросы: @poker_samara_admin",
+      ].join("\n"),
+    },
+    update: {},
+  });
 
   const season = await prisma.season.create({
     data: {
@@ -178,9 +223,9 @@ async function main(): Promise<void> {
   const venue = await prisma.venue.create({
     data: {
       title: "Покер-клуб «Роял»",
-      address: "Москва, ул. Тверская, 18",
-      geoLat: 55.764,
-      geoLon: 37.606,
+      address: "Самара, ул. Молодогвардейская, 204",
+      geoLat: 53.201,
+      geoLon: 50.117,
     },
   });
 
@@ -224,23 +269,22 @@ async function main(): Promise<void> {
     );
   }
 
-  console.log("Playing out past tournaments…");
+  console.log("Playing out past evenings…");
   const admin = users[0]!;
 
   for (const template of PAST_TOURNAMENTS) {
-    const startsAt = daysFromNow(-template.daysAgo, 19);
+    const startsAt = clubTime(-template.daysAgo, 19);
     const tournament = await prisma.tournament.create({
       data: {
         seasonId: season.id,
         venueId: venue.id,
         title: template.title,
         description: "Спортивный покер без денежных ставок. Регистрация до старта.",
-        gameType: "nlh",
         startsAt,
-        regOpensAt: daysFromNow(-template.daysAgo - 7, 12),
+        regOpensAt: clubTime(-template.daysAgo - 7, 12),
         regClosesAt: startsAt,
         capacity: 16,
-        buyinChips: 20_000,
+        paidPlaces: template.paidPlaces,
         ratingMultiplier: template.multiplier,
         status: "finished",
       },
@@ -250,31 +294,81 @@ async function main(): Promise<void> {
     const standings = shuffle(field).map((user, index) => ({
       userId: user.id,
       place: index + 1,
-      knockouts: index < 4 ? Math.round(random() * 4) : Math.round(random() * 2),
     }));
-
-    const scored = scoreTournament({
-      standings,
-      multiplier: template.multiplier,
-      config: ratingConfig,
-    });
 
     await prisma.registration.createMany({
       data: standings.map((entry) => ({
         tournamentId: tournament.id,
         userId: entry.userId,
-        status: "checked_in" as const,
+        status: "registered" as const,
         source: "web" as const,
       })),
     });
+
+    // The cash desk as it would have looked: everyone paid an entry, roughly a
+    // third took an add-on, a few bought a drink.
+    const cashDesk: {
+      tournamentId: string;
+      userId: string;
+      kind: "entry" | "addon" | "drink";
+      amountRub: number;
+      chips: number;
+      createdById: string;
+      createdAt: Date;
+    }[] = [];
+
+    for (const entry of standings) {
+      cashDesk.push({
+        tournamentId: tournament.id,
+        userId: entry.userId,
+        kind: "entry",
+        amountRub: ENTRY_PRICE,
+        chips: ratingConfig.startingStack,
+        createdById: admin.id,
+        createdAt: startsAt,
+      });
+      if (random() < 0.35) {
+        cashDesk.push({
+          tournamentId: tournament.id,
+          userId: entry.userId,
+          kind: "addon",
+          amountRub: ADDON_PRICE,
+          chips: ratingConfig.addonChips,
+          createdById: admin.id,
+          createdAt: new Date(startsAt.getTime() + 90 * 60 * 1000),
+        });
+      }
+      if (random() < 0.4) {
+        cashDesk.push({
+          tournamentId: tournament.id,
+          userId: entry.userId,
+          kind: "drink",
+          amountRub: DRINK_PRICE,
+          chips: 0,
+          createdById: admin.id,
+          createdAt: new Date(startsAt.getTime() + 60 * 60 * 1000),
+        });
+      }
+    }
+
+    await prisma.payment.createMany({ data: cashDesk });
     await prisma.result.createMany({
       data: standings.map((entry) => ({
         tournamentId: tournament.id,
         userId: entry.userId,
         place: entry.place,
-        knockouts: entry.knockouts,
       })),
     });
+
+    const chipsInPlay = cashDesk.reduce((sum, line) => sum + line.chips, 0);
+    const scored = scoreTournament({
+      standings,
+      chipsInPlay,
+      paidPlaces: template.paidPlaces,
+      multiplier: template.multiplier,
+      config: ratingConfig,
+    });
+
     await prisma.ratingEvent.createMany({
       data: scored.map((row) => ({
         userId: row.userId,
@@ -307,6 +401,7 @@ async function main(): Promise<void> {
   const firstWin = achievements.find((a) => a.code === "first_win")!;
   const regular10 = achievements.find((a) => a.code === "regular_10")!;
   const helper = achievements.find((a) => a.code === "club_helper")!;
+  const handOfTheDay = achievements.find((a) => a.code === "hand_of_the_day")!;
 
   for (const user of users) {
     const grants = [];
@@ -337,51 +432,52 @@ async function main(): Promise<void> {
     }
   }
 
-  // One hand-picked manual achievement, to show the non-automatic path.
-  const helperGrant = await prisma.userAchievement.create({
-    data: {
-      userId: users[1]!.id,
-      achievementId: helper.id,
-      grantedById: admin.id,
-      comment: "Помогает вести расписание и считать результаты",
-      dedupeKey: `manual_${Date.now()}`,
-    },
-  });
-  await prisma.ratingEvent.create({
-    data: {
-      userId: users[1]!.id,
-      seasonId: season.id,
-      sourceType: "achievement",
-      points: helper.ratingPoints,
-      achievementId: helper.id,
-      userAchievementId: helperGrant.id,
-      comment: helper.title,
-      createdBy: admin.id,
-    },
-  });
+  // Two grants made by hand at the table, the way the bot will do it.
+  for (const [index, achievement] of [helper, handOfTheDay].entries()) {
+    const holder = users[index + 1]!;
+    const granted = await prisma.userAchievement.create({
+      data: {
+        userId: holder.id,
+        achievementId: achievement.id,
+        grantedById: admin.id,
+        comment: achievement.code === "club_helper" ? "Помогает вести расписание" : "Ac-Ac",
+        dedupeKey: `manual_${achievement.code}_${index}`,
+      },
+    });
+    await prisma.ratingEvent.create({
+      data: {
+        userId: holder.id,
+        seasonId: season.id,
+        sourceType: "achievement",
+        points: achievement.ratingPoints,
+        achievementId: achievement.id,
+        userAchievementId: granted.id,
+        comment: achievement.title,
+        createdBy: admin.id,
+      },
+    });
+  }
 
-  console.log("Scheduling upcoming tournaments…");
+  console.log("Scheduling upcoming evenings…");
   for (const template of UPCOMING_TOURNAMENTS) {
-    const startsAt = daysFromNow(template.inDays, 19);
+    const startsAt = clubTime(template.inDays, 19);
     const tournament = await prisma.tournament.create({
       data: {
         seasonId: season.id,
         venueId: venue.id,
         title: template.title,
         description:
-          "Спортивный покер без денежных ставок. Приходите за 15 минут до старта на регистрацию.",
-        gameType: template.gameType ?? "nlh",
+          "Спортивный покер без денежных ставок. Приходите за 30 минут до старта на регистрацию.",
         startsAt,
-        regOpensAt: daysFromNow(template.inDays - 10, 12),
+        regOpensAt: clubTime(template.inDays - 10, 12),
         regClosesAt: new Date(startsAt.getTime() - 60 * 60 * 1000),
         capacity: template.capacity,
-        buyinChips: 20_000,
         ratingMultiplier: template.multiplier,
         status: "reg_open",
       },
     });
 
-    // Deliberately oversubscribe PLO Night so the waiting list is visible.
+    // Deliberately oversubscribe one evening so the waiting list is visible.
     const signUps = pickPlayers(users, Math.min(template.signUps, users.length));
     let waitlistPosition = 0;
 
@@ -433,20 +529,32 @@ async function main(): Promise<void> {
   console.log("\nDone. Top of the season:");
   for (const [index, row] of standings.entries()) {
     console.log(
-      `  ${index + 1}. ${row.user.nickname.padEnd(14)} ${String(row.points).padStart(5)} очков` +
+      `  ${index + 1}. ${row.user.nickname.padEnd(14)} ${String(row.points).padStart(6)} очков` +
         `  (игр: ${row.gamesPlayed}, побед: ${row.wins})`,
     );
   }
-  console.log(`\nАдмин для входа: ${PLAYERS[0]!.nickname}`);
-  console.log(`Модератор:       ${PLAYERS[1]!.nickname}`);
+  console.log(`\nАдмины для входа: ${PLAYERS[0]!.nickname}, ${PLAYERS[1]!.nickname}`);
   console.log("Вход в дев-режиме: POST /api/auth/dev/login { nickname }\n");
 }
 
-function daysFromNow(days: number, hour: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  date.setHours(hour, 0, 0, 0);
-  return date;
+/**
+ * A date `days` from today at `hour` on the club's wall clock. Built through UTC
+ * on purpose: a developer machine set to another timezone must still seed games
+ * that start at 19:00 in Samara.
+ */
+function clubTime(days: number, hour: number): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + days,
+      hour - CLUB_UTC_OFFSET_HOURS,
+      0,
+      0,
+      0,
+    ),
+  );
 }
 
 function pickPlayers<T>(pool: T[], count: number): T[] {

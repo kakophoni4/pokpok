@@ -19,7 +19,6 @@ export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
 
 export const UserRole = {
   player: 'player',
-  moderator: 'moderator',
   admin: 'admin'
 } as const
 
@@ -32,17 +31,6 @@ export const UserStatus = {
 } as const
 
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
-
-
-export const GameType = {
-  nlh: 'nlh',
-  plo: 'plo',
-  plo5: 'plo5',
-  mixed: 'mixed',
-  other: 'other'
-} as const
-
-export type GameType = (typeof GameType)[keyof typeof GameType]
 
 
 export const TournamentStatus = {
@@ -61,12 +49,20 @@ export type TournamentStatus = (typeof TournamentStatus)[keyof typeof Tournament
 export const RegistrationStatus = {
   registered: 'registered',
   waitlist: 'waitlist',
-  checked_in: 'checked_in',
-  cancelled: 'cancelled',
-  no_show: 'no_show'
+  cancelled: 'cancelled'
 } as const
 
 export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus]
+
+
+export const PaymentKind = {
+  entry: 'entry',
+  addon: 'addon',
+  drink: 'drink',
+  other: 'other'
+} as const
+
+export type PaymentKind = (typeof PaymentKind)[keyof typeof PaymentKind]
 
 
 export const RegistrationSource = {

@@ -28,14 +28,22 @@ export type AggregateTournament = {
 
 export type TournamentAvgAggregateOutputType = {
   capacity: number | null
-  buyinChips: number | null
+  paidPlaces: number | null
+  startingStack: number | null
+  addonChips: number | null
   ratingMultiplier: number | null
+  adminTopicId: number | null
+  adminBoardMsgId: number | null
 }
 
 export type TournamentSumAggregateOutputType = {
   capacity: number | null
-  buyinChips: number | null
+  paidPlaces: number | null
+  startingStack: number | null
+  addonChips: number | null
   ratingMultiplier: number | null
+  adminTopicId: number | null
+  adminBoardMsgId: number | null
 }
 
 export type TournamentMinAggregateOutputType = {
@@ -44,14 +52,17 @@ export type TournamentMinAggregateOutputType = {
   venueId: string | null
   title: string | null
   description: string | null
-  gameType: $Enums.GameType | null
   startsAt: Date | null
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
-  buyinChips: number | null
+  paidPlaces: number | null
+  startingStack: number | null
+  addonChips: number | null
   ratingMultiplier: number | null
   status: $Enums.TournamentStatus | null
+  adminTopicId: number | null
+  adminBoardMsgId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,14 +73,17 @@ export type TournamentMaxAggregateOutputType = {
   venueId: string | null
   title: string | null
   description: string | null
-  gameType: $Enums.GameType | null
   startsAt: Date | null
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
-  buyinChips: number | null
+  paidPlaces: number | null
+  startingStack: number | null
+  addonChips: number | null
   ratingMultiplier: number | null
   status: $Enums.TournamentStatus | null
+  adminTopicId: number | null
+  adminBoardMsgId: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -80,14 +94,17 @@ export type TournamentCountAggregateOutputType = {
   venueId: number
   title: number
   description: number
-  gameType: number
   startsAt: number
   regOpensAt: number
   regClosesAt: number
   capacity: number
-  buyinChips: number
+  paidPlaces: number
+  startingStack: number
+  addonChips: number
   ratingMultiplier: number
   status: number
+  adminTopicId: number
+  adminBoardMsgId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -96,14 +113,22 @@ export type TournamentCountAggregateOutputType = {
 
 export type TournamentAvgAggregateInputType = {
   capacity?: true
-  buyinChips?: true
+  paidPlaces?: true
+  startingStack?: true
+  addonChips?: true
   ratingMultiplier?: true
+  adminTopicId?: true
+  adminBoardMsgId?: true
 }
 
 export type TournamentSumAggregateInputType = {
   capacity?: true
-  buyinChips?: true
+  paidPlaces?: true
+  startingStack?: true
+  addonChips?: true
   ratingMultiplier?: true
+  adminTopicId?: true
+  adminBoardMsgId?: true
 }
 
 export type TournamentMinAggregateInputType = {
@@ -112,14 +137,17 @@ export type TournamentMinAggregateInputType = {
   venueId?: true
   title?: true
   description?: true
-  gameType?: true
   startsAt?: true
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
-  buyinChips?: true
+  paidPlaces?: true
+  startingStack?: true
+  addonChips?: true
   ratingMultiplier?: true
   status?: true
+  adminTopicId?: true
+  adminBoardMsgId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -130,14 +158,17 @@ export type TournamentMaxAggregateInputType = {
   venueId?: true
   title?: true
   description?: true
-  gameType?: true
   startsAt?: true
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
-  buyinChips?: true
+  paidPlaces?: true
+  startingStack?: true
+  addonChips?: true
   ratingMultiplier?: true
   status?: true
+  adminTopicId?: true
+  adminBoardMsgId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -148,14 +179,17 @@ export type TournamentCountAggregateInputType = {
   venueId?: true
   title?: true
   description?: true
-  gameType?: true
   startsAt?: true
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
-  buyinChips?: true
+  paidPlaces?: true
+  startingStack?: true
+  addonChips?: true
   ratingMultiplier?: true
   status?: true
+  adminTopicId?: true
+  adminBoardMsgId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -253,14 +287,17 @@ export type TournamentGroupByOutputType = {
   venueId: string | null
   title: string
   description: string | null
-  gameType: $Enums.GameType
   startsAt: Date
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
-  buyinChips: number | null
+  paidPlaces: number | null
+  startingStack: number | null
+  addonChips: number | null
   ratingMultiplier: number
   status: $Enums.TournamentStatus
+  adminTopicId: number | null
+  adminBoardMsgId: number | null
   createdAt: Date
   updatedAt: Date
   _count: TournamentCountAggregateOutputType | null
@@ -294,20 +331,24 @@ export type TournamentWhereInput = {
   venueId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   title?: Prisma.StringFilter<"Tournament"> | string
   description?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  gameType?: Prisma.EnumGameTypeFilter<"Tournament"> | $Enums.GameType
   startsAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
-  buyinChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
+  adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   season?: Prisma.XOR<Prisma.SeasonNullableScalarRelationFilter, Prisma.SeasonWhereInput> | null
   venue?: Prisma.XOR<Prisma.VenueNullableScalarRelationFilter, Prisma.VenueWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
   achievements?: Prisma.UserAchievementListRelationFilter
 }
@@ -318,20 +359,24 @@ export type TournamentOrderByWithRelationInput = {
   venueId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  gameType?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   regOpensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   regClosesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
-  buyinChips?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrderInput | Prisma.SortOrder
+  startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
+  addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   season?: Prisma.SeasonOrderByWithRelationInput
   venue?: Prisma.VenueOrderByWithRelationInput
   registrations?: Prisma.RegistrationOrderByRelationAggregateInput
   results?: Prisma.ResultOrderByRelationAggregateInput
+  payments?: Prisma.PaymentOrderByRelationAggregateInput
   ratingEvents?: Prisma.RatingEventOrderByRelationAggregateInput
   achievements?: Prisma.UserAchievementOrderByRelationAggregateInput
 }
@@ -345,20 +390,24 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   venueId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   title?: Prisma.StringFilter<"Tournament"> | string
   description?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  gameType?: Prisma.EnumGameTypeFilter<"Tournament"> | $Enums.GameType
   startsAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
-  buyinChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
+  adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   season?: Prisma.XOR<Prisma.SeasonNullableScalarRelationFilter, Prisma.SeasonWhereInput> | null
   venue?: Prisma.XOR<Prisma.VenueNullableScalarRelationFilter, Prisma.VenueWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
   results?: Prisma.ResultListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
   achievements?: Prisma.UserAchievementListRelationFilter
 }, "id">
@@ -369,14 +418,17 @@ export type TournamentOrderByWithAggregationInput = {
   venueId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  gameType?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   regOpensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   regClosesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
-  buyinChips?: Prisma.SortOrderInput | Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrderInput | Prisma.SortOrder
+  startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
+  addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TournamentCountOrderByAggregateInput
@@ -395,14 +447,17 @@ export type TournamentScalarWhereWithAggregatesInput = {
   venueId?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"Tournament"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Tournament"> | string | null
-  gameType?: Prisma.EnumGameTypeWithAggregatesFilter<"Tournament"> | $Enums.GameType
   startsAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   regOpensAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
-  buyinChips?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  paidPlaces?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  startingStack?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  addonChips?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatWithAggregatesFilter<"Tournament"> | number
   status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
+  adminTopicId?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  adminBoardMsgId?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tournament"> | Date | string
 }
@@ -411,20 +466,24 @@ export type TournamentCreateInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
@@ -435,18 +494,22 @@ export type TournamentUncheckedCreateInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
@@ -455,20 +518,24 @@ export type TournamentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
@@ -479,18 +546,22 @@ export type TournamentUncheckedUpdateInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
@@ -501,14 +572,17 @@ export type TournamentCreateManyInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -517,14 +591,17 @@ export type TournamentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -535,14 +612,17 @@ export type TournamentUncheckedUpdateManyInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -563,22 +643,29 @@ export type TournamentCountOrderByAggregateInput = {
   venueId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  gameType?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
-  buyinChips?: Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrder
+  startingStack?: Prisma.SortOrder
+  addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TournamentAvgOrderByAggregateInput = {
   capacity?: Prisma.SortOrder
-  buyinChips?: Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrder
+  startingStack?: Prisma.SortOrder
+  addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrder
 }
 
 export type TournamentMaxOrderByAggregateInput = {
@@ -587,14 +674,17 @@ export type TournamentMaxOrderByAggregateInput = {
   venueId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  gameType?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
-  buyinChips?: Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrder
+  startingStack?: Prisma.SortOrder
+  addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -605,22 +695,29 @@ export type TournamentMinOrderByAggregateInput = {
   venueId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  gameType?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
-  buyinChips?: Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrder
+  startingStack?: Prisma.SortOrder
+  addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type TournamentSumOrderByAggregateInput = {
   capacity?: Prisma.SortOrder
-  buyinChips?: Prisma.SortOrder
+  paidPlaces?: Prisma.SortOrder
+  startingStack?: Prisma.SortOrder
+  addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  adminTopicId?: Prisma.SortOrder
+  adminBoardMsgId?: Prisma.SortOrder
 }
 
 export type TournamentScalarRelationFilter = {
@@ -717,10 +814,6 @@ export type TournamentUncheckedUpdateManyWithoutVenueNestedInput = {
   deleteMany?: Prisma.TournamentScalarWhereInput | Prisma.TournamentScalarWhereInput[]
 }
 
-export type EnumGameTypeFieldUpdateOperationsInput = {
-  set?: $Enums.GameType
-}
-
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -769,6 +862,20 @@ export type TournamentUpdateOneRequiredWithoutResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutResultsInput, Prisma.TournamentUpdateWithoutResultsInput>, Prisma.TournamentUncheckedUpdateWithoutResultsInput>
 }
 
+export type TournamentCreateNestedOneWithoutPaymentsInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutPaymentsInput, Prisma.TournamentUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutPaymentsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+}
+
+export type TournamentUpdateOneRequiredWithoutPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutPaymentsInput, Prisma.TournamentUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutPaymentsInput
+  upsert?: Prisma.TournamentUpsertWithoutPaymentsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutPaymentsInput, Prisma.TournamentUpdateWithoutPaymentsInput>, Prisma.TournamentUncheckedUpdateWithoutPaymentsInput>
+}
+
 export type TournamentCreateNestedOneWithoutAchievementsInput = {
   create?: Prisma.XOR<Prisma.TournamentCreateWithoutAchievementsInput, Prisma.TournamentUncheckedCreateWithoutAchievementsInput>
   connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutAchievementsInput
@@ -805,19 +912,23 @@ export type TournamentCreateWithoutSeasonInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
@@ -827,18 +938,22 @@ export type TournamentUncheckedCreateWithoutSeasonInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
@@ -878,14 +993,17 @@ export type TournamentScalarWhereInput = {
   venueId?: Prisma.StringNullableFilter<"Tournament"> | string | null
   title?: Prisma.StringFilter<"Tournament"> | string
   description?: Prisma.StringNullableFilter<"Tournament"> | string | null
-  gameType?: Prisma.EnumGameTypeFilter<"Tournament"> | $Enums.GameType
   startsAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
-  buyinChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
+  adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tournament"> | Date | string
 }
@@ -894,19 +1012,23 @@ export type TournamentCreateWithoutVenueInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
@@ -916,18 +1038,22 @@ export type TournamentUncheckedCreateWithoutVenueInput = {
   seasonId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
@@ -962,19 +1088,23 @@ export type TournamentCreateWithoutRegistrationsInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
@@ -985,17 +1115,21 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
@@ -1020,19 +1154,23 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
@@ -1043,17 +1181,21 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
@@ -1062,19 +1204,23 @@ export type TournamentCreateWithoutResultsInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
@@ -1085,17 +1231,21 @@ export type TournamentUncheckedCreateWithoutResultsInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
@@ -1120,19 +1270,23 @@ export type TournamentUpdateWithoutResultsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
@@ -1143,17 +1297,137 @@ export type TournamentUncheckedUpdateWithoutResultsInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentCreateWithoutPaymentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
+  venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentUncheckedCreateWithoutPaymentsInput = {
+  id?: string
+  seasonId?: string | null
+  venueId?: string | null
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
+}
+
+export type TournamentCreateOrConnectWithoutPaymentsInput = {
+  where: Prisma.TournamentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutPaymentsInput, Prisma.TournamentUncheckedCreateWithoutPaymentsInput>
+}
+
+export type TournamentUpsertWithoutPaymentsInput = {
+  update: Prisma.XOR<Prisma.TournamentUpdateWithoutPaymentsInput, Prisma.TournamentUncheckedUpdateWithoutPaymentsInput>
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutPaymentsInput, Prisma.TournamentUncheckedCreateWithoutPaymentsInput>
+  where?: Prisma.TournamentWhereInput
+}
+
+export type TournamentUpdateToOneWithWhereWithoutPaymentsInput = {
+  where?: Prisma.TournamentWhereInput
+  data: Prisma.XOR<Prisma.TournamentUpdateWithoutPaymentsInput, Prisma.TournamentUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type TournamentUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
+  venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
+}
+
+export type TournamentUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  seasonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
@@ -1162,20 +1436,24 @@ export type TournamentCreateWithoutAchievementsInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
 }
 
@@ -1185,18 +1463,22 @@ export type TournamentUncheckedCreateWithoutAchievementsInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
 }
 
@@ -1220,20 +1502,24 @@ export type TournamentUpdateWithoutAchievementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
 }
 
@@ -1243,18 +1529,22 @@ export type TournamentUncheckedUpdateWithoutAchievementsInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
 }
 
@@ -1262,20 +1552,24 @@ export type TournamentCreateWithoutRatingEventsInput = {
   id?: string
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
 }
 
@@ -1285,18 +1579,22 @@ export type TournamentUncheckedCreateWithoutRatingEventsInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
 }
 
@@ -1320,20 +1618,24 @@ export type TournamentUpdateWithoutRatingEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
 
@@ -1343,18 +1645,22 @@ export type TournamentUncheckedUpdateWithoutRatingEventsInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
 
@@ -1363,14 +1669,17 @@ export type TournamentCreateManySeasonInput = {
   venueId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1379,19 +1688,23 @@ export type TournamentUpdateWithoutSeasonInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
@@ -1401,18 +1714,22 @@ export type TournamentUncheckedUpdateWithoutSeasonInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
@@ -1422,14 +1739,17 @@ export type TournamentUncheckedUpdateManyWithoutSeasonInput = {
   venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1439,14 +1759,17 @@ export type TournamentCreateManyVenueInput = {
   seasonId?: string | null
   title: string
   description?: string | null
-  gameType?: $Enums.GameType
   startsAt: Date | string
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
-  buyinChips?: number | null
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
   ratingMultiplier?: number
   status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1455,19 +1778,23 @@ export type TournamentUpdateWithoutVenueInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
 }
@@ -1477,18 +1804,22 @@ export type TournamentUncheckedUpdateWithoutVenueInput = {
   seasonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
 }
@@ -1498,14 +1829,17 @@ export type TournamentUncheckedUpdateManyWithoutVenueInput = {
   seasonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gameType?: Prisma.EnumGameTypeFieldUpdateOperationsInput | $Enums.GameType
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  buyinChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1518,6 +1852,7 @@ export type TournamentUncheckedUpdateManyWithoutVenueInput = {
 export type TournamentCountOutputType = {
   registrations: number
   results: number
+  payments: number
   ratingEvents: number
   achievements: number
 }
@@ -1525,6 +1860,7 @@ export type TournamentCountOutputType = {
 export type TournamentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrations?: boolean | TournamentCountOutputTypeCountRegistrationsArgs
   results?: boolean | TournamentCountOutputTypeCountResultsArgs
+  payments?: boolean | TournamentCountOutputTypeCountPaymentsArgs
   ratingEvents?: boolean | TournamentCountOutputTypeCountRatingEventsArgs
   achievements?: boolean | TournamentCountOutputTypeCountAchievementsArgs
 }
@@ -1556,6 +1892,13 @@ export type TournamentCountOutputTypeCountResultsArgs<ExtArgs extends runtime.Ty
 /**
  * TournamentCountOutputType without action
  */
+export type TournamentCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
+/**
+ * TournamentCountOutputType without action
+ */
 export type TournamentCountOutputTypeCountRatingEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RatingEventWhereInput
 }
@@ -1574,20 +1917,24 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   venueId?: boolean
   title?: boolean
   description?: boolean
-  gameType?: boolean
   startsAt?: boolean
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
-  buyinChips?: boolean
+  paidPlaces?: boolean
+  startingStack?: boolean
+  addonChips?: boolean
   ratingMultiplier?: boolean
   status?: boolean
+  adminTopicId?: boolean
+  adminBoardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
   venue?: boolean | Prisma.Tournament$venueArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.Tournament$resultsArgs<ExtArgs>
+  payments?: boolean | Prisma.Tournament$paymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.Tournament$ratingEventsArgs<ExtArgs>
   achievements?: boolean | Prisma.Tournament$achievementsArgs<ExtArgs>
   _count?: boolean | Prisma.TournamentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1599,14 +1946,17 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   venueId?: boolean
   title?: boolean
   description?: boolean
-  gameType?: boolean
   startsAt?: boolean
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
-  buyinChips?: boolean
+  paidPlaces?: boolean
+  startingStack?: boolean
+  addonChips?: boolean
   ratingMultiplier?: boolean
   status?: boolean
+  adminTopicId?: boolean
+  adminBoardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
@@ -1619,14 +1969,17 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   venueId?: boolean
   title?: boolean
   description?: boolean
-  gameType?: boolean
   startsAt?: boolean
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
-  buyinChips?: boolean
+  paidPlaces?: boolean
+  startingStack?: boolean
+  addonChips?: boolean
   ratingMultiplier?: boolean
   status?: boolean
+  adminTopicId?: boolean
+  adminBoardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
@@ -1639,24 +1992,28 @@ export type TournamentSelectScalar = {
   venueId?: boolean
   title?: boolean
   description?: boolean
-  gameType?: boolean
   startsAt?: boolean
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
-  buyinChips?: boolean
+  paidPlaces?: boolean
+  startingStack?: boolean
+  addonChips?: boolean
   ratingMultiplier?: boolean
   status?: boolean
+  adminTopicId?: boolean
+  adminBoardMsgId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "gameType" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "buyinChips" | "ratingMultiplier" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "paidPlaces" | "startingStack" | "addonChips" | "ratingMultiplier" | "status" | "adminTopicId" | "adminBoardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
   venue?: boolean | Prisma.Tournament$venueArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
   results?: boolean | Prisma.Tournament$resultsArgs<ExtArgs>
+  payments?: boolean | Prisma.Tournament$paymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.Tournament$ratingEventsArgs<ExtArgs>
   achievements?: boolean | Prisma.Tournament$achievementsArgs<ExtArgs>
   _count?: boolean | Prisma.TournamentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1677,6 +2034,7 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     venue: Prisma.$VenuePayload<ExtArgs> | null
     registrations: Prisma.$RegistrationPayload<ExtArgs>[]
     results: Prisma.$ResultPayload<ExtArgs>[]
+    payments: Prisma.$PaymentPayload<ExtArgs>[]
     ratingEvents: Prisma.$RatingEventPayload<ExtArgs>[]
     achievements: Prisma.$UserAchievementPayload<ExtArgs>[]
   }
@@ -1686,17 +2044,28 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     venueId: string | null
     title: string
     description: string | null
-    gameType: $Enums.GameType
     startsAt: Date
     regOpensAt: Date | null
     regClosesAt: Date | null
     capacity: number | null
-    buyinChips: number | null
+    /**
+     * Null on all three means "use the season's rating config". Kept per
+     * tournament because the paid-place count changes while the game is running.
+     */
+    paidPlaces: number | null
+    startingStack: number | null
+    addonChips: number | null
     /**
      * Weight of the event: 1 for a regular game, 2 for a major.
      */
     ratingMultiplier: number
     status: $Enums.TournamentStatus
+    /**
+     * Forum topic in the admin supergroup and the pinned summary inside it, so
+     * the bot edits the same screens instead of posting new ones.
+     */
+    adminTopicId: number | null
+    adminBoardMsgId: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["tournament"]>
@@ -2097,6 +2466,7 @@ export interface Prisma__TournamentClient<T, Null = never, ExtArgs extends runti
   venue<T extends Prisma.Tournament$venueArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$venueArgs<ExtArgs>>): Prisma.Prisma__VenueClient<runtime.Types.Result.GetResult<Prisma.$VenuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   registrations<T extends Prisma.Tournament$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   results<T extends Prisma.Tournament$resultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$resultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payments<T extends Prisma.Tournament$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ratingEvents<T extends Prisma.Tournament$ratingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$ratingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RatingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   achievements<T extends Prisma.Tournament$achievementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$achievementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAchievementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2133,14 +2503,17 @@ export interface TournamentFieldRefs {
   readonly venueId: Prisma.FieldRef<"Tournament", 'String'>
   readonly title: Prisma.FieldRef<"Tournament", 'String'>
   readonly description: Prisma.FieldRef<"Tournament", 'String'>
-  readonly gameType: Prisma.FieldRef<"Tournament", 'GameType'>
   readonly startsAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly regOpensAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly regClosesAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly capacity: Prisma.FieldRef<"Tournament", 'Int'>
-  readonly buyinChips: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly paidPlaces: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly startingStack: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly addonChips: Prisma.FieldRef<"Tournament", 'Int'>
   readonly ratingMultiplier: Prisma.FieldRef<"Tournament", 'Float'>
   readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>
+  readonly adminTopicId: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly adminBoardMsgId: Prisma.FieldRef<"Tournament", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tournament", 'DateTime'>
 }
@@ -2627,6 +3000,30 @@ export type Tournament$resultsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ResultScalarFieldEnum | Prisma.ResultScalarFieldEnum[]
+}
+
+/**
+ * Tournament.payments
+ */
+export type Tournament$paymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
 }
 
 /**

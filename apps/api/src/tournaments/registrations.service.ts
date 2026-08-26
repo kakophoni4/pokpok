@@ -146,7 +146,7 @@ export class RegistrationsService {
           });
         }
         if (registration.tournament.status === "finished") {
-          throw new BadRequestException({
+          throw new ConflictException({
             code: "TOURNAMENT_FINISHED",
             message: "Турнир уже завершён",
           });
@@ -190,45 +190,6 @@ export class RegistrationsService {
     });
 
     return outcome;
-  }
-
-  /** Staff marks arrivals at the venue. */
-  async setStatus(
-    tournamentId: string,
-    userId: string,
-    status: Extract<RegistrationStatus, "checked_in" | "no_show" | "registered">,
-    actorId: string,
-  ): Promise<RegistrationView> {
-    const registration = await this.prisma.registration.findUnique({
-      where: { tournamentId_userId: { tournamentId, userId } },
-    });
-    if (!registration) {
-      throw new NotFoundException({ code: "REGISTRATION_NOT_FOUND", message: "Запись не найдена" });
-    }
-
-    const updated = await this.prisma.registration.update({
-      where: { id: registration.id },
-      data: { status, waitlistPosition: null },
-      include: { user: true },
-    });
-
-    await this.audit.record({
-      actorId,
-      action: "registration.status",
-      entity: "Registration",
-      entityId: registration.id,
-      before: { status: registration.status },
-      after: { status },
-    });
-
-    return {
-      id: updated.id,
-      user: toPublicUser(updated.user),
-      status: updated.status,
-      source: updated.source,
-      waitlistPosition: updated.waitlistPosition,
-      createdAt: updated.createdAt.toISOString(),
-    };
   }
 
   async listForTournament(tournamentId: string): Promise<RegistrationView[]> {

@@ -19,7 +19,13 @@ export type TelegramProfile = {
   lastName?: string | undefined;
 };
 
-type CachedSession = { accessToken: string; expiresAt: number; userId: string; nickname: string };
+type CachedSession = {
+  accessToken: string;
+  expiresAt: number;
+  userId: string;
+  nickname: string;
+  role: "player" | "admin";
+};
 
 /**
  * API client for the bot.
@@ -59,6 +65,7 @@ export class Api {
       expiresAt: Date.now() + session.expiresIn * 1000,
       userId: session.user.id,
       nickname: session.user.nickname,
+      role: session.user.role,
     };
     this.sessions.set(profile.id, entry);
     return entry;

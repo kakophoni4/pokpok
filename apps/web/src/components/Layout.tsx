@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Layout() {
   const { user, can, logout } = useAuth();
   const navigate = useNavigate();
-  const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("moderator"));
+  const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("admin"));
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col">

@@ -8,14 +8,12 @@ import { z } from "zod";
 export const AuthProvider = z.enum(["telegram", "vk"]);
 export type AuthProvider = z.infer<typeof AuthProvider>;
 
-export const UserRole = z.enum(["player", "moderator", "admin"]);
+/** The club runs on two roles: everyone plays, a few people run the evening. */
+export const UserRole = z.enum(["player", "admin"]);
 export type UserRole = z.infer<typeof UserRole>;
 
 export const UserStatus = z.enum(["active", "blocked"]);
 export type UserStatus = z.infer<typeof UserStatus>;
-
-export const GameType = z.enum(["nlh", "plo", "plo5", "mixed", "other"]);
-export type GameType = z.infer<typeof GameType>;
 
 export const TournamentStatus = z.enum([
   "draft",
@@ -28,15 +26,20 @@ export const TournamentStatus = z.enum([
 ]);
 export type TournamentStatus = z.infer<typeof TournamentStatus>;
 
-/** Statuses a player can hold for a tournament. */
-export const RegistrationStatus = z.enum([
-  "registered",
-  "waitlist",
-  "checked_in",
-  "cancelled",
-  "no_show",
-]);
+/**
+ * Statuses a player can hold for a tournament. There is deliberately no
+ * "arrived" or "no-show": whoever paid the entry fee played, and that is
+ * recorded as a payment, not as an attendance flag.
+ */
+export const RegistrationStatus = z.enum(["registered", "waitlist", "cancelled"]);
 export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
+
+/**
+ * What the club took money for. Entry and add-on also hand out chips, which is
+ * what the rating is computed from; a drink is money only.
+ */
+export const PaymentKind = z.enum(["entry", "addon", "drink", "other"]);
+export type PaymentKind = z.infer<typeof PaymentKind>;
 
 /** Which client created the registration; used for analytics and audit. */
 export const RegistrationSource = z.enum(["web", "miniapp", "tg_bot", "vk_bot", "admin"]);
@@ -52,8 +55,7 @@ export type RatingSourceType = z.infer<typeof RatingSourceType>;
 
 export const ROLE_LEVEL: Record<UserRole, number> = {
   player: 0,
-  moderator: 1,
-  admin: 2,
+  admin: 1,
 };
 
 export function hasRole(actual: UserRole, required: UserRole): boolean {
@@ -61,7 +63,7 @@ export function hasRole(actual: UserRole, required: UserRole): boolean {
 }
 
 /** Statuses that occupy a seat at the table. */
-export const OCCUPYING_STATUSES: RegistrationStatus[] = ["registered", "checked_in", "no_show"];
+export const OCCUPYING_STATUSES: RegistrationStatus[] = ["registered"];
 
 /** Statuses in which a tournament accepts new sign-ups. */
 export const REGISTRABLE_STATUSES: TournamentStatus[] = ["announced", "reg_open"];

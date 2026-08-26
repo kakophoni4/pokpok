@@ -29,14 +29,10 @@ export type AggregateResult = {
 
 export type ResultAvgAggregateOutputType = {
   place: number | null
-  knockouts: number | null
-  rebuys: number | null
 }
 
 export type ResultSumAggregateOutputType = {
   place: number | null
-  knockouts: number | null
-  rebuys: number | null
 }
 
 export type ResultMinAggregateOutputType = {
@@ -44,8 +40,6 @@ export type ResultMinAggregateOutputType = {
   tournamentId: string | null
   userId: string | null
   place: number | null
-  knockouts: number | null
-  rebuys: number | null
   createdAt: Date | null
 }
 
@@ -54,8 +48,6 @@ export type ResultMaxAggregateOutputType = {
   tournamentId: string | null
   userId: string | null
   place: number | null
-  knockouts: number | null
-  rebuys: number | null
   createdAt: Date | null
 }
 
@@ -64,8 +56,6 @@ export type ResultCountAggregateOutputType = {
   tournamentId: number
   userId: number
   place: number
-  knockouts: number
-  rebuys: number
   createdAt: number
   _all: number
 }
@@ -73,14 +63,10 @@ export type ResultCountAggregateOutputType = {
 
 export type ResultAvgAggregateInputType = {
   place?: true
-  knockouts?: true
-  rebuys?: true
 }
 
 export type ResultSumAggregateInputType = {
   place?: true
-  knockouts?: true
-  rebuys?: true
 }
 
 export type ResultMinAggregateInputType = {
@@ -88,8 +74,6 @@ export type ResultMinAggregateInputType = {
   tournamentId?: true
   userId?: true
   place?: true
-  knockouts?: true
-  rebuys?: true
   createdAt?: true
 }
 
@@ -98,8 +82,6 @@ export type ResultMaxAggregateInputType = {
   tournamentId?: true
   userId?: true
   place?: true
-  knockouts?: true
-  rebuys?: true
   createdAt?: true
 }
 
@@ -108,8 +90,6 @@ export type ResultCountAggregateInputType = {
   tournamentId?: true
   userId?: true
   place?: true
-  knockouts?: true
-  rebuys?: true
   createdAt?: true
   _all?: true
 }
@@ -205,8 +185,6 @@ export type ResultGroupByOutputType = {
   tournamentId: string
   userId: string
   place: number
-  knockouts: number | null
-  rebuys: number | null
   createdAt: Date
   _count: ResultCountAggregateOutputType | null
   _avg: ResultAvgAggregateOutputType | null
@@ -238,8 +216,6 @@ export type ResultWhereInput = {
   tournamentId?: Prisma.StringFilter<"Result"> | string
   userId?: Prisma.StringFilter<"Result"> | string
   place?: Prisma.IntFilter<"Result"> | number
-  knockouts?: Prisma.IntNullableFilter<"Result"> | number | null
-  rebuys?: Prisma.IntNullableFilter<"Result"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Result"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -250,8 +226,6 @@ export type ResultOrderByWithRelationInput = {
   tournamentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrderInput | Prisma.SortOrder
-  rebuys?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tournament?: Prisma.TournamentOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
@@ -267,8 +241,6 @@ export type ResultWhereUniqueInput = Prisma.AtLeast<{
   tournamentId?: Prisma.StringFilter<"Result"> | string
   userId?: Prisma.StringFilter<"Result"> | string
   place?: Prisma.IntFilter<"Result"> | number
-  knockouts?: Prisma.IntNullableFilter<"Result"> | number | null
-  rebuys?: Prisma.IntNullableFilter<"Result"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Result"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -279,8 +251,6 @@ export type ResultOrderByWithAggregationInput = {
   tournamentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrderInput | Prisma.SortOrder
-  rebuys?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ResultCountOrderByAggregateInput
   _avg?: Prisma.ResultAvgOrderByAggregateInput
@@ -297,16 +267,12 @@ export type ResultScalarWhereWithAggregatesInput = {
   tournamentId?: Prisma.StringWithAggregatesFilter<"Result"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Result"> | string
   place?: Prisma.IntWithAggregatesFilter<"Result"> | number
-  knockouts?: Prisma.IntNullableWithAggregatesFilter<"Result"> | number | null
-  rebuys?: Prisma.IntNullableWithAggregatesFilter<"Result"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Result"> | Date | string
 }
 
 export type ResultCreateInput = {
   id?: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
   tournament: Prisma.TournamentCreateNestedOneWithoutResultsInput
   user: Prisma.UserCreateNestedOneWithoutResultsInput
@@ -317,16 +283,12 @@ export type ResultUncheckedCreateInput = {
   tournamentId: string
   userId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
 export type ResultUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutResultsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutResultsNestedInput
@@ -337,8 +299,6 @@ export type ResultUncheckedUpdateInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -347,16 +307,12 @@ export type ResultCreateManyInput = {
   tournamentId: string
   userId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
 export type ResultUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -365,8 +321,6 @@ export type ResultUncheckedUpdateManyInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -395,15 +349,11 @@ export type ResultCountOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrder
-  rebuys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ResultAvgOrderByAggregateInput = {
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrder
-  rebuys?: Prisma.SortOrder
 }
 
 export type ResultMaxOrderByAggregateInput = {
@@ -411,8 +361,6 @@ export type ResultMaxOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrder
-  rebuys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -421,15 +369,11 @@ export type ResultMinOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrder
-  rebuys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ResultSumOrderByAggregateInput = {
   place?: Prisma.SortOrder
-  knockouts?: Prisma.SortOrder
-  rebuys?: Prisma.SortOrder
 }
 
 export type ResultCreateNestedManyWithoutUserInput = {
@@ -527,8 +471,6 @@ export type IntFieldUpdateOperationsInput = {
 export type ResultCreateWithoutUserInput = {
   id?: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
   tournament: Prisma.TournamentCreateNestedOneWithoutResultsInput
 }
@@ -537,8 +479,6 @@ export type ResultUncheckedCreateWithoutUserInput = {
   id?: string
   tournamentId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
@@ -576,16 +516,12 @@ export type ResultScalarWhereInput = {
   tournamentId?: Prisma.StringFilter<"Result"> | string
   userId?: Prisma.StringFilter<"Result"> | string
   place?: Prisma.IntFilter<"Result"> | number
-  knockouts?: Prisma.IntNullableFilter<"Result"> | number | null
-  rebuys?: Prisma.IntNullableFilter<"Result"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Result"> | Date | string
 }
 
 export type ResultCreateWithoutTournamentInput = {
   id?: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutResultsInput
 }
@@ -594,8 +530,6 @@ export type ResultUncheckedCreateWithoutTournamentInput = {
   id?: string
   userId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
@@ -629,16 +563,12 @@ export type ResultCreateManyUserInput = {
   id?: string
   tournamentId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
 export type ResultUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutResultsNestedInput
 }
@@ -647,8 +577,6 @@ export type ResultUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -656,8 +584,6 @@ export type ResultUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -665,16 +591,12 @@ export type ResultCreateManyTournamentInput = {
   id?: string
   userId: string
   place: number
-  knockouts?: number | null
-  rebuys?: number | null
   createdAt?: Date | string
 }
 
 export type ResultUpdateWithoutTournamentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutResultsNestedInput
 }
@@ -683,8 +605,6 @@ export type ResultUncheckedUpdateWithoutTournamentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -692,8 +612,6 @@ export type ResultUncheckedUpdateManyWithoutTournamentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   place?: Prisma.IntFieldUpdateOperationsInput | number
-  knockouts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rebuys?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -704,8 +622,6 @@ export type ResultSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   tournamentId?: boolean
   userId?: boolean
   place?: boolean
-  knockouts?: boolean
-  rebuys?: boolean
   createdAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -716,8 +632,6 @@ export type ResultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tournamentId?: boolean
   userId?: boolean
   place?: boolean
-  knockouts?: boolean
-  rebuys?: boolean
   createdAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -728,8 +642,6 @@ export type ResultSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tournamentId?: boolean
   userId?: boolean
   place?: boolean
-  knockouts?: boolean
-  rebuys?: boolean
   createdAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -740,12 +652,10 @@ export type ResultSelectScalar = {
   tournamentId?: boolean
   userId?: boolean
   place?: boolean
-  knockouts?: boolean
-  rebuys?: boolean
   createdAt?: boolean
 }
 
-export type ResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "place" | "knockouts" | "rebuys" | "createdAt", ExtArgs["result"]["result"]>
+export type ResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "place" | "createdAt", ExtArgs["result"]["result"]>
 export type ResultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -770,8 +680,6 @@ export type $ResultPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     tournamentId: string
     userId: string
     place: number
-    knockouts: number | null
-    rebuys: number | null
     createdAt: Date
   }, ExtArgs["result"]["result"]>
   composites: {}
@@ -1202,8 +1110,6 @@ export interface ResultFieldRefs {
   readonly tournamentId: Prisma.FieldRef<"Result", 'String'>
   readonly userId: Prisma.FieldRef<"Result", 'String'>
   readonly place: Prisma.FieldRef<"Result", 'Int'>
-  readonly knockouts: Prisma.FieldRef<"Result", 'Int'>
-  readonly rebuys: Prisma.FieldRef<"Result", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Result", 'DateTime'>
 }
     

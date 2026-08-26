@@ -1,5 +1,6 @@
 export * from "./enums.js";
 export * from "./common.js";
+export * from "./club.js";
 export * from "./user.js";
 export * from "./tournament.js";
 export * from "./rating.js";
