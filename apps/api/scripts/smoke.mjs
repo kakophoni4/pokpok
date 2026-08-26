@@ -189,6 +189,22 @@ async function main() {
   const drinkLine = drink.payload.payments.find((row) => row.kind === "drink");
   check("a drink is money, not chips", drinkLine?.chips === 0, JSON.stringify(drinkLine));
 
+  const tripleRebuy = await call("POST", `/tournaments/${tournamentId}/payments`, {
+    token: admin.accessToken,
+    body: {
+      userId: contenders[1].user.id,
+      kind: "rebuy",
+      amountRub: prices.payload.rebuyPriceRub * 3,
+      multiplier: 3,
+    },
+  });
+  check(
+    "a triple rebuy is one line with three stacks",
+    tripleRebuy.payload?.payments.find((row) => row.kind === "rebuy")?.chips ===
+      afterEntries.payload.startingStack * 3,
+    JSON.stringify(tripleRebuy.payload?.payments),
+  );
+
   const voided = await call(
     "DELETE",
     `/tournaments/${tournamentId}/payments/${drinkLine.id}`,
@@ -204,7 +220,9 @@ async function main() {
   check(
     "the till counts only live lines",
     money.payload?.totalRub ===
-      4 * prices.payload.entryPriceRub + prices.payload.addonPriceRub,
+      4 * prices.payload.entryPriceRub +
+        prices.payload.addonPriceRub +
+        3 * prices.payload.rebuyPriceRub,
     `${money.payload?.totalRub} ₽`,
   );
   const asPlayer = await call("GET", `/tournaments/${tournamentId}`, {

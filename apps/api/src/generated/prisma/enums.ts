@@ -57,6 +57,7 @@ export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof Regist
 
 export const PaymentKind = {
   entry: 'entry',
+  rebuy: 'rebuy',
   addon: 'addon',
   drink: 'drink',
   other: 'other'

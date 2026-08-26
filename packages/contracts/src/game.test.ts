@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldSize, freePlaces, nextPlace } from "./game.js";
+import { fieldSize, freePlaces, nextPlace, stacksOf } from "./game.js";
 import type { TournamentDetail } from "./tournament.js";
 
 function user(id: string) {
@@ -122,5 +122,24 @@ describe("freePlaces", () => {
       ],
     });
     expect(freePlaces(done)).toEqual([]);
+  });
+});
+
+describe("stacksOf", () => {
+  it("counts a triple add-on as three stacks, not one payment", () => {
+    expect(
+      stacksOf(
+        [
+          { kind: "addon", chips: 80_000 },
+          { kind: "addon", chips: 160_000 },
+        ],
+        "addon",
+        80_000,
+      ),
+    ).toBe(3);
+  });
+
+  it("treats a rebuy the same way as an entry stack", () => {
+    expect(stacksOf([{ kind: "rebuy", chips: 120_000 }], "rebuy", 40_000)).toBe(3);
   });
 });

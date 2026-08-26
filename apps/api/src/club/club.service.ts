@@ -27,6 +27,7 @@ export class ClubService {
     return {
       infoText: row.infoText,
       entryPriceRub: row.entryPriceRub,
+      rebuyPriceRub: row.rebuyPriceRub,
       addonPriceRub: row.addonPriceRub,
       drinkPriceRub: row.drinkPriceRub,
       adminChatId: row.adminChatId,
@@ -42,6 +43,7 @@ export class ClubService {
       data: {
         ...(input.infoText === undefined ? {} : { infoText: input.infoText }),
         ...(input.entryPriceRub === undefined ? {} : { entryPriceRub: input.entryPriceRub }),
+        ...(input.rebuyPriceRub === undefined ? {} : { rebuyPriceRub: input.rebuyPriceRub }),
         ...(input.addonPriceRub === undefined ? {} : { addonPriceRub: input.addonPriceRub }),
         ...(input.drinkPriceRub === undefined ? {} : { drinkPriceRub: input.drinkPriceRub }),
         ...(input.adminChatId === undefined ? {} : { adminChatId: input.adminChatId ?? null }),

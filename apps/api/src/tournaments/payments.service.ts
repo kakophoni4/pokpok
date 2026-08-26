@@ -44,7 +44,8 @@ export class PaymentsService {
 
     const season = await this.seasons.ratingConfig(tournament.seasonId);
     const config = effectiveConfig(tournament, season);
-    const chips = input.chips ?? chipsForKind(input.kind, config);
+    const units = input.multiplier ?? 1;
+    const chips = input.chips ?? chipsForKind(input.kind, config) * units;
 
     if (input.kind === "entry") {
       const alreadyIn = await this.prisma.payment.findFirst({
@@ -73,12 +74,17 @@ export class PaymentsService {
       });
 
       // A walk-in who never signed up still belongs on the roster: paying the
-      // entry fee is what makes somebody a participant.
+      // entry fee is what makes somebody a participant. A rebuy during the late
+      // period does the same, and puts a busted player back at the table.
       await tx.registration.upsert({
         where: { tournamentId_userId: { tournamentId, userId: input.userId } },
         create: { tournamentId, userId: input.userId, status: "registered", source: "admin" },
         update: { status: "registered", waitlistPosition: null },
       });
+
+      if (input.kind === "rebuy") {
+        await tx.result.deleteMany({ where: { tournamentId, userId: input.userId } });
+      }
     });
 
     await this.audit.record({
@@ -86,7 +92,13 @@ export class PaymentsService {
       action: "payment.add",
       entity: "Tournament",
       entityId: tournamentId,
-      after: { userId: input.userId, kind: input.kind, amountRub: input.amountRub, chips },
+      after: {
+        userId: input.userId,
+        kind: input.kind,
+        amountRub: input.amountRub,
+        chips,
+        multiplier: units,
+      },
     });
 
     return this.playerView(tournamentId, input.userId);

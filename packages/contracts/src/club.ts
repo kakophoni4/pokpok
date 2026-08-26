@@ -13,6 +13,7 @@ export const ClubSettings = z.object({
   infoText: z.string(),
   /** Defaults offered as buttons at the cash desk; the amount stays editable. */
   entryPriceRub: z.number().int().nonnegative(),
+  rebuyPriceRub: z.number().int().nonnegative(),
   addonPriceRub: z.number().int().nonnegative(),
   drinkPriceRub: z.number().int().nonnegative(),
   /** Supergroup the bot runs the live admin screens in. */
@@ -24,6 +25,7 @@ export type ClubSettings = z.infer<typeof ClubSettings>;
 export const UpdateClubSettingsInput = z.object({
   infoText: z.string().trim().max(4000).optional(),
   entryPriceRub: z.number().int().min(0).max(1_000_000).optional(),
+  rebuyPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   addonPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   drinkPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   adminChatId: z.string().trim().max(64).nullish(),

@@ -29,12 +29,14 @@ export type AggregateClubSettings = {
 
 export type ClubSettingsAvgAggregateOutputType = {
   entryPriceRub: number | null
+  rebuyPriceRub: number | null
   addonPriceRub: number | null
   drinkPriceRub: number | null
 }
 
 export type ClubSettingsSumAggregateOutputType = {
   entryPriceRub: number | null
+  rebuyPriceRub: number | null
   addonPriceRub: number | null
   drinkPriceRub: number | null
 }
@@ -43,6 +45,7 @@ export type ClubSettingsMinAggregateOutputType = {
   id: string | null
   infoText: string | null
   entryPriceRub: number | null
+  rebuyPriceRub: number | null
   addonPriceRub: number | null
   drinkPriceRub: number | null
   adminChatId: string | null
@@ -54,6 +57,7 @@ export type ClubSettingsMaxAggregateOutputType = {
   id: string | null
   infoText: string | null
   entryPriceRub: number | null
+  rebuyPriceRub: number | null
   addonPriceRub: number | null
   drinkPriceRub: number | null
   adminChatId: string | null
@@ -65,6 +69,7 @@ export type ClubSettingsCountAggregateOutputType = {
   id: number
   infoText: number
   entryPriceRub: number
+  rebuyPriceRub: number
   addonPriceRub: number
   drinkPriceRub: number
   adminChatId: number
@@ -76,12 +81,14 @@ export type ClubSettingsCountAggregateOutputType = {
 
 export type ClubSettingsAvgAggregateInputType = {
   entryPriceRub?: true
+  rebuyPriceRub?: true
   addonPriceRub?: true
   drinkPriceRub?: true
 }
 
 export type ClubSettingsSumAggregateInputType = {
   entryPriceRub?: true
+  rebuyPriceRub?: true
   addonPriceRub?: true
   drinkPriceRub?: true
 }
@@ -90,6 +97,7 @@ export type ClubSettingsMinAggregateInputType = {
   id?: true
   infoText?: true
   entryPriceRub?: true
+  rebuyPriceRub?: true
   addonPriceRub?: true
   drinkPriceRub?: true
   adminChatId?: true
@@ -101,6 +109,7 @@ export type ClubSettingsMaxAggregateInputType = {
   id?: true
   infoText?: true
   entryPriceRub?: true
+  rebuyPriceRub?: true
   addonPriceRub?: true
   drinkPriceRub?: true
   adminChatId?: true
@@ -112,6 +121,7 @@ export type ClubSettingsCountAggregateInputType = {
   id?: true
   infoText?: true
   entryPriceRub?: true
+  rebuyPriceRub?: true
   addonPriceRub?: true
   drinkPriceRub?: true
   adminChatId?: true
@@ -210,6 +220,7 @@ export type ClubSettingsGroupByOutputType = {
   id: string
   infoText: string
   entryPriceRub: number
+  rebuyPriceRub: number
   addonPriceRub: number
   drinkPriceRub: number
   adminChatId: string | null
@@ -244,6 +255,7 @@ export type ClubSettingsWhereInput = {
   id?: Prisma.StringFilter<"ClubSettings"> | string
   infoText?: Prisma.StringFilter<"ClubSettings"> | string
   entryPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
+  rebuyPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   drinkPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   adminChatId?: Prisma.StringNullableFilter<"ClubSettings"> | string | null
@@ -255,6 +267,7 @@ export type ClubSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
   adminChatId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -269,6 +282,7 @@ export type ClubSettingsWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ClubSettingsWhereInput | Prisma.ClubSettingsWhereInput[]
   infoText?: Prisma.StringFilter<"ClubSettings"> | string
   entryPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
+  rebuyPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   drinkPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   adminChatId?: Prisma.StringNullableFilter<"ClubSettings"> | string | null
@@ -280,6 +294,7 @@ export type ClubSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
   adminChatId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -299,6 +314,7 @@ export type ClubSettingsScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ClubSettings"> | string
   infoText?: Prisma.StringWithAggregatesFilter<"ClubSettings"> | string
   entryPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
+  rebuyPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
   drinkPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
   adminChatId?: Prisma.StringNullableWithAggregatesFilter<"ClubSettings"> | string | null
@@ -310,6 +326,7 @@ export type ClubSettingsCreateInput = {
   id?: string
   infoText?: string
   entryPriceRub?: number
+  rebuyPriceRub?: number
   addonPriceRub?: number
   drinkPriceRub?: number
   adminChatId?: string | null
@@ -321,6 +338,7 @@ export type ClubSettingsUncheckedCreateInput = {
   id?: string
   infoText?: string
   entryPriceRub?: number
+  rebuyPriceRub?: number
   addonPriceRub?: number
   drinkPriceRub?: number
   adminChatId?: string | null
@@ -332,6 +350,7 @@ export type ClubSettingsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   drinkPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   adminChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -343,6 +362,7 @@ export type ClubSettingsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   drinkPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   adminChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -354,6 +374,7 @@ export type ClubSettingsCreateManyInput = {
   id?: string
   infoText?: string
   entryPriceRub?: number
+  rebuyPriceRub?: number
   addonPriceRub?: number
   drinkPriceRub?: number
   adminChatId?: string | null
@@ -365,6 +386,7 @@ export type ClubSettingsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   drinkPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   adminChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -376,6 +398,7 @@ export type ClubSettingsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   drinkPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   adminChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -387,6 +410,7 @@ export type ClubSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
   adminChatId?: Prisma.SortOrder
@@ -396,6 +420,7 @@ export type ClubSettingsCountOrderByAggregateInput = {
 
 export type ClubSettingsAvgOrderByAggregateInput = {
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
 }
@@ -404,6 +429,7 @@ export type ClubSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
   adminChatId?: Prisma.SortOrder
@@ -415,6 +441,7 @@ export type ClubSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
   adminChatId?: Prisma.SortOrder
@@ -424,6 +451,7 @@ export type ClubSettingsMinOrderByAggregateInput = {
 
 export type ClubSettingsSumOrderByAggregateInput = {
   entryPriceRub?: Prisma.SortOrder
+  rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
   drinkPriceRub?: Prisma.SortOrder
 }
@@ -434,6 +462,7 @@ export type ClubSettingsSelect<ExtArgs extends runtime.Types.Extensions.Internal
   id?: boolean
   infoText?: boolean
   entryPriceRub?: boolean
+  rebuyPriceRub?: boolean
   addonPriceRub?: boolean
   drinkPriceRub?: boolean
   adminChatId?: boolean
@@ -445,6 +474,7 @@ export type ClubSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   infoText?: boolean
   entryPriceRub?: boolean
+  rebuyPriceRub?: boolean
   addonPriceRub?: boolean
   drinkPriceRub?: boolean
   adminChatId?: boolean
@@ -456,6 +486,7 @@ export type ClubSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   infoText?: boolean
   entryPriceRub?: boolean
+  rebuyPriceRub?: boolean
   addonPriceRub?: boolean
   drinkPriceRub?: boolean
   adminChatId?: boolean
@@ -467,6 +498,7 @@ export type ClubSettingsSelectScalar = {
   id?: boolean
   infoText?: boolean
   entryPriceRub?: boolean
+  rebuyPriceRub?: boolean
   addonPriceRub?: boolean
   drinkPriceRub?: boolean
   adminChatId?: boolean
@@ -474,7 +506,7 @@ export type ClubSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ClubSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "infoText" | "entryPriceRub" | "addonPriceRub" | "drinkPriceRub" | "adminChatId" | "timezone" | "updatedAt", ExtArgs["result"]["clubSettings"]>
+export type ClubSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "infoText" | "entryPriceRub" | "rebuyPriceRub" | "addonPriceRub" | "drinkPriceRub" | "adminChatId" | "timezone" | "updatedAt", ExtArgs["result"]["clubSettings"]>
 
 export type $ClubSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClubSettings"
@@ -483,6 +515,7 @@ export type $ClubSettingsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     id: string
     infoText: string
     entryPriceRub: number
+    rebuyPriceRub: number
     addonPriceRub: number
     drinkPriceRub: number
     /**
@@ -917,6 +950,7 @@ export interface ClubSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"ClubSettings", 'String'>
   readonly infoText: Prisma.FieldRef<"ClubSettings", 'String'>
   readonly entryPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
+  readonly rebuyPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
   readonly addonPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
   readonly drinkPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
   readonly adminChatId: Prisma.FieldRef<"ClubSettings", 'String'>

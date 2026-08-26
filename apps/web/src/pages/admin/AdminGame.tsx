@@ -1,5 +1,5 @@
 import type { PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
-import { fieldSize, freePlaces, nextPlace } from "@poker/contracts";
+import { fieldSize, freePlaces, nextPlace, stacksOf } from "@poker/contracts";
 import { useMemo, useState } from "react";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, cx } from "../../components/ui";
 import {
@@ -206,7 +206,12 @@ function PlayerRow({
 }: {
   seat: Seat;
   detail: TournamentDetail;
-  prices: { entryPriceRub: number; addonPriceRub: number; drinkPriceRub: number };
+  prices: {
+    entryPriceRub: number;
+    rebuyPriceRub: number;
+    addonPriceRub: number;
+    drinkPriceRub: number;
+  };
   locked: boolean;
 }) {
   const addPayment = useAddPayment(detail.id);
@@ -216,12 +221,14 @@ function PlayerRow({
 
   const priceOf: Record<Exclude<PaymentKind, "other">, number> = {
     entry: prices.entryPriceRub,
+    rebuy: prices.rebuyPriceRub,
     addon: prices.addonPriceRub,
     drink: prices.drinkPriceRub,
   };
 
   const tab: string[] = [];
   if (seat.paid.entry) tab.push("вход");
+  if (seat.paid.rebuys > 0) tab.push(`ребай ×${seat.paid.rebuys}`);
   if (seat.paid.addons > 0) tab.push(`адон ×${seat.paid.addons}`);
   if (seat.paid.drinks > 0) tab.push(`напиток ×${seat.paid.drinks}`);
 
@@ -249,23 +256,48 @@ function PlayerRow({
 
       {!locked && (
         <div className="mt-2 flex flex-wrap gap-2 border-t border-felt-800 pt-2">
-          {(["entry", "addon", "drink"] as const).map((kind) => (
-            <Button
-              key={kind}
-              size="sm"
-              variant="ghost"
-              disabled={busy || (kind === "entry" && seat.paid.entry)}
-              onClick={() =>
-                addPayment.mutate({
-                  userId: seat.user.id,
-                  kind,
-                  amountRub: priceOf[kind],
-                })
-              }
-            >
-              {PAYMENT_KIND_LABELS[kind]} {priceOf[kind]}
-            </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy || seat.paid.entry}
+            onClick={() =>
+              addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
+            }
+          >
+            Вход {priceOf.entry}
+          </Button>
+          {(["rebuy", "addon"] as const).map((kind) => (
+            <span key={kind} className="inline-flex gap-1">
+              {([1, 2, 3] as const).map((times) => (
+                <Button
+                  key={times}
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() =>
+                    addPayment.mutate({
+                      userId: seat.user.id,
+                      kind,
+                      amountRub: priceOf[kind] * times,
+                      multiplier: times,
+                    })
+                  }
+                >
+                  {times === 1 ? `${PAYMENT_KIND_LABELS[kind]} ${priceOf[kind]}` : `×${times}`}
+                </Button>
+              ))}
+            </span>
           ))}
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={() =>
+              addPayment.mutate({ userId: seat.user.id, kind: "drink", amountRub: priceOf.drink })
+            }
+          >
+            Напиток {priceOf.drink}
+          </Button>
 
           {seat.place == null && (
             <Button
@@ -341,7 +373,7 @@ type Seat = {
   chips: number;
   place: number | null;
   ratingPoints: number | null;
-  paid: { entry: boolean; addons: number; drinks: number };
+  paid: { entry: boolean; rebuys: number; addons: number; drinks: number };
   lastPaymentId: string | null;
 };
 
@@ -358,7 +390,7 @@ function seatsOf(detail: TournamentDetail): Seat[] {
       chips: 0,
       place: placeByUser.get(registration.user.id) ?? null,
       ratingPoints: null,
-      paid: { entry: false, addons: 0, drinks: 0 },
+      paid: { entry: false, rebuys: 0, addons: 0, drinks: 0 },
       lastPaymentId: null,
     });
   }
@@ -372,7 +404,8 @@ function seatsOf(detail: TournamentDetail): Seat[] {
       ratingPoints: player.ratingPoints,
       paid: {
         entry: player.payments.some((payment) => payment.kind === "entry"),
-        addons: player.payments.filter((payment) => payment.kind === "addon").length,
+        rebuys: stacksOf(player.payments, "rebuy", detail.startingStack),
+        addons: stacksOf(player.payments, "addon", detail.addonChips),
         drinks: player.payments.filter((payment) => payment.kind === "drink").length,
       },
       lastPaymentId: player.payments.at(-1)?.id ?? null,

@@ -196,6 +196,7 @@ async function main(): Promise<void> {
       id: "club",
       timezone: CLUB_TIMEZONE,
       entryPriceRub: ENTRY_PRICE,
+      rebuyPriceRub: ENTRY_PRICE,
       addonPriceRub: ADDON_PRICE,
       drinkPriceRub: DRINK_PRICE,
       infoText: [

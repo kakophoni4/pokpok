@@ -276,8 +276,17 @@ async function resolve(ctx: Context, profile: TelegramProfile): Promise<Target |
   return { kind: "card", detail, userId: card.userId, msgId: card.msgId };
 }
 
-const PRICE_OF: Record<PaymentKind, (prices: { entryPriceRub: number; addonPriceRub: number; drinkPriceRub: number }) => number> = {
+const PRICE_OF: Record<
+  PaymentKind,
+  (prices: {
+    entryPriceRub: number;
+    rebuyPriceRub: number;
+    addonPriceRub: number;
+    drinkPriceRub: number;
+  }) => number
+> = {
   entry: (prices) => prices.entryPriceRub,
+  rebuy: (prices) => prices.rebuyPriceRub,
   addon: (prices) => prices.addonPriceRub,
   drink: (prices) => prices.drinkPriceRub,
   other: () => 0,
@@ -285,6 +294,7 @@ const PRICE_OF: Record<PaymentKind, (prices: { entryPriceRub: number; addonPrice
 
 const KIND_LABEL: Record<PaymentKind, string> = {
   entry: "Вход",
+  rebuy: "Ребай",
   addon: "Адон",
   drink: "Напиток",
   other: "Прочее",
@@ -362,20 +372,24 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   }
 
   // ── Player card ──
-  const { userId, msgId } = target;
+  const { userId } = target;
 
   if (data.startsWith("p:")) {
-    const kind = data.slice(2) as PaymentKind;
+    const match = data.match(/^p:(entry|rebuy|addon|drink)(?::([123]))?$/);
+    if (!match) {
+      await ctx.answerCallbackQuery();
+      return;
+    }
+    const kind = match[1] as PaymentKind;
+    const multiplier = Number(match[2] ?? 1);
     const prices = await admin.settings(profile);
-    const amount = PRICE_OF[kind](prices);
+    const amount = PRICE_OF[kind](prices) * multiplier;
 
-    await admin.charge(profile, detail.id, userId, kind, amount);
-    await ctx.answerCallbackQuery({ text: `${KIND_LABEL[kind]}: ${rub(amount)}` });
-    await refresh(chatId, profile, await admin.detail(profile, detail.id), false);
-
-    const after = await admin.detail(profile, detail.id);
-    const seat = seatFor(after, userId);
-    if (seat) await editById(chatId, msgId, admin.card(seat, after, prices));
+    await admin.charge(profile, detail.id, userId, kind, amount, multiplier);
+    const toast =
+      multiplier > 1 ? `${KIND_LABEL[kind]} ×${multiplier}: ${rub(amount)}` : `${KIND_LABEL[kind]}: ${rub(amount)}`;
+    await ctx.answerCallbackQuery({ text: toast });
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
@@ -383,14 +397,14 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const place = nextPlace(detail);
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
   if (data === "unbust") {
     await admin.setPlace(profile, detail.id, userId, null);
     await ctx.answerCallbackQuery({ text: "Место снято" });
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
@@ -407,7 +421,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const place = Number(chosenPlace[1]);
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
@@ -423,7 +437,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const achievementId = data.slice(2);
     await admin.grant(profile, detail.id, userId, achievementId);
     await ctx.answerCallbackQuery({ text: "Ачивка выдана" });
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
@@ -435,32 +449,25 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     }
     await admin.voidPayment(profile, detail.id, seat.lastPaymentId);
     await ctx.answerCallbackQuery({ text: "Последняя оплата отменена" });
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
   if (data === "card") {
     await ctx.answerCallbackQuery();
-    await redrawCardAndBoard(chatId, profile, detail.id, userId, msgId);
+    await redrawEvening(chatId, profile, detail.id);
     return;
   }
 
   await ctx.answerCallbackQuery();
 });
 
-async function redrawCardAndBoard(
+async function redrawEvening(
   chatId: number,
   profile: TelegramProfile,
   tournamentId: string,
-  userId: string,
-  msgId: number,
 ): Promise<void> {
-  const detail = await admin.detail(profile, tournamentId);
-  const prices = await admin.settings(profile);
-  const seat = seatFor(detail, userId);
-
-  if (seat) await editById(chatId, msgId, admin.card(seat, detail, prices));
-  await refresh(chatId, profile, detail, false);
+  await refresh(chatId, profile, await admin.detail(profile, tournamentId), true);
 }
 
 /**
@@ -469,7 +476,7 @@ async function redrawCardAndBoard(
  * Parsed by hand rather than through grammY's command router: Telegram only marks
  * Latin words after a slash as commands, and the club's admins write in Russian.
  */
-const COMMAND = /^\/(вход|адон|напиток|место|ачивка|игрок|игра|обновить|entry|addon|drink|place|ach|player|game|sync)(?:@\S+)?\s*(.*)$/is;
+const COMMAND = /^\/(вход|адон|ребай|напиток|место|ачивка|игрок|игра|обновить|entry|addon|rebuy|drink|place|ach|player|game|sync)(?:@\S+)?\s*(.*)$/is;
 
 bot.chatType(GROUP).on("message:text", async (ctx) => {
   const profile = profileOf(ctx);
@@ -562,24 +569,25 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     const kind: PaymentKind =
       verb === "вход" || verb === "entry"
         ? "entry"
-        : verb === "адон" || verb === "addon"
-          ? "addon"
-          : "drink";
+        : verb === "ребай" || verb === "rebuy"
+          ? "rebuy"
+          : verb === "адон" || verb === "addon"
+            ? "addon"
+            : "drink";
 
     const prices = await admin.settings(profile);
-    const value = Number.isFinite(amount) && amount >= 0 ? amount : PRICE_OF[kind](prices);
-    await admin.charge(profile, detail.id, userId, kind, value);
-    await ctx.reply(`${KIND_LABEL[kind]}: ${rub(value)}.`);
+    const times = Number((rest.match(/[x×]\s*([123])/i) ?? [])[1] ?? 1);
+    const value =
+      Number.isFinite(amount) && amount >= 0 ? amount : PRICE_OF[kind](prices) * times;
+    await admin.charge(profile, detail.id, userId, kind, value, times);
+    await ctx.reply(
+      times > 1
+        ? `${KIND_LABEL[kind]} ×${times}: ${rub(value)}.`
+        : `${KIND_LABEL[kind]}: ${rub(value)}.`,
+    );
   }
 
-  const fresh = await admin.detail(profile, detail.id);
-  const seat = seatFor(fresh, userId);
-  const cardMsgId = fresh.adminScreens?.cards.find((row) => row.userId === userId)?.msgId;
-  const prices = await admin.settings(profile);
-  if (seat && cardMsgId != null) {
-    await editById(ctx.chat.id, cardMsgId, admin.card(seat, fresh, prices));
-  }
-  await refresh(ctx.chat.id, profile, fresh, false);
+  await redrawEvening(ctx.chat.id, profile, detail.id);
 });
 
 bot.catch(async ({ ctx, error }) => {

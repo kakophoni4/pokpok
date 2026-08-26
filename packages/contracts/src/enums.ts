@@ -35,10 +35,14 @@ export const RegistrationStatus = z.enum(["registered", "waitlist", "cancelled"]
 export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
 
 /**
- * What the club took money for. Entry and add-on also hand out chips, which is
- * what the rating is computed from; a drink is money only.
+ * What the club took money for. Entry, rebuy and add-on also hand out chips,
+ * which is what the rating is computed from; a drink is money only.
+ *
+ * A rebuy is the same stack as the entry, but may happen any number of times.
+ * Double and triple stacks are the same kind with `multiplier` 2 or 3, not
+ * extra kinds — one tap, one line on the tab.
  */
-export const PaymentKind = z.enum(["entry", "addon", "drink", "other"]);
+export const PaymentKind = z.enum(["entry", "rebuy", "addon", "drink", "other"]);
 export type PaymentKind = z.infer<typeof PaymentKind>;
 
 /**

@@ -12,6 +12,7 @@ export function AdminSettings() {
 
   const [infoText, setInfoText] = useState("");
   const [entryPriceRub, setEntry] = useState(500);
+  const [rebuyPriceRub, setRebuy] = useState(500);
   const [addonPriceRub, setAddon] = useState(500);
   const [drinkPriceRub, setDrink] = useState(200);
   const [timezone, setTimezone] = useState("Europe/Samara");
@@ -21,6 +22,7 @@ export function AdminSettings() {
     if (!settings.data) return;
     setInfoText(settings.data.infoText);
     setEntry(settings.data.entryPriceRub);
+    setRebuy(settings.data.rebuyPriceRub);
     setAddon(settings.data.addonPriceRub);
     setDrink(settings.data.drinkPriceRub);
     setTimezone(settings.data.timezone);
@@ -49,6 +51,7 @@ export function AdminSettings() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Price label="Вход, ₽" value={entryPriceRub} onChange={setEntry} />
+        <Price label="Ребай, ₽" value={rebuyPriceRub} onChange={setRebuy} />
         <Price label="Адон, ₽" value={addonPriceRub} onChange={setAddon} />
         <Price label="Напиток, ₽" value={drinkPriceRub} onChange={setDrink} />
         <div>
@@ -75,7 +78,7 @@ export function AdminSettings() {
       <Button
         loading={save.isPending}
         onClick={() =>
-          save.mutate({ infoText, entryPriceRub, addonPriceRub, drinkPriceRub, timezone })
+          save.mutate({ infoText, entryPriceRub, rebuyPriceRub, addonPriceRub, drinkPriceRub, timezone })
         }
       >
         Сохранить

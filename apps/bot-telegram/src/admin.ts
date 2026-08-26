@@ -7,7 +7,7 @@ import type {
   TournamentPlayer,
   TournamentSummary,
 } from "@poker/contracts";
-import { fieldSize, freePlaces, nextPlace } from "@poker/contracts";
+import { fieldSize, freePlaces, nextPlace, stacksOf } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import { clubDate, clubClock, escapeHtml, fit, num, points, rub } from "./format.js";
@@ -21,7 +21,7 @@ type Seat = {
   chips: number;
   place: number | null;
   ratingPoints: number | null;
-  paid: { entry: boolean; addons: number; drinks: number };
+  paid: { entry: boolean; rebuys: number; addons: number; drinks: number };
   lastPaymentId: string | null;
 };
 
@@ -73,12 +73,13 @@ export class AdminScreens {
     userId: string,
     kind: PaymentKind,
     amountRub: number,
+    multiplier = 1,
   ): Promise<TournamentPlayer> {
     return this.api.asUser<TournamentPlayer>(
       profile,
       "POST",
       `/tournaments/${tournamentId}/payments`,
-      { userId, kind, amountRub },
+      { userId, kind, amountRub, multiplier },
     );
   }
 
@@ -236,6 +237,7 @@ export class AdminScreens {
 
     const tab: string[] = [];
     if (seat.paid.entry) tab.push("вход");
+    if (seat.paid.rebuys > 0) tab.push(`ребай ×${seat.paid.rebuys}`);
     if (seat.paid.addons > 0) tab.push(`адон ×${seat.paid.addons}`);
     if (seat.paid.drinks > 0) tab.push(`напиток ×${seat.paid.drinks}`);
 
@@ -256,11 +258,18 @@ export class AdminScreens {
     const keyboard = new InlineKeyboard();
 
     if (detail.status !== "finished") {
+      keyboard.text(`Вход ${prices.entryPriceRub}`, "p:entry:1").row();
       keyboard
-        .text(`Вход ${prices.entryPriceRub}`, "p:entry")
-        .text(`Адон ${prices.addonPriceRub}`, "p:addon")
-        .text(`Напиток ${prices.drinkPriceRub}`, "p:drink")
+        .text(`Ребай ${prices.rebuyPriceRub}`, "p:rebuy:1")
+        .text("×2", "p:rebuy:2")
+        .text("×3", "p:rebuy:3")
         .row();
+      keyboard
+        .text(`Адон ${prices.addonPriceRub}`, "p:addon:1")
+        .text("×2", "p:addon:2")
+        .text("×3", "p:addon:3")
+        .row();
+      keyboard.text(`Напиток ${prices.drinkPriceRub}`, "p:drink:1").row();
 
       if (seat.place == null) {
         keyboard.text(`🚪 Выбыл — ${nextPlace(detail)} место`, "bust").row();
@@ -341,7 +350,7 @@ export function seats(detail: TournamentDetail): Seat[] {
       chips: 0,
       place: placeByUser.get(registration.user.id) ?? null,
       ratingPoints: pointsByUser.get(registration.user.id) ?? null,
-      paid: { entry: false, addons: 0, drinks: 0 },
+      paid: { entry: false, rebuys: 0, addons: 0, drinks: 0 },
       lastPaymentId: null,
     });
   }
@@ -355,7 +364,8 @@ export function seats(detail: TournamentDetail): Seat[] {
       ratingPoints: player.ratingPoints ?? null,
       paid: {
         entry: player.payments.some((payment) => payment.kind === "entry"),
-        addons: player.payments.filter((payment) => payment.kind === "addon").length,
+        rebuys: stacksOf(player.payments, "rebuy", detail.startingStack),
+        addons: stacksOf(player.payments, "addon", detail.addonChips),
         drinks: player.payments.filter((payment) => payment.kind === "drink").length,
       },
       lastPaymentId: player.payments.at(-1)?.id ?? null,

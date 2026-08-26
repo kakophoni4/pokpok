@@ -48,3 +48,20 @@ export function freePlaces(detail: TournamentDetail): number[] {
 export function nextPlace(detail: TournamentDetail): number {
   return freePlaces(detail)[0] ?? 1;
 }
+
+/**
+ * How many stacks of this kind sit on a player's tab. A triple add-on is one
+ * payment with three stacks, so counting rows would under-report it.
+ */
+export function stacksOf(
+  payments: { kind: string; chips: number }[],
+  kind: string,
+  stack: number,
+): number {
+  const rows = payments.filter((payment) => payment.kind === kind);
+  if (stack <= 0) return rows.length;
+  return rows.reduce((sum, payment) => {
+    if (payment.chips <= 0) return sum + 1;
+    return sum + Math.max(1, Math.round(payment.chips / stack));
+  }, 0);
+}

@@ -1974,6 +1974,7 @@ export const ClubSettingsScalarFieldEnum = {
   id: 'id',
   infoText: 'infoText',
   entryPriceRub: 'entryPriceRub',
+  rebuyPriceRub: 'rebuyPriceRub',
   addonPriceRub: 'addonPriceRub',
   drinkPriceRub: 'drinkPriceRub',
   adminChatId: 'adminChatId',

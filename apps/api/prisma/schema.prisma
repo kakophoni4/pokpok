@@ -56,6 +56,7 @@ enum RegistrationStatus {
 /// what the rating is computed from; a drink is money only.
 enum PaymentKind {
   entry
+  rebuy
   addon
   drink
   other
@@ -329,6 +330,7 @@ model ClubSettings {
   id            String   @id @default("club")
   infoText      String   @default("")
   entryPriceRub Int      @default(500)
+  rebuyPriceRub Int      @default(500)
   addonPriceRub Int      @default(500)
   drinkPriceRub Int      @default(200)
   /// Supergroup the bot runs the live admin screens in.

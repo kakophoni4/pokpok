@@ -157,6 +157,7 @@ export const REGISTRATION_STATUS_LABELS: Record<string, string> = {
 
 export const PAYMENT_KIND_LABELS: Record<string, string> = {
   entry: "Вход",
+  rebuy: "Ребай",
   addon: "Адон",
   drink: "Напиток",
   other: "Прочее",

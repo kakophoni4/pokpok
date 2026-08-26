@@ -29,7 +29,7 @@ export function effectiveConfig(tournament: Overrides, season: RatingConfig): Ef
 
 /** Chips a payment of this kind hands out under the given settings. */
 export function chipsForKind(kind: string, config: EffectiveConfig): number {
-  if (kind === "entry") return config.startingStack;
+  if (kind === "entry" || kind === "rebuy") return config.startingStack;
   if (kind === "addon") return config.addonChips;
   return 0;
 }

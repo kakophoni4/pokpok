@@ -188,6 +188,11 @@ export const AddPaymentInput = z.object({
   userId: Id,
   kind: PaymentKind,
   amountRub: z.number().int().min(0).max(1_000_000),
+  /**
+   * Double or triple stack in one tap. Multiplies the chips that kind would
+   * normally hand out; the amount is whatever the till already sent.
+   */
+  multiplier: z.number().int().min(1).max(3).optional(),
   chips: z.number().int().nonnegative().nullish(),
   note: z.string().trim().max(200).nullish(),
 });
