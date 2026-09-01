@@ -3,17 +3,16 @@ import { useAuth } from "../auth/auth-context";
 import { PlayerProfile } from "../components/PlayerProfile";
 import { Badge, Button, ErrorState, Loading } from "../components/ui";
 import { useMyStats, useUserAchievements } from "../lib/queries";
-import { platform } from "../platform/platform";
 
 export function ProfilePage() {
-  const { user, status, logout, can } = useAuth();
+  const { user, status, signingIn, logout, can } = useAuth();
   const navigate = useNavigate();
   const stats = useMyStats(status === "authenticated");
   const achievements = useUserAchievements(user?.id);
 
   if (status === "loading") return <Loading />;
   if (status === "anonymous") {
-    if (platform.isEmbedded) return <Loading label="Входим через Telegram…" />;
+    if (signingIn) return <Loading label="Входим через Telegram…" />;
     return <Navigate to="/login" replace />;
   }
   if (stats.isPending) return <Loading label="Собираем статистику…" />;

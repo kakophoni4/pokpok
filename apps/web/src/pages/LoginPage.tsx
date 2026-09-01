@@ -8,7 +8,7 @@ import { platform } from "../platform/platform";
 const IS_DEV = import.meta.env.DEV;
 
 export function LoginPage() {
-  const { status, loginAsDev, loginWithMiniApp } = useAuth();
+  const { status, signingIn, loginAsDev, loginWithMiniApp } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("Ferz");
@@ -37,21 +37,36 @@ export function LoginPage() {
     };
   }, [status, loginWithMiniApp, navigate]);
 
-  if (status === "loading" || (platform.isEmbedded && status === "anonymous" && busy && !error)) {
+  if (status === "loading" || (status === "anonymous" && signingIn && busy && !error)) {
     return <Loading label="Входим через Telegram…" />;
   }
   if (status === "authenticated") return <Navigate to="/" replace />;
 
+  // Inside Telegram there is no widget to fall back to, so a failed hand-off
+  // needs a button of its own rather than a spinner that says "trying" forever.
   if (platform.isEmbedded) {
     return (
       <div className="mx-auto max-w-md">
         <Card className="space-y-3 p-5 text-center">
           <h1 className="text-xl font-semibold">Вход из Telegram</h1>
           <p className="text-sm text-stone-400">
-            Откройте клуб из меню бота — вход происходит сам, без кнопки.
+            Telegram не передал данные входа. Закройте клуб полностью и откройте его из меню бота.
           </p>
           {error && <p className="text-sm text-chip-red">{error}</p>}
-          <p className="text-xs text-stone-500">Пробуем ещё раз…</p>
+          <Button
+            className="w-full"
+            loading={busy}
+            onClick={() => {
+              setBusy(true);
+              setError(null);
+              loginWithMiniApp()
+                .then(() => navigate("/", { replace: true }))
+                .catch((cause: Error) => setError(cause.message))
+                .finally(() => setBusy(false));
+            }}
+          >
+            Попробовать снова
+          </Button>
         </Card>
       </div>
     );

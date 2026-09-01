@@ -44,7 +44,6 @@ declare global {
   interface Window {
     Telegram?: { WebApp?: TelegramWebApp; WebView?: TelegramWebView };
     TelegramWebviewProxy?: unknown;
-    TelegramGameProxy?: unknown;
     __TG_INIT_DATA__?: string;
     __TG_PLATFORM__?: string;
     webkit?: { messageHandlers?: { TelegramWebView?: unknown } };
@@ -109,9 +108,12 @@ function hashInitData(): string | null {
 /**
  * True inside a Telegram WebView even when initData has not landed yet.
  *
- * The SDK object exists on every page of this site, so its mere presence is
- * not enough. Launch params live in the hash, then in Telegram.WebView.initParams
- * after the SDK strips the hash, then in sessionStorage for the rest of the visit.
+ * Every signal here has to be one a plain browser cannot produce. The SDK
+ * script alone is not one: loading it defines `Telegram.WebApp` *and*
+ * `TelegramGameProxy` on any page, and treating those as proof left ordinary
+ * visitors staring at «Входим…» with no way to sign in. Launch params live in
+ * the hash, then in Telegram.WebView.initParams once the SDK strips the hash,
+ * then in sessionStorage for the rest of the visit.
  */
 function looksLikeTelegram(): boolean {
   if (readInitData()) return true;
@@ -119,10 +121,9 @@ function looksLikeTelegram(): boolean {
     window.__TG_PLATFORM__ || stored(PLATFORM_KEY) || sdkInitParams().tgWebAppPlatform || "";
   if (platform && platform !== "unknown") return true;
   if (hashParams().get("tgWebAppData") || hashParams().get("tgWebAppPlatform")) return true;
+  // Injected by the Telegram client itself, not by the SDK script.
   if (typeof window.TelegramWebviewProxy !== "undefined") return true;
-  if (typeof window.TelegramGameProxy !== "undefined") return true;
   if (window.webkit?.messageHandlers?.TelegramWebView) return true;
-  if (/Telegram/i.test(window.navigator.userAgent)) return true;
   const app = telegramShell();
   if (app?.platform && app.platform !== "unknown") return true;
   try {

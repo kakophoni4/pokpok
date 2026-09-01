@@ -58,9 +58,71 @@ export function clubWhen(iso: string): string {
 
 /** True when the timestamp falls on today's date in the club's timezone. */
 export function isToday(iso: string): boolean {
-  const asDay = (date: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(date);
-  return asDay(new Date(iso)) === asDay(new Date());
+  return clubDayKey(new Date(iso)) === clubDayKey(new Date());
+}
+
+/** "2026-09-04" on the club's wall clock, safe to compare and subtract. */
+function clubDayKey(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(date);
+}
+
+function daysUntil(iso: string, now: Date): number {
+  const from = Date.parse(`${clubDayKey(now)}T00:00:00Z`);
+  const to = Date.parse(`${clubDayKey(new Date(iso))}T00:00:00Z`);
+  return Math.round((to - from) / 86_400_000);
+}
+
+/**
+ * How a person would say it out loud: "сегодня в 19:00", "в пятницу, 19:00",
+ * "4 октября, 19:00". Anything further out than a week gets the date, because
+ * "в пятницу" stops being useful once there is more than one Friday left.
+ */
+export function clubMoment(iso: string, now = new Date()): string {
+  const clock = clubClock(iso);
+  const days = daysUntil(iso, now);
+
+  if (days === 0) return `сегодня в ${clock}`;
+  if (days === 1) return `завтра в ${clock}`;
+  if (days === -1) return `вчера в ${clock}`;
+
+  if (days > 1 && days < 7) {
+    const weekday = new Intl.DateTimeFormat("ru-RU", {
+      timeZone: timezone,
+      weekday: "long",
+    }).format(new Date(iso));
+    return `${weekdayPrefix(weekday)}, ${clock}`;
+  }
+
+  const date = new Intl.DateTimeFormat("ru-RU", {
+    timeZone: timezone,
+    day: "numeric",
+    month: "long",
+  }).format(new Date(iso));
+  return `${date}, ${clock}`;
+}
+
+/** "среда" → "в среду": Russian wants the accusative after "в". */
+function weekdayPrefix(weekday: string): string {
+  const accusative = weekday.endsWith("а") ? `${weekday.slice(0, -1)}у` : weekday;
+  return `в ${accusative}`;
+}
+
+/**
+ * Seats as a bar: `▰▰▰▰▱▱▱▱`. A number tells you how full a game is only after
+ * you have read both halves of it; the bar tells you before you read anything.
+ */
+export function gauge(taken: number, total: number, width = 10): string {
+  if (total <= 0) return "";
+  if (taken >= total) return "▰".repeat(width);
+  // A lone sign-up still has to show, and a table with a seat left must not be
+  // rounded up into looking full — that is the one thing the bar is read for.
+  const shown = Math.min(width - 1, Math.max(taken > 0 ? 1 : 0, Math.round((taken / total) * width)));
+  return `${"▰".repeat(shown)}${"▱".repeat(width - shown)}`;
+}
+
+/** Telegram's quote block: the cheapest way to group lines into a card. */
+export function quote(lines: (string | null | undefined | false)[]): string {
+  return `<blockquote>${lines.filter(Boolean).join("\n")}</blockquote>`;
 }
 
 /** 1234567 → "1 234 567", with a narrow space Telegram renders reliably. */
@@ -105,11 +167,11 @@ export function playerLabel(user: { nickname: string; displayName?: string | nul
 }
 
 const GREETINGS: ((name: string) => string)[] = [
-  (name) => `Добрый вечер, <b>${name}</b>.\nКлуб спортивного покера · Ульяновск.`,
-  (name) => `<b>${name}</b>, рады вас видеть.\nИграем в Ульяновске.`,
-  (name) => `Здравствуйте, <b>${name}</b>.\nУльяновск, клуб спортивного покера.`,
-  (name) => `<b>${name}</b>, добро пожаловать.\nСтолы ждут в Ульяновске.`,
-  (name) => `Приветствуем, <b>${name}</b>.\nВечер в Ульяновске начинается здесь.`,
+  (name) => `Добрый вечер, <b>${name}</b>.`,
+  (name) => `<b>${name}</b>, рады вас видеть.`,
+  (name) => `Здравствуйте, <b>${name}</b>.`,
+  (name) => `<b>${name}</b>, добро пожаловать за стол.`,
+  (name) => `Приветствуем, <b>${name}</b>.`,
 ];
 
 function hashSeed(value: string): number {

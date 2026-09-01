@@ -8,7 +8,15 @@ import type {
 } from "@poker/contracts";
 import { hasRole } from "@poker/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { api, refreshSession, setAccessToken } from "../lib/api";
 import { platform } from "../platform/platform";
@@ -16,6 +24,12 @@ import { platform } from "../platform/platform";
 type AuthState = {
   user: MeUser | null;
   status: "loading" | "authenticated" | "anonymous";
+  /**
+   * The Telegram hand-off is still in flight. Screens wait on this rather than
+   * on "are we inside Telegram", so a launch that never delivers initData ends
+   * in an ordinary sign-in screen instead of a spinner that never stops.
+   */
+  signingIn: boolean;
   can: (role: UserRole) => boolean;
   loginWithTelegramWidget: (payload: Record<string, unknown>) => Promise<void>;
   /** Signs in from Telegram Mini App initData. Throws if Telegram sent nothing. */
@@ -31,9 +45,15 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+/** How long a Mini App launch gets to produce initData before we give up. */
+const TELEGRAM_HANDOFF_MS = 12_000;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<MeUser | null>(null);
   const [status, setStatus] = useState<AuthState["status"]>("loading");
+  const [signingIn, setSigningIn] = useState(() => platform.isEmbedded);
+  // Absolute, so re-running the poll effect cannot extend the wait.
+  const handoffDeadline = useRef(Date.now() + TELEGRAM_HANDOFF_MS);
   const queryClient = useQueryClient();
 
   const applySession = useCallback(
@@ -101,28 +121,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * whether or not we already decided this is a Mini App — detection is racy.
    */
   useEffect(() => {
-    if (status === "authenticated") return;
+    if (status === "authenticated") {
+      setSigningIn(false);
+      return;
+    }
+
     let cancelled = false;
+    let timer = 0;
+
     const tick = (): void => {
+      if (cancelled) return;
+      if (Date.now() >= handoffDeadline.current) {
+        window.clearInterval(timer);
+        setSigningIn(false);
+        return;
+      }
       platform.ready();
       const initData = platform.telegramInitData();
-      if (!initData || cancelled) return;
+      if (!initData) return;
       void (async () => {
         try {
           const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
           if (!cancelled) applySession(session);
         } catch {
-          /* next tick retries */
+          /* next tick retries until the deadline */
         }
       })();
     };
+
     tick();
-    const timer = window.setInterval(tick, 250);
-    const stop = window.setTimeout(() => window.clearInterval(timer), 15_000);
+    timer = window.setInterval(tick, 250);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
-      window.clearTimeout(stop);
     };
   }, [status, applySession]);
 
@@ -130,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       status,
+      signingIn,
       can: (role) => (user ? hasRole(user.role, role) : false),
 
       loginWithTelegramWidget: async (payload) => {
@@ -174,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(await api.get<MeUser>("/auth/me"));
       },
     }),
-    [user, status, applySession, queryClient],
+    [user, status, signingIn, applySession, queryClient],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -38,6 +38,7 @@ async function edit(ctx: Context, screen: Screen): Promise<void> {
     await ctx.editMessageText(screen.text, {
       parse_mode: "HTML",
       reply_markup: screen.keyboard,
+      link_preview_options: { is_disabled: true },
     });
   } catch (error) {
     if (error instanceof GrammyError && error.description.includes("not modified")) return;
@@ -79,9 +80,17 @@ function delay(ms: number): Promise<void> {
 
 // ─── Player: one screen, rewritten in place ───────────────────────────────────
 
+async function sendScreen(ctx: Context, profile: TelegramProfile, route: string): Promise<void> {
+  const screen = await player.render(route, profile);
+  await ctx.reply(screen.text, {
+    parse_mode: "HTML",
+    reply_markup: screen.keyboard,
+    link_preview_options: { is_disabled: true },
+  });
+}
+
 async function sendHome(ctx: Context, profile: TelegramProfile): Promise<void> {
-  const screen = await player.render("home", profile);
-  await ctx.reply(screen.text, { parse_mode: "HTML", reply_markup: screen.keyboard });
+  await sendScreen(ctx, profile, "home");
 }
 
 bot.chatType("private").command(["start", "menu"], async (ctx) => {
@@ -98,6 +107,24 @@ bot.chatType("private").command(["start", "menu"], async (ctx) => {
 
   await sendHome(ctx, profile);
 });
+
+/** Typed shortcuts to the same screens the buttons open. */
+const SHORTCUTS: Record<string, string> = {
+  schedule: "sched",
+  rating: "rate",
+  me: "me",
+  who: "who",
+  club: "info",
+};
+
+bot
+  .chatType("private")
+  .command(Object.keys(SHORTCUTS), async (ctx) => {
+    const profile = profileOf(ctx);
+    const verb = ctx.message?.text?.slice(1).split(/[\s@]/)[0]?.toLowerCase();
+    if (!profile || !verb) return;
+    await sendScreen(ctx, profile, SHORTCUTS[verb] ?? "home");
+  });
 
 bot.chatType("private").callbackQuery(LOGIN_CALLBACK, async (ctx) => {
   const profile = profileOf(ctx);
@@ -605,19 +632,49 @@ bot.catch(async ({ ctx, error }) => {
   }
 });
 
-await bot.api.setMyCommands([{ command: "start", description: "Открыть меню клуба" }]);
-try {
-  await bot.api.setChatMenuButton({
-    menu_button: {
-      type: "web_app",
-      text: "Клуб",
-      web_app: { url: config.miniAppUrl },
-    },
-  });
-} catch (error) {
-  console.error("[bot] could not set Mini App menu button:", error);
-}
+await bot.api.setMyCommands([
+  { command: "start", description: "Меню клуба" },
+  { command: "schedule", description: "Расписание игр" },
+  { command: "rating", description: "Рейтинг сезона" },
+  { command: "me", description: "Мой профиль" },
+  { command: "who", description: "Кто записан" },
+  { command: "club", description: "О клубе" },
+]);
 await bot.api.setMyCommands([], { scope: { type: "all_group_chats" } });
+
+/**
+ * The bot's own profile text. It is the first thing a new player sees — before
+ * any button exists to press — so it is worth setting from code rather than
+ * leaving whatever was typed into BotFather once.
+ */
+const PROFILE_TEXTS = {
+  short: "Клуб спортивного покера: расписание, запись за стол и рейтинг сезона.",
+  full: [
+    "Клуб спортивного покера.",
+    "",
+    "Здесь вы записываетесь на турниры, смотрите состав вечера и следите за рейтингом сезона.",
+    "Нажмите «Начать» — меню откроется само.",
+  ].join("\n"),
+};
+
+for (const [what, set] of [
+  ["short description", () => bot.api.setMyShortDescription(PROFILE_TEXTS.short)],
+  ["description", () => bot.api.setMyDescription(PROFILE_TEXTS.full)],
+  [
+    "Mini App menu button",
+    () =>
+      bot.api.setChatMenuButton({
+        menu_button: { type: "web_app", text: "Клуб", web_app: { url: config.miniAppUrl } },
+      }),
+  ],
+] as const) {
+  try {
+    await set();
+  } catch (error) {
+    // Telegram rate-limits profile edits; a restart must not die over cosmetics.
+    console.error(`[bot] could not set ${what}:`, error);
+  }
+}
 
 const stop = () => void bot.stop();
 process.once("SIGINT", stop);

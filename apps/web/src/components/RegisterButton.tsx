@@ -11,7 +11,7 @@ import { Button } from "./ui";
  * about who may register and when live in exactly one place on the client.
  */
 export function RegisterButton({ tournament }: { tournament: TournamentSummary }) {
-  const { user } = useAuth();
+  const { user, signingIn } = useAuth();
   const navigate = useNavigate();
   const register = useRegister(tournament.id);
   const cancel = useCancelRegistration(tournament.id);
@@ -23,7 +23,7 @@ export function RegisterButton({ tournament }: { tournament: TournamentSummary }
   const tooLate = closesAt != null && closesAt < new Date();
 
   if (!user) {
-    if (platform.isEmbedded) {
+    if (signingIn) {
       return (
         <Button variant="secondary" className="w-full" disabled>
           Входим…

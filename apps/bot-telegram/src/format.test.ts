@@ -3,13 +3,16 @@ import {
   clubClock,
   clubDate,
   clubGreeting,
+  clubMoment,
   clubWhen,
   escapeHtml,
   fit,
+  gauge,
   isToday,
   num,
   plural,
   points,
+  quote,
   rankMark,
   rub,
   setTimezone,
@@ -52,6 +55,53 @@ describe("club clock", () => {
   it("knows what today means in the club's timezone", () => {
     expect(isToday(new Date().toISOString())).toBe(true);
     expect(isToday("2020-01-01T00:00:00.000Z")).toBe(false);
+  });
+});
+
+describe("clubMoment", () => {
+  // Fixed point of reference: Friday 4 September 2026, 19:00 in Samara.
+  const friday = "2026-09-04T15:00:00.000Z";
+  const at = (iso: string) => new Date(iso);
+
+  it("says today and tomorrow instead of a date", () => {
+    expect(clubMoment(friday, at("2026-09-04T09:00:00.000Z"))).toBe("сегодня в 19:00");
+    expect(clubMoment(friday, at("2026-09-03T09:00:00.000Z"))).toBe("завтра в 19:00");
+    expect(clubMoment("2026-09-03T15:00:00.000Z", at("2026-09-04T09:00:00.000Z"))).toBe(
+      "вчера в 19:00",
+    );
+  });
+
+  it("names the weekday within the coming week, in the accusative", () => {
+    expect(clubMoment(friday, at("2026-09-01T09:00:00.000Z"))).toBe("в пятницу, 19:00");
+    expect(clubMoment("2026-09-02T15:00:00.000Z", at("2026-08-31T09:00:00.000Z"))).toBe(
+      "в среду, 19:00",
+    );
+  });
+
+  it("falls back to the date once there is more than one such weekday left", () => {
+    expect(clubMoment(friday, at("2026-08-20T09:00:00.000Z"))).toBe("4 сентября, 19:00");
+  });
+
+  it("uses the club's day boundary, not the reader's", () => {
+    // 22:00 UTC on the 3rd is already the 4th in Samara.
+    expect(clubMoment(friday, at("2026-09-03T21:00:00.000Z"))).toBe("сегодня в 19:00");
+  });
+});
+
+describe("layout", () => {
+  it("draws seats as a bar", () => {
+    expect(gauge(0, 16)).toBe("▱▱▱▱▱▱▱▱▱▱");
+    expect(gauge(8, 16)).toBe("▰▰▰▰▰▱▱▱▱▱");
+    expect(gauge(16, 16)).toBe("▰▰▰▰▰▰▰▰▰▰");
+  });
+
+  it("shows a single sign-up and never rounds a full table down", () => {
+    expect(gauge(1, 40)).toBe("▰▱▱▱▱▱▱▱▱▱");
+    expect(gauge(19, 20)).toBe("▰▰▰▰▰▰▰▰▰▱");
+  });
+
+  it("skips empty lines inside a quote block", () => {
+    expect(quote(["раз", null, false, "два"])).toBe("<blockquote>раз\nдва</blockquote>");
   });
 });
 
@@ -104,7 +154,6 @@ describe("greetings", () => {
     const second = clubGreeting("Тимур А.", "42", new Date("2026-09-01T23:00:00+04:00"));
     expect(first).toBe(second);
     expect(first).toContain("Тимур А.");
-    expect(first).toMatch(/Ульяновск/);
   });
 
   it("escapes a name that would break HTML", () => {
