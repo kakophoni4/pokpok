@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { useTelegramLogin } from "../auth/useTelegramLogin";
@@ -12,12 +12,34 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("Ferz");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(platform.isEmbedded);
   const [agreed, setAgreed] = useState(platform.isEmbedded);
-  const telegram = useTelegramLogin(status === "anonymous");
+  const telegram = useTelegramLogin(status === "anonymous" && !platform.isEmbedded);
 
-  if (status === "loading") return <Loading />;
-  if (status === "authenticated") return <Navigate to="/me" replace />;
+  useEffect(() => {
+    if (!platform.isEmbedded || status !== "anonymous") return;
+    let cancelled = false;
+    setBusy(true);
+    setError(null);
+    loginWithMiniApp()
+      .then(() => {
+        if (!cancelled) navigate("/", { replace: true });
+      })
+      .catch((cause: Error) => {
+        if (!cancelled) setError(cause.message);
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, loginWithMiniApp, navigate]);
+
+  if (status === "loading" || (platform.isEmbedded && status === "anonymous" && busy && !error)) {
+    return <Loading label="Входим через Telegram…" />;
+  }
+  if (status === "authenticated") return <Navigate to="/" replace />;
 
   if (platform.isEmbedded) {
     return (
@@ -25,36 +47,10 @@ export function LoginPage() {
         <Card className="space-y-3 p-5 text-center">
           <h1 className="text-xl font-semibold">Вход из Telegram</h1>
           <p className="text-sm text-stone-400">
-            Клуб открыт из бота — вход должен произойти сам. Если этого не случилось,
-            нажмите ещё раз.
+            Откройте клуб из меню бота — вход происходит сам, без кнопки.
           </p>
           {error && <p className="text-sm text-chip-red">{error}</p>}
-          <Button
-            className="w-full"
-            loading={busy}
-            onClick={() => {
-              setBusy(true);
-              setError(null);
-              loginWithMiniApp()
-                .then(() => navigate("/me"))
-                .catch((cause: Error) => setError(cause.message))
-                .finally(() => setBusy(false));
-            }}
-          >
-            Войти
-          </Button>
-          {telegram.ticket && (
-            <button
-              type="button"
-              className="w-full text-sm text-stone-400 underline decoration-dotted"
-              onClick={() => {
-                telegram.follow();
-                platform.openLink(telegram.ticket!.url);
-              }}
-            >
-              Подтвердить вход в боте
-            </button>
-          )}
+          <p className="text-xs text-stone-500">Пробуем ещё раз…</p>
         </Card>
       </div>
     );

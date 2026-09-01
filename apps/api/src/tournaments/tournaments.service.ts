@@ -140,6 +140,7 @@ export class TournamentsService {
           chipsInPlay,
           divisor: config.divisor,
           multiplier: tournament.ratingMultiplier,
+          floor: tournament.minRating ?? 0,
         }),
       ),
       registrations: tournament.registrations.map((row) => ({
@@ -348,18 +349,31 @@ export class TournamentsService {
         ? [query.status]
         : undefined;
 
-    // All date bounds are merged into one filter; setting `startsAt` twice would
-    // silently drop the earlier condition.
+    // Explicit from/to still bound the calendar. Upcoming vs past is the
+    // tournament's status, not whether its start date already happened: editing
+    // a date must not hide a live event, and a finished game today belongs in
+    // «Завершённые».
     const startsAt: Prisma.DateTimeFilter = {};
-    const today = startOfDay(new Date());
-    if (query.scope === "upcoming") startsAt.gte = today;
-    if (query.scope === "past") startsAt.lt = today;
     if (query.from) startsAt.gte = new Date(query.from);
     if (query.to) startsAt.lte = new Date(query.to);
 
+    const live = ["announced", "reg_open", "reg_closed", "running"] as const;
+    const past = ["finished", "cancelled"] as const;
+
+    let statusFilter: Prisma.TournamentWhereInput["status"];
+    if (statuses) {
+      statusFilter = { in: statuses };
+    } else if (query.scope === "upcoming") {
+      statusFilter = { in: [...live] };
+    } else if (query.scope === "past") {
+      statusFilter = { in: [...past] };
+    } else {
+      // Drafts stay staff-only.
+      statusFilter = { not: "draft" };
+    }
+
     return {
-      // Drafts are staff-only; they never reach the public schedule.
-      status: statuses ? { in: statuses } : { not: "draft" },
+      status: statusFilter,
       ...(query.seasonId ? { seasonId: query.seasonId } : {}),
       ...(Object.keys(startsAt).length > 0 ? { startsAt } : {}),
     };
@@ -515,8 +529,3 @@ function toSummary(
   };
 }
 
-function startOfDay(date: Date): Date {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}

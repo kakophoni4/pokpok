@@ -92,6 +92,14 @@ export function fit(value: string, max = 60): string {
   return value.length <= max ? value : `${value.slice(0, max - 1)}…`;
 }
 
+/** 🥇 / 🥈 / 🥉 for the podium, then "4." */
+export function rankMark(rank: number): string {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return `${rank}.`;
+}
+
 export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
   return formatPlayerName(user.displayName, user.nickname);
 }

@@ -24,8 +24,27 @@
     <meta name="apple-mobile-web-app-title" content="Покер клуб" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    <!-- Loaded lazily: only the Mini App shell needs it, and it must come from Telegram. -->
+    <!-- Loaded before React so Mini App ready()/initData exist on the first paint. -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (function () {
+        try {
+          var app = window.Telegram && window.Telegram.WebApp;
+          if (app) {
+            app.ready();
+            app.expand();
+            if (app.initData) window.__TG_INIT_DATA__ = app.initData;
+            if (app.platform && app.platform !== "unknown") window.__TG_PLATFORM__ = app.platform;
+          }
+          var hash = location.hash.charAt(0) === "#" ? location.hash.slice(1) : location.hash;
+          var params = new URLSearchParams(hash);
+          var data = params.get("tgWebAppData");
+          var plat = params.get("tgWebAppPlatform");
+          if (data) window.__TG_INIT_DATA__ = data;
+          if (plat) window.__TG_PLATFORM__ = plat;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

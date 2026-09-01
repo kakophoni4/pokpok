@@ -4,6 +4,8 @@ import type {
   AdminUpdateUserInput,
   ClubMenuItem,
   ClubSettings,
+  ClubVenue,
+  ClubVenueInput,
   CreateAchievementInput,
   CreateClubMenuItemInput,
   CreateSeasonInput,
@@ -343,6 +345,40 @@ export function useDeleteMenuItem() {
   return useMutation({
     mutationFn: (id: string) => api.delete(`/club/menu/${id}`),
     onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
+  });
+}
+
+export function useCreateVenue() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ClubVenueInput) => api.post<ClubVenue>("/club/venues", input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["club"] });
+      void client.invalidateQueries({ queryKey: ["tournaments"] });
+    },
+  });
+}
+
+export function useUpdateVenue() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: ClubVenueInput }) =>
+      api.patch<ClubVenue>(`/club/venues/${id}`, input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["club"] });
+      void client.invalidateQueries({ queryKey: ["tournaments"] });
+    },
+  });
+}
+
+export function useDeleteVenue() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/club/venues/${id}`),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["club"] });
+      void client.invalidateQueries({ queryKey: ["tournaments"] });
+    },
   });
 }
 

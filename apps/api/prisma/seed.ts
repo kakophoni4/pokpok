@@ -289,7 +289,7 @@ async function main(): Promise<void> {
         seasonId: season.id,
         venueId: venue.id,
         title: template.title,
-        description: "Спортивный покер без денежных ставок. Регистрация до старта.",
+        description: null,
         startsAt,
         regOpensAt: clubTime(-template.daysAgo - 7, 12),
         regClosesAt: startsAt,
@@ -476,8 +476,7 @@ async function main(): Promise<void> {
         seasonId: season.id,
         venueId: venue.id,
         title: template.title,
-        description:
-          "Спортивный покер без денежных ставок. Приходите за 30 минут до старта на регистрацию.",
+        description: null,
         startsAt,
         regOpensAt: clubTime(template.inDays - 10, 12),
         regClosesAt: new Date(startsAt.getTime() - 60 * 60 * 1000),

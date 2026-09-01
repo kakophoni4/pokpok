@@ -29,7 +29,10 @@ export const TournamentSummary = z.object({
   ratingMultiplier: z.number().positive(),
   /** How many places earn rating. Editable while the game is running. */
   paidPlaces: z.number().int().positive(),
-  /** Season points needed to sign up. Null means anyone may register. */
+  /**
+   * Floor for first place: even a thin field still pays at least this many
+   * points. Null means the pool follows chips in play with no floor.
+   */
   minRating: z.number().int().nonnegative().nullable(),
   venue: Venue.nullable(),
   registeredCount: z.number().int().nonnegative(),

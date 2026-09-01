@@ -6,7 +6,7 @@ import { AdminScreens, seatFor, seats } from "./admin.js";
 import { Api, ApiError, type TelegramProfile } from "./api.js";
 import { ClubInfo } from "./club.js";
 import { loadConfig } from "./config.js";
-import { clubDate, escapeHtml, playerLabel, points, rub } from "./format.js";
+import { escapeHtml, playerLabel, points, rub } from "./format.js";
 import { LOGIN_CALLBACK, LoginConfirm } from "./login.js";
 import { PlayerScreens, type Screen } from "./player.js";
 
@@ -154,69 +154,17 @@ async function requireStaff(profile: TelegramProfile): Promise<void> {
 }
 
 /**
- * Opens the evening: a topic named after the tournament, a board pinned on top
- * and a card per player. Running it twice reuses whatever already exists, so a
- * bot restart or a second tap costs nothing.
+ * Evening desk lives on the site. Telegram groups are not a second cash desk.
  */
 async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
   await requireStaff(profile);
-
-  const chatId = ctx.chat!.id;
-  const next = await admin.pickTournament(profile);
-  if (!next) {
-    await ctx.reply("В расписании нет ближайших событий - сначала создайте турнир на сайте.");
-    return;
-  }
-
-  let detail = await admin.detail(profile, next.id);
-  let topicId = detail.adminScreens?.topicId ?? null;
-
-  if (topicId == null) {
-    try {
-      const topic = await bot.api.createForumTopic(
-        chatId,
-        `${clubDate(detail.startsAt)} - ${detail.title}`.slice(0, 128),
-      );
-      topicId = topic.message_thread_id;
-    } catch {
-      await ctx.reply(
-        [
-          "Не получилось создать топик.",
-          "",
-          "Нужно: в группе включены темы (Topics), бот - администратор",
-          "с правом «Управление темами».",
-        ].join("\n"),
-      );
-      return;
-    }
-    await admin.saveScreens(profile, detail.id, { topicId });
-    detail = await admin.detail(profile, detail.id);
-  }
-
-  // Put the tournament in play so the public schedule stops taking sign-ups.
-  if (detail.status !== "running" && detail.status !== "finished") {
-    await api.asUser(profile, "PATCH", `/tournaments/${detail.id}`, { status: "running" });
-    detail = await admin.detail(profile, detail.id);
-  }
-
-  if (detail.adminScreens?.boardMsgId == null) {
-    const board = admin.board(detail);
-    const posted = await bot.api.sendMessage(chatId, board.text, {
-      parse_mode: "HTML",
-      reply_markup: board.keyboard,
-      message_thread_id: topicId,
-    });
-    await admin.saveScreens(profile, detail.id, { boardMsgId: posted.message_id });
-    try {
-      await bot.api.pinChatMessage(chatId, posted.message_id);
-    } catch {
-      // Pinning is a nicety; the board works just as well unpinned.
-    }
-    detail = await admin.detail(profile, detail.id);
-  }
-
-  await postMissingCards(chatId, profile, detail, topicId);
-  await ctx.reply(`Готово: ${detail.title}. Карточки игроков - в теме турнира.`);
+  await ctx.reply(
+    [
+      "Вечер ведётся на сайте — топики в Telegram больше не открываем.",
+      "",
+      `Хостес: ${config.webUrl}/admin`,
+    ].join("\n"),
+  );
 }
 
 /** Adds a card for every player who does not have one yet. */
@@ -323,7 +271,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   const target = await resolve(ctx, profile);
   if (!target) {
     await ctx.answerCallbackQuery({
-      text: "Этот экран больше не привязан к турниру. Отправьте /игра, чтобы открыть новый.",
+      text: "Этот экран больше не привязан к турниру. Ведите вечер на сайте клуба.",
       show_alert: true,
     });
     return;
@@ -669,13 +617,7 @@ try {
 } catch (error) {
   console.error("[bot] could not set Mini App menu button:", error);
 }
-await bot.api.setMyCommands(
-  [
-    { command: "game", description: "Открыть тему сегодняшней игры" },
-    { command: "sync", description: "Обновить доску и карточки" },
-  ],
-  { scope: { type: "all_group_chats" } },
-);
+await bot.api.setMyCommands([], { scope: { type: "all_group_chats" } });
 
 const stop = () => void bot.stop();
 process.once("SIGINT", stop);

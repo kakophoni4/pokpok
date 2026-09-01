@@ -64,10 +64,12 @@ export function TournamentPage() {
 
             {data.venue && (
               <p className="mt-3 text-sm text-stone-300">
-                {data.venue.title}
-            {data.venue.address && <span className="text-stone-500"> · {data.venue.address}</span>}
-          </p>
-        )}
+                {data.venue.address ?? data.venue.title}
+                {data.venue.address && data.venue.title && data.venue.address !== data.venue.title && (
+                  <span className="text-stone-500"> · {data.venue.title}</span>
+                )}
+              </p>
+            )}
 
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <Detail
@@ -76,7 +78,7 @@ export function TournamentPage() {
           />
           <Detail label="Призовых мест" value={String(data.paidPlaces)} />
           {data.minRating != null && data.minRating > 0 && (
-            <Detail label="Мин. рейтинг" value={String(data.minRating)} />
+            <Detail label="Мин. очков" value={String(data.minRating)} />
           )}
           <Detail label="Стартовый стек" value={formatNumber(data.startingStack)} />
           {data.ratingMultiplier !== 1 ? (
@@ -94,7 +96,7 @@ export function TournamentPage() {
           </p>
         )}
 
-        {data.description && (
+        {data.description && !isBoilerplateDescription(data.description) && (
           <p className="mt-4 border-t border-felt-800 pt-3 text-sm whitespace-pre-line text-stone-300">
             {data.description}
           </p>
@@ -181,6 +183,10 @@ export function TournamentPage() {
       )}
     </>
   );
+}
+
+function isBoilerplateDescription(text: string): boolean {
+  return /спортивный покер без денежных ставок/i.test(text) || /приходите за 30 минут/i.test(text);
 }
 
 function Detail({ label, value }: { label: string; value: string }) {

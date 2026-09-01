@@ -48,24 +48,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   /**
-   * Restores a session on load. Inside Telegram we can authenticate silently
-   * from initData; on the web we rely on the refresh cookie.
+   * Restores a session on load. Inside Telegram we stay on "loading" until
+   * Mini App initData signs us in — the player should never have to tap Войти.
    */
   useEffect(() => {
     let cancelled = false;
 
+    async function tryMiniApp(waitMs: number): Promise<boolean> {
+      platform.ready();
+      const initData = await platform.telegramInitDataSoon(waitMs);
+      if (!initData || cancelled) return false;
+      try {
+        const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
+        if (!cancelled) applySession(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     async function restore(): Promise<void> {
       platform.ready();
-      const initData = await platform.telegramInitDataSoon();
+      if (cancelled) return;
 
-      if (initData) {
-        try {
-          const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
-          if (!cancelled) applySession(session);
-          return;
-        } catch {
-          // Cookie path below still runs: a previous Mini App session may be enough.
-        }
+      if (platform.isEmbedded) {
+        // Give the inline Telegram boot script a tick to fill initData.
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        if (cancelled) return;
+        if (await tryMiniApp(8000)) return;
+      } else if (await tryMiniApp(0)) {
+        return;
       }
 
       const restored = await refreshSession();
@@ -91,30 +103,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession]);
 
   /**
-   * Some Telegram clients fill initData after the first restore already gave up.
-   * Keep watching for a few seconds while we are still anonymous.
+   * Mini App initData can appear after the first restore. Keep signing in
+   * silently for as long as this WebView is open — never ask the player to tap.
    */
   useEffect(() => {
     if (status !== "anonymous" || !platform.isEmbedded) return;
     let cancelled = false;
-    const timer = window.setInterval(() => {
+    const tick = (): void => {
       void (async () => {
-        const initData = platform.telegramInitData();
+        platform.ready();
+        const initData = platform.telegramInitData() ?? (await platform.telegramInitDataSoon(400));
         if (!initData || cancelled) return;
-        window.clearInterval(timer);
         try {
           const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
           if (!cancelled) applySession(session);
         } catch {
-          /* LoginPage retry shows the error */
+          /* next tick retries */
         }
       })();
-    }, 250);
-    const stop = window.setTimeout(() => window.clearInterval(timer), 4000);
+    };
+    tick();
+    const timer = window.setInterval(tick, 1500);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
-      window.clearTimeout(stop);
     };
   }, [status, applySession]);
 

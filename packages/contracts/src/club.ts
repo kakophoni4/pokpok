@@ -99,6 +99,19 @@ export function promoBundleLabel(
  * Dates are always rendered in Samara time. The timezone field stays on the
  * payload so older clients keep working; the site no longer lets anyone change it.
  */
+export const ClubVenue = z.object({
+  id: Id,
+  title: z.string(),
+  address: z.string().nullable(),
+});
+export type ClubVenue = z.infer<typeof ClubVenue>;
+
+export const ClubVenueInput = z.object({
+  title: z.string().trim().min(2).max(80),
+  address: z.string().trim().min(2).max(240),
+});
+export type ClubVenueInput = z.infer<typeof ClubVenueInput>;
+
 export const ClubSettings = z.object({
   infoText: z.string(),
   entryPriceRub: z.number().int().nonnegative(),
@@ -108,6 +121,7 @@ export const ClubSettings = z.object({
   adminChatId: z.string().nullable(),
   timezone: z.string(),
   menuItems: z.array(ClubMenuItem),
+  venues: z.array(ClubVenue),
 });
 export type ClubSettings = z.infer<typeof ClubSettings>;
 

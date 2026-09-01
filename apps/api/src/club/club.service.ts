@@ -3,6 +3,8 @@ import {
   CLUB_TIMEZONE,
   type ClubMenuItem,
   type ClubSettings,
+  type ClubVenue,
+  type ClubVenueInput,
   type CreateClubMenuItemInput,
   parsePromoBundle,
   promoKindFromBundle,
@@ -48,6 +50,7 @@ export class ClubService {
     const items = await this.prisma.clubMenuItem.findMany({
       orderBy: [{ isPromo: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
     });
+    const venues = await this.prisma.venue.findMany({ orderBy: { createdAt: "asc" } });
 
     return {
       infoText: row.infoText,
@@ -58,6 +61,7 @@ export class ClubService {
       adminChatId: row.adminChatId,
       timezone: CLUB_TIMEZONE,
       menuItems: items.map(toMenuView),
+      venues: venues.map(toVenueView),
     };
   }
 
@@ -231,6 +235,56 @@ export class ClubService {
     return { ok: true };
   }
 
+  async createVenue(actorId: string, input: ClubVenueInput): Promise<ClubVenue> {
+    const venue = await this.prisma.venue.create({
+      data: { title: input.title, address: input.address },
+    });
+    await this.audit.record({
+      actorId,
+      action: "club.venue.create",
+      entity: "Venue",
+      entityId: venue.id,
+      after: { title: venue.title, address: venue.address },
+    });
+    return toVenueView(venue);
+  }
+
+  async updateVenue(actorId: string, id: string, input: ClubVenueInput): Promise<ClubVenue> {
+    const before = await this.prisma.venue.findUnique({ where: { id } });
+    if (!before) {
+      throw new NotFoundException({ code: "VENUE_NOT_FOUND", message: "Адрес не найден" });
+    }
+    const venue = await this.prisma.venue.update({
+      where: { id },
+      data: { title: input.title, address: input.address },
+    });
+    await this.audit.record({
+      actorId,
+      action: "club.venue.update",
+      entity: "Venue",
+      entityId: id,
+      before: { title: before.title, address: before.address },
+      after: { title: venue.title, address: venue.address },
+    });
+    return toVenueView(venue);
+  }
+
+  async deleteVenue(actorId: string, id: string): Promise<{ ok: true }> {
+    const before = await this.prisma.venue.findUnique({ where: { id } });
+    if (!before) {
+      throw new NotFoundException({ code: "VENUE_NOT_FOUND", message: "Адрес не найден" });
+    }
+    await this.prisma.venue.delete({ where: { id } });
+    await this.audit.record({
+      actorId,
+      action: "club.venue.delete",
+      entity: "Venue",
+      entityId: id,
+      before: { title: before.title, address: before.address },
+    });
+    return { ok: true };
+  }
+
   private async ensureFixedItems(row: {
     entryPriceRub: number;
     rebuyPriceRub: number;
@@ -364,6 +418,10 @@ export class ClubService {
       lines,
     };
   }
+}
+
+function toVenueView(venue: { id: string; title: string; address: string | null }): ClubVenue {
+  return { id: venue.id, title: venue.title, address: venue.address };
 }
 
 function toMenuView(item: MenuRow): ClubMenuItem {

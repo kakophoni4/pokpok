@@ -40,6 +40,10 @@ declare global {
   interface Window {
     Telegram?: { WebApp?: TelegramWebApp };
     TelegramWebviewProxy?: unknown;
+    TelegramGameProxy?: unknown;
+    __TG_INIT_DATA__?: string;
+    __TG_PLATFORM__?: string;
+    webkit?: { messageHandlers?: { TelegramWebView?: unknown } };
   }
 }
 
@@ -47,20 +51,34 @@ function telegramShell(): TelegramWebApp | null {
   return window.Telegram?.WebApp ?? null;
 }
 
+function hashParams(): URLSearchParams {
+  try {
+    const hash = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : window.location.hash;
+    return new URLSearchParams(hash);
+  } catch {
+    return new URLSearchParams();
+  }
+}
+
 /**
  * Telegram sometimes puts the signed payload in the URL hash instead of (or
  * before) filling WebApp.initData. URLSearchParams already decodes it.
  */
 function hashInitData(): string | null {
-  try {
-    const hash = window.location.hash.startsWith("#")
-      ? window.location.hash.slice(1)
-      : window.location.hash;
-    const data = new URLSearchParams(hash).get("tgWebAppData");
-    return data && data.length > 0 ? data : null;
-  } catch {
-    return null;
-  }
+  const data = hashParams().get("tgWebAppData");
+  return data && data.length > 0 ? data : null;
+}
+
+function hashLooksLikeMiniApp(): boolean {
+  const params = hashParams();
+  return Boolean(
+    params.get("tgWebAppData") ||
+      params.get("tgWebAppPlatform") ||
+      params.get("tgWebAppVersion") ||
+      params.get("tgWebAppThemeParams"),
+  );
 }
 
 /**
@@ -68,14 +86,19 @@ function hashInitData(): string | null {
  *
  * The SDK object exists on every page of this site, so its mere presence is
  * not enough. iOS Mini Apps often report a Safari user agent with no
- * "Telegram" token; those still set WebApp.platform or inject TelegramWebviewProxy.
+ * "Telegram" token; those still set WebApp.platform, inject TelegramWebviewProxy,
+ * or put launch params in the URL hash.
  */
 function looksLikeTelegram(): boolean {
+  if (window.__TG_INIT_DATA__) return true;
+  if (window.__TG_PLATFORM__ && window.__TG_PLATFORM__ !== "unknown") return true;
+  if (hashInitData() || hashLooksLikeMiniApp()) return true;
+  if (typeof window.TelegramWebviewProxy !== "undefined") return true;
+  if (typeof window.TelegramGameProxy !== "undefined") return true;
+  if (window.webkit?.messageHandlers?.TelegramWebView) return true;
+  if (/Telegram/i.test(window.navigator.userAgent)) return true;
   const app = telegramShell();
   if (app && app.initData.length > 0) return true;
-  if (hashInitData()) return true;
-  if (typeof window.TelegramWebviewProxy !== "undefined") return true;
-  if (/Telegram/i.test(window.navigator.userAgent)) return true;
   if (app?.platform && app.platform !== "unknown") return true;
   try {
     const query = new URLSearchParams(window.location.search);
@@ -99,19 +122,23 @@ export const platform = {
   telegramInitData(): string | null {
     const fromSdk = telegramShell()?.initData;
     if (fromSdk && fromSdk.length > 0) return fromSdk;
+    if (window.__TG_INIT_DATA__ && window.__TG_INIT_DATA__.length > 0) {
+      return window.__TG_INIT_DATA__;
+    }
     return hashInitData();
   },
 
   /**
-   * Mini App initData can arrive a beat after the script. Wait briefly so the
-   * first paint inside Telegram does not fall through to the anonymous login.
+   * Mini App initData can arrive a beat after the script. Wait so the first
+   * paint inside Telegram does not fall through to the anonymous login.
    */
-  async telegramInitDataSoon(timeoutMs = 3000): Promise<string | null> {
+  async telegramInitDataSoon(timeoutMs = 8000): Promise<string | null> {
     this.ready();
     const immediate = this.telegramInitData();
     if (immediate || !looksLikeTelegram()) return immediate;
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
+      this.ready();
       const data = this.telegramInitData();
       if (data) return data;
       await new Promise((resolve) => setTimeout(resolve, 50));

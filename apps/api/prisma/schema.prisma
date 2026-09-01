@@ -239,7 +239,7 @@ model Tournament {
   addonChips       Int?
   /// Weight of the event: 1 for a regular game, 2 for a major.
   ratingMultiplier Float            @default(1)
-  /// If set, a player needs at least this many season points to sign up.
+  /// Floor for first-place points when the field is thin. Not a sign-up gate.
   minRating        Int?
   status           TournamentStatus @default(draft)
   /// Forum topic in the admin supergroup and the pinned summary inside it, so

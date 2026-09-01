@@ -1,5 +1,6 @@
 import type {
   ClubMenuItem,
+  ClubVenue,
   CreateClubMenuItemInput,
   PaymentKind,
   PromoGrant,
@@ -11,9 +12,12 @@ import { Button, Card, ErrorState, Loading } from "../../components/ui";
 import {
   useClubSettings,
   useCreateMenuItem,
+  useCreateVenue,
   useDeleteMenuItem,
+  useDeleteVenue,
   useUpdateClubSettings,
   useUpdateMenuItem,
+  useUpdateVenue,
 } from "../../lib/queries";
 
 type GrantOption = {
@@ -103,6 +107,8 @@ export function AdminSettings() {
         </Button>
       </Card>
 
+      <VenuesCard venues={settings.data.venues ?? []} />
+
       <Card className="space-y-3">
         <h2 className="font-semibold">Касса</h2>
         <CashierTable
@@ -180,6 +186,141 @@ export function AdminSettings() {
         </ul>
       </Card>
     </div>
+  );
+}
+
+function VenuesCard({ venues }: { venues: ClubVenue[] }) {
+  const create = useCreateVenue();
+  const update = useUpdateVenue();
+  const remove = useDeleteVenue();
+  const [title, setTitle] = useState("");
+  const [address, setAddress] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  function submit(): void {
+    const input = {
+      title: title.trim() || address.trim(),
+      address: address.trim() || title.trim(),
+    };
+    if (input.address.length < 2) return;
+    if (editingId) {
+      update.mutate(
+        { id: editingId, input },
+        {
+          onSuccess: () => {
+            setEditingId(null);
+            setTitle("");
+            setAddress("");
+          },
+        },
+      );
+      return;
+    }
+    create.mutate(input, {
+      onSuccess: () => {
+        setTitle("");
+        setAddress("");
+      },
+    });
+  }
+
+  const error =
+    (create.error as Error | null)?.message ??
+    (update.error as Error | null)?.message ??
+    (remove.error as Error | null)?.message;
+
+  return (
+    <Card className="space-y-3">
+      <h2 className="font-semibold">Адреса клуба</h2>
+      <p className="text-sm text-stone-400">
+        Здесь хранятся места проведения. В расписании у каждого турнира выбирается один адрес —
+        можно переехать и добавить новый, не трогая старые игры.
+      </p>
+
+      {venues.length === 0 && (
+        <p className="text-sm text-stone-500">Пока ни одного адреса — добавьте, куда приходить.</p>
+      )}
+
+      <ul className="space-y-2">
+        {venues.map((venue) => (
+          <li key={venue.id} className="flex items-start justify-between gap-2 rounded-xl bg-felt-900 px-3 py-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{venue.title}</p>
+              {venue.address && venue.address !== venue.title && (
+                <p className="truncate text-xs text-stone-400">{venue.address}</p>
+              )}
+            </div>
+            <div className="flex shrink-0 gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setEditingId(venue.id);
+                  setTitle(venue.title);
+                  setAddress(venue.address ?? "");
+                }}
+              >
+                Изменить
+              </Button>
+              <Button size="sm" variant="ghost" loading={remove.isPending} onClick={() => remove.mutate(venue.id)}>
+                Удалить
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <label className="label" htmlFor="venue-title">
+            Название
+          </label>
+          <input
+            id="venue-title"
+            className="field"
+            value={title}
+            placeholder="Зал на Ленина"
+            onChange={(event) => setTitle(event.target.value)}
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="venue-address">
+            Адрес
+          </label>
+          <input
+            id="venue-address"
+            className="field"
+            value={address}
+            placeholder="ул. Ленина, 10"
+            onChange={(event) => setAddress(event.target.value)}
+          />
+        </div>
+      </div>
+
+      {error && <p className="text-sm text-chip-red">{error}</p>}
+
+      <div className="flex gap-2">
+        <Button
+          loading={create.isPending || update.isPending}
+          disabled={address.trim().length < 2 && title.trim().length < 2}
+          onClick={submit}
+        >
+          {editingId ? "Сохранить адрес" : "Добавить адрес"}
+        </Button>
+        {editingId && (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setEditingId(null);
+              setTitle("");
+              setAddress("");
+            }}
+          >
+            Отмена
+          </Button>
+        )}
+      </div>
+    </Card>
   );
 }
 

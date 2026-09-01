@@ -8,7 +8,7 @@ import { formatPlayerName } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import type { ClubInfo } from "./club.js";
-import { clubGreeting, clubWhen, escapeHtml, fit, num, playerLabel, plural, points } from "./format.js";
+import { clubGreeting, clubWhen, escapeHtml, fit, num, playerLabel, plural, points, rankMark } from "./format.js";
 
 export type Screen = { text: string; keyboard: InlineKeyboard };
 
@@ -85,9 +85,9 @@ export class PlayerScreens {
 
     const keyboard = new InlineKeyboard();
     for (const tournament of tournaments.slice(0, 12)) {
-      const signed = isSignedUp(tournament) ? " · записан" : "";
+      const mark = isSignedUp(tournament) ? "✓ " : "";
       keyboard
-        .text(fit(`${clubWhen(tournament.startsAt)} · ${tournament.title}${signed}`), `tog:${tournament.id}`)
+        .text(fit(`${mark}${clubWhen(tournament.startsAt)} · ${tournament.title}`), `tog:${tournament.id}`)
         .row();
     }
     keyboard.text(`← ${BACK}`, "nav:home");
@@ -106,7 +106,7 @@ export class PlayerScreens {
 
     if (rows.length === 0) {
       return {
-        text: "<b>Рейтинг сезона</b>\n\nСезон только начинается.",
+        text: "🏆 <b>Топ игроков:</b>\n\nСезон только начинается.",
         keyboard: new InlineKeyboard().text(`← ${BACK}`, "nav:home"),
       };
     }
@@ -114,11 +114,9 @@ export class PlayerScreens {
     const lines = rows.slice(0, TOP_SIZE).map((row) => {
       const name = escapeHtml(playerLabel(row.user));
       const score = num(row.points);
-      const own = row.user.id === session.userId;
-      const lead = row.rank <= 3;
-      if (own) return `<i>${row.rank} · ${name}</i>\n<i>${score}</i>`;
-      if (lead) return `<b>${row.rank} · ${name}</b>\n<i>${score}</i>`;
-      return `${row.rank} · ${name}\n${score}`;
+      const mark = rankMark(row.rank);
+      const line = `${mark} ${name} — ${score}`;
+      return row.user.id === session.userId ? `<b>${line}</b>` : line;
     });
 
     const me = rows.find((row) => row.user.id === session.userId);
@@ -127,9 +125,7 @@ export class PlayerScreens {
       : await this.myPlaceLine(profile);
 
     return {
-      text: ["<b>Рейтинг сезона</b>", "", lines.join("\n\n"), "", `<b>${escapeHtml(footer)}</b>`].join(
-        "\n",
-      ),
+      text: ["🏆 <b>Топ игроков:</b>", "", lines.join("\n"), "", `<b>${escapeHtml(footer)}</b>`].join("\n"),
       keyboard: new InlineKeyboard().text(`← ${BACK}`, "nav:home"),
     };
   }

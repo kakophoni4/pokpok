@@ -5,7 +5,7 @@ import type {
 } from "@poker/contracts";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Card, ErrorState, Loading, cx } from "../../components/ui";
+import { Badge, Button, Card, ErrorState, Loading, Tabs, cx } from "../../components/ui";
 import {
   formatFullDate,
   formatTime,
@@ -14,19 +14,40 @@ import {
   TOURNAMENT_STATUS_LABELS,
 } from "../../lib/format";
 import {
+  useClubSettings,
   useCreateTournament,
   useDeleteTournament,
   useTournaments,
   useUpdateTournament,
 } from "../../lib/queries";
 
+const LIVE: TournamentSummary["status"][] = [
+  "draft",
+  "announced",
+  "reg_open",
+  "reg_closed",
+  "running",
+];
+
 export function AdminTournaments({ canDelete }: { canDelete: boolean }) {
   const [creating, setCreating] = useState(false);
+  const [scope, setScope] = useState<"upcoming" | "past">("upcoming");
   const tournaments = useTournaments("all");
+  const rows = (tournaments.data ?? []).filter((tournament) =>
+    scope === "upcoming" ? LIVE.includes(tournament.status) : !LIVE.includes(tournament.status),
+  );
 
   return (
     <>
-      <div className="mb-3 flex justify-end">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <Tabs
+          value={scope}
+          onChange={setScope}
+          options={[
+            { value: "upcoming", label: "Текущие" },
+            { value: "past", label: "Завершённые" },
+          ]}
+        />
         <Button size="sm" onClick={() => setCreating((value) => !value)}>
           {creating ? "Свернуть" : "+ Новый турнир"}
         </Button>
@@ -37,8 +58,14 @@ export function AdminTournaments({ canDelete }: { canDelete: boolean }) {
       {tournaments.isPending && <Loading />}
       {tournaments.isError && <ErrorState error={tournaments.error} />}
 
+      {tournaments.data && rows.length === 0 && (
+        <p className="text-sm text-stone-500">
+          {scope === "upcoming" ? "Нет текущих турниров." : "Нет завершённых турниров."}
+        </p>
+      )}
+
       <ul className="space-y-2">
-        {tournaments.data?.map((tournament) => (
+        {rows.map((tournament) => (
           <TournamentRow key={tournament.id} tournament={tournament} canDelete={canDelete} />
         ))}
       </ul>
@@ -71,7 +98,7 @@ function TournamentRow({
             {formatFullDate(tournament.startsAt)} · {formatTime(tournament.startsAt)} ·{" "}
             {tournament.paidPlaces} призовых · ×{tournament.ratingMultiplier}
             {tournament.minRating != null && tournament.minRating > 0
-              ? ` · от ${tournament.minRating}`
+              ? ` · мин. ${tournament.minRating} очков`
               : ""}
           </p>
           <p className="nums mt-0.5 text-xs text-stone-500">
@@ -176,6 +203,9 @@ function TournamentForm({
   const create = useCreateTournament();
   const update = useUpdateTournament(tournament?.id ?? "");
   const mutation = isEdit ? update : create;
+  const settings = useClubSettings(true);
+  const venues = settings.data?.venues ?? [];
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [form, setForm] = useState(() => {
     if (!tournament) {
@@ -188,6 +218,7 @@ function TournamentForm({
         paidPlaces: "9",
         minRating: "",
         description: "",
+        venueId: "",
       };
     }
 
@@ -201,12 +232,23 @@ function TournamentForm({
       paidPlaces: String(tournament.paidPlaces),
       minRating: tournament.minRating == null ? "" : String(tournament.minRating),
       description: "",
+      venueId: tournament.venue?.id ?? "",
     };
   });
 
   function submit(): void {
-    // The typed time is the club's wall clock, not the browser's.
+    setFormError(null);
+    if (!form.date || !form.time) {
+      setFormError("Укажите дату и время");
+      return;
+    }
     const startsAt = fromClubParts(form.date, form.time);
+    if (Number.isNaN(startsAt.getTime())) {
+      setFormError("Не получилось прочитать дату — проверьте поля");
+      return;
+    }
+
+    const venueId = form.venueId || venues[0]?.id || null;
 
     const shared = {
       title: form.title.trim(),
@@ -217,6 +259,7 @@ function TournamentForm({
       ratingMultiplier: Number(form.ratingMultiplier),
       paidPlaces: form.paidPlaces ? Number(form.paidPlaces) : null,
       minRating: form.minRating ? Number(form.minRating) : null,
+      venueId,
       // Editing keeps whatever description exists unless something was typed.
       ...(form.description.trim() || !isEdit
         ? { description: form.description.trim() || null }
@@ -246,6 +289,30 @@ function TournamentForm({
           placeholder="Weekly Freezeout #17"
           onChange={(event) => setForm({ ...form, title: event.target.value })}
         />
+      </div>
+
+      <div>
+        <label className="label" htmlFor="t-venue">
+          Адрес
+        </label>
+        {venues.length === 0 ? (
+          <p className="text-sm text-stone-500">
+            Сначала добавьте адрес в настройках клуба — тогда его можно будет выбрать здесь.
+          </p>
+        ) : (
+          <select
+            id="t-venue"
+            className="field"
+            value={form.venueId || venues[0]?.id || ""}
+            onChange={(event) => setForm({ ...form, venueId: event.target.value })}
+          >
+            {venues.map((venue) => (
+              <option key={venue.id} value={venue.id}>
+                {venue.address ? `${venue.title} — ${venue.address}` : venue.title}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -320,7 +387,7 @@ function TournamentForm({
 
       <div>
         <label className="label" htmlFor="t-min-rating">
-          Мин. рейтинг
+          Мин. очков за 1 место
         </label>
         <input
           id="t-min-rating"
@@ -328,9 +395,12 @@ function TournamentForm({
           min={0}
           className="field nums max-w-40"
           value={form.minRating}
-          placeholder="не нужен"
+          placeholder="как по фишкам"
           onChange={(event) => setForm({ ...form, minRating: event.target.value })}
         />
+        <p className="mt-1 text-xs text-stone-500">
+          Если придёт мало людей и фишек будет мало, первое место всё равно получит не меньше этого.
+        </p>
       </div>
 
       <div>
@@ -347,8 +417,10 @@ function TournamentForm({
         />
       </div>
 
-      {mutation.isError && (
-        <p className="text-xs text-chip-red">{(mutation.error as Error).message}</p>
+      {(mutation.isError || formError) && (
+        <p className="text-xs text-chip-red">
+          {formError ?? (mutation.error as Error).message}
+        </p>
       )}
 
       <div className="flex gap-2">

@@ -82,7 +82,7 @@ export function LeaderboardPage() {
                       row.rank > 3 && "text-stone-500",
                     )}
                   >
-                    {row.rank}
+                    {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : row.rank}
                   </span>
 
                   <Link

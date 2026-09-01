@@ -10,6 +10,7 @@ import {
   num,
   plural,
   points,
+  rankMark,
   rub,
   setTimezone,
 } from "./format.js";
@@ -87,6 +88,13 @@ describe("text safety", () => {
   it("trims labels to fit on a button", () => {
     expect(fit("a".repeat(80))).toHaveLength(60);
     expect(fit("короткая")).toBe("короткая");
+  });
+
+  it("marks the podium with medals and the rest with a number", () => {
+    expect(rankMark(1)).toBe("🥇");
+    expect(rankMark(2)).toBe("🥈");
+    expect(rankMark(3)).toBe("🥉");
+    expect(rankMark(15)).toBe("15.");
   });
 });
 

@@ -1,8 +1,9 @@
 import type { PlayerStats, UserAchievementView } from "@poker/contracts";
 import { Link } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { formatFullDate, formatPoints, placeLabel, playerLabel, plural } from "../lib/format";
-import { Avatar, Card, EmptyState, Stat, cx } from "./ui";
+import { useRevokeAchievement } from "../lib/queries";
+import { Avatar, Button, Card, EmptyState, Stat, cx } from "./ui";
 
 function showsPrizePlace(place: number | null | undefined, paidPlaces: number): boolean {
   return place != null && place >= 1 && place <= paidPlaces;
@@ -22,10 +23,12 @@ export function PlayerProfile({
   stats,
   achievements,
   extra,
+  canRevoke = false,
 }: {
   stats: PlayerStats;
   achievements: UserAchievementView[] | undefined;
   extra?: React.ReactNode;
+  canRevoke?: boolean;
 }) {
   return (
     <>
@@ -73,17 +76,7 @@ export function PlayerProfile({
           </h2>
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {achievements.map((granted) => (
-              <li key={granted.id} className="card flex items-start gap-2.5 p-3">
-                <span aria-hidden className="text-2xl leading-none">
-                  {granted.achievement.icon ?? "🏅"}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{granted.achievement.title}</p>
-                  <p className="nums text-xs text-gold-500">
-                    {formatPoints(granted.achievement.ratingPoints)} рейтинга
-                  </p>
-                </div>
-              </li>
+              <AchievementTile key={granted.id} granted={granted} canRevoke={canRevoke} />
             ))}
           </ul>
         </section>
@@ -160,5 +153,50 @@ export function PlayerProfile({
         )}
       </section>
     </>
+  );
+}
+
+function AchievementTile({
+  granted,
+  canRevoke,
+}: {
+  granted: UserAchievementView;
+  canRevoke: boolean;
+}) {
+  const revoke = useRevokeAchievement();
+  const [confirming, setConfirming] = useState(false);
+
+  return (
+    <li className="card flex items-start gap-2.5 p-3">
+      <span aria-hidden className="text-2xl leading-none">
+        {granted.achievement.icon ?? "🏅"}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{granted.achievement.title}</p>
+        <p className="nums text-xs text-gold-500">
+          {formatPoints(granted.achievement.ratingPoints)} рейтинга
+        </p>
+        {canRevoke && (
+          <Button
+            size="sm"
+            variant={confirming ? "danger" : "ghost"}
+            className="mt-1"
+            loading={revoke.isPending}
+            onClick={() => {
+              if (!confirming) {
+                setConfirming(true);
+                return;
+              }
+              revoke.mutate(granted.id, { onSettled: () => setConfirming(false) });
+            }}
+          >
+            {confirming ? "Забрать?" : "Забрать"}
+          </Button>
+        )}
+        {revoke.isError && (
+          <p className="mt-1 text-xs text-chip-red">{(revoke.error as Error).message}</p>
+        )}
+      </div>
+    </li>
   );
 }

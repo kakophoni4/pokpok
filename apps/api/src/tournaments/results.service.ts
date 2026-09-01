@@ -141,6 +141,7 @@ export class ResultsService {
       chipsInPlay,
       paidPlaces: config.paidPlaces,
       multiplier: tournament.ratingMultiplier,
+      floor: tournament.minRating ?? 0,
       config,
     });
 

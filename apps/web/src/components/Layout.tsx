@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function Layout() {
-  const { user, can } = useAuth();
+  const { user, status, can } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("hostess"));
@@ -56,6 +56,8 @@ export function Layout() {
               <Avatar nickname={playerLabel(user)} url={user.avatarUrl} size={28} />
               <span className="hidden text-sm sm:inline">{playerLabel(user)}</span>
             </button>
+          ) : status === "loading" || platform.isEmbedded ? (
+            <span className="size-7" aria-hidden />
           ) : (
             <Button size="sm" onClick={() => navigate("/login")}>
               Войти

@@ -3,15 +3,19 @@ import { useAuth } from "../auth/auth-context";
 import { PlayerProfile } from "../components/PlayerProfile";
 import { Badge, Button, ErrorState, Loading } from "../components/ui";
 import { useMyStats, useUserAchievements } from "../lib/queries";
+import { platform } from "../platform/platform";
 
 export function ProfilePage() {
-  const { user, status, logout } = useAuth();
+  const { user, status, logout, can } = useAuth();
   const navigate = useNavigate();
   const stats = useMyStats(status === "authenticated");
   const achievements = useUserAchievements(user?.id);
 
   if (status === "loading") return <Loading />;
-  if (status === "anonymous") return <Navigate to="/login" replace />;
+  if (status === "anonymous") {
+    if (platform.isEmbedded) return <Loading label="Входим через Telegram…" />;
+    return <Navigate to="/login" replace />;
+  }
   if (stats.isPending) return <Loading label="Собираем статистику…" />;
   if (stats.isError) return <ErrorState error={stats.error} onRetry={() => void stats.refetch()} />;
   if (!stats.data || !user) return null;
@@ -21,6 +25,7 @@ export function ProfilePage() {
       <PlayerProfile
         stats={stats.data}
         achievements={achievements.data}
+        canRevoke={can("hostess")}
         extra={
           <div className="mt-4 space-y-3 border-t border-felt-800 pt-3">
             <div className="flex flex-wrap items-center gap-2 text-xs text-stone-400">

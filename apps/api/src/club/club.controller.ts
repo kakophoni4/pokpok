@@ -3,7 +3,9 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   type ClubMenuItem,
   type ClubSettings,
+  type ClubVenue,
   type SalesReport,
+  ClubVenueInput,
   CreateClubMenuItemInput,
   SalesQuery,
   UpdateClubMenuItemInput,
@@ -83,5 +85,36 @@ export class ClubController {
     @Param("id") id: string,
   ): Promise<{ ok: true }> {
     return this.club.deleteMenuItem(actor.id, id);
+  }
+
+  @Roles("admin")
+  @Post("venues")
+  @ApiOperation({ summary: "Add a playing address the schedule can pick (admin)" })
+  createVenue(
+    @CurrentUser() actor: RequestUser,
+    @Body(zodPipe(ClubVenueInput)) body: ClubVenueInput,
+  ): Promise<ClubVenue> {
+    return this.club.createVenue(actor.id, body);
+  }
+
+  @Roles("admin")
+  @Patch("venues/:id")
+  @ApiOperation({ summary: "Edit a playing address (admin)" })
+  updateVenue(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+    @Body(zodPipe(ClubVenueInput)) body: ClubVenueInput,
+  ): Promise<ClubVenue> {
+    return this.club.updateVenue(actor.id, id, body);
+  }
+
+  @Roles("admin")
+  @Delete("venues/:id")
+  @ApiOperation({ summary: "Remove a playing address (admin)" })
+  deleteVenue(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+  ): Promise<{ ok: true }> {
+    return this.club.deleteVenue(actor.id, id);
   }
 }

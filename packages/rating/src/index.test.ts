@@ -33,6 +33,12 @@ describe("ratingPool", () => {
     expect(ratingPool({ chipsInPlay: -5, divisor: 200 })).toBe(0);
     expect(ratingPool({ chipsInPlay: CHIPS, divisor: 0 })).toBe(0);
   });
+
+  it("never pays first place less than the floor, even on a thin table", () => {
+    expect(ratingPool({ chipsInPlay: 5 * 40_000, divisor: 200, floor: 3000 })).toBe(3000);
+    expect(ratingPool({ chipsInPlay: CHIPS, divisor: 200, floor: 1000 })).toBe(4000);
+    expect(ratingPool({ chipsInPlay: 0, divisor: 0, floor: 2500 })).toBe(2500);
+  });
 });
 
 describe("placeShare", () => {
@@ -92,6 +98,12 @@ describe("pointsForPlace", () => {
 
   it("hands unpaid places nothing", () => {
     expect(pointsForPlace({ place: 10, paidPlaces: 9, chipsInPlay: CHIPS, config })).toBe(0);
+  });
+
+  it("still hands the winner the floor when the field is thin", () => {
+    expect(
+      pointsForPlace({ place: 1, paidPlaces: 5, chipsInPlay: 5 * 40_000, floor: 3000, config }),
+    ).toBe(3000);
   });
 
   it("reacts to the paid-place count changing mid-game", () => {

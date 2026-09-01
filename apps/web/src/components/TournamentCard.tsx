@@ -21,7 +21,9 @@ export function TournamentCard({ tournament }: { tournament: TournamentSummary }
               <span className="nums text-stone-300">{formatTime(tournament.startsAt)}</span>
             </p>
             {tournament.venue && (
-              <p className="mt-0.5 truncate text-xs text-stone-500">{tournament.venue.title}</p>
+              <p className="mt-0.5 truncate text-xs text-stone-500">
+                {tournament.venue.address ?? tournament.venue.title}
+              </p>
             )}
           </div>
 
@@ -31,7 +33,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentSummary }
             )}
             <Badge>{tournament.paidPlaces} призовых</Badge>
             {tournament.minRating != null && tournament.minRating > 0 && (
-              <Badge tone="blue">от {tournament.minRating} очков</Badge>
+              <Badge tone="blue">мин. {tournament.minRating} очков</Badge>
             )}
           </div>
         </div>

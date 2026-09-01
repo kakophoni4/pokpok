@@ -19,10 +19,13 @@ export function ratingPool(params: {
   chipsInPlay: number;
   divisor: number;
   multiplier?: number;
+  /** If the table is thin, first place is still worth at least this many points. */
+  floor?: number;
 }): number {
-  const { chipsInPlay, divisor, multiplier = 1 } = params;
-  if (divisor <= 0) return 0;
-  return (Math.max(0, chipsInPlay) / divisor) * multiplier;
+  const { chipsInPlay, divisor, multiplier = 1, floor = 0 } = params;
+  if (divisor <= 0) return Math.max(0, floor);
+  const computed = (Math.max(0, chipsInPlay) / divisor) * multiplier;
+  return Math.max(computed, Math.max(0, floor));
 }
 
 /**
@@ -53,11 +56,12 @@ export function pointsForPlace(params: {
   paidPlaces: number;
   chipsInPlay: number;
   multiplier?: number;
+  floor?: number;
   config: RatingConfig;
 }): number {
-  const { place, paidPlaces, chipsInPlay, multiplier = 1, config } = params;
+  const { place, paidPlaces, chipsInPlay, multiplier = 1, floor = 0, config } = params;
 
-  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier });
+  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier, floor });
   const share = placeShare({
     place,
     paidPlaces,
@@ -89,10 +93,11 @@ export function scoreTournament(params: {
   chipsInPlay: number;
   paidPlaces: number;
   multiplier?: number;
+  floor?: number;
   config: RatingConfig;
 }): StandingOutput[] {
-  const { standings, chipsInPlay, paidPlaces, multiplier = 1, config } = params;
-  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier });
+  const { standings, chipsInPlay, paidPlaces, multiplier = 1, floor = 0, config } = params;
+  const pool = ratingPool({ chipsInPlay, divisor: config.divisor, multiplier, floor });
 
   return standings.map((standing) => {
     const share = placeShare({
