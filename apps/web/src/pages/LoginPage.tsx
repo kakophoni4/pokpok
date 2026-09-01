@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { useTelegramLogin } from "../auth/useTelegramLogin";
 import { Button, Card, Loading } from "../components/ui";
+import { platform } from "../platform/platform";
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -13,10 +14,27 @@ export function LoginPage() {
   const [nickname, setNickname] = useState("Ferz");
   const [busy, setBusy] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const telegram = useTelegramLogin(status === "anonymous");
+  const telegram = useTelegramLogin(status === "anonymous" && !platform.isEmbedded);
 
   if (status === "loading") return <Loading />;
   if (status === "authenticated") return <Navigate to="/me" replace />;
+
+  if (platform.isEmbedded) {
+    return (
+      <div className="mx-auto max-w-md">
+        <Card className="space-y-3 p-5 text-center">
+          <h1 className="text-xl font-semibold">Вход из Telegram</h1>
+          <p className="text-sm text-stone-400">
+            Mini App входит сам при открытии. Если этого не произошло - закройте окно и
+            откройте клуб ещё раз из бота.
+          </p>
+          <Button className="w-full" onClick={() => window.location.reload()}>
+            Повторить вход
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-md">

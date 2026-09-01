@@ -51,6 +51,12 @@ export class RegistrationsService {
             message: "Турнир не найден",
           });
         }
+        if (tournament.status === "finished") {
+          throw new ConflictException({
+            code: "TOURNAMENT_FINISHED",
+            message: "Турнир уже завершён",
+          });
+        }
 
         const isStaffAction = source === "admin";
         if (!isStaffAction) this.assertRegistrationOpen(tournament);
@@ -88,6 +94,15 @@ export class RegistrationsService {
           where: { tournamentId_userId: { tournamentId, userId } },
         });
         if (existing && existing.status !== "cancelled") {
+          // A walk-in who was only on the waiting list is now physically here.
+          if (isStaffAction && existing.status === "waitlist") {
+            await tx.registration.update({
+              where: { id: existing.id },
+              data: { status: "registered", waitlistPosition: null, source },
+            });
+            await this.renumberWaitlist(tx, tournamentId);
+            return { status: "registered" as const, waitlistPosition: null };
+          }
           throw new ConflictException({
             code: "ALREADY_REGISTERED",
             message:
@@ -105,7 +120,9 @@ export class RegistrationsService {
         let status: RegistrationStatus = "registered";
         let waitlistPosition: number | null = null;
 
-        if (seatsLeft <= 0) {
+        // Staff seating a walk-in never parks them on the waitlist: they are
+        // already in the room. Players signing up themselves still queue.
+        if (seatsLeft <= 0 && !isStaffAction) {
           status = "waitlist";
           const last = await tx.registration.aggregate({
             where: { tournamentId, status: "waitlist" },

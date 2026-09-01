@@ -1,4 +1,11 @@
-import type { Achievement, ClubMenuItem, PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
+import type {
+  Achievement,
+  ClubMenuItem,
+  PaymentKind,
+  PaymentView,
+  TournamentDetail,
+  TournamentPlayer,
+} from "@poker/contracts";
 import type { ClubSettings } from "@poker/contracts";
 import { freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +16,7 @@ import {
   formatNumber,
   formatRub,
   formatTime,
+  PAYMENT_KIND_LABELS,
   placeLabel,
 } from "../../lib/format";
 import {
@@ -17,8 +25,11 @@ import {
   useClubSettings,
   useFinishTournament,
   useGrantAchievement,
+  usePlayers,
   useRevokeAchievement,
   useSetPlace,
+  useStaffCancelRegistration,
+  useStaffRegister,
   useTournament,
   useTournaments,
   useUpdateTournament,
@@ -118,6 +129,7 @@ function GameDesk({
   const visibleSeats = needle
     ? seats.filter((seat) => seat.user.nickname.toLowerCase().includes(needle))
     : seats;
+  const seatedIds = new Set(seats.map((seat) => seat.user.id));
 
   return (
     <Card className="overflow-visible p-0">
@@ -216,27 +228,21 @@ function GameDesk({
         )}
       </div>
 
+      <WalkInPanel tournamentId={detail.id} seatedIds={seatedIds} locked={isFinished} />
+
       {seats.length === 0 ? (
         <p className="border-t border-felt-800 px-3 py-4 text-sm text-stone-400">
-          На турнир никто не записан. Запишите игроков в расписании или проведите оплату входа - тот,
-          кто заплатил, автоматически попадает в список.
+          На турнир никто не записан. Посадите игрока из клуба ниже или проведите оплату входа -
+          тот, кто заплатил, автоматически попадает в список.
         </p>
       ) : visibleSeats.length === 0 ? (
         <p className="border-t border-felt-800 px-3 py-4 text-sm text-stone-400">
           Никого с таким ником нет.
         </p>
       ) : (
-        <div className="border-t border-felt-800">
-          <div className="hidden grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
-            <span>Игрок</span>
-            <span>Вход</span>
-            <span>Ребай</span>
-            <span>Адон</span>
-            <span>Бар</span>
-            <span>Место</span>
-          </div>
+        <div>
           {visibleSeats.map((seat) => (
-            <PlayerRow
+            <PlayerCard
               key={seat.user.id}
               seat={seat}
               detail={detail}
@@ -251,7 +257,83 @@ function GameDesk({
   );
 }
 
-function PlayerRow({
+function WalkInPanel({
+  tournamentId,
+  seatedIds,
+  locked,
+}: {
+  tournamentId: string;
+  seatedIds: Set<string>;
+  locked: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const players = usePlayers(search, open && search.length >= 2);
+  const register = useStaffRegister(tournamentId);
+
+  if (locked) return null;
+
+  const matches = (players.data?.items ?? []).filter(
+    (player) => player.status !== "blocked" && !seatedIds.has(player.id),
+  );
+
+  return (
+    <div className="border-t border-felt-800 px-3 py-3">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="text-sm text-gold-400 hover:underline"
+      >
+        {open ? "Свернуть" : "+ Игрок пришёл без записи"}
+      </button>
+
+      {open && (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs text-stone-500">
+            Только из уже зарегистрированных в клубе. Новый аккаунт отсюда не создать.
+          </p>
+          <input
+            type="search"
+            className="field max-w-80"
+            value={search}
+            placeholder="Начните вводить ник"
+            onChange={(event) => setSearch(event.target.value)}
+            aria-label="Найти игрока клуба"
+          />
+          {register.isError && (
+            <p className="text-xs text-chip-red">{(register.error as Error).message}</p>
+          )}
+          {search.length < 2 ? (
+            <p className="text-xs text-stone-600">Введите хотя бы две буквы ника.</p>
+          ) : players.isPending ? (
+            <p className="text-xs text-stone-500">Ищем…</p>
+          ) : matches.length === 0 ? (
+            <p className="text-xs text-stone-500">Никого свободного с таким ником нет.</p>
+          ) : (
+            <ul className="max-h-56 divide-y divide-felt-800 overflow-y-auto">
+              {matches.map((player) => (
+                <li key={player.id} className="flex items-center gap-2 py-1.5">
+                  <Avatar nickname={player.nickname} url={player.avatarUrl} size={24} />
+                  <span className="min-w-0 flex-1 truncate text-sm">{player.nickname}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    loading={register.isPending && register.variables === player.id}
+                    onClick={() => register.mutate(player.id, { onSuccess: () => setSearch("") })}
+                  >
+                    Посадить
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PlayerCard({
   seat,
   detail,
   prices,
@@ -269,12 +351,14 @@ function PlayerRow({
   const setPlace = useSetPlace(detail.id);
   const grant = useGrantAchievement();
   const revoke = useRevokeAchievement();
+  const unseat = useStaffCancelRegistration(detail.id);
   const busy =
     addPayment.isPending ||
     voidPayment.isPending ||
     setPlace.isPending ||
     grant.isPending ||
-    revoke.isPending;
+    revoke.isPending ||
+    unseat.isPending;
 
   const priceOf: Record<Exclude<PaymentKind, "other">, number> = {
     entry: prices.entryPriceRub,
@@ -285,143 +369,159 @@ function PlayerRow({
 
   const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
   const upcoming = nextPlace(detail);
+  const entries = seat.payments.filter((payment) => payment.kind === "entry");
+  const rebuys = seat.payments.filter((payment) => payment.kind === "rebuy");
+  const addons = seat.payments.filter((payment) => payment.kind === "addon");
+  const barLines = seat.payments.filter(
+    (payment) => payment.kind !== "entry" && payment.kind !== "rebuy" && payment.kind !== "addon",
+  );
+  const canUnseat = !locked && seat.payments.length === 0 && seat.place == null;
   const rowError =
     (addPayment.error as Error | null)?.message ??
+    (voidPayment.error as Error | null)?.message ??
     (grant.error as Error | null)?.message ??
     (revoke.error as Error | null)?.message ??
-    (setPlace.error as Error | null)?.message;
+    (setPlace.error as Error | null)?.message ??
+    (unseat.error as Error | null)?.message;
+
+  function charge(kind: "entry" | "rebuy" | "addon", times = 1) {
+    addPayment.mutate({
+      userId: seat.user.id,
+      kind,
+      amountRub: priceOf[kind] * times,
+      multiplier: times,
+    });
+  }
 
   return (
-    <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] sm:items-center">
-      <div className="col-span-2 flex min-w-0 items-center gap-2 sm:col-span-1">
-        <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={28} />
+    <div className="space-y-3 border-t border-felt-800/80 px-3 py-3">
+      <div className="flex items-start gap-2">
+        <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={32} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium leading-tight">{seat.user.nickname}</p>
           <p className="truncate text-xs text-stone-500">
             {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
             {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
-            {seat.paid.extras > 0 ? ` · бар ×${seat.paid.extras}` : ""}
           </p>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="mt-1 h-7 px-2 text-xs"
-            disabled={busy || locked || !seat.lastPaymentId}
-            onClick={() => {
-              if (seat.lastPaymentId) voidPayment.mutate(seat.lastPaymentId);
-            }}
-          >
-            Отменить оплату
-          </Button>
-          {rowError ? <p className="truncate text-xs text-chip-red">{rowError}</p> : null}
+          {canUnseat && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="mt-1 h-7 px-2 text-xs"
+              disabled={busy}
+              onClick={() => unseat.mutate(seat.user.id)}
+            >
+              Убрать из вечера
+            </Button>
+          )}
+          {rowError ? <p className="text-xs text-chip-red">{rowError}</p> : null}
         </div>
+        <PlaceControls
+          seat={seat}
+          detail={detail}
+          upcoming={upcoming}
+          locked={locked}
+          busy={busy}
+          onBust={() => {
+            if (upcoming != null) setPlace.mutate({ userId: seat.user.id, place: upcoming });
+          }}
+          onPick={(place) => setPlace.mutate({ userId: seat.user.id, place })}
+        />
       </div>
 
-      <div>
-        {locked ? (
-          <span className="text-xs text-stone-400">{seat.paid.entry ? "оплачен" : "-"}</span>
-        ) : (
-          <Button
-            size="sm"
-            variant={seat.paid.entry ? "secondary" : "ghost"}
-            className="h-8 w-full"
-            disabled={busy || seat.paid.entry}
-            onClick={() =>
-              addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
-            }
-          >
-            {seat.paid.entry ? "оплачен" : `${priceOf.entry} ₽`}
-          </Button>
-        )}
-      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DeskSection title="Вход">
+          {entries.map((payment) => (
+            <LineChip
+              key={payment.id}
+              label={lineLabel(payment, 0)}
+              disabled={busy || locked}
+              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+            />
+          ))}
+          {!locked && entries.length === 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8"
+              disabled={busy}
+              onClick={() => charge("entry")}
+            >
+              {formatRub(priceOf.entry)}
+            </Button>
+          )}
+          {locked && entries.length === 0 && <span className="text-xs text-stone-600">-</span>}
+        </DeskSection>
 
-      <QtyCharge
-        count={seat.paid.rebuys}
-        unitPrice={priceOf.rebuy}
-        disabled={busy || locked}
-        locked={locked}
-        onCharge={(times) =>
-          addPayment.mutate({
-            userId: seat.user.id,
-            kind: "rebuy",
-            amountRub: priceOf.rebuy * times,
-            multiplier: times,
-          })
-        }
-      />
+        <DeskSection title="Ребай">
+          {rebuys.map((payment) => (
+            <LineChip
+              key={payment.id}
+              label={lineLabel(payment, detail.startingStack)}
+              disabled={busy || locked}
+              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+            />
+          ))}
+          {!locked && (
+            <QtyCharge
+              unitPrice={priceOf.rebuy}
+              disabled={busy}
+              onCharge={(times) => charge("rebuy", times)}
+            />
+          )}
+          {locked && rebuys.length === 0 && <span className="text-xs text-stone-600">-</span>}
+        </DeskSection>
 
-      <QtyCharge
-        count={seat.paid.addons}
-        unitPrice={priceOf.addon}
-        disabled={busy || locked}
-        locked={locked}
-        onCharge={(times) =>
-          addPayment.mutate({
-            userId: seat.user.id,
-            kind: "addon",
-            amountRub: priceOf.addon * times,
-            multiplier: times,
-          })
-        }
-      />
+        <DeskSection title="Адон">
+          {addons.map((payment) => (
+            <LineChip
+              key={payment.id}
+              label={lineLabel(payment, detail.addonChips)}
+              disabled={busy || locked}
+              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+            />
+          ))}
+          {!locked && (
+            <QtyCharge
+              unitPrice={priceOf.addon}
+              disabled={busy}
+              onCharge={(times) => charge("addon", times)}
+            />
+          )}
+          {locked && addons.length === 0 && <span className="text-xs text-stone-600">-</span>}
+        </DeskSection>
 
-      <BarPicker
-        extras={extras}
-        count={seat.paid.extras}
-        disabled={busy || locked}
-        locked={locked}
-        onPick={(item) =>
-          addPayment.mutate({
-            userId: seat.user.id,
-            kind: item.kind,
-            amountRub: item.priceRub,
-            menuItemId: item.id,
-          })
-        }
-      />
-
-      <div className="flex h-8 items-center gap-1">
-        {!locked && (
-          <Button
-            size="sm"
-            className="h-8 min-w-0 flex-1 px-2"
-            disabled={busy || seat.place != null || upcoming == null}
-            onClick={() => {
-              if (upcoming != null) setPlace.mutate({ userId: seat.user.id, place: upcoming });
-            }}
-          >
-            {seat.place != null ? `${seat.place}` : upcoming != null ? `Выбыл ${upcoming}` : "в игре"}
-          </Button>
-        )}
-        {locked ? (
-          <span className="nums text-stone-200">
-            {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "-"}
-          </span>
-        ) : (
-          <select
-            aria-label={`Место игрока ${seat.user.nickname}`}
-            className="field h-8 min-w-0 flex-1 py-0 text-xs"
-            disabled={busy}
-            value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
-            onChange={(event) =>
-              setPlace.mutate({
-                userId: seat.user.id,
-                place: event.target.value ? Number(event.target.value) : null,
-              })
-            }
-          >
-            <option value="">игра</option>
-            {placeOptions(detail, seat.place).map((place) => (
-              <option key={place} value={place}>
-                {place}
-              </option>
-            ))}
-          </select>
-        )}
+        <DeskSection title="Бар">
+          {barLines.map((payment) => (
+            <LineChip
+              key={payment.id}
+              label={lineLabel(payment, 0)}
+              disabled={busy || locked}
+              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+            />
+          ))}
+          {!locked && extras.length > 0 && (
+            <BarPicker
+              extras={extras}
+              disabled={busy}
+              onPick={(item) =>
+                addPayment.mutate({
+                  userId: seat.user.id,
+                  kind: item.kind,
+                  amountRub: item.priceRub,
+                  menuItemId: item.id,
+                })
+              }
+            />
+          )}
+          {extras.length === 0 && barLines.length === 0 && (
+            <span className="text-xs text-stone-600">нет позиций</span>
+          )}
+        </DeskSection>
       </div>
 
       {hands.length > 0 && (
-        <div className="col-span-2 flex flex-wrap items-center gap-1 sm:col-span-6">
+        <DeskSection title="Комбинации">
           {hands.map((hand) => {
             const count = grantCount(detail, seat.user.id, hand.id);
             const lastId = lastGrantId(detail, seat.user.id, hand.id);
@@ -465,25 +565,128 @@ function PlayerRow({
               </span>
             );
           })}
-        </div>
+        </DeskSection>
       )}
     </div>
   );
+}
+
+function PlaceControls({
+  seat,
+  detail,
+  upcoming,
+  locked,
+  busy,
+  onBust,
+  onPick,
+}: {
+  seat: Seat;
+  detail: TournamentDetail;
+  upcoming: number | null;
+  locked: boolean;
+  busy: boolean;
+  onBust: () => void;
+  onPick: (place: number | null) => void;
+}) {
+  if (locked) {
+    return (
+      <p className="nums shrink-0 pt-1 text-sm text-stone-200">
+        {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "-"}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex shrink-0 items-center gap-1">
+      <Button
+        size="sm"
+        className="h-8 whitespace-nowrap px-3"
+        disabled={busy || seat.place != null || upcoming == null}
+        onClick={onBust}
+      >
+        {seat.place != null ? `Место ${seat.place}` : upcoming != null ? `Выбыл ${upcoming}` : "в игре"}
+      </Button>
+      <select
+        aria-label={`Место игрока ${seat.user.nickname}`}
+        className="field h-8 w-[4.5rem] shrink-0 py-0 text-xs"
+        disabled={busy}
+        value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
+        onChange={(event) => onPick(event.target.value ? Number(event.target.value) : null)}
+      >
+        <option value="">игра</option>
+        {placeOptions(detail, seat.place).map((place) => (
+          <option key={place} value={place}>
+            {place}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function DeskSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0 space-y-1.5">
+      <p className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">{title}</p>
+      <div className="flex flex-wrap items-center gap-1.5">{children}</div>
+    </div>
+  );
+}
+
+function LineChip({
+  label,
+  onVoid,
+  disabled,
+}: {
+  label: string;
+  onVoid?: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <span className="inline-flex h-8 max-w-full overflow-hidden rounded-lg border border-gold-500/25">
+      <span className="inline-flex min-w-0 items-center truncate px-2 text-xs whitespace-nowrap text-gold-400">
+        {label}
+      </span>
+      {onVoid ? (
+        <button
+          type="button"
+          title="Отменить эту позицию"
+          disabled={disabled}
+          onClick={onVoid}
+          className="h-8 w-7 shrink-0 border-l border-gold-500/20 text-sm text-stone-400 hover:bg-chip-red/20 hover:text-chip-red disabled:opacity-20"
+        >
+          −
+        </button>
+      ) : null}
+    </span>
+  );
+}
+
+function lineLabel(payment: PaymentView, unitChips: number): string {
+  const units = stackUnits(payment.chips, unitChips);
+  const kindName = PAYMENT_KIND_LABELS[payment.kind] ?? payment.kind;
+  const name =
+    payment.kind === "entry" || payment.kind === "rebuy" || payment.kind === "addon"
+      ? kindName
+      : payment.note?.trim() || kindName;
+  const times = (payment.kind === "rebuy" || payment.kind === "addon") && units > 1 ? ` ×${units}` : "";
+  return `${name}${times} · ${formatRub(payment.amountRub)}`;
+}
+
+function stackUnits(chips: number, stack: number): number {
+  if (stack <= 0 || chips <= 0) return 1;
+  return Math.max(1, Math.round(chips / stack));
 }
 
 const QTY = [1, 2, 3] as const;
 
 function BarPicker({
   extras,
-  count,
   disabled,
-  locked,
   onPick,
 }: {
   extras: ClubMenuItem[];
-  count: number;
   disabled: boolean;
-  locked: boolean;
   onPick: (item: ClubMenuItem) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -523,14 +726,6 @@ function BarPicker({
     };
   }, [open]);
 
-  if (locked) {
-    return <span className="nums text-xs text-stone-400">{count > 0 ? `×${count}` : "-"}</span>;
-  }
-
-  if (extras.length === 0) {
-    return <span className="text-xs text-stone-600">-</span>;
-  }
-
   return (
     <div ref={root} className="min-w-0">
       <button
@@ -539,11 +734,11 @@ function BarPicker({
         disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Бар"
+        aria-label="Добавить из бара"
         onClick={() => setOpen((current) => !current)}
-        className="field flex h-8 w-full items-center justify-between gap-1 px-2 py-0 text-xs"
+        className="field flex h-8 items-center justify-between gap-1 px-2 py-0 text-xs"
       >
-        <span className="truncate">{count > 0 ? `Бар ×${count}` : "Бар"}</span>
+        <span>Добавить</span>
         <svg viewBox="0 0 12 8" aria-hidden className={cx("size-2.5 shrink-0 text-gold-400", open && "rotate-180")}>
           <path
             d="M1.2 1.4L6 6.2L10.8 1.4"
@@ -595,40 +790,29 @@ function BarPicker({
 }
 
 function QtyCharge({
-  count,
   unitPrice,
   disabled,
-  locked,
   onCharge,
 }: {
-  count: number;
   unitPrice: number;
   disabled: boolean;
-  locked: boolean;
   onCharge: (times: number) => void;
 }) {
-  if (locked) {
-    return <span className="nums text-stone-300">{count > 0 ? `×${count}` : "-"}</span>;
-  }
-
   return (
-    <div className="flex h-8 items-center gap-1">
-      <span className="nums w-4 text-center text-xs text-stone-400">{count > 0 ? count : ""}</span>
-      <span className="inline-flex overflow-hidden rounded-lg border border-gold-500/25">
-        {QTY.map((times) => (
-          <button
-            key={times}
-            type="button"
-            disabled={disabled}
-            title={`${times} × ${unitPrice} ₽`}
-            onClick={() => onCharge(times)}
-            className="h-8 w-8 border-l border-gold-500/15 text-xs text-gold-400 first:border-l-0 hover:bg-gold-500/15 disabled:opacity-40"
-          >
-            ×{times}
-          </button>
-        ))}
-      </span>
-    </div>
+    <span className="inline-flex overflow-hidden rounded-lg border border-gold-500/25">
+      {QTY.map((times) => (
+        <button
+          key={times}
+          type="button"
+          disabled={disabled}
+          title={`${times} × ${unitPrice} ₽`}
+          onClick={() => onCharge(times)}
+          className="h-8 w-8 border-l border-gold-500/15 text-xs text-gold-400 first:border-l-0 hover:bg-gold-500/15 disabled:opacity-40"
+        >
+          ×{times}
+        </button>
+      ))}
+    </span>
   );
 }
 
@@ -681,8 +865,8 @@ type Seat = {
   chips: number;
   place: number | null;
   ratingPoints: number | null;
+  payments: PaymentView[];
   paid: { entry: boolean; rebuys: number; addons: number; drinks: number; extras: number };
-  lastPaymentId: string | null;
 };
 
 /** Everyone signed up, plus anyone who walked in and paid. */
@@ -698,8 +882,8 @@ function seatsOf(detail: TournamentDetail): Seat[] {
       chips: 0,
       place: placeByUser.get(registration.user.id) ?? null,
       ratingPoints: null,
+      payments: [],
       paid: { entry: false, rebuys: 0, addons: 0, drinks: 0, extras: 0 },
-      lastPaymentId: null,
     });
   }
 
@@ -710,6 +894,7 @@ function seatsOf(detail: TournamentDetail): Seat[] {
       chips: player.chips,
       place: player.place ?? placeByUser.get(player.user.id) ?? null,
       ratingPoints: player.ratingPoints,
+      payments: player.payments,
       paid: {
         entry: player.payments.some((payment) => payment.kind === "entry"),
         rebuys: stacksOf(player.payments, "rebuy", detail.startingStack),
@@ -719,7 +904,6 @@ function seatsOf(detail: TournamentDetail): Seat[] {
           (payment) => payment.kind !== "entry" && payment.kind !== "rebuy" && payment.kind !== "addon",
         ).length,
       },
-      lastPaymentId: player.payments.at(-1)?.id ?? null,
     });
   }
 
@@ -762,43 +946,44 @@ const PREVIEW_BAR: ClubMenuItem[] = [
   sortOrder: index,
 }));
 
-/** DEV-only layout check: a full evening row with 18 bar items. */
+/** DEV-only layout check: a full evening card with 18 bar items. */
 export function EveningLayoutPreview() {
   return (
     <Card className="overflow-visible p-0">
       <p className="border-b border-felt-800 px-3 py-2 text-sm text-stone-400">
-        Макет вечера: 18 позиций бара в списке, строка без горизонтальной прокрутки
+        Макет вечера: карточка игрока, позиции с минусом, бар списком
       </p>
-      <div className="hidden grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
-        <span>Игрок</span>
-        <span>Вход</span>
-        <span>Ребай</span>
-        <span>Адон</span>
-        <span>Бар</span>
-        <span>Место</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] sm:items-center">
-        <div className="col-span-2 min-w-0 sm:col-span-1">
-          <p className="font-medium">DenisPro</p>
-          <p className="text-xs text-stone-500">1 500 ₽ · бар ×2</p>
-          <Button size="sm" variant="ghost" className="mt-1 h-7 px-2 text-xs">
-            Отменить оплату
-          </Button>
+      <div className="space-y-3 px-3 py-3">
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">DenisPro</p>
+            <p className="text-xs text-stone-500">1 500 ₽ · 120 000 фишек</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button size="sm" className="h-8 whitespace-nowrap px-3">
+              Выбыл 9
+            </Button>
+            <span className="field flex h-8 w-[4.5rem] items-center px-2 text-xs">игра</span>
+          </div>
         </div>
-        <Button size="sm" variant="secondary" className="h-8 w-full">
-          оплачен
-        </Button>
-        <QtyCharge count={2} unitPrice={500} disabled={false} locked={false} onCharge={() => undefined} />
-        <QtyCharge count={1} unitPrice={500} disabled={false} locked={false} onCharge={() => undefined} />
-        <BarPicker extras={PREVIEW_BAR} count={2} disabled={false} locked={false} onPick={() => undefined} />
-        <div className="flex h-8 gap-1">
-          <Button size="sm" className="h-8 flex-1 px-2">
-            Выбыл 9
-          </Button>
-          <span className="field flex h-8 flex-1 items-center px-2 text-xs">игра</span>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <DeskSection title="Вход">
+            <LineChip label="Вход · 500 ₽" onVoid={() => undefined} />
+          </DeskSection>
+          <DeskSection title="Ребай">
+            <LineChip label="Ребай ×2 · 1 000 ₽" onVoid={() => undefined} />
+            <QtyCharge unitPrice={500} disabled={false} onCharge={() => undefined} />
+          </DeskSection>
+          <DeskSection title="Адон">
+            <QtyCharge unitPrice={500} disabled={false} onCharge={() => undefined} />
+          </DeskSection>
+          <DeskSection title="Бар">
+            <LineChip label="Кальян · 1 500 ₽" onVoid={() => undefined} />
+            <LineChip label="Напиток · 200 ₽" onVoid={() => undefined} />
+            <BarPicker extras={PREVIEW_BAR} disabled={false} onPick={() => undefined} />
+          </DeskSection>
         </div>
       </div>
     </Card>
   );
 }
-

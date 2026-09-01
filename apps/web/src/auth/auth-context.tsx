@@ -53,7 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function restore(): Promise<void> {
-      const initData = platform.telegramInitData();
+      platform.ready();
+      const initData = (await platform.telegramInitDataSoon()) ?? platform.telegramInitData();
 
       if (initData) {
         try {
@@ -81,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    platform.ready();
     void restore();
     return () => {
       cancelled = true;

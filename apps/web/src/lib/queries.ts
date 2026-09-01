@@ -201,10 +201,32 @@ export function useRegister(tournamentId: string) {
   });
 }
 
+/** Seat a club player who walked in without signing up. Staff only. */
+export function useStaffRegister(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) =>
+      api.post<{ status: string; waitlistPosition: number | null }>(
+        `/tournaments/${tournamentId}/register`,
+        { userId, source: "admin" },
+      ),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
 export function useCancelRegistration(tournamentId: string) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: () => api.delete(`/tournaments/${tournamentId}/register`),
+    onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useStaffCancelRegistration(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) =>
+      api.delete(`/tournaments/${tournamentId}/register${query({ userId })}`),
     onSuccess: () => invalidateSchedule(client, tournamentId),
   });
 }

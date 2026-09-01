@@ -1,6 +1,6 @@
 import type { PlayerStats } from "@poker/contracts";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { formatDayMonth } from "../lib/format";
+import { formatDayMonth, formatNumber } from "../lib/format";
 
 /** Cumulative rating over the season — the one chart players actually look at. */
 export function RatingChart({ progression }: { progression: PlayerStats["progression"] }) {
@@ -35,16 +35,7 @@ export function RatingChart({ progression }: { progression: PlayerStats["progres
             tickLine={false}
             width={44}
           />
-          <Tooltip
-            contentStyle={{
-              background: "#101a17",
-              border: "1px solid #1e3229",
-              borderRadius: 12,
-              fontSize: 12,
-            }}
-            labelStyle={{ color: "#8a8a80" }}
-            formatter={(value) => [`${String(value)} очков`, ""]}
-          />
+          <Tooltip content={<ChartTooltip />} />
           <Area
             type="monotone"
             dataKey="points"
@@ -55,6 +46,24 @@ export function RatingChart({ progression }: { progression: PlayerStats["progres
           />
         </AreaChart>
       </ResponsiveContainer>
+    </div>
+  );
+}
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value?: number }[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-felt-800 bg-felt-950 px-3 py-2 text-xs shadow-lg">
+      <p className="text-stone-400">{label}</p>
+      <p className="nums mt-0.5 text-gold-400">{formatNumber(Number(payload[0]?.value ?? 0))} очков</p>
     </div>
   );
 }

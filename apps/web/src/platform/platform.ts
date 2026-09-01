@@ -48,6 +48,16 @@ function telegramApp(): TelegramWebApp | null {
   return app && app.initData.length > 0 ? app : null;
 }
 
+function telegramShell(): TelegramWebApp | null {
+  return window.Telegram?.WebApp ?? null;
+}
+
+/** The SDK object exists on every page; Telegram's WebView is what matters. */
+function looksLikeTelegram(): boolean {
+  if (telegramApp()) return true;
+  return /Telegram/i.test(window.navigator.userAgent);
+}
+
 export const platform = {
   get kind(): PlatformKind {
     return telegramApp() ? "telegram" : "web";
@@ -59,11 +69,30 @@ export const platform = {
 
   /** Credentials for the matching /api/auth endpoint, or null on the plain web. */
   telegramInitData(): string | null {
-    return telegramApp()?.initData ?? null;
+    const data = telegramShell()?.initData;
+    return data && data.length > 0 ? data : null;
+  },
+
+  /**
+   * Mini App initData can arrive a beat after the script. Wait briefly so the
+   * first paint inside Telegram does not fall through to the anonymous login.
+   */
+  async telegramInitDataSoon(timeoutMs = 1500): Promise<string | null> {
+    const immediate = this.telegramInitData();
+    if (immediate || !looksLikeTelegram()) return immediate;
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      const data = this.telegramInitData();
+      if (data) return data;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return this.telegramInitData();
   },
 
   ready(): void {
-    const app = telegramApp();
+    // Call even before initData arrives: some Telegram clients fill it only
+    // after ready(), and skipping that leaves Mini App login stuck anonymous.
+    const app = telegramShell();
     if (!app) return;
     app.ready();
     app.expand();
@@ -112,5 +141,9 @@ export const platform = {
 
   get isIos(): boolean {
     return /iPad|iPhone|iPod/.test(window.navigator.userAgent);
+  },
+
+  get isAndroid(): boolean {
+    return /Android/i.test(window.navigator.userAgent);
   },
 };
