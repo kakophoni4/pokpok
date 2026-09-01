@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id, IsoDateTime } from "./common.js";
+import { Id, IsoDateTime, patchShape } from "./common.js";
 import { PublicUser } from "./user.js";
 
 /**
@@ -50,7 +50,10 @@ export const CreateAchievementInput = z.object({
 });
 export type CreateAchievementInput = z.infer<typeof CreateAchievementInput>;
 
-export const UpdateAchievementInput = CreateAchievementInput.partial().omit({ code: true });
+export const UpdateAchievementInput = z
+  .object(patchShape(CreateAchievementInput.shape))
+  .partial()
+  .omit({ code: true });
 export type UpdateAchievementInput = z.infer<typeof UpdateAchievementInput>;
 
 export const UserAchievementView = z.object({

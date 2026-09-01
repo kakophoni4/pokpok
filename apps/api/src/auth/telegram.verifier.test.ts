@@ -99,6 +99,23 @@ describe("verifyInitData", () => {
     expect(() => makeVerifier().verifyInitData(initData)).not.toThrow();
   });
 
+  // Real clients sign over `signature` too. Rejecting those is what kept the
+  // Mini App on the sign-in screen instead of logging the player in.
+  it("accepts initData whose hash covers the signature field", () => {
+    const user = JSON.stringify({ id: 777_003, first_name: "Анна" });
+    const fields: Record<string, string> = {
+      auth_date: String(now()),
+      user,
+      signature: "Ed25519_sig_value",
+    };
+    const initData = new URLSearchParams({
+      ...fields,
+      hash: sign(fields, miniAppSecret()),
+    }).toString();
+
+    expect(makeVerifier().verifyInitData(initData).telegramId).toBe("777003");
+  });
+
   it("rejects initData without a hash", () => {
     expect(() => makeVerifier().verifyInitData("auth_date=1&user=%7B%7D")).toThrow(
       UnauthorizedException,

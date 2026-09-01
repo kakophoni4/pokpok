@@ -71,15 +71,22 @@ export class TelegramVerifier {
 
     const fields: Record<string, string> = {};
     for (const [key, value] of params.entries()) {
-      // `signature` is Telegram's separate Ed25519 field and is not part of the HMAC string.
-      if (key === "hash" || key === "signature") continue;
+      if (key === "hash") continue;
       fields[key] = value;
     }
 
-    const checkString = buildCheckString(fields);
     const secret = createHmac("sha256", "WebAppData").update(this.botToken()).digest();
 
-    this.assertSignature(checkString, secret, hash);
+    // Telegram now ships an Ed25519 `signature` alongside `hash`, and clients
+    // disagree on whether it belongs in the data-check string. Accept either
+    // reading: both are still HMAC-verified against the bot token.
+    const withSignature = buildCheckString(fields);
+    const { signature: _ed25519, ...rest } = fields;
+    const withoutSignature = buildCheckString(rest);
+
+    if (!this.matches(withSignature, secret, hash)) {
+      this.assertSignature(withoutSignature, secret, hash);
+    }
 
     const authDate = Number(fields.auth_date);
     if (!Number.isFinite(authDate)) {
@@ -98,16 +105,19 @@ export class TelegramVerifier {
     return user;
   }
 
-  private assertSignature(checkString: string, secret: Buffer, expectedHex: string): void {
+  private matches(checkString: string, secret: Buffer, expectedHex: string): boolean {
     const actual = createHmac("sha256", secret).update(checkString).digest();
     let expected: Buffer;
     try {
       expected = Buffer.from(expectedHex, "hex");
     } catch {
-      throw new UnauthorizedException({ code: "BAD_SIGNATURE", message: "Подпись неверна" });
+      return false;
     }
+    return expected.length === actual.length && timingSafeEqual(actual, expected);
+  }
 
-    if (expected.length !== actual.length || !timingSafeEqual(actual, expected)) {
+  private assertSignature(checkString: string, secret: Buffer, expectedHex: string): void {
+    if (!this.matches(checkString, secret, expectedHex)) {
       throw new UnauthorizedException({ code: "BAD_SIGNATURE", message: "Подпись неверна" });
     }
   }

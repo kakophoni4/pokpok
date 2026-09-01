@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id, IsoDateTime } from "./common.js";
+import { Id, IsoDateTime, patchShape } from "./common.js";
 import { PaymentKind, RegistrationSource, RegistrationStatus, TournamentStatus } from "./enums.js";
 import { PublicUser } from "./user.js";
 
@@ -178,7 +178,9 @@ function withScheduleChecks<T extends z.ZodType<TournamentWindow>>(schema: T) {
 export const CreateTournamentInput = withScheduleChecks(TournamentInputShape);
 export type CreateTournamentInput = z.infer<typeof CreateTournamentInput>;
 
-export const UpdateTournamentInput = withScheduleChecks(TournamentInputShape.partial());
+export const UpdateTournamentInput = withScheduleChecks(
+  z.object(patchShape(TournamentInputShape.shape)).partial(),
+);
 export type UpdateTournamentInput = z.infer<typeof UpdateTournamentInput>;
 
 export const RegisterInput = z.object({

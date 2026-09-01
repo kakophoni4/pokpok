@@ -140,27 +140,34 @@ export function TournamentPage() {
         </section>
       )}
 
-      <section className="mb-4">
-        <h2 className="mb-2 text-base font-semibold text-stone-200">
-          Записались ({seated.length})
-        </h2>
-        {seated.length === 0 ? (
-          <Card className="text-sm text-stone-400">Пока никто не записался - будьте первым.</Card>
-        ) : (
-          <ul className="card divide-y divide-felt-800">
-            {seated.map((row) => (
-              <li key={row.id} className="flex items-center gap-3 px-4 py-2.5">
-                <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={32} />
-                <Link to={`/player/${row.user.id}`} className="flex-1 truncate hover:text-gold-400">
-                  {playerLabel(row.user)}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {/* Once the game is played the results are the record; repeating the
+          sign-up sheet under them says the same thing twice. */}
+      {!hasResults && (
+        <section className="mb-4">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
+            Записались ({seated.length})
+          </h2>
+          {seated.length === 0 ? (
+            <Card className="text-sm text-stone-400">Пока никто не записался - будьте первым.</Card>
+          ) : (
+            <ul className="card divide-y divide-felt-800">
+              {seated.map((row) => (
+                <li key={row.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={32} />
+                  <Link
+                    to={`/player/${row.user.id}`}
+                    className="flex-1 truncate hover:text-gold-400"
+                  >
+                    {playerLabel(row.user)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
-      {waiting.length > 0 && (
+      {!hasResults && waiting.length > 0 && (
         <section>
           <h2 className="mb-2 text-base font-semibold text-stone-200">
             Лист ожидания ({waiting.length})

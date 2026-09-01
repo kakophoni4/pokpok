@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id, IsoDateTime } from "./common.js";
+import { Id, IsoDateTime, patchShape } from "./common.js";
 import { RatingSourceType } from "./enums.js";
 import { PublicUser } from "./user.js";
 
@@ -50,7 +50,7 @@ export const CreateSeasonInput = z.object({
 });
 export type CreateSeasonInput = z.infer<typeof CreateSeasonInput>;
 
-export const UpdateSeasonInput = CreateSeasonInput.partial();
+export const UpdateSeasonInput = z.object(patchShape(CreateSeasonInput.shape)).partial();
 export type UpdateSeasonInput = z.infer<typeof UpdateSeasonInput>;
 
 export const LeaderboardRow = z.object({
