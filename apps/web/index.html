@@ -49,6 +49,28 @@
             window.__TG_PLATFORM__ = plat;
             sessionStorage.setItem("__poker_tg_platform", plat);
           }
+          var fromTelegram =
+            Boolean(data) ||
+            Boolean(plat) ||
+            typeof window.TelegramWebviewProxy !== "undefined";
+          if (fromTelegram && navigator.serviceWorker) {
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              if (!regs.length || sessionStorage.getItem("__poker_sw_cleared")) return;
+              sessionStorage.setItem("__poker_sw_cleared", "1");
+              var reload = function () {
+                location.reload();
+              };
+              var pending = [Promise.all(regs.map(function (reg) { return reg.unregister(); }))];
+              if (window.caches) {
+                pending.push(
+                  caches.keys().then(function (keys) {
+                    return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+                  }),
+                );
+              }
+              Promise.all(pending).then(reload).catch(reload);
+            });
+          }
         } catch (e) {}
       })();
     </script>

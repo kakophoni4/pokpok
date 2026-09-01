@@ -32,6 +32,6 @@ export function loadConfig(raw: NodeJS.ProcessEnv = process.env): BotConfig {
     internalToken: parsed.data.INTERNAL_API_TOKEN,
     apiBase: `${parsed.data.PUBLIC_API_URL.replace(/\/+$/, "")}/api`,
     webUrl: parsed.data.PUBLIC_WEB_URL.replace(/\/+$/, ""),
-    miniAppUrl: `${parsed.data.PUBLIC_WEB_URL.replace(/\/+$/, "")}/?v=20260901mini`,
+    miniAppUrl: `${parsed.data.PUBLIC_WEB_URL.replace(/\/+$/, "")}/?v=20260901kill`,
   };
 }

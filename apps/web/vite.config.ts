@@ -13,6 +13,11 @@ export default defineConfig({
     tailwind(),
     VitePWA({
       registerType: "autoUpdate",
+      // Replace the installed worker with one that unregisters itself. Telegram's
+      // webview was serving yesterday's Mini App from the PWA cache, so tapping
+      // «Клуб» never reached the login code. Keep the filename `sw.js`.
+      selfDestroying: true,
+      injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "Клуб спортивного покера",
