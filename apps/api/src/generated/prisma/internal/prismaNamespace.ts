@@ -409,6 +409,7 @@ export const ModelName = {
   Result: 'Result',
   Payment: 'Payment',
   ClubSettings: 'ClubSettings',
+  ClubMenuItem: 'ClubMenuItem',
   Achievement: 'Achievement',
   UserAchievement: 'UserAchievement',
   RatingEvent: 'RatingEvent',
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "clubSettings" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
+    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1322,6 +1323,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ClubMenuItem: {
+      payload: Prisma.$ClubMenuItemPayload<ExtArgs>
+      fields: Prisma.ClubMenuItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClubMenuItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClubMenuItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        findFirst: {
+          args: Prisma.ClubMenuItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClubMenuItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        findMany: {
+          args: Prisma.ClubMenuItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>[]
+        }
+        create: {
+          args: Prisma.ClubMenuItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        createMany: {
+          args: Prisma.ClubMenuItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClubMenuItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>[]
+        }
+        delete: {
+          args: Prisma.ClubMenuItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        update: {
+          args: Prisma.ClubMenuItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClubMenuItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClubMenuItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClubMenuItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClubMenuItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClubMenuItemPayload>
+        }
+        aggregate: {
+          args: Prisma.ClubMenuItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClubMenuItem>
+        }
+        groupBy: {
+          args: Prisma.ClubMenuItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClubMenuItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClubMenuItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClubMenuItemCountAggregateOutputType> | number
+        }
+      }
+    }
     Achievement: {
       payload: Prisma.$AchievementPayload<ExtArgs>
       fields: Prisma.AchievementFieldRefs
@@ -1917,6 +1992,7 @@ export const TournamentScalarFieldEnum = {
   startingStack: 'startingStack',
   addonChips: 'addonChips',
   ratingMultiplier: 'ratingMultiplier',
+  minRating: 'minRating',
   status: 'status',
   adminTopicId: 'adminTopicId',
   adminBoardMsgId: 'adminBoardMsgId',
@@ -1983,6 +2059,23 @@ export const ClubSettingsScalarFieldEnum = {
 } as const
 
 export type ClubSettingsScalarFieldEnum = (typeof ClubSettingsScalarFieldEnum)[keyof typeof ClubSettingsScalarFieldEnum]
+
+
+export const ClubMenuItemScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  kind: 'kind',
+  priceRub: 'priceRub',
+  chips: 'chips',
+  isFixed: 'isFixed',
+  isPromo: 'isPromo',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClubMenuItemScalarFieldEnum = (typeof ClubMenuItemScalarFieldEnum)[keyof typeof ClubMenuItemScalarFieldEnum]
 
 
 export const AchievementScalarFieldEnum = {
@@ -2502,6 +2595,7 @@ export type GlobalOmitConfig = {
   result?: Prisma.ResultOmit
   payment?: Prisma.PaymentOmit
   clubSettings?: Prisma.ClubSettingsOmit
+  clubMenuItem?: Prisma.ClubMenuItemOmit
   achievement?: Prisma.AchievementOmit
   userAchievement?: Prisma.UserAchievementOmit
   ratingEvent?: Prisma.RatingEventOmit

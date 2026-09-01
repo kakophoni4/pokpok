@@ -74,12 +74,13 @@ export class AdminScreens {
     kind: PaymentKind,
     amountRub: number,
     multiplier = 1,
+    menuItemId?: string,
   ): Promise<TournamentPlayer> {
     return this.api.asUser<TournamentPlayer>(
       profile,
       "POST",
       `/tournaments/${tournamentId}/payments`,
-      { userId, kind, amountRub, multiplier },
+      { userId, kind, amountRub, multiplier, ...(menuItemId ? { menuItemId } : {}) },
     );
   }
 
@@ -181,7 +182,7 @@ export class AdminScreens {
       `Касса: <b>${rub(detail.totalRub ?? 0)}</b>`,
       `Призовых мест: <b>${detail.paidPlaces}</b> · Первое место: <b>${points(detail.ratingPool)}</b>`,
       `Мест проставлено: <b>${placed.length}</b> из <b>${fieldSize(detail)}</b>`,
-      ...(finished
+      ...(finished || nextPlace(detail) == null
         ? []
         : [`Следующий выбывший займёт <b>${nextPlace(detail)}</b> место`]),
       ...(finished ? ["", "🏁 <b>Турнир завершён, рейтинг начислен.</b>"] : []),
@@ -247,37 +248,53 @@ export class AdminScreens {
         : "<i>ничего не оплачено</i>",
     );
     if (seat.chips > 0) lines.push(`Фишек: <b>${num(seat.chips)}</b>`);
-    if (seat.place != null) {
+    if (seat.place != null && seat.place <= detail.paidPlaces) {
       const earned = seat.ratingPoints != null ? ` · ${points(seat.ratingPoints)}` : "";
-      const prize = seat.place <= detail.paidPlaces ? "" : " · вне призов";
-      lines.push(`Место: <b>${seat.place}</b>${earned}${prize}`);
+      lines.push(`Место: <b>${seat.place}</b>${earned}`);
+    } else if (seat.place != null) {
+      lines.push("<i>участие</i>");
     } else {
-      lines.push(
-        `<i>в игре · за столом ${fieldSize(detail)} · следующий: ${nextPlace(detail)} место</i>`,
-      );
+      const upcoming = nextPlace(detail);
+      lines.push(upcoming != null ? `<i>в игре · следующий: ${upcoming} место</i>` : "<i>в игре</i>");
     }
 
     const keyboard = new InlineKeyboard();
 
     if (detail.status !== "finished") {
-      keyboard.text(`Вход ${prices.entryPriceRub}`, "p:entry:1").row();
+      const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
+      const entry = prices.menuItems?.find((item) => item.isFixed && item.kind === "entry");
+      const rebuy = prices.menuItems?.find((item) => item.isFixed && item.kind === "rebuy");
+      const addon = prices.menuItems?.find((item) => item.isFixed && item.kind === "addon");
+
+      keyboard.text(`Вход ${entry?.priceRub ?? prices.entryPriceRub}`, "p:entry:1").row();
       keyboard
-        .text(`Ребай ${prices.rebuyPriceRub}`, "p:rebuy:1")
+        .text(`Ребай ${rebuy?.priceRub ?? prices.rebuyPriceRub}`, "p:rebuy:1")
         .text("×2", "p:rebuy:2")
         .text("×3", "p:rebuy:3")
         .row();
       keyboard
-        .text(`Адон ${prices.addonPriceRub}`, "p:addon:1")
+        .text(`Адон ${addon?.priceRub ?? prices.addonPriceRub}`, "p:addon:1")
         .text("×2", "p:addon:2")
         .text("×3", "p:addon:3")
         .row();
-      keyboard.text(`Напиток ${prices.drinkPriceRub}`, "p:drink:1").row();
 
-      if (seat.place == null) {
-        keyboard.text(`🚪 Выбыл — ${nextPlace(detail)} место`, "bust").row();
-        keyboard.text("✏️ Другое место", "place");
+      for (const item of extras) {
+        const label = item.isPromo
+          ? item.title
+          : item.priceRub > 0
+            ? `${item.title} ${item.priceRub}`
+            : item.title;
+        keyboard.text(fit(label, 40), `m:${item.id}`).row();
+      }
+
+      const upcoming = nextPlace(detail);
+      if (seat.place == null && upcoming != null) {
+        keyboard.text(`Выбыл — ${upcoming} место`, "bust").row();
+        keyboard.text("Другое место", "place");
+      } else if (seat.place == null) {
+        keyboard.text("Место", "place");
       } else {
-        keyboard.text("✏️ Изменить место", "place").text("↩️ Вернуть в игру", "unbust");
+        keyboard.text("Изменить место", "place").text("Вернуть в игру", "unbust");
       }
 
       keyboard.row().text("🏅 Ачивка", "ach");
@@ -298,20 +315,14 @@ export class AdminScreens {
 
     const keyboard = new InlineKeyboard();
     offered.forEach((place, index) => {
-      const paid = place <= detail.paidPlaces;
-      keyboard.text(`${paid ? "🏅" : ""}${place}`, `pl:${place}`);
+      keyboard.text(`${place}`, `pl:${place}`);
       if (index % 5 === 4) keyboard.row();
     });
 
     keyboard.row().text("← Назад", "card");
 
     return {
-      text: [
-        `✏️ <b>${escapeHtml(seat.user.nickname)}</b>`,
-        "",
-        `За столом ${fieldSize(detail)}, призовых мест ${detail.paidPlaces}.`,
-        "🏅 — место в призах. Выберите, каким игрок закончил вечер.",
-      ].join("\n"),
+      text: [`<b>${escapeHtml(seat.user.nickname)}</b>`, "", "Призовое место."].join("\n"),
       keyboard,
     };
   }

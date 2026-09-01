@@ -42,12 +42,25 @@ export class PaymentsService {
       throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
     }
 
+    const menuItem = input.menuItemId
+      ? await this.prisma.clubMenuItem.findUnique({ where: { id: input.menuItemId } })
+      : null;
+    if (input.menuItemId && !menuItem) {
+      throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция меню не найдена" });
+    }
+
+    const kind = menuItem?.kind ?? input.kind;
     const season = await this.seasons.ratingConfig(tournament.seasonId);
     const config = effectiveConfig(tournament, season);
     const units = input.multiplier ?? 1;
-    const chips = input.chips ?? chipsForKind(input.kind, config) * units;
+    const amountRub = menuItem ? menuItem.priceRub * units : input.amountRub;
+    const chips =
+      input.chips ??
+      (menuItem && menuItem.chips > 0
+        ? menuItem.chips * units
+        : chipsForKind(kind, config) * units);
 
-    if (input.kind === "entry") {
+    if (kind === "entry") {
       const alreadyIn = await this.prisma.payment.findFirst({
         where: { tournamentId, userId: input.userId, kind: "entry", voidedAt: null },
         select: { id: true },
@@ -65,10 +78,10 @@ export class PaymentsService {
         data: {
           tournamentId,
           userId: input.userId,
-          kind: input.kind,
-          amountRub: input.amountRub,
+          kind,
+          amountRub,
           chips,
-          note: input.note ?? null,
+          note: input.note ?? menuItem?.title ?? null,
           createdById: actorId,
         },
       });
@@ -82,7 +95,7 @@ export class PaymentsService {
         update: { status: "registered", waitlistPosition: null },
       });
 
-      if (input.kind === "rebuy") {
+      if (kind === "rebuy") {
         await tx.result.deleteMany({ where: { tournamentId, userId: input.userId } });
       }
     });
@@ -94,10 +107,11 @@ export class PaymentsService {
       entityId: tournamentId,
       after: {
         userId: input.userId,
-        kind: input.kind,
-        amountRub: input.amountRub,
+        kind,
+        amountRub,
         chips,
         multiplier: units,
+        menuItemId: menuItem?.id ?? null,
       },
     });
 

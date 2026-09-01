@@ -63,6 +63,7 @@ export const ModelName = {
   Result: 'Result',
   Payment: 'Payment',
   ClubSettings: 'ClubSettings',
+  ClubMenuItem: 'ClubMenuItem',
   Achievement: 'Achievement',
   UserAchievement: 'UserAchievement',
   RatingEvent: 'RatingEvent',
@@ -199,6 +200,7 @@ export const TournamentScalarFieldEnum = {
   startingStack: 'startingStack',
   addonChips: 'addonChips',
   ratingMultiplier: 'ratingMultiplier',
+  minRating: 'minRating',
   status: 'status',
   adminTopicId: 'adminTopicId',
   adminBoardMsgId: 'adminBoardMsgId',
@@ -265,6 +267,23 @@ export const ClubSettingsScalarFieldEnum = {
 } as const
 
 export type ClubSettingsScalarFieldEnum = (typeof ClubSettingsScalarFieldEnum)[keyof typeof ClubSettingsScalarFieldEnum]
+
+
+export const ClubMenuItemScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  kind: 'kind',
+  priceRub: 'priceRub',
+  chips: 'chips',
+  isFixed: 'isFixed',
+  isPromo: 'isPromo',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClubMenuItemScalarFieldEnum = (typeof ClubMenuItemScalarFieldEnum)[keyof typeof ClubMenuItemScalarFieldEnum]
 
 
 export const AchievementScalarFieldEnum = {

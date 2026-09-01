@@ -66,6 +66,24 @@ export class RegistrationsService {
           throw new ForbiddenException({ code: "USER_BLOCKED", message: "Аккаунт заблокирован" });
         }
 
+        if (!isStaffAction && tournament.minRating != null && tournament.minRating > 0) {
+          const seasonId = tournament.seasonId;
+          const points = seasonId
+            ? (
+                await tx.userSeasonStats.findUnique({
+                  where: { userId_seasonId: { userId, seasonId } },
+                  select: { points: true },
+                })
+              )?.points ?? 0
+            : 0;
+          if (points < tournament.minRating) {
+            throw new ForbiddenException({
+              code: "RATING_TOO_LOW",
+              message: `Нужен рейтинг не ниже ${tournament.minRating}`,
+            });
+          }
+        }
+
         const existing = await tx.registration.findUnique({
           where: { tournamentId_userId: { tournamentId, userId } },
         });

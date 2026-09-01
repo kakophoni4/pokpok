@@ -1,5 +1,6 @@
 import type { PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
-import { fieldSize, freePlaces, nextPlace, stacksOf } from "@poker/contracts";
+import type { ClubSettings } from "@poker/contracts";
+import { freePlaces, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
 import { useMemo, useState } from "react";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, cx } from "../../components/ui";
 import {
@@ -134,16 +135,7 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
             />
           </div>
 
-          <p className="flex-1 text-xs text-stone-500">
-            Можно менять по ходу игры — рейтинг считается в момент завершения.
-            {!isFinished && (
-              <>
-                <br />
-                За столом {fieldSize(detail)}, мест проставлено{" "}
-                {detail.results.length}. Следующий выбывший займёт {nextPlace(detail)} место.
-              </>
-            )}
-          </p>
+          <div className="flex-1" />
 
           {isFinished ? (
             <Button variant="ghost" loading={finish.isPending} onClick={() => finish.mutate(true)}>
@@ -206,12 +198,7 @@ function PlayerRow({
 }: {
   seat: Seat;
   detail: TournamentDetail;
-  prices: {
-    entryPriceRub: number;
-    rebuyPriceRub: number;
-    addonPriceRub: number;
-    drinkPriceRub: number;
-  };
+  prices: ClubSettings;
   locked: boolean;
 }) {
   const addPayment = useAddPayment(detail.id);
@@ -241,7 +228,7 @@ function PlayerRow({
             seat.place == null ? "text-stone-600" : "text-stone-200",
           )}
         >
-          {seat.place == null ? "—" : placeLabel(seat.place)}
+          {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "—"}
         </span>
         <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={32} />
         <div className="min-w-0 flex-1">
@@ -288,22 +275,36 @@ function PlayerRow({
               ))}
             </span>
           ))}
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={busy}
-            onClick={() =>
-              addPayment.mutate({ userId: seat.user.id, kind: "drink", amountRub: priceOf.drink })
-            }
-          >
-            Напиток {priceOf.drink}
-          </Button>
+          {(prices.menuItems ?? [])
+            .filter((item) => item.isActive && !item.isFixed)
+            .map((item) => (
+              <Button
+                key={item.id}
+                size="sm"
+                variant="ghost"
+                disabled={busy}
+                onClick={() =>
+                  addPayment.mutate({
+                    userId: seat.user.id,
+                    kind: item.kind,
+                    amountRub: item.priceRub,
+                    menuItemId: item.id,
+                  })
+                }
+              >
+                {item.title}
+                {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
+              </Button>
+            ))}
 
-          {seat.place == null && (
+          {seat.place == null && nextPlace(detail) != null && (
             <Button
               size="sm"
               disabled={busy}
-              onClick={() => setPlace.mutate({ userId: seat.user.id, place: nextPlace(detail) })}
+              onClick={() => {
+                const place = nextPlace(detail);
+                if (place != null) setPlace.mutate({ userId: seat.user.id, place });
+              }}
             >
               Выбыл — {nextPlace(detail)} место
             </Button>
@@ -313,7 +314,7 @@ function PlayerRow({
             aria-label={`Место игрока ${seat.user.nickname}`}
             className="field h-8 w-auto py-0 text-sm"
             disabled={busy}
-            value={seat.place ?? ""}
+            value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
             onChange={(event) =>
               setPlace.mutate({
                 userId: seat.user.id,
@@ -324,7 +325,7 @@ function PlayerRow({
             <option value="">в игре</option>
             {placeOptions(detail, seat.place).map((place) => (
               <option key={place} value={place}>
-                {place} место{place <= detail.paidPlaces ? " · в призах" : ""}
+                {place} место
               </option>
             ))}
           </select>

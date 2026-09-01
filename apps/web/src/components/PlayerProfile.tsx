@@ -2,7 +2,11 @@ import type { PlayerStats, UserAchievementView } from "@poker/contracts";
 import { Link } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { formatFullDate, formatPoints, placeLabel, plural } from "../lib/format";
-import { Avatar, Badge, Card, EmptyState, Stat, cx } from "./ui";
+import { Avatar, Card, EmptyState, Stat, cx } from "./ui";
+
+function showsPrizePlace(place: number | null | undefined, paidPlaces: number): boolean {
+  return place != null && place >= 1 && place <= paidPlaces;
+}
 
 // The charting library is by far the heaviest dependency; keep it out of the
 // initial bundle so the schedule opens fast on a phone.
@@ -39,11 +43,6 @@ export function PlayerProfile({
               <span className="nums">{stats.points}</span> очков
             </p>
           </div>
-          {stats.user.role !== "player" && (
-            <Badge tone="gold">
-              {stats.user.role === "admin" ? "Администратор" : "Организатор"}
-            </Badge>
-          )}
         </div>
         {extra}
       </Card>
@@ -97,7 +96,6 @@ export function PlayerProfile({
 
         {stats.history.length === 0 ? (
           <EmptyState
-            icon="🃏"
             title="Игр пока не было"
             description="Запишитесь на ближайший турнир — он появится в этой истории вместе с полученным рейтингом."
           />
@@ -105,14 +103,20 @@ export function PlayerProfile({
           <ul className="card divide-y divide-felt-800">
             {stats.history.map((event) => (
               <li key={event.id} className="flex items-center gap-3 px-4 py-3">
-                <span className="w-8 shrink-0 text-center">
-                  {event.place ? (
-                    <span className={cx("nums font-semibold", event.place <= 3 && "text-lg")}>
-                      {placeLabel(event.place)}
-                    </span>
+                <span className="w-16 shrink-0 text-center">
+                  {event.tournament ? (
+                    showsPrizePlace(event.place, event.tournament.paidPlaces) ? (
+                      <span className={cx("nums font-semibold", event.place === 1 && "text-gold-400")}>
+                        {placeLabel(event.place as number)}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] tracking-wide text-stone-500 uppercase">
+                        участие
+                      </span>
+                    )
                   ) : (
                     <span aria-hidden className="text-lg">
-                      {event.achievement?.icon ?? (event.points < 0 ? "⚠️" : "✳️")}
+                      {event.achievement?.icon ?? "·"}
                     </span>
                   )}
                 </span>

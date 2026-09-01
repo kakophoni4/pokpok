@@ -5,10 +5,11 @@ import { Loading, PageHeader, Tabs } from "../../components/ui";
 import { AdminAchievements } from "./AdminAchievements";
 import { AdminGame } from "./AdminGame";
 import { AdminPlayers } from "./AdminPlayers";
+import { AdminSeasons } from "./AdminSeasons";
 import { AdminSettings } from "./AdminSettings";
 import { AdminTournaments } from "./AdminTournaments";
 
-type Tab = "tournaments" | "game" | "players" | "achievements" | "settings";
+type Tab = "tournaments" | "game" | "players" | "achievements" | "seasons" | "settings";
 
 export function AdminPage() {
   const { status, can } = useAuth();
@@ -19,7 +20,7 @@ export function AdminPage() {
 
   return (
     <>
-      <PageHeader title="Управление клубом" subtitle="Игровой вечер, расписание, игроки и ачивки" />
+      <PageHeader title="Управление клубом" />
 
       <Tabs
         value={tab}
@@ -29,6 +30,7 @@ export function AdminPage() {
           { value: "tournaments", label: "Расписание" },
           { value: "players", label: "Игроки" },
           { value: "achievements", label: "Ачивки" },
+          { value: "seasons", label: "Сезоны" },
           { value: "settings", label: "Клуб" },
         ]}
       />
@@ -37,6 +39,7 @@ export function AdminPage() {
       {tab === "tournaments" && <AdminTournaments canDelete />}
       {tab === "players" && <AdminPlayers canEdit />}
       {tab === "achievements" && <AdminAchievements canEdit />}
+      {tab === "seasons" && <AdminSeasons />}
       {tab === "settings" && <AdminSettings />}
     </>
   );

@@ -19,8 +19,8 @@ export function SchedulePage() {
         value={scope}
         onChange={setScope}
         options={[
-          { value: "upcoming", label: "Предстоящие" },
-          { value: "past", label: "Прошедшие" },
+          { value: "upcoming", label: "Текущие" },
+          { value: "past", label: "Завершённые" },
         ]}
       />
 
@@ -31,11 +31,10 @@ export function SchedulePage() {
 
       {tournaments.data?.length === 0 && (
         <EmptyState
-          icon={scope === "upcoming" ? "🗓" : "📜"}
-          title={scope === "upcoming" ? "Игр пока не назначено" : "Прошедших игр нет"}
+          title={scope === "upcoming" ? "Игр пока не назначено" : "Завершённых игр нет"}
           description={
             scope === "upcoming"
-              ? "Как только организатор опубликует турнир, он появится здесь, а бот пришлёт уведомление."
+              ? "Как только организатор опубликует турнир, он появится здесь."
               : "Здесь появятся результаты сыгранных турниров."
           }
         />

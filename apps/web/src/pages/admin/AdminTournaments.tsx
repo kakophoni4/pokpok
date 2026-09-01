@@ -70,6 +70,9 @@ function TournamentRow({
           <p className="nums mt-0.5 text-xs text-stone-400">
             {formatFullDate(tournament.startsAt)} · {formatTime(tournament.startsAt)} ·{" "}
             {tournament.paidPlaces} призовых · ×{tournament.ratingMultiplier}
+            {tournament.minRating != null && tournament.minRating > 0
+              ? ` · от ${tournament.minRating}`
+              : ""}
           </p>
           <p className="nums mt-0.5 text-xs text-stone-500">
             {tournament.registeredCount}
@@ -183,6 +186,7 @@ function TournamentForm({
         capacity: "16",
         ratingMultiplier: "1",
         paidPlaces: "9",
+        minRating: "",
         description: "",
       };
     }
@@ -195,6 +199,7 @@ function TournamentForm({
       capacity: tournament.capacity == null ? "" : String(tournament.capacity),
       ratingMultiplier: String(tournament.ratingMultiplier),
       paidPlaces: String(tournament.paidPlaces),
+      minRating: tournament.minRating == null ? "" : String(tournament.minRating),
       description: "",
     };
   });
@@ -211,6 +216,7 @@ function TournamentForm({
       capacity: form.capacity ? Number(form.capacity) : null,
       ratingMultiplier: Number(form.ratingMultiplier),
       paidPlaces: form.paidPlaces ? Number(form.paidPlaces) : null,
+      minRating: form.minRating ? Number(form.minRating) : null,
       // Editing keeps whatever description exists unless something was typed.
       ...(form.description.trim() || !isEdit
         ? { description: form.description.trim() || null }
@@ -313,6 +319,21 @@ function TournamentForm({
       </div>
 
       <div>
+        <label className="label" htmlFor="t-min-rating">
+          Мин. рейтинг
+        </label>
+        <input
+          id="t-min-rating"
+          type="number"
+          min={0}
+          className="field nums max-w-40"
+          value={form.minRating}
+          placeholder="не нужен"
+          onChange={(event) => setForm({ ...form, minRating: event.target.value })}
+        />
+      </div>
+
+      <div>
         <label className="label" htmlFor="t-desc">
           Описание
         </label>
@@ -328,13 +349,6 @@ function TournamentForm({
 
       {mutation.isError && (
         <p className="text-xs text-chip-red">{(mutation.error as Error).message}</p>
-      )}
-
-      {isEdit && tournament.registeredCount > 0 && (
-        <p className="text-xs text-stone-500">
-          На турнир уже записаны {tournament.registeredCount} игроков. Смену даты они увидят
-          сразу — предупредите их сообщением в чате.
-        </p>
       )}
 
       <div className="flex gap-2">

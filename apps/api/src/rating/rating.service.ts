@@ -137,7 +137,7 @@ export class RatingService {
     const events = await this.prisma.ratingEvent.findMany({
       where: { userId, ...(seasonId ? { seasonId } : {}) },
       include: {
-        tournament: { select: { id: true, title: true, startsAt: true } },
+        tournament: { select: { id: true, title: true, startsAt: true, paidPlaces: true } },
         achievement: { select: { id: true, title: true, icon: true } },
       },
       orderBy: { createdAt: "asc" },
@@ -218,7 +218,7 @@ function toRatingEventView(event: {
   comment: string | null;
   place: number | null;
   fieldSize: number | null;
-  tournament: { id: string; title: string; startsAt: Date } | null;
+  tournament: { id: string; title: string; startsAt: Date; paidPlaces: number | null } | null;
   achievement: { id: string; title: string; icon: string | null } | null;
 }): RatingEventView {
   return {
@@ -234,6 +234,7 @@ function toRatingEventView(event: {
           title: event.tournament.title,
           startsAt: event.tournament.startsAt.toISOString(),
           fieldSize: event.fieldSize ?? 0,
+          paidPlaces: event.tournament.paidPlaces ?? 9,
         }
       : null,
     achievement: event.achievement,

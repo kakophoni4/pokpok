@@ -1,107 +1,96 @@
-import { useCallback, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
-import { TelegramLoginButton } from "../auth/TelegramLoginButton";
 import { useTelegramLogin } from "../auth/useTelegramLogin";
 import { Button, Card, Loading } from "../components/ui";
 
-const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? "";
 const IS_DEV = import.meta.env.DEV;
 
 export function LoginPage() {
-  const { status, loginWithTelegramWidget, loginAsDev } = useAuth();
+  const { status, loginAsDev } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("Ferz");
   const [busy, setBusy] = useState(false);
-  const [showWidget, setShowWidget] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const telegram = useTelegramLogin(status === "anonymous");
-
-  const handleWidget = useCallback(
-    (payload: Record<string, unknown>) => {
-      setError(null);
-      loginWithTelegramWidget(payload)
-        .then(() => navigate("/me"))
-        .catch((cause: Error) => setError(cause.message));
-    },
-    [loginWithTelegramWidget, navigate],
-  );
 
   if (status === "loading") return <Loading />;
   if (status === "authenticated") return <Navigate to="/me" replace />;
 
   return (
     <div className="mx-auto max-w-md">
-      <Card className="text-center">
-        <span aria-hidden className="text-4xl">
-          ♠️
-        </span>
-        <h1 className="mt-2 text-xl font-semibold">Вход в клуб</h1>
-        <p className="mt-1 text-sm text-stone-400">
-          Открываем бота, вы подтверждаете вход одной кнопкой — ни пароля, ни номера телефона.
-        </p>
+      <Card className="overflow-hidden p-0 text-center">
+        <div
+          className="h-36 bg-cover bg-center"
+          style={{ backgroundImage: "url(/images/login-hero.jpg)" }}
+          aria-hidden
+        />
+        <div className="p-5">
+          <h1 className="text-xl font-semibold">Вход в клуб</h1>
 
-        <div className="mt-5">
-          {telegram.phase === "waiting" ? (
-            <Waiting login={telegram} />
-          ) : telegram.phase === "declined" ? (
-            <Retry
-              title="Вход отклонён в Telegram"
-              hint="Если это были не вы — всё в порядке, в аккаунт никто не попал."
-              onRetry={telegram.restart}
+          <label className="mt-4 flex items-start gap-2 text-left text-xs text-stone-400">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={agreed}
+              onChange={(event) => setAgreed(event.target.checked)}
             />
-          ) : telegram.phase === "expired" ? (
-            <Retry
-              title="Время на подтверждение вышло"
-              hint="Ссылка живёт пять минут, чтобы её нельзя было использовать позже."
-              onRetry={telegram.restart}
-            />
-          ) : telegram.phase === "error" ? (
-            <Retry
-              title="Не удалось начать вход"
-              hint={telegram.error ?? "Попробуйте ещё раз."}
-              onRetry={telegram.restart}
-            />
-          ) : (
-            <a
-              href={telegram.ticket?.url ?? "#"}
-              target="_blank"
-              rel="noreferrer"
-              onClick={telegram.follow}
-              aria-disabled={telegram.ticket == null}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-4 py-3 font-semibold text-white transition hover:brightness-110 aria-disabled:pointer-events-none aria-disabled:opacity-60"
-            >
-              Войти через Telegram
-            </a>
-          )}
-        </div>
+            <span>
+              Продолжая, я подтверждаю, что это не азартная игра и не игра на деньги, и принимаю{" "}
+              <Link to="/rules" className="text-gold-400 underline">
+                правила клуба
+              </Link>
+              .
+            </span>
+          </label>
 
-        {BOT_USERNAME && telegram.phase !== "waiting" && (
-          <div className="mt-4">
-            {showWidget ? (
-              <TelegramLoginButton botUsername={BOT_USERNAME} onAuth={handleWidget} />
+          <div className="mt-5">
+            {!agreed ? (
+              <Button className="w-full" disabled>
+                Войти через Telegram
+              </Button>
+            ) : telegram.phase === "waiting" ? (
+              <Waiting login={telegram} />
+            ) : telegram.phase === "declined" ? (
+              <Retry
+                title="Вход отклонён в Telegram"
+                hint="Если это были не вы — всё в порядке, в аккаунт никто не попал."
+                onRetry={telegram.restart}
+              />
+            ) : telegram.phase === "expired" ? (
+              <Retry
+                title="Время на подтверждение вышло"
+                hint="Ссылка живёт пять минут."
+                onRetry={telegram.restart}
+              />
+            ) : telegram.phase === "error" ? (
+              <Retry
+                title="Не удалось начать вход"
+                hint={telegram.error ?? "Попробуйте ещё раз."}
+                onRetry={telegram.restart}
+              />
             ) : (
-              <button
-                type="button"
-                onClick={() => setShowWidget(true)}
-                className="text-xs text-stone-500 underline decoration-dotted"
+              <a
+                href={telegram.ticket?.url ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+                onClick={telegram.follow}
+                aria-disabled={telegram.ticket == null}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-4 py-3 font-semibold text-white transition hover:brightness-110 aria-disabled:pointer-events-none aria-disabled:opacity-60"
               >
-                Войти по номеру телефона
-              </button>
+                Войти через Telegram
+              </a>
             )}
           </div>
-        )}
 
-        {error && <p className="mt-3 text-sm text-chip-red">{error}</p>}
+          {error && <p className="mt-3 text-sm text-chip-red">{error}</p>}
+        </div>
       </Card>
 
       {IS_DEV && (
         <Card className="mt-4">
           <p className="label">Локальная разработка</p>
-          <p className="mb-3 text-xs text-stone-500">
-            Вход по нику из демо-данных, без бота. Работает только когда API запущен не в
-            production.
-          </p>
           <div className="flex gap-2">
             <input
               value={nickname}
@@ -123,26 +112,18 @@ export function LoginPage() {
               Войти
             </Button>
           </div>
-          <p className="mt-2 text-xs text-stone-500">
-            Админы: <code>Ferz</code>, <code>Kate_AA</code> · игрок: <code>Sanya_River</code>
-          </p>
         </Card>
       )}
     </div>
   );
 }
 
-/** The phrase is the whole point of this screen: the bot asks for a match. */
 function Waiting({ login }: { login: ReturnType<typeof useTelegramLogin> }) {
   return (
     <div>
       <p className="text-sm text-stone-300">Подтвердите вход в Telegram</p>
       <p className="mt-3 text-xs uppercase tracking-wide text-stone-500">Кодовая фраза</p>
       <p className="text-lg font-semibold text-gold-400">{login.ticket?.phrase}</p>
-      <p className="mt-3 text-xs text-stone-500">
-        Бот покажет эту же фразу. Совпадает — нажимайте «Это я».
-      </p>
-
       <div className="mt-4 flex flex-col gap-2">
         <a
           href={login.ticket?.url ?? "#"}

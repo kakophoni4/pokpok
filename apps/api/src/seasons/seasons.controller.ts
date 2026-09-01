@@ -36,6 +36,13 @@ export class SeasonsController {
   }
 
   @Roles("admin")
+  @Post(":id/finish")
+  @ApiOperation({ summary: "Close a season; standings stay archived (admin)" })
+  finish(@CurrentUser() actor: RequestUser, @Param("id") id: string): Promise<Season> {
+    return this.seasons.finish(actor.id, id);
+  }
+
+  @Roles("admin")
   @Patch(":id")
   @ApiOperation({ summary: "Edit a season, including the rating formula (admin)" })
   update(

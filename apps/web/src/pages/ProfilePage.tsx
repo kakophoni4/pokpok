@@ -34,10 +34,6 @@ export function ProfilePage() {
               ))}
             </div>
 
-            <p className="text-xs text-stone-500">
-              Ник в рейтинге меняет администратор — напишите организатору, если нужно другое имя.
-            </p>
-
             <div className="flex gap-2">
               <Button
                 variant="secondary"

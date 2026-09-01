@@ -61,9 +61,9 @@ export function TournamentPage() {
           </Badge>
         </div>
 
-        {data.venue && (
-          <p className="mt-3 text-sm text-stone-300">
-            📍 {data.venue.title}
+            {data.venue && (
+              <p className="mt-3 text-sm text-stone-300">
+                {data.venue.title}
             {data.venue.address && <span className="text-stone-500"> · {data.venue.address}</span>}
           </p>
         )}
@@ -74,6 +74,9 @@ export function TournamentPage() {
             value={`${data.registeredCount}${data.capacity != null ? ` / ${data.capacity}` : ""}`}
           />
           <Detail label="Призовых мест" value={String(data.paidPlaces)} />
+          {data.minRating != null && data.minRating > 0 && (
+            <Detail label="Мин. рейтинг" value={String(data.minRating)} />
+          )}
           <Detail label="Стартовый стек" value={formatNumber(data.startingStack)} />
           {data.ratingMultiplier !== 1 ? (
             <Detail label="Коэффициент" value={`×${data.ratingMultiplier}`} />
@@ -103,13 +106,15 @@ export function TournamentPage() {
         )}
       </Card>
 
-      {hasResults && (
+          {hasResults && (
         <section className="mb-4">
           <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
             Результаты
           </h2>
           <ul className="card divide-y divide-felt-800">
-            {data.results.map((row) => (
+            {data.results
+              .filter((row) => row.place <= data.paidPlaces)
+              .map((row) => (
               <li key={row.user.id} className="flex items-center gap-3 px-4 py-2.5">
                 <span
                   className={cx(

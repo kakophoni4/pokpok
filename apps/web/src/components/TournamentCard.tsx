@@ -30,6 +30,9 @@ export function TournamentCard({ tournament }: { tournament: TournamentSummary }
               <Badge tone="gold">×{tournament.ratingMultiplier} рейтинг</Badge>
             )}
             <Badge>{tournament.paidPlaces} призовых</Badge>
+            {tournament.minRating != null && tournament.minRating > 0 && (
+              <Badge tone="blue">от {tournament.minRating} очков</Badge>
+            )}
           </div>
         </div>
 

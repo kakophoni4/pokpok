@@ -23,6 +23,7 @@ function detail(overrides: {
     capacity: null,
     ratingMultiplier: 1,
     paidPlaces: 9,
+    minRating: null,
     venue: null,
     registeredCount: signedUp.length,
     waitlistCount: 0,
@@ -85,8 +86,13 @@ describe("fieldSize", () => {
 });
 
 describe("nextPlace", () => {
-  it("hands out the deepest place first", () => {
+  it("hands out the deepest prize place first", () => {
     expect(nextPlace(detail({ entriesPaid: ["a", "b", "c"] }))).toBe(3);
+  });
+
+  it("never offers a place outside the money", () => {
+    const field = Array.from({ length: 10 }, (_, index) => String(index));
+    expect(nextPlace(detail({ entriesPaid: field }))).toBe(9);
   });
 
   it("walks up the table as players bust", () => {
@@ -122,7 +128,7 @@ describe("freePlaces", () => {
     ]);
   });
 
-  it("is empty once the whole table is placed", () => {
+  it("is empty once every prize place is taken", () => {
     const done = detail({
       entriesPaid: ["a", "b"],
       places: [

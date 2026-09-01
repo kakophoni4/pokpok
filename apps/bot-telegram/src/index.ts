@@ -406,8 +406,26 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     return;
   }
 
+  if (data.startsWith("m:")) {
+    const itemId = data.slice(2);
+    const prices = await admin.settings(profile);
+    const item = prices.menuItems?.find((row) => row.id === itemId);
+    if (!item) {
+      await ctx.answerCallbackQuery({ text: "Позиция больше не в меню" });
+      return;
+    }
+    await admin.charge(profile, detail.id, userId, item.kind, item.priceRub, 1, item.id);
+    await ctx.answerCallbackQuery({ text: `${item.title}: ${rub(item.priceRub)}` });
+    await redrawEvening(chatId, profile, detail.id);
+    return;
+  }
+
   if (data === "bust") {
     const place = nextPlace(detail);
+    if (place == null) {
+      await ctx.answerCallbackQuery({ text: "Призовые места уже заняты" });
+      return;
+    }
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
     const fresh = await admin.detail(profile, detail.id);
@@ -572,6 +590,10 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
 
   if (verb === "место" || verb === "place") {
     const place = Number.isFinite(amount) ? amount : nextPlace(detail);
+    if (place == null) {
+      await ctx.reply("Призовые места уже заняты.");
+      return;
+    }
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.reply(`Записал ${place} место.`);
   } else if (verb === "ачивка" || verb === "ach") {

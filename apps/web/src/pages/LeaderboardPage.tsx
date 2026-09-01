@@ -1,42 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
-import { Avatar, EmptyState, ErrorState, Loading, PageHeader, Tabs, cx } from "../components/ui";
-import { useActiveSeason, useLeaderboard } from "../lib/queries";
+import { Avatar, EmptyState, ErrorState, Loading, PageHeader, cx } from "../components/ui";
+import { useLeaderboard, useSeasons } from "../lib/queries";
 
 export function LeaderboardPage() {
-  const [scope, setScope] = useState<"season" | "all_time">("season");
+  const [seasonId, setSeasonId] = useState("");
   const [search, setSearch] = useState("");
   const { user } = useAuth();
-  const season = useActiveSeason();
-  const board = useLeaderboard(scope, search);
+  const seasons = useSeasons();
+  const board = useLeaderboard(seasonId || undefined, search);
 
-  const bestOf = season.data?.ratingConfig.bestOfCount ?? 0;
+  useEffect(() => {
+    if (seasonId || !seasons.data?.length) return;
+    const active = seasons.data.find((row) => row.isActive) ?? seasons.data[0];
+    if (active) setSeasonId(active.id);
+  }, [seasonId, seasons.data]);
+
+  const selected = seasons.data?.find((row) => row.id === seasonId);
+  const bestOf = selected?.ratingConfig.bestOfCount ?? 0;
 
   return (
     <>
       <PageHeader
         title="Рейтинг"
         subtitle={
-          scope === "season"
-            ? season.data
-              ? bestOf > 0
-                ? `${season.data.title} · в зачёт идут ${bestOf} лучших результатов`
-                : season.data.title
-              : undefined
-            : "За всё время существования клуба"
+          selected
+            ? bestOf > 0
+              ? `${selected.title} · в зачёт идут ${bestOf} лучших результатов`
+              : selected.title
+            : undefined
         }
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Tabs
-          value={scope}
-          onChange={setScope}
-          options={[
-            { value: "season", label: "Сезон" },
-            { value: "all_time", label: "Всё время" },
-          ]}
-        />
+        <select
+          className="field mb-4 sm:max-w-64"
+          value={seasonId}
+          onChange={(event) => setSeasonId(event.target.value)}
+          aria-label="Сезон"
+        >
+          {(seasons.data ?? []).map((season) => (
+            <option key={season.id} value={season.id}>
+              {season.title}
+              {season.isActive ? " · сейчас" : " · завершён"}
+            </option>
+          ))}
+        </select>
         <input
           type="search"
           value={search}
@@ -50,7 +60,6 @@ export function LeaderboardPage() {
       {board.isError && <ErrorState error={board.error} onRetry={() => void board.refetch()} />}
       {board.data?.length === 0 && (
         <EmptyState
-          icon="📊"
           title="Рейтинг пока пуст"
           description="Очки появятся после первого турнира с внесёнными результатами."
         />

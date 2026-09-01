@@ -1,6 +1,10 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+
+beforeEach(() => {
+  localStorage.setItem("poker-club-rules-ok", "1");
+});
 
 afterEach(() => {
   cleanup();

@@ -31,12 +31,14 @@ export const Achievement = z.object({
 export type Achievement = z.infer<typeof Achievement>;
 
 export const CreateAchievementInput = z.object({
+  /** Optional: the server mints a unique code from the title if omitted. */
   code: z
     .string()
     .trim()
     .min(2)
     .max(48)
-    .regex(/^[a-z0-9_]+$/, "Только латиница в нижнем регистре, цифры и подчёркивание"),
+    .regex(/^[a-z0-9_]+$/, "Только латиница в нижнем регистре, цифры и подчёркивание")
+    .optional(),
   title: z.string().trim().min(2).max(80),
   description: z.string().trim().max(500).nullish(),
   /** Emoji or a URL to an uploaded image. */

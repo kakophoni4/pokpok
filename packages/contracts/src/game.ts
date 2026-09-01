@@ -27,7 +27,12 @@ export function fieldSize(detail: TournamentDetail): number {
   return Math.max(paid, signedUp, awarded, 1);
 }
 
-/** Places nobody holds yet, deepest first — the order they get handed out in. */
+/**
+ * Prize places nobody holds yet, deepest first.
+ *
+ * The club only marks finishes that pay. A field of ten with nine paid places
+ * offers 9…1, never 10th — that player simply participated.
+ */
 export function freePlaces(detail: TournamentDetail): number[] {
   const taken = new Set<number>();
   for (const row of detail.results) taken.add(row.place);
@@ -35,8 +40,9 @@ export function freePlaces(detail: TournamentDetail): number[] {
     if (player.place != null) taken.add(player.place);
   }
 
+  const ceiling = Math.min(detail.paidPlaces, fieldSize(detail));
   const places: number[] = [];
-  for (let place = fieldSize(detail); place >= 1; place -= 1) {
+  for (let place = ceiling; place >= 1; place -= 1) {
     if (!taken.has(place)) places.push(place);
   }
 
@@ -44,13 +50,15 @@ export function freePlaces(detail: TournamentDetail): number[] {
 }
 
 /**
- * What the next player to bust out finishes in: the deepest place still free.
- *
- * Counting down is what a live table does — the first player out of eighteen
- * finishes eighteenth — so the admin taps a button instead of typing a number.
+ * The deepest prize place still free, or null when every paid finish is taken.
  */
-export function nextPlace(detail: TournamentDetail): number {
-  return freePlaces(detail)[0] ?? 1;
+export function nextPlace(detail: TournamentDetail): number | null {
+  return freePlaces(detail)[0] ?? null;
+}
+
+/** A numbered finish the club actually records — inside the money. */
+export function isPrizePlace(place: number | null | undefined, paidPlaces: number): boolean {
+  return place != null && place >= 1 && place <= paidPlaces;
 }
 
 /**

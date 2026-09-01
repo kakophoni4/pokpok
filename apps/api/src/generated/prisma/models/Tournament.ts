@@ -32,6 +32,7 @@ export type TournamentAvgAggregateOutputType = {
   startingStack: number | null
   addonChips: number | null
   ratingMultiplier: number | null
+  minRating: number | null
   adminTopicId: number | null
   adminBoardMsgId: number | null
 }
@@ -42,6 +43,7 @@ export type TournamentSumAggregateOutputType = {
   startingStack: number | null
   addonChips: number | null
   ratingMultiplier: number | null
+  minRating: number | null
   adminTopicId: number | null
   adminBoardMsgId: number | null
 }
@@ -60,6 +62,7 @@ export type TournamentMinAggregateOutputType = {
   startingStack: number | null
   addonChips: number | null
   ratingMultiplier: number | null
+  minRating: number | null
   status: $Enums.TournamentStatus | null
   adminTopicId: number | null
   adminBoardMsgId: number | null
@@ -81,6 +84,7 @@ export type TournamentMaxAggregateOutputType = {
   startingStack: number | null
   addonChips: number | null
   ratingMultiplier: number | null
+  minRating: number | null
   status: $Enums.TournamentStatus | null
   adminTopicId: number | null
   adminBoardMsgId: number | null
@@ -102,6 +106,7 @@ export type TournamentCountAggregateOutputType = {
   startingStack: number
   addonChips: number
   ratingMultiplier: number
+  minRating: number
   status: number
   adminTopicId: number
   adminBoardMsgId: number
@@ -117,6 +122,7 @@ export type TournamentAvgAggregateInputType = {
   startingStack?: true
   addonChips?: true
   ratingMultiplier?: true
+  minRating?: true
   adminTopicId?: true
   adminBoardMsgId?: true
 }
@@ -127,6 +133,7 @@ export type TournamentSumAggregateInputType = {
   startingStack?: true
   addonChips?: true
   ratingMultiplier?: true
+  minRating?: true
   adminTopicId?: true
   adminBoardMsgId?: true
 }
@@ -145,6 +152,7 @@ export type TournamentMinAggregateInputType = {
   startingStack?: true
   addonChips?: true
   ratingMultiplier?: true
+  minRating?: true
   status?: true
   adminTopicId?: true
   adminBoardMsgId?: true
@@ -166,6 +174,7 @@ export type TournamentMaxAggregateInputType = {
   startingStack?: true
   addonChips?: true
   ratingMultiplier?: true
+  minRating?: true
   status?: true
   adminTopicId?: true
   adminBoardMsgId?: true
@@ -187,6 +196,7 @@ export type TournamentCountAggregateInputType = {
   startingStack?: true
   addonChips?: true
   ratingMultiplier?: true
+  minRating?: true
   status?: true
   adminTopicId?: true
   adminBoardMsgId?: true
@@ -295,6 +305,7 @@ export type TournamentGroupByOutputType = {
   startingStack: number | null
   addonChips: number | null
   ratingMultiplier: number
+  minRating: number | null
   status: $Enums.TournamentStatus
   adminTopicId: number | null
   adminBoardMsgId: number | null
@@ -339,6 +350,7 @@ export type TournamentWhereInput = {
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
+  minRating?: Prisma.IntNullableFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -367,6 +379,7 @@ export type TournamentOrderByWithRelationInput = {
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
   addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrderInput | Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -398,6 +411,7 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
+  minRating?: Prisma.IntNullableFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -426,6 +440,7 @@ export type TournamentOrderByWithAggregationInput = {
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
   addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrderInput | Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -455,6 +470,7 @@ export type TournamentScalarWhereWithAggregatesInput = {
   startingStack?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatWithAggregatesFilter<"Tournament"> | number
+  minRating?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusWithAggregatesFilter<"Tournament"> | $Enums.TournamentStatus
   adminTopicId?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   adminBoardMsgId?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
@@ -474,6 +490,7 @@ export type TournamentCreateInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -502,6 +519,7 @@ export type TournamentUncheckedCreateInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -526,6 +544,7 @@ export type TournamentUpdateInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -554,6 +573,7 @@ export type TournamentUncheckedUpdateInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -580,6 +600,7 @@ export type TournamentCreateManyInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -599,6 +620,7 @@ export type TournamentUpdateManyMutationInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -620,6 +642,7 @@ export type TournamentUncheckedUpdateManyInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -651,6 +674,7 @@ export type TournamentCountOrderByAggregateInput = {
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrder
@@ -664,6 +688,7 @@ export type TournamentAvgOrderByAggregateInput = {
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrder
 }
@@ -682,6 +707,7 @@ export type TournamentMaxOrderByAggregateInput = {
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrder
@@ -703,6 +729,7 @@ export type TournamentMinOrderByAggregateInput = {
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrder
   status?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrder
@@ -716,6 +743,7 @@ export type TournamentSumOrderByAggregateInput = {
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
   ratingMultiplier?: Prisma.SortOrder
+  minRating?: Prisma.SortOrder
   adminTopicId?: Prisma.SortOrder
   adminBoardMsgId?: Prisma.SortOrder
 }
@@ -920,6 +948,7 @@ export type TournamentCreateWithoutSeasonInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -946,6 +975,7 @@ export type TournamentUncheckedCreateWithoutSeasonInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1001,6 +1031,7 @@ export type TournamentScalarWhereInput = {
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
   ratingMultiplier?: Prisma.FloatFilter<"Tournament"> | number
+  minRating?: Prisma.IntNullableFilter<"Tournament"> | number | null
   status?: Prisma.EnumTournamentStatusFilter<"Tournament"> | $Enums.TournamentStatus
   adminTopicId?: Prisma.IntNullableFilter<"Tournament"> | number | null
   adminBoardMsgId?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -1020,6 +1051,7 @@ export type TournamentCreateWithoutVenueInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1046,6 +1078,7 @@ export type TournamentUncheckedCreateWithoutVenueInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1096,6 +1129,7 @@ export type TournamentCreateWithoutRegistrationsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1123,6 +1157,7 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1162,6 +1197,7 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1189,6 +1225,7 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1212,6 +1249,7 @@ export type TournamentCreateWithoutResultsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1239,6 +1277,7 @@ export type TournamentUncheckedCreateWithoutResultsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1278,6 +1317,7 @@ export type TournamentUpdateWithoutResultsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1305,6 +1345,7 @@ export type TournamentUncheckedUpdateWithoutResultsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1328,6 +1369,7 @@ export type TournamentCreateWithoutPaymentsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1355,6 +1397,7 @@ export type TournamentUncheckedCreateWithoutPaymentsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1394,6 +1437,7 @@ export type TournamentUpdateWithoutPaymentsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1421,6 +1465,7 @@ export type TournamentUncheckedUpdateWithoutPaymentsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1444,6 +1489,7 @@ export type TournamentCreateWithoutAchievementsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1471,6 +1517,7 @@ export type TournamentUncheckedCreateWithoutAchievementsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1510,6 +1557,7 @@ export type TournamentUpdateWithoutAchievementsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1537,6 +1585,7 @@ export type TournamentUncheckedUpdateWithoutAchievementsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1560,6 +1609,7 @@ export type TournamentCreateWithoutRatingEventsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1587,6 +1637,7 @@ export type TournamentUncheckedCreateWithoutRatingEventsInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1626,6 +1677,7 @@ export type TournamentUpdateWithoutRatingEventsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1653,6 +1705,7 @@ export type TournamentUncheckedUpdateWithoutRatingEventsInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1677,6 +1730,7 @@ export type TournamentCreateManySeasonInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1696,6 +1750,7 @@ export type TournamentUpdateWithoutSeasonInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1722,6 +1777,7 @@ export type TournamentUncheckedUpdateWithoutSeasonInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1747,6 +1803,7 @@ export type TournamentUncheckedUpdateManyWithoutSeasonInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1767,6 +1824,7 @@ export type TournamentCreateManyVenueInput = {
   startingStack?: number | null
   addonChips?: number | null
   ratingMultiplier?: number
+  minRating?: number | null
   status?: $Enums.TournamentStatus
   adminTopicId?: number | null
   adminBoardMsgId?: number | null
@@ -1786,6 +1844,7 @@ export type TournamentUpdateWithoutVenueInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1812,6 +1871,7 @@ export type TournamentUncheckedUpdateWithoutVenueInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1837,6 +1897,7 @@ export type TournamentUncheckedUpdateManyWithoutVenueInput = {
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
   adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1925,6 +1986,7 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   startingStack?: boolean
   addonChips?: boolean
   ratingMultiplier?: boolean
+  minRating?: boolean
   status?: boolean
   adminTopicId?: boolean
   adminBoardMsgId?: boolean
@@ -1954,6 +2016,7 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   startingStack?: boolean
   addonChips?: boolean
   ratingMultiplier?: boolean
+  minRating?: boolean
   status?: boolean
   adminTopicId?: boolean
   adminBoardMsgId?: boolean
@@ -1977,6 +2040,7 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   startingStack?: boolean
   addonChips?: boolean
   ratingMultiplier?: boolean
+  minRating?: boolean
   status?: boolean
   adminTopicId?: boolean
   adminBoardMsgId?: boolean
@@ -2000,6 +2064,7 @@ export type TournamentSelectScalar = {
   startingStack?: boolean
   addonChips?: boolean
   ratingMultiplier?: boolean
+  minRating?: boolean
   status?: boolean
   adminTopicId?: boolean
   adminBoardMsgId?: boolean
@@ -2007,7 +2072,7 @@ export type TournamentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "paidPlaces" | "startingStack" | "addonChips" | "ratingMultiplier" | "status" | "adminTopicId" | "adminBoardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "paidPlaces" | "startingStack" | "addonChips" | "ratingMultiplier" | "minRating" | "status" | "adminTopicId" | "adminBoardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
   venue?: boolean | Prisma.Tournament$venueArgs<ExtArgs>
@@ -2059,6 +2124,10 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
      * Weight of the event: 1 for a regular game, 2 for a major.
      */
     ratingMultiplier: number
+    /**
+     * If set, a player needs at least this many season points to sign up.
+     */
+    minRating: number | null
     status: $Enums.TournamentStatus
     /**
      * Forum topic in the admin supergroup and the pinned summary inside it, so
@@ -2511,6 +2580,7 @@ export interface TournamentFieldRefs {
   readonly startingStack: Prisma.FieldRef<"Tournament", 'Int'>
   readonly addonChips: Prisma.FieldRef<"Tournament", 'Int'>
   readonly ratingMultiplier: Prisma.FieldRef<"Tournament", 'Float'>
+  readonly minRating: Prisma.FieldRef<"Tournament", 'Int'>
   readonly status: Prisma.FieldRef<"Tournament", 'TournamentStatus'>
   readonly adminTopicId: Prisma.FieldRef<"Tournament", 'Int'>
   readonly adminBoardMsgId: Prisma.FieldRef<"Tournament", 'Int'>

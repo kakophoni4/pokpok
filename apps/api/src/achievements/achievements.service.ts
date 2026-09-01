@@ -34,14 +34,11 @@ export class AchievementsService {
   }
 
   async create(actorId: string, input: CreateAchievementInput): Promise<AchievementView> {
-    const existing = await this.prisma.achievement.findUnique({ where: { code: input.code } });
-    if (existing) {
-      throw new ConflictException({ code: "CODE_TAKEN", message: "Такой код уже используется" });
-    }
+    const code = await this.uniqueCode(input.code, input.title);
 
     const achievement = await this.prisma.achievement.create({
       data: {
-        code: input.code,
+        code,
         title: input.title,
         description: input.description ?? null,
         icon: input.icon ?? null,
@@ -226,6 +223,35 @@ export class AchievementsService {
       comment: row.comment,
     }));
   }
+
+  private async uniqueCode(requested: string | undefined, title: string): Promise<string> {
+    const base = requested && requested.length >= 2 ? requested : slugify(title) || `ach_${Date.now()}`;
+    let code = base;
+    let attempt = 2;
+    while (await this.prisma.achievement.findUnique({ where: { code }, select: { id: true } })) {
+      code = `${base}_${attempt}`;
+      attempt += 1;
+    }
+    return code;
+  }
+}
+
+function slugify(value: string): string {
+  const map: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
+    й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t",
+    у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "",
+    э: "e", ю: "yu", я: "ya",
+  };
+
+  return value
+    .toLowerCase()
+    .split("")
+    .map((char) => map[char] ?? char)
+    .join("")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
 }
 
 function toView(achievement: Achievement): AchievementView {

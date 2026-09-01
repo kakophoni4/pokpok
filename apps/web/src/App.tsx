@@ -14,6 +14,7 @@ import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PlayerPage } from "./pages/PlayerPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { RulesPage } from "./pages/RulesPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { TournamentPage } from "./pages/TournamentPage";
 
@@ -49,6 +50,7 @@ export function App() {
               <Route path="achievements" element={<AchievementsPage />} />
               <Route path="me" element={<ProfilePage />} />
               <Route path="login" element={<LoginPage />} />
+              <Route path="rules" element={<RulesPage />} />
               <Route
                 path="admin"
                 element={
@@ -60,7 +62,7 @@ export function App() {
               <Route
                 path="*"
                 element={
-                  <EmptyState icon="🔍" title="Страница не найдена" description="Проверьте адрес." />
+                  <EmptyState title="Страница не найдена" description="Проверьте адрес." />
                 }
               />
             </Route>

@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 /*
- * Poker-club palette: deep felt green as the base, warm gold for anything the
- * player earns. Tokens are declared here so the Telegram Mini App shell can
- * later override them with Telegram's own theme variables.
+ * Poker-club palette: deep felt, warm gold, real table photography behind the
+ * glass. Achievement icons stay as emoji; everything else is type and photos.
  */
 @theme {
   --color-felt-950: #070d0b;
@@ -21,7 +20,8 @@
   --color-chip-red: #d1495b;
   --color-chip-blue: #4a7ba7;
 
-  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", "Times New Roman", ui-serif, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 1rem;
 }
 
@@ -32,15 +32,20 @@
   }
 
   body {
-    @apply bg-felt-900 text-stone-100 antialiased;
-    font-family: var(--font-display);
-    /* Respect the iPhone notch and home indicator in standalone mode. */
+    @apply text-stone-100 antialiased;
+    font-family: var(--font-body);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     min-height: 100dvh;
+    background-color: #070d0b;
+    background-image:
+      linear-gradient(180deg, rgba(7, 13, 11, 0.78) 0%, rgba(7, 13, 11, 0.92) 100%),
+      url("/images/felt.jpg");
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
   }
 
-  /* Tabular figures keep rating columns from jittering as numbers change. */
   .nums {
     font-variant-numeric: tabular-nums;
   }
@@ -48,11 +53,11 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-felt-700/70 bg-felt-850/80 backdrop-blur-sm;
+    @apply rounded-2xl border border-gold-500/15 bg-felt-950/70 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md;
   }
 
   .field {
-    @apply w-full rounded-xl border border-felt-700 bg-felt-900 px-3 py-2 text-sm
+    @apply w-full rounded-xl border border-gold-500/20 bg-felt-950/80 px-3 py-2 text-sm
       text-stone-100 outline-none transition
       placeholder:text-stone-500
       focus:border-gold-500/70 focus:ring-2 focus:ring-gold-500/20;

@@ -43,7 +43,14 @@ export class ResultsService {
   ): Promise<TournamentPlayer> {
     const tournament = await this.prisma.tournament.findUnique({
       where: { id: tournamentId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        paidPlaces: true,
+        seasonId: true,
+        startingStack: true,
+        addonChips: true,
+      },
     });
     if (!tournament) {
       throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
@@ -53,6 +60,17 @@ export class ResultsService {
         code: "TOURNAMENT_FINISHED",
         message: "Турнир завершён. Верните его в игру, чтобы менять места",
       });
+    }
+
+    if (place != null) {
+      const season = await this.seasons.ratingConfig(tournament.seasonId);
+      const paidPlaces = effectiveConfig(tournament, season).paidPlaces;
+      if (place > paidPlaces) {
+        throw new BadRequestException({
+          code: "NOT_A_PRIZE_PLACE",
+          message: `Отмечаются только призовые места (1–${paidPlaces})`,
+        });
+      }
     }
 
     if (place == null) {
@@ -99,7 +117,7 @@ export class ResultsService {
       where: { id: tournamentId },
       include: {
         results: { select: { userId: true, place: true } },
-        payments: { where: { voidedAt: null }, select: { userId: true, chips: true } },
+        payments: { where: { voidedAt: null }, select: { userId: true, chips: true, kind: true } },
       },
     });
     if (!tournament) {
@@ -126,12 +144,19 @@ export class ResultsService {
       config,
     });
 
+    const entered = new Set(
+      tournament.payments.filter((payment) => payment.kind === "entry").map((payment) => payment.userId),
+    );
+    const placed = new Set(scored.map((row) => row.userId));
+    const participantsOnly = [...entered].filter((userId) => !placed.has(userId));
+
     const previous = await this.prisma.ratingEvent.findMany({
       where: { tournamentId, sourceType: "tournament_result" },
       select: { userId: true },
     });
     const affected = new Set<string>([
       ...scored.map((row) => row.userId),
+      ...participantsOnly,
       ...previous.map((row) => row.userId),
     ]);
 
@@ -139,16 +164,28 @@ export class ResultsService {
       await tx.ratingEvent.deleteMany({ where: { tournamentId, sourceType: "tournament_result" } });
 
       await tx.ratingEvent.createMany({
-        data: scored.map((row) => ({
-          userId: row.userId,
-          seasonId: tournament.seasonId,
-          sourceType: "tournament_result" as const,
-          points: row.points,
-          tournamentId,
-          place: row.place,
-          fieldSize: participants.size,
-          createdBy: actorId,
-        })),
+        data: [
+          ...scored.map((row) => ({
+            userId: row.userId,
+            seasonId: tournament.seasonId,
+            sourceType: "tournament_result" as const,
+            points: row.points,
+            tournamentId,
+            place: row.place,
+            fieldSize: participants.size,
+            createdBy: actorId,
+          })),
+          ...participantsOnly.map((userId) => ({
+            userId,
+            seasonId: tournament.seasonId,
+            sourceType: "tournament_result" as const,
+            points: 0,
+            tournamentId,
+            place: null,
+            fieldSize: participants.size,
+            createdBy: actorId,
+          })),
+        ],
       });
 
       await tx.tournament.update({ where: { id: tournamentId }, data: { status: "finished" } });

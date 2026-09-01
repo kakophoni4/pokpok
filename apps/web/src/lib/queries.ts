@@ -2,8 +2,11 @@ import type {
   Achievement,
   AddPaymentInput,
   AdminUpdateUserInput,
+  ClubMenuItem,
   ClubSettings,
   CreateAchievementInput,
+  CreateClubMenuItemInput,
+  CreateSeasonInput,
   CreateTournamentInput,
   GrantAchievementInput,
   LeaderboardRow,
@@ -18,6 +21,7 @@ import type {
   TournamentPlayer,
   TournamentSummary,
   UpdateAchievementInput,
+  UpdateClubMenuItemInput,
   UpdateClubSettingsInput,
   UpdateTournamentInput,
   UserAchievementView,
@@ -33,7 +37,7 @@ export const keys = {
   tournaments: (scope: string) => ["tournaments", scope] as const,
   tournament: (id: string) => ["tournament", id] as const,
   registrations: (id: string) => ["registrations", id] as const,
-  leaderboard: (scope: string, search: string) => ["leaderboard", scope, search] as const,
+  leaderboard: (seasonId: string, search: string) => ["leaderboard", seasonId, search] as const,
   myStats: () => ["rating", "me"] as const,
   playerStats: (userId: string) => ["rating", "player", userId] as const,
   achievements: (includeInactive: boolean) => ["achievements", includeInactive] as const,
@@ -69,10 +73,12 @@ export function useRegistrations(id: string | undefined) {
   });
 }
 
-export function useLeaderboard(scope: "season" | "all_time", search = "") {
+export function useLeaderboard(seasonId: string | undefined, search = "") {
   return useQuery({
-    queryKey: keys.leaderboard(scope, search),
-    queryFn: () => api.get<LeaderboardRow[]>(`/rating/leaderboard${query({ scope, search })}`),
+    queryKey: keys.leaderboard(seasonId ?? "", search),
+    queryFn: () =>
+      api.get<LeaderboardRow[]>(`/rating/leaderboard${query({ seasonId, search })}`),
+    enabled: Boolean(seasonId),
   });
 }
 
@@ -111,6 +117,35 @@ export function useActiveSeason() {
   return useQuery({
     queryKey: keys.activeSeason(),
     queryFn: () => api.get<Season | null>("/seasons/active"),
+  });
+}
+
+export function useSeasons() {
+  return useQuery({
+    queryKey: keys.seasons(),
+    queryFn: () => api.get<Season[]>("/seasons"),
+  });
+}
+
+export function useCreateSeason() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSeasonInput) => api.post<Season>("/seasons", input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["seasons"] });
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
+}
+
+export function useFinishSeason() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Season>(`/seasons/${id}/finish`),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["seasons"] });
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
   });
 }
 
@@ -250,6 +285,31 @@ export function useUpdateClubSettings() {
   return useMutation({
     mutationFn: (input: UpdateClubSettingsInput) =>
       api.patch<ClubSettings>("/club/settings", input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
+  });
+}
+
+export function useCreateMenuItem() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateClubMenuItemInput) => api.post<ClubMenuItem>("/club/menu", input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
+  });
+}
+
+export function useUpdateMenuItem() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateClubMenuItemInput }) =>
+      api.patch<ClubMenuItem>(`/club/menu/${id}`, input),
+    onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
+  });
+}
+
+export function useDeleteMenuItem() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/club/menu/${id}`),
     onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
   });
 }

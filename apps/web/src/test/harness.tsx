@@ -88,6 +88,7 @@ export function tournament(overrides: Record<string, unknown> = {}) {
     id: "t1",
     title: "Weekly Freezeout #16",
     paidPlaces: 9,
+    minRating: null,
     status: "reg_open",
     startsAt: "2099-06-01T16:00:00.000Z",
     regOpensAt: null,

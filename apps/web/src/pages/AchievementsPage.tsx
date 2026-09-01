@@ -27,7 +27,6 @@ export function AchievementsPage() {
       )}
       {catalogue.data?.length === 0 && (
         <EmptyState
-          icon="🏅"
           title="Ачивок пока нет"
           description="Администратор может создать их в разделе «Админ» — название, описание и сколько рейтинга они дают."
         />
@@ -53,8 +52,6 @@ export function AchievementsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-medium">{achievement.title}</h3>
                     {owned && <Badge tone="gold">получено</Badge>}
-                    {achievement.isRepeatable && <Badge>можно повторно</Badge>}
-                    {achievement.rule === null && <Badge tone="blue">вручную</Badge>}
                   </div>
 
                   {achievement.description && (

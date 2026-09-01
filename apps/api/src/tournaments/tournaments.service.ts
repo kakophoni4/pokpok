@@ -212,6 +212,7 @@ export class TournamentsService {
         startingStack: input.startingStack ?? null,
         addonChips: input.addonChips ?? null,
         ratingMultiplier: input.ratingMultiplier,
+        minRating: input.minRating ?? null,
         status: input.status,
       },
       include: { venue: true },
@@ -273,6 +274,7 @@ export class TournamentsService {
         ...(input.ratingMultiplier === undefined
           ? {}
           : { ratingMultiplier: input.ratingMultiplier }),
+        ...(input.minRating === undefined ? {} : { minRating: input.minRating ?? null }),
         ...(input.status === undefined ? {} : { status: input.status }),
       },
       include: { venue: true },
@@ -487,6 +489,7 @@ function toSummary(
     capacity: tournament.capacity,
     ratingMultiplier: tournament.ratingMultiplier,
     paidPlaces: tournament.paidPlaces ?? season.defaultPaidPlaces,
+    minRating: tournament.minRating,
     venue: tournament.venue
       ? { id: tournament.venue.id, title: tournament.venue.title, address: tournament.venue.address }
       : null,

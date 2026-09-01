@@ -133,10 +133,7 @@ export function formatRub(value: number): string {
 }
 
 export function placeLabel(place: number): string {
-  if (place === 1) return "🥇";
-  if (place === 2) return "🥈";
-  if (place === 3) return "🥉";
-  return `${place}`;
+  return String(place);
 }
 
 export const TOURNAMENT_STATUS_LABELS: Record<string, string> = {

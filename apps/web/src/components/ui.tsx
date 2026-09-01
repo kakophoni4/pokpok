@@ -172,7 +172,7 @@ export function Stat({
 }
 
 export function EmptyState({
-  icon = "🃏",
+  icon,
   title,
   description,
   action,
@@ -184,9 +184,11 @@ export function EmptyState({
 }) {
   return (
     <div className="card flex flex-col items-center gap-2 px-6 py-12 text-center">
-      <span className="text-4xl" aria-hidden>
-        {icon}
-      </span>
+      {icon && (
+        <span className="text-4xl" aria-hidden>
+          {icon}
+        </span>
+      )}
       <p className="font-medium">{title}</p>
       {description && <p className="max-w-sm text-sm text-stone-400">{description}</p>}
       {action}

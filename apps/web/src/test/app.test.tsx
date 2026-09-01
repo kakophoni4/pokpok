@@ -147,6 +147,7 @@ describe("leaderboard", () => {
       SIGNED_IN,
       { match: "GET /auth/me", body: ME },
       ACTIVE_SEASON,
+      { match: "GET /seasons", body: [SEASON] },
       {
         match: "GET /rating/leaderboard",
         body: [
@@ -223,6 +224,7 @@ describe("personal cabinet", () => {
                 title: "Клубный мейджор «Осень»",
                 startsAt: "2026-04-01T16:00:00.000Z",
                 fieldSize: 14,
+                paidPlaces: 9,
               },
               achievement: null,
             },

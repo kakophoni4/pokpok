@@ -1,24 +1,61 @@
 import { z } from "zod";
+import { Id } from "./common.js";
+import { PaymentKind } from "./enums.js";
+
+/**
+ * One button on the till: a fixed fee (вход / адон / ребай), an extra SKU
+ * such as a drink, or a promo that still hands out chips.
+ */
+export const ClubMenuItem = z.object({
+  id: Id,
+  title: z.string(),
+  kind: PaymentKind,
+  priceRub: z.number().int().nonnegative(),
+  /** Extra chips this purchase adds. 0 means "use the tournament stack". */
+  chips: z.number().int().nonnegative(),
+  isFixed: z.boolean(),
+  isPromo: z.boolean(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int(),
+});
+export type ClubMenuItem = z.infer<typeof ClubMenuItem>;
+
+export const CreateClubMenuItemInput = z.object({
+  title: z.string().trim().min(2).max(80),
+  kind: PaymentKind.default("other"),
+  priceRub: z.number().int().min(0).max(1_000_000).default(0),
+  chips: z.number().int().min(0).max(10_000_000).default(0),
+  isPromo: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+});
+export type CreateClubMenuItemInput = z.infer<typeof CreateClubMenuItemInput>;
+
+export const UpdateClubMenuItemInput = z.object({
+  title: z.string().trim().min(2).max(80).optional(),
+  kind: PaymentKind.optional(),
+  priceRub: z.number().int().min(0).max(1_000_000).optional(),
+  chips: z.number().int().min(0).max(10_000_000).optional(),
+  isPromo: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).max(10_000).optional(),
+});
+export type UpdateClubMenuItemInput = z.infer<typeof UpdateClubMenuItemInput>;
 
 /**
  * Club-wide settings: one row, edited by admins, read by everything.
  *
- * The timezone lives here rather than in the code because it is what every date
- * on the site and in the bot is rendered in. The club plays in Samara, and a
- * player opening the schedule from a phone set to another timezone must still
- * see the hour the game actually starts.
+ * Dates are always rendered in Samara time. The timezone field stays on the
+ * payload so older clients keep working; the site no longer lets anyone change it.
  */
 export const ClubSettings = z.object({
-  /** Free-form text behind the bot's "как нас найти" button. */
   infoText: z.string(),
-  /** Defaults offered as buttons at the cash desk; the amount stays editable. */
   entryPriceRub: z.number().int().nonnegative(),
   rebuyPriceRub: z.number().int().nonnegative(),
   addonPriceRub: z.number().int().nonnegative(),
   drinkPriceRub: z.number().int().nonnegative(),
-  /** Supergroup the bot runs the live admin screens in. */
   adminChatId: z.string().nullable(),
   timezone: z.string(),
+  menuItems: z.array(ClubMenuItem),
 });
 export type ClubSettings = z.infer<typeof ClubSettings>;
 
@@ -29,7 +66,6 @@ export const UpdateClubSettingsInput = z.object({
   addonPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   drinkPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   adminChatId: z.string().trim().max(64).nullish(),
-  timezone: z.string().trim().max(64).optional(),
 });
 export type UpdateClubSettingsInput = z.infer<typeof UpdateClubSettingsInput>;
 

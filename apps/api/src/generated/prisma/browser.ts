@@ -92,6 +92,12 @@ export type Payment = Prisma.PaymentModel
  */
 export type ClubSettings = Prisma.ClubSettingsModel
 /**
+ * Model ClubMenuItem
+ * Cash-desk buttons: the three fixed kinds (вход / адон / ребай) cannot be
+ * deleted. Everything else is an extra SKU or a promo the admin added.
+ */
+export type ClubMenuItem = Prisma.ClubMenuItemModel
+/**
  * Model Achievement
  * 
  */

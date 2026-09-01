@@ -29,6 +29,8 @@ export const TournamentSummary = z.object({
   ratingMultiplier: z.number().positive(),
   /** How many places earn rating. Editable while the game is running. */
   paidPlaces: z.number().int().positive(),
+  /** Season points needed to sign up. Null means anyone may register. */
+  minRating: z.number().int().nonnegative().nullable(),
   venue: Venue.nullable(),
   registeredCount: z.number().int().nonnegative(),
   waitlistCount: z.number().int().nonnegative(),
@@ -142,6 +144,7 @@ const TournamentInputShape = z.object({
   startingStack: z.number().int().positive().nullish(),
   addonChips: z.number().int().positive().nullish(),
   ratingMultiplier: z.number().min(0.1).max(10).default(1),
+  minRating: z.number().int().min(0).max(1_000_000).nullish(),
   status: TournamentStatus.default("draft"),
 });
 
@@ -187,6 +190,8 @@ export type RegisterInput = z.infer<typeof RegisterInput>;
 export const AddPaymentInput = z.object({
   userId: Id,
   kind: PaymentKind,
+  /** When set, price and chips come from this till item. */
+  menuItemId: Id.optional(),
   amountRub: z.number().int().min(0).max(1_000_000),
   /**
    * Double or triple stack in one tap. Multiplies the chips that kind would

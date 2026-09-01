@@ -238,6 +238,8 @@ model Tournament {
   addonChips       Int?
   /// Weight of the event: 1 for a regular game, 2 for a major.
   ratingMultiplier Float            @default(1)
+  /// If set, a player needs at least this many season points to sign up.
+  minRating        Int?
   status           TournamentStatus @default(draft)
   /// Forum topic in the admin supergroup and the pinned summary inside it, so
   /// the bot edits the same screens instead of posting new ones.
@@ -337,6 +339,25 @@ model ClubSettings {
   adminChatId   String?
   timezone      String   @default("Europe/Samara")
   updatedAt     DateTime @updatedAt
+}
+
+/// Cash-desk buttons: the three fixed kinds (вход / адон / ребай) cannot be
+/// deleted. Everything else is an extra SKU or a promo the admin added.
+model ClubMenuItem {
+  id        String      @id @default(cuid(2))
+  title     String
+  kind      PaymentKind
+  priceRub  Int         @default(0)
+  /// Extra chips this line hands out. 0 means "use the tournament stack".
+  chips     Int         @default(0)
+  isFixed   Boolean     @default(false)
+  isPromo   Boolean     @default(false)
+  isActive  Boolean     @default(true)
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([sortOrder])
 }
 
 model Achievement {

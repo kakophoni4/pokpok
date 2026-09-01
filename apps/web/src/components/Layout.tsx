@@ -2,37 +2,44 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { platform } from "../platform/platform";
 import { InstallHint } from "./InstallHint";
+import { LegalNotice } from "./LegalNotice";
 import { Avatar, Button, cx } from "./ui";
 
-type NavItem = { to: string; label: string; icon: string; staffOnly?: boolean };
+type NavItem = { to: string; label: string; staffOnly?: boolean };
 
 const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Расписание", icon: "🗓" },
-  { to: "/rating", label: "Рейтинг", icon: "📊" },
-  { to: "/achievements", label: "Ачивки", icon: "🏅" },
-  { to: "/me", label: "Кабинет", icon: "👤" },
-  { to: "/admin", label: "Админ", icon: "⚙️", staffOnly: true },
+  { to: "/", label: "Расписание" },
+  { to: "/rating", label: "Рейтинг" },
+  { to: "/achievements", label: "Ачивки" },
+  { to: "/me", label: "Кабинет" },
+  { to: "/admin", label: "Админ", staffOnly: true },
 ];
 
 export function Layout() {
-  const { user, can, logout } = useAuth();
+  const { user, can } = useAuth();
   const navigate = useNavigate();
   const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("admin"));
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col">
-      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-felt-800 bg-felt-900/90 px-4 py-3 backdrop-blur">
+    <div className="site-shell mx-auto flex min-h-dvh w-full max-w-3xl flex-col">
+      <LegalNotice />
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-gold-500/15 bg-felt-950/80 px-4 py-3 backdrop-blur-md">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-left"
+          className="flex items-center gap-2.5 text-left"
           aria-label="На главную"
         >
-          <span aria-hidden className="text-xl">
-            ♠️
-          </span>
+          <img
+            src="/images/chip-mark.jpg"
+            alt=""
+            width={36}
+            height={36}
+            className="size-9 rounded-full object-cover ring-1 ring-gold-500/40"
+          />
           <span className="leading-tight">
-            <span className="block text-sm font-semibold">Клуб спортивного покера</span>
-            <span className="block text-[11px] text-stone-500">игра без денежных ставок</span>
+            <span className="block font-display text-sm font-semibold tracking-wide text-gold-400">
+              Клуб спортивного покера
+            </span>
           </span>
         </button>
 
@@ -56,9 +63,16 @@ export function Layout() {
         <Outlet />
       </main>
 
-      {/* Bottom bar: thumb-reachable on a phone, which is where most sign-ups happen. */}
+      <footer className="px-4 pb-24 text-center text-[11px] text-stone-500">
+        <NavLink to="/rules" className="hover:text-gold-400">
+          Правила клуба
+        </NavLink>
+        <span className="px-2">·</span>
+        игра не на деньги
+      </footer>
+
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-felt-800 bg-felt-900/95 backdrop-blur"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-gold-500/15 bg-felt-950/90 backdrop-blur-md"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto flex max-w-3xl">
@@ -70,28 +84,16 @@ export function Layout() {
               onClick={() => platform.haptic("tap")}
               className={({ isActive }: { isActive: boolean }) =>
                 cx(
-                  "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] transition",
+                  "flex flex-1 flex-col items-center gap-0.5 py-3 text-[11px] tracking-wide uppercase transition",
                   isActive ? "text-gold-400" : "text-stone-500 hover:text-stone-300",
                 )
               }
             >
-              <span aria-hidden className="text-lg leading-none">
-                {item.icon}
-              </span>
               {item.label}
             </NavLink>
           ))}
         </div>
       </nav>
-
-      {user && (
-        <button
-          onClick={() => void logout()}
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-felt-700 focus:px-3 focus:py-1"
-        >
-          Выйти
-        </button>
-      )}
     </div>
   );
 }

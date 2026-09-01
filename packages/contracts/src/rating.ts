@@ -88,6 +88,7 @@ export const RatingEventView = z.object({
       startsAt: IsoDateTime,
       /** 0 for events that are not tied to a finished standings table. */
       fieldSize: z.number().int().nonnegative(),
+      paidPlaces: z.number().int().positive(),
     })
     .nullable(),
   place: z.number().int().positive().nullable(),

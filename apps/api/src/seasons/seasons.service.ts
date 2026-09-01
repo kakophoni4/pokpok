@@ -8,6 +8,7 @@ import {
 } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
+import type { TxClient } from "../common/prisma/tx-client";
 import type { Season } from "../generated/prisma/client";
 
 @Injectable()
@@ -45,8 +46,9 @@ export class SeasonsService {
   }
 
   async create(actorId: string, input: CreateSeasonInput): Promise<SeasonView> {
+    const previous = await this.findActive();
     const season = await this.prisma.$transaction(async (tx) => {
-      if (input.isActive) await tx.season.updateMany({ data: { isActive: false } });
+      if (input.isActive) await this.closeOthers(tx, null, new Date(input.startsAt));
 
       return tx.season.create({
         data: {
@@ -54,7 +56,7 @@ export class SeasonsService {
           startsAt: new Date(input.startsAt),
           endsAt: input.endsAt ? new Date(input.endsAt) : null,
           isActive: input.isActive,
-          ratingConfig: (input.ratingConfig ?? DEFAULT_RATING_CONFIG) as never,
+          ratingConfig: (previous?.ratingConfig ?? input.ratingConfig ?? DEFAULT_RATING_CONFIG) as never,
         },
       });
     });
@@ -76,7 +78,7 @@ export class SeasonsService {
     const season = await this.prisma.$transaction(async (tx) => {
       // Exactly one season may be active, otherwise "current standings" is ambiguous.
       if (input.isActive) {
-        await tx.season.updateMany({ where: { id: { not: id } }, data: { isActive: false } });
+        await this.closeOthers(tx, id, new Date(input.startsAt ?? before.startsAt));
       }
 
       return tx.season.update({
@@ -104,6 +106,48 @@ export class SeasonsService {
       after: { title: season.title, ratingConfig: season.ratingConfig },
     });
     return toSeasonView(season);
+  }
+
+  /**
+   * Closes a season: standings stay in UserSeasonStats, the row just stops
+   * being "the current one". New games attach to whichever season is active next.
+   */
+  async finish(actorId: string, id: string): Promise<SeasonView> {
+    const before = await this.prisma.season.findUnique({ where: { id } });
+    if (!before) throw new NotFoundException({ code: "SEASON_NOT_FOUND", message: "Сезон не найден" });
+
+    const now = new Date();
+    const season = await this.prisma.season.update({
+      where: { id },
+      data: {
+        isActive: false,
+        endsAt: before.endsAt && before.endsAt <= now ? before.endsAt : now,
+      },
+    });
+
+    await this.audit.record({
+      actorId,
+      action: "season.finish",
+      entity: "Season",
+      entityId: id,
+      before: { title: before.title, isActive: before.isActive },
+      after: { title: season.title, isActive: false, endsAt: season.endsAt },
+    });
+    return toSeasonView(season);
+  }
+
+  private async closeOthers(
+    tx: TxClient,
+    exceptId: string | null,
+    closedAt: Date,
+  ): Promise<void> {
+    await tx.season.updateMany({
+      where: {
+        isActive: true,
+        ...(exceptId ? { id: { not: exceptId } } : {}),
+      },
+      data: { isActive: false, endsAt: closedAt },
+    });
   }
 }
 
