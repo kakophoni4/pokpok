@@ -97,8 +97,8 @@ export class PlayerScreens {
       "",
       quote(
         next
-          ? ["<b>Ближайшая игра</b>", "", ...eventLines(next)]
-          : ["<b>Ближайшая игра</b>", "", "Расписание пока пустое — заглядывайте позже."],
+          ? ["<b>Ближайшая игра</b>", ...eventLines(next)]
+          : ["<b>Ближайшая игра</b>", "Расписание пока пустое — заглядывайте позже."],
       ),
     ];
 
@@ -245,7 +245,7 @@ export class PlayerScreens {
         .map((row) => escapeHtml(row.achievement.title))
         .join(" · ");
       const more = awards.length > 8 ? ` и ещё ${awards.length - 8}` : "";
-      blocks.push(quote([`<b>Ачивки</b>`, "", `${names}${more}`]));
+      blocks.push(quote(["<b>Ачивки</b>", `${names}${more}`]));
     }
 
     const recent = stats.history.filter((row) => row.tournament != null).slice(0, HISTORY_LINES);
@@ -253,7 +253,6 @@ export class PlayerScreens {
       blocks.push(
         quote([
           "<b>Последние игры</b>",
-          "",
           ...recent.map((row) => {
             const where = row.place != null ? `${row.place} место` : "участие";
             const sign = row.points >= 0 ? "+" : "−";
@@ -352,7 +351,7 @@ export class PlayerScreens {
 
     const body =
       playing.length === 0
-        ? quote(["Пока никто не записался.", "", "Будьте первым — это всегда заметно."])
+        ? quote(["Пока никто не записался.", "Будьте первым — это всегда заметно."])
         : quote([
             tournament?.capacity != null
               ? `${gauge(playing.length, tournament.capacity)}  <b>${playing.length}</b> / ${tournament.capacity}`
@@ -440,7 +439,6 @@ function eventLines(tournament: TournamentSummary): string[] {
     `<b>${escapeHtml(tournament.title)}</b>`,
     clubMoment(tournament.startsAt),
     place ? escapeHtml(place) : null,
-    "",
     seats,
     extras.join(" · "),
     isSignedUp(tournament) ? "✓ <b>Вы записаны</b>" : null,
@@ -449,7 +447,7 @@ function eventLines(tournament: TournamentSummary): string[] {
 
 function standingLines(stats: PlayerStats): string[] {
   if (stats.rank == null) {
-    return ["<b>Вы ещё не в рейтинге</b>", "", "Первый сыгранный турнир откроет счёт."];
+    return ["<b>Вы ещё не в рейтинге</b>", "Первый сыгранный турнир откроет счёт."];
   }
   return [
     `<b>${stats.rank}-е место</b> в клубе`,

@@ -100,8 +100,8 @@ describe("layout", () => {
     expect(gauge(19, 20)).toBe("▰▰▰▰▰▰▰▰▰▱");
   });
 
-  it("skips empty lines inside a quote block", () => {
-    expect(quote(["раз", null, false, "два"])).toBe("<blockquote>раз\nдва</blockquote>");
+  it("drops the lines a screen decided not to show", () => {
+    expect(quote(["раз", null, false, "", "два"])).toBe("<blockquote>раз\nдва</blockquote>");
   });
 });
 
