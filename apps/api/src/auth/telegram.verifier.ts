@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { TelegramWidgetAuthInput } from "@poker/contracts";
 import type { Env } from "../config/env";
@@ -29,6 +29,8 @@ const MAX_AUTH_AGE_SECONDS = 24 * 60 * 60;
  */
 @Injectable()
 export class TelegramVerifier {
+  private readonly logger = new Logger(TelegramVerifier.name);
+
   constructor(private readonly config: ConfigService<Env, true>) {}
 
   private botToken(): string {
@@ -84,8 +86,17 @@ export class TelegramVerifier {
     const { signature: _ed25519, ...rest } = fields;
     const withoutSignature = buildCheckString(rest);
 
-    if (!this.matches(withSignature, secret, hash)) {
-      this.assertSignature(withoutSignature, secret, hash);
+    if (
+      !this.matches(withSignature, secret, hash) &&
+      !this.matches(withoutSignature, secret, hash)
+    ) {
+      // Field names only: enough to spot a payload shape we do not handle,
+      // without writing somebody's Telegram profile into the log.
+      this.logger.warn(
+        `Mini App initData rejected: bot ${this.botToken().split(":")[0]}, ` +
+          `fields [${Object.keys(fields).sort().join(", ")}]`,
+      );
+      throw new UnauthorizedException({ code: "BAD_SIGNATURE", message: "Подпись неверна" });
     }
 
     const authDate = Number(fields.auth_date);
