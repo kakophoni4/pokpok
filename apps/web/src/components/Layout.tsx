@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { platform } from "../platform/platform";
 import { InstallHint } from "./InstallHint";
@@ -18,7 +18,9 @@ const NAV_ITEMS: NavItem[] = [
 export function Layout() {
   const { user, can } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("hostess"));
+  const shell = pathname.startsWith("/admin") ? "max-w-5xl" : "max-w-3xl";
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -27,7 +29,7 @@ export function Layout() {
         className="sticky top-0 z-20 border-b border-gold-500/20 bg-felt-950"
         style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
       >
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 pb-3">
+        <div className={cx("mx-auto flex items-center justify-between gap-3 px-4 pb-3", shell)}>
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2.5 text-left"
@@ -61,12 +63,12 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-5 pb-28">
+      <main className={cx("mx-auto w-full flex-1 px-4 pt-5 pb-28", shell)}>
         <InstallHint />
         <Outlet />
       </main>
 
-      <footer className="mx-auto w-full max-w-3xl px-4 pb-24 text-center text-sm text-stone-400">
+      <footer className={cx("mx-auto w-full px-4 pb-24 text-center text-sm text-stone-400", shell)}>
         <NavLink to="/rules" className="hover:text-gold-400">
           Правила клуба
         </NavLink>
@@ -76,7 +78,7 @@ export function Layout() {
         className="fixed inset-x-0 bottom-0 z-20 border-t border-gold-500/20 bg-felt-950/95 backdrop-blur-md"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="mx-auto flex max-w-3xl">
+        <div className={cx("mx-auto flex", shell)}>
           {items.map((item) => (
             <NavLink
               key={item.to}

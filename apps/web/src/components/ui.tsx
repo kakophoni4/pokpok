@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 export function cx(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
@@ -267,11 +268,16 @@ export function Select({
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLUListElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const [box, setBox] = useState<DOMRect | null>(null);
   const selected = options.find((option) => option.value === value);
 
   useEffect(() => {
     function onPointer(event: MouseEvent) {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (root.current?.contains(target) || list.current?.contains(target)) return;
+      setOpen(false);
     }
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
@@ -284,9 +290,24 @@ export function Select({
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    function place() {
+      setBox(button.current?.getBoundingClientRect() ?? null);
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
   return (
     <div ref={root} className={cx("relative", className)}>
       <button
+        ref={button}
         id={id}
         type="button"
         aria-label={ariaLabel}
@@ -314,37 +335,48 @@ export function Select({
           />
         </svg>
       </button>
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-gold-500/25 bg-felt-950 py-1 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
-        >
-          {options.map((option) => {
-            const active = option.value === value;
-            return (
-              <li key={option.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  className={cx(
-                    "w-full px-3 py-2.5 text-left text-base",
-                    active
-                      ? "bg-gold-500/15 text-gold-400"
-                      : "text-stone-200 hover:bg-felt-800",
-                  )}
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
-                >
-                  {option.label}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {open &&
+        box &&
+        createPortal(
+          <ul
+            ref={list}
+            role="listbox"
+            style={{
+              position: "fixed",
+              top: box.bottom + 4,
+              left: box.left,
+              width: box.width,
+              zIndex: 80,
+            }}
+            className="max-h-72 overflow-auto rounded-xl border border-gold-500/25 bg-felt-950 py-1 shadow-[0_16px_40px_rgba(0,0,0,0.7)]"
+          >
+            {options.map((option) => {
+              const active = option.value === value;
+              return (
+                <li key={option.value}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    className={cx(
+                      "w-full px-3 py-2 text-left text-sm",
+                      active
+                        ? "bg-gold-500/15 text-gold-400"
+                        : "text-stone-200 hover:bg-felt-800",
+                    )}
+                    onClick={() => {
+                      onChange(option.value);
+                      setOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>,
+          document.body,
+        )}
     </div>
   );
 }

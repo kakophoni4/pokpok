@@ -472,6 +472,14 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     return;
   }
 
+  if (data.startsWith("ar:")) {
+    const achievementId = data.slice(3);
+    const removed = await admin.revokeLast(profile, detail.id, userId, achievementId);
+    await ctx.answerCallbackQuery({ text: removed ? "Ачивка снята" : "Снимать нечего" });
+    await redrawEvening(chatId, profile, detail.id);
+    return;
+  }
+
   if (data.startsWith("a:")) {
     const achievementId = data.slice(2);
     await admin.grant(profile, detail.id, userId, achievementId);

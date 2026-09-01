@@ -118,7 +118,7 @@ export const TournamentDetail = TournamentSummary.extend({
   totalRub: z.number().int().nonnegative().nullish(),
   adminScreens: AdminScreens.nullish(),
   /** Combo awards handed out this evening. Staff-only. */
-  eveningGrants: z.array(z.object({ userId: Id, achievementId: Id })).nullish(),
+  eveningGrants: z.array(z.object({ id: Id, userId: Id, achievementId: Id })).nullish(),
 });
 export type TournamentDetail = z.infer<typeof TournamentDetail>;
 

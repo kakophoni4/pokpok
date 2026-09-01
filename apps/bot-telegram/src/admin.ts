@@ -126,6 +126,21 @@ export class AdminScreens {
     });
   }
 
+  async revokeLast(
+    profile: TelegramProfile,
+    tournamentId: string,
+    userId: string,
+    achievementId: string,
+  ): Promise<boolean> {
+    const detail = await this.detail(profile, tournamentId);
+    const last = (detail.eveningGrants ?? [])
+      .filter((row) => row.userId === userId && row.achievementId === achievementId)
+      .at(-1);
+    if (!last?.id) return false;
+    await this.api.asUser(profile, "DELETE", `/achievements/grant/${last.id}`);
+    return true;
+  }
+
   async setPaidPlaces(
     profile: TelegramProfile,
     tournamentId: string,
@@ -306,13 +321,13 @@ export class AdminScreens {
         .filter(isEveningHand)
         .sort((a, b) => b.ratingPoints - a.ratingPoints)
         .slice(0, 6);
-      hands.forEach((hand, index) => {
+      hands.forEach((hand) => {
         const count = grants.filter((row) => row.achievementId === hand.id).length;
         const mark = count > 0 ? `×${count} ` : "";
-        keyboard.text(fit(`${mark}${hand.icon ?? "🏅"} ${hand.title}`, 28), `a:${hand.id}`);
-        if (index % 2 === 1) keyboard.row();
+        keyboard.text(fit(`${mark}${hand.icon ?? "🏅"} ${hand.title}`, 22), `a:${hand.id}`);
+        if (count > 0) keyboard.text("−", `ar:${hand.id}`);
+        keyboard.row();
       });
-      if (hands.length % 2 === 1) keyboard.row();
       keyboard.text("🏅 Другие ачивки", "ach");
       if (seat.lastPaymentId) keyboard.text("✖️ Отменить оплату", "undo");
     }

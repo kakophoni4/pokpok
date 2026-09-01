@@ -354,6 +354,19 @@ export function useGrantAchievement() {
   });
 }
 
+export function useRevokeAchievement() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (grantId: string) => api.delete(`/achievements/grant/${grantId}`),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["achievements"] });
+      void client.invalidateQueries({ queryKey: ["leaderboard"] });
+      void client.invalidateQueries({ queryKey: ["rating"] });
+      void client.invalidateQueries({ queryKey: ["tournament"] });
+    },
+  });
+}
+
 export function useUpdatePlayer() {
   const client = useQueryClient();
   return useMutation({

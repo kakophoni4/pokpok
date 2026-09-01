@@ -110,7 +110,8 @@ export class TournamentsService {
       staffViewer
         ? this.prisma.userAchievement.findMany({
             where: { tournamentId: id },
-            select: { userId: true, achievementId: true },
+            select: { id: true, userId: true, achievementId: true },
+            orderBy: { grantedAt: "asc" },
           })
         : Promise.resolve([]),
     ]);

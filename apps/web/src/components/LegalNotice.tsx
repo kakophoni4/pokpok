@@ -22,7 +22,7 @@ export function LegalNotice() {
       <div className="card max-w-md p-5 shadow-2xl">
         <h2 className="text-lg font-semibold">Перед входом на сайт</h2>
         <p className="mt-2 text-base leading-relaxed text-stone-300">
-          Клуб спортивного покера, без денежного призового фонда. Дальше - если принимаете{" "}
+          Клуб спортивного покера Хроники, без денежного призового фонда. Дальше - если принимаете{" "}
           <Link to="/rules" className="text-gold-400 underline" onClick={() => setOpen(false)}>
             правила клуба
           </Link>

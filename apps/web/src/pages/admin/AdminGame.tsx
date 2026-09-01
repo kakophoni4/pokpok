@@ -16,6 +16,7 @@ import {
   useClubSettings,
   useFinishTournament,
   useGrantAchievement,
+  useRevokeAchievement,
   useSetPlace,
   useTournament,
   useTournaments,
@@ -48,35 +49,43 @@ export function AdminGame() {
   if (tournaments.isError) return <ErrorState error={tournaments.error} />;
 
   return (
-    <>
-      <Card className="mb-4">
-        <label className="label" htmlFor="game-tournament">
-          Турнир
-        </label>
-        <Select
-          id="game-tournament"
-          aria-label="Турнир"
-          value={activeId}
-          onChange={setSelectedId}
-          options={
-            candidates.length === 0
-              ? [{ value: "", label: "- нет подходящих турниров -" }]
-              : candidates.map((tournament) => ({
-                  value: tournament.id,
-                  label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}${
-                    tournament.status === "finished" ? " (завершён)" : ""
-                  }`,
-                }))
-          }
-        />
-      </Card>
-
-      {activeId && <GameDesk key={activeId} tournamentId={activeId} />}
-    </>
+    <GameDesk
+      key={activeId || "none"}
+      tournamentId={activeId}
+      picker={
+        <div>
+          <label className="label" htmlFor="game-tournament">
+            Турнир
+          </label>
+          <Select
+            id="game-tournament"
+            aria-label="Турнир"
+            value={activeId}
+            onChange={setSelectedId}
+            options={
+              candidates.length === 0
+                ? [{ value: "", label: "- нет подходящих турниров -" }]
+                : candidates.map((tournament) => ({
+                    value: tournament.id,
+                    label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}${
+                      tournament.status === "finished" ? " (завершён)" : ""
+                    }`,
+                  }))
+            }
+          />
+        </div>
+      }
+    />
   );
 }
 
-function GameDesk({ tournamentId }: { tournamentId: string }) {
+function GameDesk({
+  tournamentId,
+  picker,
+}: {
+  tournamentId: string;
+  picker: React.ReactNode;
+}) {
   const tournament = useTournament(tournamentId);
   const settings = useClubSettings(true);
   const catalogue = useAchievements();
@@ -85,7 +94,18 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
   const [confirming, setConfirming] = useState(false);
   const [query, setQuery] = useState("");
 
-  if (tournament.isPending || settings.isPending) return <Loading />;
+  if (!tournamentId) {
+    return <Card>{picker}</Card>;
+  }
+
+  if (tournament.isPending || settings.isPending) {
+    return (
+      <Card>
+        {picker}
+        <Loading />
+      </Card>
+    );
+  }
   if (tournament.isError) return <ErrorState error={tournament.error} />;
   if (!tournament.data || !settings.data) return null;
 
@@ -99,8 +119,10 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
     : seats;
 
   return (
-    <>
-      <Card className="mb-4">
+    <Card className="overflow-visible p-0">
+      <div className="space-y-4 p-3">
+        {picker}
+
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-semibold">{detail.title}</h2>
@@ -116,14 +138,14 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
           )}
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <Stat label="Играют" value={String(playing.length)} />
           <Stat label="Фишек в игре" value={formatNumber(detail.chipsInPlay)} />
           <Stat label="Касса" value={formatRub(detail.totalRub ?? 0)} />
           <Stat label="Первое место" value={`${formatNumber(detail.ratingPool)} очков`} />
         </dl>
 
-        <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-felt-800 pt-3">
+        <div className="flex flex-wrap items-end gap-3 border-t border-felt-800 pt-3">
           <div>
             <label className="label" htmlFor="paid-places">
               Призовых мест
@@ -173,18 +195,11 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
         </div>
 
         {finish.isError && (
-          <p className="mt-2 text-sm text-chip-red">{(finish.error as Error).message}</p>
+          <p className="text-sm text-chip-red">{(finish.error as Error).message}</p>
         )}
-      </Card>
 
-      {seats.length === 0 ? (
-        <Card className="text-sm text-stone-400">
-          На турнир никто не записан. Запишите игроков в расписании или проведите оплату входа - тот,
-          кто заплатил, автоматически попадает в список.
-        </Card>
-      ) : (
-        <Card className="overflow-hidden p-0">
-          <div className="flex flex-wrap items-center gap-2 border-b border-felt-800 px-3 py-2">
+        {seats.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-felt-800 pt-3">
             <input
               type="search"
               className="field max-w-80"
@@ -197,41 +212,41 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
               {visibleSeats.length} из {seats.length}
             </span>
           </div>
+        )}
+      </div>
 
-          {visibleSeats.length === 0 ? (
-            <p className="px-3 py-6 text-sm text-stone-400">Никого с таким ником нет.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[56rem] border-collapse text-sm">
-                <thead className="sticky top-0 z-10 bg-felt-950 text-left text-xs font-medium text-stone-400">
-                  <tr className="border-b border-felt-800">
-                    <th className="w-[14rem] px-3 py-2 font-medium">Игрок</th>
-                    <th className="w-[6.5rem] px-2 py-2 font-medium">Вход</th>
-                    <th className="w-[9.5rem] px-2 py-2 font-medium">Ребай</th>
-                    <th className="w-[9.5rem] px-2 py-2 font-medium">Адон</th>
-                    <th className="px-2 py-2 font-medium">Бар</th>
-                    <th className="px-2 py-2 font-medium">Комбинации</th>
-                    <th className="w-[13rem] px-2 py-2 font-medium">Место</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleSeats.map((seat) => (
-                    <PlayerRow
-                      key={seat.user.id}
-                      seat={seat}
-                      detail={detail}
-                      prices={settings.data}
-                      hands={eveningHands(catalogue.data ?? [])}
-                      locked={isFinished}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </Card>
+      {seats.length === 0 ? (
+        <p className="border-t border-felt-800 px-3 py-4 text-sm text-stone-400">
+          На турнир никто не записан. Запишите игроков в расписании или проведите оплату входа - тот,
+          кто заплатил, автоматически попадает в список.
+        </p>
+      ) : visibleSeats.length === 0 ? (
+        <p className="border-t border-felt-800 px-3 py-4 text-sm text-stone-400">
+          Никого с таким ником нет.
+        </p>
+      ) : (
+        <div className="border-t border-felt-800">
+          <div className="hidden grid-cols-[minmax(0,1.2fr)_4.5rem_6.75rem_6.75rem_auto_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
+            <span>Игрок</span>
+            <span>Вход</span>
+            <span>Ребай</span>
+            <span>Адон</span>
+            <span>Бар</span>
+            <span>Место</span>
+          </div>
+          {visibleSeats.map((seat) => (
+            <PlayerRow
+              key={seat.user.id}
+              seat={seat}
+              detail={detail}
+              prices={settings.data}
+              hands={eveningHands(catalogue.data ?? [])}
+              locked={isFinished}
+            />
+          ))}
+        </div>
       )}
-    </>
+    </Card>
   );
 }
 
@@ -252,7 +267,13 @@ function PlayerRow({
   const voidPayment = useVoidPayment(detail.id);
   const setPlace = useSetPlace(detail.id);
   const grant = useGrantAchievement();
-  const busy = addPayment.isPending || voidPayment.isPending || setPlace.isPending || grant.isPending;
+  const revoke = useRevokeAchievement();
+  const busy =
+    addPayment.isPending ||
+    voidPayment.isPending ||
+    setPlace.isPending ||
+    grant.isPending ||
+    revoke.isPending;
 
   const priceOf: Record<Exclude<PaymentKind, "other">, number> = {
     entry: prices.entryPriceRub,
@@ -266,45 +287,42 @@ function PlayerRow({
   const rowError =
     (addPayment.error as Error | null)?.message ??
     (grant.error as Error | null)?.message ??
+    (revoke.error as Error | null)?.message ??
     (setPlace.error as Error | null)?.message;
 
   return (
-    <tr className="h-14 border-b border-felt-800/80 last:border-b-0">
-      <td className="px-3 py-1.5 align-middle">
-        <div className="flex min-w-0 items-center gap-2">
-          <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={28} />
-          <div className="min-w-0">
-            <p className="truncate font-medium leading-tight">{seat.user.nickname}</p>
-            <p className="truncate text-xs text-stone-500">
-              {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
-              {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
-              {seat.lastPaymentId && !locked ? (
-                <>
-                  {" · "}
-                  <button
-                    type="button"
-                    className="text-stone-400 hover:text-chip-red"
-                    disabled={busy}
-                    onClick={() => voidPayment.mutate(seat.lastPaymentId as string)}
-                  >
-                    отмена
-                  </button>
-                </>
-              ) : null}
-            </p>
-            {rowError ? <p className="truncate text-xs text-chip-red">{rowError}</p> : null}
-          </div>
+    <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.2fr)_4.5rem_6.75rem_6.75rem_auto_6.6rem] sm:items-center">
+      <div className="col-span-2 flex min-w-0 items-center gap-2 sm:col-span-1">
+        <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={28} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium leading-tight">{seat.user.nickname}</p>
+          <p className="truncate text-xs text-stone-500">
+            {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
+            {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
+          </p>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-1 h-7 px-2 text-xs"
+            disabled={busy || locked || !seat.lastPaymentId}
+            onClick={() => {
+              if (seat.lastPaymentId) voidPayment.mutate(seat.lastPaymentId);
+            }}
+          >
+            Отменить оплату
+          </Button>
+          {rowError ? <p className="truncate text-xs text-chip-red">{rowError}</p> : null}
         </div>
-      </td>
+      </div>
 
-      <td className="px-2 py-1.5 align-middle">
+      <div>
         {locked ? (
           <span className="text-xs text-stone-400">{seat.paid.entry ? "оплачен" : "-"}</span>
         ) : (
           <Button
             size="sm"
             variant={seat.paid.entry ? "secondary" : "ghost"}
-            className="h-8 w-[5.5rem]"
+            className="h-8 w-full"
             disabled={busy || seat.paid.entry}
             onClick={() =>
               addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
@@ -313,146 +331,149 @@ function PlayerRow({
             {seat.paid.entry ? "оплачен" : `${priceOf.entry} ₽`}
           </Button>
         )}
-      </td>
+      </div>
 
-      <td className="px-2 py-1.5 align-middle">
-        <QtyCharge
-          count={seat.paid.rebuys}
-          unitPrice={priceOf.rebuy}
-          disabled={busy || locked}
-          locked={locked}
-          onCharge={(times) =>
-            addPayment.mutate({
-              userId: seat.user.id,
-              kind: "rebuy",
-              amountRub: priceOf.rebuy * times,
-              multiplier: times,
-            })
-          }
-        />
-      </td>
+      <QtyCharge
+        count={seat.paid.rebuys}
+        unitPrice={priceOf.rebuy}
+        disabled={busy || locked}
+        locked={locked}
+        onCharge={(times) =>
+          addPayment.mutate({
+            userId: seat.user.id,
+            kind: "rebuy",
+            amountRub: priceOf.rebuy * times,
+            multiplier: times,
+          })
+        }
+      />
 
-      <td className="px-2 py-1.5 align-middle">
-        <QtyCharge
-          count={seat.paid.addons}
-          unitPrice={priceOf.addon}
-          disabled={busy || locked}
-          locked={locked}
-          onCharge={(times) =>
-            addPayment.mutate({
-              userId: seat.user.id,
-              kind: "addon",
-              amountRub: priceOf.addon * times,
-              multiplier: times,
-            })
-          }
-        />
-      </td>
+      <QtyCharge
+        count={seat.paid.addons}
+        unitPrice={priceOf.addon}
+        disabled={busy || locked}
+        locked={locked}
+        onCharge={(times) =>
+          addPayment.mutate({
+            userId: seat.user.id,
+            kind: "addon",
+            amountRub: priceOf.addon * times,
+            multiplier: times,
+          })
+        }
+      />
 
-      <td className="px-2 py-1.5 align-middle">
-        <div className="flex h-8 items-center gap-1">
-          {extras.map((item) => (
-            <Button
-              key={item.id}
-              size="sm"
-              variant="ghost"
-              disabled={busy || locked}
-              onClick={() =>
-                addPayment.mutate({
-                  userId: seat.user.id,
-                  kind: item.kind,
-                  amountRub: item.priceRub,
-                  menuItemId: item.id,
-                })
-              }
-            >
-              {item.title}
-              {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
-            </Button>
-          ))}
-        </div>
-      </td>
+      <div className="flex h-8 items-center gap-1">
+        {extras.map((item) => (
+          <Button
+            key={item.id}
+            size="sm"
+            variant="ghost"
+            className="h-8"
+            disabled={busy || locked}
+            onClick={() =>
+              addPayment.mutate({
+                userId: seat.user.id,
+                kind: item.kind,
+                amountRub: item.priceRub,
+                menuItemId: item.id,
+              })
+            }
+          >
+            {item.title}
+            {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
+          </Button>
+        ))}
+      </div>
 
-      <td className="px-2 py-1.5 align-middle">
-        <div className="flex h-8 flex-nowrap items-center gap-1">
+      <div className="flex h-8 items-center gap-1">
+        {!locked && (
+          <Button
+            size="sm"
+            className="h-8 min-w-0 flex-1 px-2"
+            disabled={busy || seat.place != null || upcoming == null}
+            onClick={() => {
+              if (upcoming != null) setPlace.mutate({ userId: seat.user.id, place: upcoming });
+            }}
+          >
+            {seat.place != null ? `${seat.place}` : upcoming != null ? `Выбыл ${upcoming}` : "в игре"}
+          </Button>
+        )}
+        {locked ? (
+          <span className="nums text-stone-200">
+            {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "-"}
+          </span>
+        ) : (
+          <select
+            aria-label={`Место игрока ${seat.user.nickname}`}
+            className="field h-8 min-w-0 flex-1 py-0 text-xs"
+            disabled={busy}
+            value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
+            onChange={(event) =>
+              setPlace.mutate({
+                userId: seat.user.id,
+                place: event.target.value ? Number(event.target.value) : null,
+              })
+            }
+          >
+            <option value="">игра</option>
+            {placeOptions(detail, seat.place).map((place) => (
+              <option key={place} value={place}>
+                {place}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {hands.length > 0 && (
+        <div className="col-span-2 flex flex-wrap items-center gap-1 sm:col-span-6">
           {hands.map((hand) => {
             const count = grantCount(detail, seat.user.id, hand.id);
+            const lastId = lastGrantId(detail, seat.user.id, hand.id);
             return (
-              <button
+              <span
                 key={hand.id}
-                type="button"
-                title={hand.title}
-                disabled={busy || locked}
-                onClick={() =>
-                  grant.mutate({
-                    userId: seat.user.id,
-                    achievementId: hand.id,
-                    tournamentId: detail.id,
-                  })
-                }
-                className={cx(
-                  "inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border px-2 text-xs whitespace-nowrap",
-                  count > 0
-                    ? "border-gold-500/40 bg-gold-500/10 text-gold-400"
-                    : "border-gold-500/20 text-stone-300 hover:bg-gold-500/10",
-                  "disabled:opacity-40",
-                )}
+                className="inline-flex h-8 overflow-hidden rounded-lg border border-gold-500/25"
               >
-                {hand.icon ? <span aria-hidden>{hand.icon}</span> : null}
-                {hand.title}
-                {count > 0 ? <span className="nums text-gold-400">×{count}</span> : null}
-              </button>
+                <button
+                  type="button"
+                  title={`Выдать: ${hand.title}`}
+                  disabled={busy || locked}
+                  onClick={() =>
+                    grant.mutate({
+                      userId: seat.user.id,
+                      achievementId: hand.id,
+                      tournamentId: detail.id,
+                    })
+                  }
+                  className={cx(
+                    "inline-flex h-8 items-center gap-1 px-2 text-xs whitespace-nowrap",
+                    count > 0 ? "bg-gold-500/10 text-gold-400" : "text-stone-300 hover:bg-gold-500/10",
+                    "disabled:opacity-40",
+                  )}
+                >
+                  {hand.icon ? <span aria-hidden>{hand.icon}</span> : null}
+                  {hand.title}
+                  {count > 0 ? <span className="nums">×{count}</span> : null}
+                </button>
+                <button
+                  type="button"
+                  title={`Снять: ${hand.title}`}
+                  disabled={busy || locked || !lastId}
+                  onClick={() => {
+                    if (lastId) revoke.mutate(lastId);
+                  }}
+                  className="h-8 w-7 border-l border-gold-500/20 text-sm text-stone-400 hover:bg-chip-red/20 hover:text-chip-red disabled:opacity-20"
+                >
+                  −
+                </button>
+              </span>
             );
           })}
         </div>
-      </td>
-
-      <td className="px-2 py-1.5 align-middle">
-        <div className="flex h-8 items-center gap-1">
-          {!locked && (
-            <Button
-              size="sm"
-              className="min-w-[7.5rem]"
-              disabled={busy || seat.place != null || upcoming == null}
-              onClick={() => {
-                if (upcoming != null) setPlace.mutate({ userId: seat.user.id, place: upcoming });
-              }}
-            >
-              {seat.place != null
-                ? `${seat.place} место`
-                : upcoming != null
-                  ? `Выбыл - ${upcoming}`
-                  : "в игре"}
-            </Button>
-          )}
-          {locked ? (
-            <span className="nums text-stone-200">
-              {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "-"}
-            </span>
-          ) : (
-            <select
-              aria-label={`Место игрока ${seat.user.nickname}`}
-              className="field h-8 w-[6.5rem] py-0 text-xs"
-              disabled={busy}
-              value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
-              onChange={(event) =>
-                setPlace.mutate({
-                  userId: seat.user.id,
-                  place: event.target.value ? Number(event.target.value) : null,
-                })
-              }
-            >
-              <option value="">в игре</option>
-              {placeOptions(detail, seat.place).map((place) => (
-                <option key={place} value={place}>
-                  {place} место
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-      </td>
-    </tr>
+      )}
+    </div>
   );
 }
 
@@ -500,6 +521,13 @@ function grantCount(detail: TournamentDetail, userId: string, achievementId: str
   return (detail.eveningGrants ?? []).filter(
     (row) => row.userId === userId && row.achievementId === achievementId,
   ).length;
+}
+
+function lastGrantId(detail: TournamentDetail, userId: string, achievementId: string): string | null {
+  const rows = (detail.eveningGrants ?? []).filter(
+    (row) => row.userId === userId && row.achievementId === achievementId,
+  );
+  return rows.at(-1)?.id ?? null;
 }
 
 const HAND_ORDER = ["hand_of_the_day", "quads", "straight_flush", "royal_flush"];
