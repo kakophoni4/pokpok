@@ -33,7 +33,7 @@ export function Button({
       className={cx(
         "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2.5 text-base",
+        size === "sm" ? "px-2.5 py-1 text-sm" : "px-3.5 py-1.5 text-sm",
         BUTTON_VARIANTS[variant],
         className,
       )}
@@ -295,7 +295,7 @@ export function Select({
         onClick={() => setOpen((current) => !current)}
         className="field flex w-full items-center justify-between gap-3 text-left"
       >
-        <span className="min-w-0 truncate">{selected?.label ?? "—"}</span>
+        <span className="min-w-0 truncate">{selected?.label ?? "-"}</span>
         <svg
           viewBox="0 0 12 8"
           aria-hidden

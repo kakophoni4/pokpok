@@ -64,7 +64,7 @@ function SeasonRow({ season }: { season: Season }) {
           <p className="font-medium">{season.title}</p>
           <p className="mt-0.5 text-xs text-stone-400">
             {formatFullDate(season.startsAt)}
-            {season.endsAt ? ` — ${formatFullDate(season.endsAt)}` : " — …"}
+            {season.endsAt ? ` - ${formatFullDate(season.endsAt)}` : " - …"}
           </p>
         </div>
         <Badge tone={season.isActive ? "green" : "neutral"}>

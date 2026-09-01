@@ -50,7 +50,7 @@ export class PlayerScreens {
         "🃏 <b>Клуб спортивного покера</b>",
         "",
         `Здравствуйте, ${escapeHtml(session.nickname)}.`,
-        "Все игры и время — по Самаре.",
+        "Все игры и время - по Самаре.",
       ].join("\n"),
       keyboard: new InlineKeyboard()
         .text("📅 Расписание событий", "nav:sched")
@@ -77,7 +77,7 @@ export class PlayerScreens {
     for (const tournament of tournaments.slice(0, 12)) {
       const mark = isSignedUp(tournament) ? "✅" : "▫️";
       keyboard
-        .text(fit(`${mark} ${clubWhen(tournament.startsAt)} — ${tournament.title}`), `tog:${tournament.id}`)
+        .text(fit(`${mark} ${clubWhen(tournament.startsAt)} - ${tournament.title}`), `tog:${tournament.id}`)
         .row();
     }
     keyboard.text(`← ${BACK}`, "nav:home");
@@ -86,8 +86,8 @@ export class PlayerScreens {
       text: [
         "📅 <b>Расписание событий</b>",
         "",
-        "Нажмите на событие, чтобы записаться. Нажмите ещё раз — запись снимется.",
-        "✅ — вы записаны.",
+        "Нажмите на событие, чтобы записаться. Нажмите ещё раз - запись снимется.",
+        "✅ - вы записаны.",
       ].join("\n"),
       keyboard,
     };
@@ -101,7 +101,7 @@ export class PlayerScreens {
 
     if (rows.length === 0) {
       return {
-        text: "🏆 <b>Рейтинг</b>\n\nСезон только начинается — сыгранных турниров пока нет.",
+        text: "🏆 <b>Рейтинг</b>\n\nСезон только начинается - сыгранных турниров пока нет.",
         keyboard: new InlineKeyboard().text(`← ${BACK}`, "nav:home"),
       };
     }
@@ -110,7 +110,7 @@ export class PlayerScreens {
     const lines = rows.slice(0, TOP_SIZE).map((row) => {
       const rank = String(row.rank).padStart(width, " ");
       const own = row.user.id === session.userId ? "👉 " : "";
-      return `${own}${rank}. ${escapeHtml(row.user.nickname)} — ${num(row.points)}`;
+      return `${own}${rank}. ${escapeHtml(row.user.nickname)} - ${num(row.points)}`;
     });
 
     const me = rows.find((row) => row.user.id === session.userId);
@@ -132,7 +132,7 @@ export class PlayerScreens {
   /** For a player who is outside the visible top: their own line, fetched separately. */
   private async myPlaceLine(profile: TelegramProfile): Promise<string> {
     const stats = await this.api.asUser<PlayerStats>(profile, "GET", "/rating/me");
-    if (stats.rank == null) return "Вы ещё не в рейтинге — сыграйте первый турнир";
+    if (stats.rank == null) return "Вы ещё не в рейтинге - сыграйте первый турнир";
     return `Вы: ${stats.rank}-е место, ${points(stats.points)}`;
   }
 
@@ -165,7 +165,7 @@ export class PlayerScreens {
     for (const tournament of tournaments.slice(0, 12)) {
       keyboard
         .text(
-          fit(`${clubWhen(tournament.startsAt)} — ${tournament.title} (${tournament.registeredCount})`),
+          fit(`${clubWhen(tournament.startsAt)} - ${tournament.title} (${tournament.registeredCount})`),
           `nav:who:${tournament.id}`,
         )
         .row();
@@ -219,7 +219,7 @@ export class PlayerScreens {
   /** One-line summary of a player, shown as a toast over the roster. */
   async playerToast(userId: string): Promise<string> {
     const stats = await this.api.public<PlayerStats>(`/rating/player/${userId}`);
-    if (stats.rank == null) return `${stats.user.nickname} — ещё не в рейтинге`;
+    if (stats.rank == null) return `${stats.user.nickname} - ещё не в рейтинге`;
 
     const games = `${stats.gamesPlayed} ${plural(stats.gamesPlayed, "турнир", "турнира", "турниров")}`;
     return `${stats.user.nickname}\n${stats.rank}-е место · ${points(stats.points)} · ${games}`;
@@ -248,7 +248,7 @@ export class PlayerScreens {
     );
 
     return result.status === "waitlist"
-      ? `Мест нет — вы в листе ожидания №${result.waitlistPosition}`
+      ? `Мест нет - вы в листе ожидания №${result.waitlistPosition}`
       : `Вы успешно записаны: ${tournament.title}`;
   }
 

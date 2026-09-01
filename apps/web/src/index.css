@@ -29,7 +29,7 @@
   html {
     color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
-    font-size: 17px;
+    font-size: 16px;
   }
 
   body {
@@ -56,7 +56,7 @@
   }
 
   .field {
-    @apply w-full rounded-xl border border-gold-500/25 bg-felt-950 px-3 py-2.5 text-base
+    @apply w-full rounded-lg border border-gold-500/25 bg-felt-950 px-2.5 py-1.5 text-sm
       text-stone-100 outline-none transition
       placeholder:text-stone-500
       focus:border-gold-500/70 focus:ring-2 focus:ring-gold-500/20;
@@ -66,12 +66,12 @@
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.2 1.4L6 6.2L10.8 1.4' stroke='%23e5c07b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.9rem center;
-    background-size: 0.72rem 0.48rem;
-    padding-right: 2.4rem;
+    background-position: right 0.65rem center;
+    background-size: 0.65rem 0.42rem;
+    padding-right: 1.9rem;
   }
 
   .label {
-    @apply mb-1.5 block text-sm font-medium text-stone-300;
+    @apply mb-1 block text-xs font-medium text-stone-400;
   }
 }

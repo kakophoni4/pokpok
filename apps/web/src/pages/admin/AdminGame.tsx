@@ -8,7 +8,6 @@ import {
   formatNumber,
   formatRub,
   formatTime,
-  PAYMENT_KIND_LABELS,
   placeLabel,
 } from "../../lib/format";
 import {
@@ -61,7 +60,7 @@ export function AdminGame() {
           onChange={setSelectedId}
           options={
             candidates.length === 0
-              ? [{ value: "", label: "— нет подходящих турниров —" }]
+              ? [{ value: "", label: "- нет подходящих турниров -" }]
               : candidates.map((tournament) => ({
                   value: tournament.id,
                   label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}${
@@ -84,6 +83,7 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
   const finish = useFinishTournament(tournamentId);
   const update = useUpdateTournament(tournamentId);
   const [confirming, setConfirming] = useState(false);
+  const [query, setQuery] = useState("");
 
   if (tournament.isPending || settings.isPending) return <Loading />;
   if (tournament.isError) return <ErrorState error={tournament.error} />;
@@ -93,6 +93,10 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
   const seats = seatsOf(detail);
   const playing = seats.filter((seat) => seat.paid.entry);
   const isFinished = detail.status === "finished";
+  const needle = query.trim().toLowerCase();
+  const visibleSeats = needle
+    ? seats.filter((seat) => seat.user.nickname.toLowerCase().includes(needle))
+    : seats;
 
   return (
     <>
@@ -175,22 +179,57 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
 
       {seats.length === 0 ? (
         <Card className="text-sm text-stone-400">
-          На турнир никто не записан. Запишите игроков в расписании или проведите оплату входа — тот,
+          На турнир никто не записан. Запишите игроков в расписании или проведите оплату входа - тот,
           кто заплатил, автоматически попадает в список.
         </Card>
       ) : (
-        <ul className="space-y-2">
-          {seats.map((seat) => (
-            <PlayerRow
-              key={seat.user.id}
-              seat={seat}
-              detail={detail}
-              prices={settings.data}
-              hands={eveningHands(catalogue.data ?? [])}
-              locked={isFinished}
+        <Card className="overflow-hidden p-0">
+          <div className="flex flex-wrap items-center gap-2 border-b border-felt-800 px-3 py-2">
+            <input
+              type="search"
+              className="field max-w-80"
+              value={query}
+              placeholder="Поиск по нику"
+              onChange={(event) => setQuery(event.target.value)}
+              aria-label="Поиск игрока по нику"
             />
-          ))}
-        </ul>
+            <span className="text-xs text-stone-500">
+              {visibleSeats.length} из {seats.length}
+            </span>
+          </div>
+
+          {visibleSeats.length === 0 ? (
+            <p className="px-3 py-6 text-sm text-stone-400">Никого с таким ником нет.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[56rem] border-collapse text-sm">
+                <thead className="sticky top-0 z-10 bg-felt-950 text-left text-xs font-medium text-stone-400">
+                  <tr className="border-b border-felt-800">
+                    <th className="w-[14rem] px-3 py-2 font-medium">Игрок</th>
+                    <th className="w-[6.5rem] px-2 py-2 font-medium">Вход</th>
+                    <th className="w-[9.5rem] px-2 py-2 font-medium">Ребай</th>
+                    <th className="w-[9.5rem] px-2 py-2 font-medium">Адон</th>
+                    <th className="px-2 py-2 font-medium">Бар</th>
+                    <th className="px-2 py-2 font-medium">Комбинации</th>
+                    <th className="w-[13rem] px-2 py-2 font-medium">Место</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleSeats.map((seat) => (
+                    <PlayerRow
+                      key={seat.user.id}
+                      seat={seat}
+                      detail={detail}
+                      prices={settings.data}
+                      hands={eveningHands(catalogue.data ?? [])}
+                      locked={isFinished}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       )}
     </>
   );
@@ -222,141 +261,178 @@ function PlayerRow({
     drink: prices.drinkPriceRub,
   };
 
-  const tab: string[] = [];
-  if (seat.paid.entry) tab.push("вход");
-  if (seat.paid.rebuys > 0) tab.push(`ребай ×${seat.paid.rebuys}`);
-  if (seat.paid.addons > 0) tab.push(`адон ×${seat.paid.addons}`);
-  if (seat.paid.drinks > 0) tab.push(`напиток ×${seat.paid.drinks}`);
-
-  const granted = new Set(
-    (detail.eveningGrants ?? [])
-      .filter((row) => row.userId === seat.user.id)
-      .map((row) => row.achievementId),
-  );
+  const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
+  const upcoming = nextPlace(detail);
+  const rowError =
+    (addPayment.error as Error | null)?.message ??
+    (grant.error as Error | null)?.message ??
+    (setPlace.error as Error | null)?.message;
 
   return (
-    <li className="card p-3">
-      <div className="flex items-center gap-3">
-        <span
-          className={cx(
-            "nums w-8 shrink-0 text-center font-semibold",
-            seat.place == null ? "text-stone-600" : "text-stone-200",
-          )}
-        >
-          {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "—"}
-        </span>
-        <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={32} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{seat.user.nickname}</p>
-          <p className="truncate text-sm text-stone-400">
-            {tab.length > 0 ? `${tab.join(", ")} — ${formatRub(seat.totalRub)}` : "ничего не оплачено"}
-            {seat.chips > 0 && ` · ${formatNumber(seat.chips)} фишек`}
-            {seat.ratingPoints != null && ` · ${formatNumber(seat.ratingPoints)} очков`}
-          </p>
+    <tr className="h-14 border-b border-felt-800/80 last:border-b-0">
+      <td className="px-3 py-1.5 align-middle">
+        <div className="flex min-w-0 items-center gap-2">
+          <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={28} />
+          <div className="min-w-0">
+            <p className="truncate font-medium leading-tight">{seat.user.nickname}</p>
+            <p className="truncate text-xs text-stone-500">
+              {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
+              {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
+              {seat.lastPaymentId && !locked ? (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    className="text-stone-400 hover:text-chip-red"
+                    disabled={busy}
+                    onClick={() => voidPayment.mutate(seat.lastPaymentId as string)}
+                  >
+                    отмена
+                  </button>
+                </>
+              ) : null}
+            </p>
+            {rowError ? <p className="truncate text-xs text-chip-red">{rowError}</p> : null}
+          </div>
         </div>
-      </div>
+      </td>
 
-      {!locked && (
-        <div className="mt-3 space-y-3 border-t border-felt-800 pt-3">
-          <div className="flex flex-wrap items-end gap-2">
+      <td className="px-2 py-1.5 align-middle">
+        {locked ? (
+          <span className="text-xs text-stone-400">{seat.paid.entry ? "оплачен" : "-"}</span>
+        ) : (
+          <Button
+            size="sm"
+            variant={seat.paid.entry ? "secondary" : "ghost"}
+            className="h-8 w-[5.5rem]"
+            disabled={busy || seat.paid.entry}
+            onClick={() =>
+              addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
+            }
+          >
+            {seat.paid.entry ? "оплачен" : `${priceOf.entry} ₽`}
+          </Button>
+        )}
+      </td>
+
+      <td className="px-2 py-1.5 align-middle">
+        <QtyCharge
+          count={seat.paid.rebuys}
+          unitPrice={priceOf.rebuy}
+          disabled={busy || locked}
+          locked={locked}
+          onCharge={(times) =>
+            addPayment.mutate({
+              userId: seat.user.id,
+              kind: "rebuy",
+              amountRub: priceOf.rebuy * times,
+              multiplier: times,
+            })
+          }
+        />
+      </td>
+
+      <td className="px-2 py-1.5 align-middle">
+        <QtyCharge
+          count={seat.paid.addons}
+          unitPrice={priceOf.addon}
+          disabled={busy || locked}
+          locked={locked}
+          onCharge={(times) =>
+            addPayment.mutate({
+              userId: seat.user.id,
+              kind: "addon",
+              amountRub: priceOf.addon * times,
+              multiplier: times,
+            })
+          }
+        />
+      </td>
+
+      <td className="px-2 py-1.5 align-middle">
+        <div className="flex h-8 items-center gap-1">
+          {extras.map((item) => (
             <Button
+              key={item.id}
               size="sm"
               variant="ghost"
-              disabled={busy || seat.paid.entry}
+              disabled={busy || locked}
               onClick={() =>
-                addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
+                addPayment.mutate({
+                  userId: seat.user.id,
+                  kind: item.kind,
+                  amountRub: item.priceRub,
+                  menuItemId: item.id,
+                })
               }
             >
-              Вход {priceOf.entry}
+              {item.title}
+              {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
             </Button>
+          ))}
+        </div>
+      </td>
 
-            {(["rebuy", "addon"] as const).map((kind) => (
-              <QtyCharge
-                key={kind}
-                label={PAYMENT_KIND_LABELS[kind] ?? kind}
-                unitPrice={priceOf[kind]}
-                disabled={busy}
-                onCharge={(times) =>
-                  addPayment.mutate({
+      <td className="px-2 py-1.5 align-middle">
+        <div className="flex h-8 flex-nowrap items-center gap-1">
+          {hands.map((hand) => {
+            const count = grantCount(detail, seat.user.id, hand.id);
+            return (
+              <button
+                key={hand.id}
+                type="button"
+                title={hand.title}
+                disabled={busy || locked}
+                onClick={() =>
+                  grant.mutate({
                     userId: seat.user.id,
-                    kind,
-                    amountRub: priceOf[kind] * times,
-                    multiplier: times,
+                    achievementId: hand.id,
+                    tournamentId: detail.id,
                   })
                 }
-              />
-            ))}
-
-            {(prices.menuItems ?? [])
-              .filter((item) => item.isActive && !item.isFixed)
-              .map((item) => (
-                <Button
-                  key={item.id}
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  onClick={() =>
-                    addPayment.mutate({
-                      userId: seat.user.id,
-                      kind: item.kind,
-                      amountRub: item.priceRub,
-                      menuItemId: item.id,
-                    })
-                  }
-                >
-                  {item.title}
-                  {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
-                </Button>
-              ))}
-          </div>
-
-          {hands.length > 0 && (
-            <div>
-              <p className="mb-1.5 text-sm text-stone-300">Комбинации</p>
-              <div className="flex flex-wrap gap-2">
-                {hands.map((hand) => {
-                  const already = granted.has(hand.id);
-                  return (
-                    <Button
-                      key={hand.id}
-                      size="sm"
-                      variant={already ? "secondary" : "ghost"}
-                      disabled={busy || already}
-                      onClick={() =>
-                        grant.mutate({
-                          userId: seat.user.id,
-                          achievementId: hand.id,
-                          tournamentId: detail.id,
-                        })
-                      }
-                    >
-                      {hand.icon ? `${hand.icon} ` : ""}
-                      {hand.title}
-                      {already ? " ✓" : ""}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center gap-2">
-            {seat.place == null && nextPlace(detail) != null && (
-              <Button
-                size="sm"
-                disabled={busy}
-                onClick={() => {
-                  const place = nextPlace(detail);
-                  if (place != null) setPlace.mutate({ userId: seat.user.id, place });
-                }}
+                className={cx(
+                  "inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border px-2 text-xs whitespace-nowrap",
+                  count > 0
+                    ? "border-gold-500/40 bg-gold-500/10 text-gold-400"
+                    : "border-gold-500/20 text-stone-300 hover:bg-gold-500/10",
+                  "disabled:opacity-40",
+                )}
               >
-                Выбыл — {nextPlace(detail)} место
-              </Button>
-            )}
+                {hand.icon ? <span aria-hidden>{hand.icon}</span> : null}
+                {hand.title}
+                {count > 0 ? <span className="nums text-gold-400">×{count}</span> : null}
+              </button>
+            );
+          })}
+        </div>
+      </td>
 
+      <td className="px-2 py-1.5 align-middle">
+        <div className="flex h-8 items-center gap-1">
+          {!locked && (
+            <Button
+              size="sm"
+              className="min-w-[7.5rem]"
+              disabled={busy || seat.place != null || upcoming == null}
+              onClick={() => {
+                if (upcoming != null) setPlace.mutate({ userId: seat.user.id, place: upcoming });
+              }}
+            >
+              {seat.place != null
+                ? `${seat.place} место`
+                : upcoming != null
+                  ? `Выбыл - ${upcoming}`
+                  : "в игре"}
+            </Button>
+          )}
+          {locked ? (
+            <span className="nums text-stone-200">
+              {isPrizePlace(seat.place, detail.paidPlaces) ? placeLabel(seat.place as number) : "-"}
+            </span>
+          ) : (
             <select
               aria-label={`Место игрока ${seat.user.nickname}`}
-              className="field h-10 w-auto py-0 text-sm"
+              className="field h-8 w-[6.5rem] py-0 text-xs"
               disabled={busy}
               value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
               onChange={(event) =>
@@ -373,64 +449,57 @@ function PlayerRow({
                 </option>
               ))}
             </select>
-
-            {seat.lastPaymentId && (
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={busy}
-                onClick={() => voidPayment.mutate(seat.lastPaymentId as string)}
-              >
-                Отменить оплату
-              </Button>
-            )}
-          </div>
+          )}
         </div>
-      )}
-
-      {addPayment.isError && (
-        <p className="mt-2 text-sm text-chip-red">{(addPayment.error as Error).message}</p>
-      )}
-      {grant.isError && (
-        <p className="mt-2 text-sm text-chip-red">{(grant.error as Error).message}</p>
-      )}
-      {setPlace.isError && (
-        <p className="mt-2 text-sm text-chip-red">{(setPlace.error as Error).message}</p>
-      )}
-    </li>
+      </td>
+    </tr>
   );
 }
 
-const QTY = [1, 2, 3, 4, 5] as const;
+const QTY = [1, 2, 3] as const;
 
 function QtyCharge({
-  label,
+  count,
   unitPrice,
   disabled,
+  locked,
   onCharge,
 }: {
-  label: string;
+  count: number;
   unitPrice: number;
   disabled: boolean;
+  locked: boolean;
   onCharge: (times: number) => void;
 }) {
+  if (locked) {
+    return <span className="nums text-stone-300">{count > 0 ? `×${count}` : "-"}</span>;
+  }
+
   return (
-    <span className="inline-flex items-center gap-1 rounded-xl border border-gold-500/20 bg-felt-950 p-1">
-      <span className="px-2 text-sm whitespace-nowrap">{label}</span>
-      {QTY.map((times) => (
-        <button
-          key={times}
-          type="button"
-          disabled={disabled}
-          onClick={() => onCharge(times)}
-          className="rounded-lg px-2 py-1 text-sm text-gold-400 transition hover:bg-gold-500/15 disabled:opacity-50"
-        >
-          ×{times}
-        </button>
-      ))}
-      <span className="pr-2 text-sm text-stone-500">{unitPrice} ₽</span>
-    </span>
+    <div className="flex h-8 items-center gap-1">
+      <span className="nums w-4 text-center text-xs text-stone-400">{count > 0 ? count : ""}</span>
+      <span className="inline-flex overflow-hidden rounded-lg border border-gold-500/25">
+        {QTY.map((times) => (
+          <button
+            key={times}
+            type="button"
+            disabled={disabled}
+            title={`${times} × ${unitPrice} ₽`}
+            onClick={() => onCharge(times)}
+            className="h-8 w-8 border-l border-gold-500/15 text-xs text-gold-400 first:border-l-0 hover:bg-gold-500/15 disabled:opacity-40"
+          >
+            ×{times}
+          </button>
+        ))}
+      </span>
+    </div>
   );
+}
+
+function grantCount(detail: TournamentDetail, userId: string, achievementId: string): number {
+  return (detail.eveningGrants ?? []).filter(
+    (row) => row.userId === userId && row.achievementId === achievementId,
+  ).length;
 }
 
 const HAND_ORDER = ["hand_of_the_day", "quads", "straight_flush", "royal_flush"];

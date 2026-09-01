@@ -50,7 +50,7 @@ export function AdminSales() {
             <Stat label="Вечеров" value={formatNumber(report.data.tournamentCount)} />
             <Stat
               label="Фишек выдано"
-              value={report.data.totalChips > 0 ? formatNumber(report.data.totalChips) : "—"}
+              value={report.data.totalChips > 0 ? formatNumber(report.data.totalChips) : "-"}
             />
           </dl>
 

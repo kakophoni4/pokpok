@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Injectable, OnModuleInit, ConflictException, NotFoundException } from "@nestjs/common";
 import {
   type Achievement as AchievementView,
@@ -134,25 +135,28 @@ export class AchievementsService implements OnModuleInit {
     }
     if (!user) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
 
-    // Empty key for one-off achievements makes the unique index reject a repeat.
+    // One-off achievements share an empty key so the unique index blocks a repeat.
+    // Repeatable hands (рука дня, каре, стрит-флеш) get a fresh key every grant.
     const dedupeKey = achievement.isRepeatable
-      ? (input.tournamentId ?? `manual_${Date.now()}`)
+      ? `${input.tournamentId ?? "manual"}_${randomUUID()}`
       : "";
 
-    const already = await this.prisma.userAchievement.findUnique({
-      where: {
-        userId_achievementId_dedupeKey: {
-          userId: input.userId,
-          achievementId: input.achievementId,
-          dedupeKey,
+    if (!achievement.isRepeatable) {
+      const already = await this.prisma.userAchievement.findUnique({
+        where: {
+          userId_achievementId_dedupeKey: {
+            userId: input.userId,
+            achievementId: input.achievementId,
+            dedupeKey,
+          },
         },
-      },
-    });
-    if (already) {
-      throw new ConflictException({
-        code: "ALREADY_GRANTED",
-        message: "У игрока уже есть эта ачивка",
       });
+      if (already) {
+        throw new ConflictException({
+          code: "ALREADY_GRANTED",
+          message: "У игрока уже есть эта ачивка",
+        });
+      }
     }
 
     const seasonId = (await this.seasons.findActive())?.id ?? null;

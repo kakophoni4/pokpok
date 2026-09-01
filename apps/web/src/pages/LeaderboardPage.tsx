@@ -97,7 +97,7 @@ export function LeaderboardPage() {
                   <span className="nums text-right text-stone-400">{row.gamesPlayed}</span>
                   <span className="nums hidden text-right text-stone-400 sm:block">{row.wins}</span>
                   <span className="nums hidden text-right text-stone-400 sm:block">
-                    {row.avgPlace == null ? "—" : row.avgPlace.toFixed(1)}
+                    {row.avgPlace == null ? "-" : row.avgPlace.toFixed(1)}
                   </span>
                 </li>
               );

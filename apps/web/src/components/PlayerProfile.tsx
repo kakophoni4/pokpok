@@ -55,7 +55,7 @@ export function PlayerProfile({
         <Stat label="В призах" value={stats.itm} />
         <Stat
           label="Ср. место"
-          value={stats.avgPlace == null ? "—" : stats.avgPlace.toFixed(1)}
+          value={stats.avgPlace == null ? "-" : stats.avgPlace.toFixed(1)}
           hint={stats.bestPlace ? `лучшее: ${stats.bestPlace}` : undefined}
         />
       </div>
@@ -97,20 +97,27 @@ export function PlayerProfile({
         {stats.history.length === 0 ? (
           <EmptyState
             title="Игр пока не было"
-            description="Запишитесь на ближайший турнир — он появится в этой истории вместе с полученным рейтингом."
+            description="Запишитесь на ближайший турнир - он появится в этой истории вместе с полученным рейтингом."
           />
         ) : (
           <ul className="card divide-y divide-felt-800">
             {stats.history.map((event) => (
               <li key={event.id} className="flex items-center gap-3 px-4 py-3">
-                <span className="w-16 shrink-0 text-center">
+                <span className="flex h-10 w-12 shrink-0 items-center justify-center">
                   {event.tournament ? (
                     showsPrizePlace(event.place, event.tournament.paidPlaces) ? (
-                      <span className={cx("nums font-semibold", event.place === 1 && "text-gold-400")}>
+                      <span
+                        className={cx(
+                          "nums text-2xl font-semibold tracking-tight",
+                          event.place === 1 ? "text-gold-400" : "text-stone-50",
+                        )}
+                      >
                         {placeLabel(event.place as number)}
                       </span>
                     ) : (
-                      <span className="text-sm text-stone-400">участие</span>
+                      <span className="nums text-2xl font-semibold tracking-tight text-stone-600">
+                        -
+                      </span>
                     )
                   ) : (
                     <span aria-hidden className="text-lg">
@@ -141,7 +148,7 @@ export function PlayerProfile({
 
                 <span
                   className={cx(
-                    "nums shrink-0 font-semibold",
+                    "nums shrink-0 text-lg font-semibold tracking-tight",
                     event.points >= 0 ? "text-gold-400" : "text-chip-red",
                   )}
                 >

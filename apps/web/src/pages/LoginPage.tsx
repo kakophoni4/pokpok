@@ -54,7 +54,7 @@ export function LoginPage() {
             ) : telegram.phase === "declined" ? (
               <Retry
                 title="Вход отклонён в Telegram"
-                hint="Если это были не вы — всё в порядке, в аккаунт никто не попал."
+                hint="Если это были не вы - всё в порядке, в аккаунт никто не попал."
                 onRetry={telegram.restart}
               />
             ) : telegram.phase === "expired" ? (

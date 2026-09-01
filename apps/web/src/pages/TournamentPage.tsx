@@ -142,7 +142,7 @@ export function TournamentPage() {
           Записались ({seated.length})
         </h2>
         {seated.length === 0 ? (
-          <Card className="text-sm text-stone-400">Пока никто не записался — будьте первым.</Card>
+          <Card className="text-sm text-stone-400">Пока никто не записался - будьте первым.</Card>
         ) : (
           <ul className="card divide-y divide-felt-800">
             {seated.map((row) => (

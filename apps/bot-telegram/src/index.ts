@@ -164,7 +164,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
   const chatId = ctx.chat!.id;
   const next = await admin.pickTournament(profile);
   if (!next) {
-    await ctx.reply("В расписании нет ближайших событий — сначала создайте турнир на сайте.");
+    await ctx.reply("В расписании нет ближайших событий - сначала создайте турнир на сайте.");
     return;
   }
 
@@ -175,7 +175,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
     try {
       const topic = await bot.api.createForumTopic(
         chatId,
-        `🎲 ${clubDate(detail.startsAt)} — ${detail.title}`.slice(0, 128),
+        `🎲 ${clubDate(detail.startsAt)} - ${detail.title}`.slice(0, 128),
       );
       topicId = topic.message_thread_id;
     } catch {
@@ -183,7 +183,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
         [
           "Не получилось создать топик.",
           "",
-          "Нужно: в группе включены темы (Topics), бот — администратор",
+          "Нужно: в группе включены темы (Topics), бот - администратор",
           "с правом «Управление темами».",
         ].join("\n"),
       );
@@ -216,7 +216,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
   }
 
   await postMissingCards(chatId, profile, detail, topicId);
-  await ctx.reply(`Готово: ${detail.title}. Карточки игроков — в теме турнира.`);
+  await ctx.reply(`Готово: ${detail.title}. Карточки игроков - в теме турнира.`);
 }
 
 /** Adds a card for every player who does not have one yet. */
@@ -388,7 +388,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   const { userId } = target;
 
   if (data.startsWith("p:")) {
-    const match = data.match(/^p:(entry|rebuy|addon|drink)(?::([1-9]|10))?$/);
+    const match = data.match(/^p:(entry|rebuy|addon|drink)(?::([1-3]))?$/);
     if (!match) {
       await ctx.answerCallbackQuery();
       return;
@@ -563,7 +563,7 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     const added = await postMissingCards(ctx.chat.id, profile, fresh, topicId);
     await ctx.reply(
       added > 0
-        ? `Добавил ${found.nickname} — карточка ниже.`
+        ? `Добавил ${found.nickname} - карточка ниже.`
         : `${found.nickname} уже в теме турнира.`,
     );
     await refresh(ctx.chat.id, profile, await admin.detail(profile, detail.id), false);

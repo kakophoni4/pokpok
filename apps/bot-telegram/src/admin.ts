@@ -231,7 +231,7 @@ export class AdminScreens {
       text: [
         `🏅 <b>Призовых мест: ${detail.paidPlaces}</b>`,
         "",
-        "Сколько мест получают рейтинг. Можно менять по ходу игры —",
+        "Сколько мест получают рейтинг. Можно менять по ходу игры -",
         "рейтинг считается только в момент завершения турнира.",
       ].join("\n"),
       keyboard,
@@ -249,7 +249,7 @@ export class AdminScreens {
 
     lines.push(
       tab.length > 0
-        ? `${tab.join(", ")} — <b>${rub(seat.totalRub)}</b>`
+        ? `${tab.join(", ")} - <b>${rub(seat.totalRub)}</b>`
         : "<i>ничего не оплачено</i>",
     );
     if (seat.chips > 0) lines.push(`Фишек: <b>${num(seat.chips)}</b>`);
@@ -257,7 +257,7 @@ export class AdminScreens {
       const earned = seat.ratingPoints != null ? ` · ${points(seat.ratingPoints)}` : "";
       lines.push(`Место: <b>${seat.place}</b>${earned}`);
     } else if (seat.place != null) {
-      lines.push("<i>участие</i>");
+      lines.push("<i>-</i>");
     } else {
       const upcoming = nextPlace(detail);
       lines.push(upcoming != null ? `<i>в игре · следующий: ${upcoming} место</i>` : "<i>в игре</i>");
@@ -274,8 +274,6 @@ export class AdminScreens {
         .text("Ребай ×1", "p:rebuy:1")
         .text("×2", "p:rebuy:2")
         .text("×3", "p:rebuy:3")
-        .text("×4", "p:rebuy:4")
-        .text("×5", "p:rebuy:5")
         .row();
       keyboard
         .text("Адон ×1", "p:addon:1")
@@ -294,7 +292,7 @@ export class AdminScreens {
 
       const upcoming = nextPlace(detail);
       if (seat.place == null && upcoming != null) {
-        keyboard.text(`Выбыл — ${upcoming} место`, "bust").row();
+        keyboard.text(`Выбыл - ${upcoming} место`, "bust").row();
         keyboard.text("Другое место", "place");
       } else if (seat.place == null) {
         keyboard.text("Место", "place");
@@ -303,17 +301,14 @@ export class AdminScreens {
       }
 
       keyboard.row();
-      const granted = new Set(
-        (detail.eveningGrants ?? [])
-          .filter((row) => row.userId === seat.user.id)
-          .map((row) => row.achievementId),
-      );
+      const grants = (detail.eveningGrants ?? []).filter((row) => row.userId === seat.user.id);
       const hands = achievements
         .filter(isEveningHand)
         .sort((a, b) => b.ratingPoints - a.ratingPoints)
         .slice(0, 6);
       hands.forEach((hand, index) => {
-        const mark = granted.has(hand.id) ? "✓ " : "";
+        const count = grants.filter((row) => row.achievementId === hand.id).length;
+        const mark = count > 0 ? `×${count} ` : "";
         keyboard.text(fit(`${mark}${hand.icon ?? "🏅"} ${hand.title}`, 28), `a:${hand.id}`);
         if (index % 2 === 1) keyboard.row();
       });

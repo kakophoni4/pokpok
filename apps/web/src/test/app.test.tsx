@@ -37,7 +37,7 @@ describe("schedule", () => {
     expect(screen.getByText(/\+ 2 в ожидании/)).toBeInTheDocument();
     // A full table must say so rather than offering a seat that does not exist.
     expect(screen.getByText("Мест нет")).toBeInTheDocument();
-    expect(screen.getByText("Сезон 2026 — идёт сейчас")).toBeInTheDocument();
+    expect(screen.getByText("Сезон 2026 - идёт сейчас")).toBeInTheDocument();
   });
 
   it("asks anonymous visitors to sign in instead of offering registration", async () => {

@@ -1,5 +1,5 @@
 import type { Achievement, CreateAchievementInput } from "@poker/contracts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, Badge, Button, Card, ErrorState, Loading } from "../../components/ui";
 import { formatPoints } from "../../lib/format";
 import {
@@ -46,8 +46,21 @@ function AchievementRow({
   canEdit: boolean;
 }) {
   const update = useUpdateAchievement();
+  const [title, setTitle] = useState(achievement.title);
+  const [description, setDescription] = useState(achievement.description ?? "");
   const [points, setPoints] = useState(String(achievement.ratingPoints));
   const [granting, setGranting] = useState(false);
+
+  useEffect(() => {
+    setTitle(achievement.title);
+    setDescription(achievement.description ?? "");
+    setPoints(String(achievement.ratingPoints));
+  }, [achievement.title, achievement.description, achievement.ratingPoints]);
+
+  const dirty =
+    title.trim() !== achievement.title ||
+    description.trim() !== (achievement.description ?? "") ||
+    Number(points) !== achievement.ratingPoints;
 
   return (
     <li className="card p-3">
@@ -82,14 +95,36 @@ function AchievementRow({
 
         {canEdit && (
           <>
-            <div>
+            <div className="min-w-40 flex-1">
+              <label className="label" htmlFor={`title-${achievement.id}`}>
+                Название
+              </label>
+              <input
+                id={`title-${achievement.id}`}
+                className="field"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </div>
+            <div className="min-w-48 flex-[1.4]">
+              <label className="label" htmlFor={`desc-${achievement.id}`}>
+                Описание
+              </label>
+              <input
+                id={`desc-${achievement.id}`}
+                className="field"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </div>
+            <div className="w-20">
               <label className="label" htmlFor={`points-${achievement.id}`}>
                 Рейтинг
               </label>
               <input
                 id={`points-${achievement.id}`}
                 type="number"
-                className="field nums w-24"
+                className="field nums"
                 value={points}
                 onChange={(event) => setPoints(event.target.value)}
               />
@@ -97,11 +132,15 @@ function AchievementRow({
             <Button
               size="sm"
               loading={update.isPending}
-              disabled={Number(points) === achievement.ratingPoints}
+              disabled={!dirty || title.trim().length < 2}
               onClick={() =>
                 update.mutate({
                   id: achievement.id,
-                  input: { ratingPoints: Number(points) },
+                  input: {
+                    title: title.trim(),
+                    description: description.trim() || null,
+                    ratingPoints: Number(points),
+                  },
                 })
               }
             >
@@ -227,7 +266,7 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
         <input
           id="a-points"
           type="number"
-          className="field nums max-w-40"
+          className="field nums w-20"
           value={form.ratingPoints}
           onChange={(event) => setForm({ ...form, ratingPoints: event.target.value })}
         />

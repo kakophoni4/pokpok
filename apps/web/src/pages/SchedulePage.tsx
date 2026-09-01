@@ -12,7 +12,7 @@ export function SchedulePage() {
     <>
       <PageHeader
         title="Расписание игр"
-        subtitle={season.data ? `${season.data.title} — идёт сейчас` : undefined}
+        subtitle={season.data ? `${season.data.title} - идёт сейчас` : undefined}
       />
 
       <Tabs

@@ -34,11 +34,11 @@ export function Layout() {
             aria-label="На главную"
           >
             <img
-              src="/images/chip-mark.jpg"
+              src="/favicon.svg"
               alt=""
               width={40}
               height={40}
-              className="size-10 rounded-full object-cover ring-1 ring-gold-500/40"
+              className="size-10 rounded-[10px] ring-1 ring-gold-500/40"
             />
             <span className="font-display text-lg leading-tight font-semibold text-gold-400 sm:text-xl">
               Клуб спортивного покера

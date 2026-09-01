@@ -18,5 +18,6 @@ pnpm-debug.log*
 
 # local data
 infra/pgdata/
+infra/bypass-vpn.ps1
 *.sqlite
 *.sqlite-journal
