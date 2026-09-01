@@ -1,7 +1,8 @@
-import type { Achievement, PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
+import type { Achievement, ClubMenuItem, PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
 import type { ClubSettings } from "@poker/contracts";
 import { freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, Select, cx } from "../../components/ui";
 import {
   formatFullDate,
@@ -226,7 +227,7 @@ function GameDesk({
         </p>
       ) : (
         <div className="border-t border-felt-800">
-          <div className="hidden grid-cols-[minmax(0,1.2fr)_4.5rem_6.75rem_6.75rem_auto_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
+          <div className="hidden grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
             <span>Игрок</span>
             <span>Вход</span>
             <span>Ребай</span>
@@ -291,7 +292,7 @@ function PlayerRow({
     (setPlace.error as Error | null)?.message;
 
   return (
-    <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.2fr)_4.5rem_6.75rem_6.75rem_auto_6.6rem] sm:items-center">
+    <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] sm:items-center">
       <div className="col-span-2 flex min-w-0 items-center gap-2 sm:col-span-1">
         <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={28} />
         <div className="min-w-0 flex-1">
@@ -299,6 +300,7 @@ function PlayerRow({
           <p className="truncate text-xs text-stone-500">
             {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
             {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
+            {seat.paid.extras > 0 ? ` · бар ×${seat.paid.extras}` : ""}
           </p>
           <Button
             size="sm"
@@ -363,28 +365,20 @@ function PlayerRow({
         }
       />
 
-      <div className="flex h-8 items-center gap-1">
-        {extras.map((item) => (
-          <Button
-            key={item.id}
-            size="sm"
-            variant="ghost"
-            className="h-8"
-            disabled={busy || locked}
-            onClick={() =>
-              addPayment.mutate({
-                userId: seat.user.id,
-                kind: item.kind,
-                amountRub: item.priceRub,
-                menuItemId: item.id,
-              })
-            }
-          >
-            {item.title}
-            {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
-          </Button>
-        ))}
-      </div>
+      <BarPicker
+        extras={extras}
+        count={seat.paid.extras}
+        disabled={busy || locked}
+        locked={locked}
+        onPick={(item) =>
+          addPayment.mutate({
+            userId: seat.user.id,
+            kind: item.kind,
+            amountRub: item.priceRub,
+            menuItemId: item.id,
+          })
+        }
+      />
 
       <div className="flex h-8 items-center gap-1">
         {!locked && (
@@ -479,6 +473,127 @@ function PlayerRow({
 
 const QTY = [1, 2, 3] as const;
 
+function BarPicker({
+  extras,
+  count,
+  disabled,
+  locked,
+  onPick,
+}: {
+  extras: ClubMenuItem[];
+  count: number;
+  disabled: boolean;
+  locked: boolean;
+  onPick: (item: ClubMenuItem) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const [box, setBox] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    function onPointer(event: MouseEvent) {
+      const target = event.target as Node;
+      if (root.current?.contains(target) || list.current?.contains(target)) return;
+      setOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    function place() {
+      setBox(button.current?.getBoundingClientRect() ?? null);
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
+  if (locked) {
+    return <span className="nums text-xs text-stone-400">{count > 0 ? `×${count}` : "-"}</span>;
+  }
+
+  if (extras.length === 0) {
+    return <span className="text-xs text-stone-600">-</span>;
+  }
+
+  return (
+    <div ref={root} className="min-w-0">
+      <button
+        ref={button}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Бар"
+        onClick={() => setOpen((current) => !current)}
+        className="field flex h-8 w-full items-center justify-between gap-1 px-2 py-0 text-xs"
+      >
+        <span className="truncate">{count > 0 ? `Бар ×${count}` : "Бар"}</span>
+        <svg viewBox="0 0 12 8" aria-hidden className={cx("size-2.5 shrink-0 text-gold-400", open && "rotate-180")}>
+          <path
+            d="M1.2 1.4L6 6.2L10.8 1.4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {open &&
+        box &&
+        createPortal(
+          <div
+            ref={list}
+            role="menu"
+            style={{
+              position: "fixed",
+              top: box.bottom + 4,
+              left: Math.min(box.left, window.innerWidth - 272),
+              width: 256,
+              zIndex: 80,
+            }}
+            className="max-h-72 overflow-auto rounded-xl border border-gold-500/25 bg-felt-950 py-1 shadow-[0_16px_40px_rgba(0,0,0,0.7)]"
+          >
+            {extras.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-stone-200 hover:bg-felt-800"
+                onClick={() => {
+                  onPick(item);
+                  setOpen(false);
+                }}
+              >
+                <span className="min-w-0 truncate">{item.title}</span>
+                <span className="nums shrink-0 text-gold-400">
+                  {item.priceRub > 0 ? `${item.priceRub} ₽` : "0 ₽"}
+                </span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
 function QtyCharge({
   count,
   unitPrice,
@@ -566,7 +681,7 @@ type Seat = {
   chips: number;
   place: number | null;
   ratingPoints: number | null;
-  paid: { entry: boolean; rebuys: number; addons: number; drinks: number };
+  paid: { entry: boolean; rebuys: number; addons: number; drinks: number; extras: number };
   lastPaymentId: string | null;
 };
 
@@ -583,7 +698,7 @@ function seatsOf(detail: TournamentDetail): Seat[] {
       chips: 0,
       place: placeByUser.get(registration.user.id) ?? null,
       ratingPoints: null,
-      paid: { entry: false, rebuys: 0, addons: 0, drinks: 0 },
+      paid: { entry: false, rebuys: 0, addons: 0, drinks: 0, extras: 0 },
       lastPaymentId: null,
     });
   }
@@ -600,6 +715,9 @@ function seatsOf(detail: TournamentDetail): Seat[] {
         rebuys: stacksOf(player.payments, "rebuy", detail.startingStack),
         addons: stacksOf(player.payments, "addon", detail.addonChips),
         drinks: player.payments.filter((payment) => payment.kind === "drink").length,
+        extras: player.payments.filter(
+          (payment) => payment.kind !== "entry" && payment.kind !== "rebuy" && payment.kind !== "addon",
+        ).length,
       },
       lastPaymentId: player.payments.at(-1)?.id ?? null,
     });
@@ -611,5 +729,76 @@ function seatsOf(detail: TournamentDetail): Seat[] {
     if (b.place != null) return 1;
     return a.user.nickname.localeCompare(b.user.nickname, "ru");
   });
+}
+
+const PREVIEW_BAR: ClubMenuItem[] = [
+  "Напиток",
+  "Кальян",
+  "Энергетик",
+  "Кола",
+  "Вода",
+  "Чай",
+  "Кофе",
+  "Снэк",
+  "Пицца",
+  "Салат",
+  "Десерт",
+  "Сок",
+  "Лимонад",
+  "Морс",
+  "Какао",
+  "Мороженое",
+  "Чипсы",
+  "Сэндвич",
+].map((title, index) => ({
+  id: `preview-bar-${index}`,
+  title,
+  kind: "drink",
+  priceRub: [200, 1500, 250, 150, 80, 100, 180, 300, 450, 400, 280, 220, 190, 160, 170, 200, 120, 350][index] ?? 100,
+  chips: 0,
+  isFixed: false,
+  isPromo: false,
+  isActive: true,
+  sortOrder: index,
+}));
+
+/** DEV-only layout check: a full evening row with 18 bar items. */
+export function EveningLayoutPreview() {
+  return (
+    <Card className="overflow-visible p-0">
+      <p className="border-b border-felt-800 px-3 py-2 text-sm text-stone-400">
+        Макет вечера: 18 позиций бара в списке, строка без горизонтальной прокрутки
+      </p>
+      <div className="hidden grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] gap-2 px-3 py-2 text-xs text-stone-400 sm:grid">
+        <span>Игрок</span>
+        <span>Вход</span>
+        <span>Ребай</span>
+        <span>Адон</span>
+        <span>Бар</span>
+        <span>Место</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 border-t border-felt-800/80 px-3 py-2 sm:grid-cols-[minmax(0,1.3fr)_4.5rem_6.75rem_6.75rem_5.75rem_6.6rem] sm:items-center">
+        <div className="col-span-2 min-w-0 sm:col-span-1">
+          <p className="font-medium">DenisPro</p>
+          <p className="text-xs text-stone-500">1 500 ₽ · бар ×2</p>
+          <Button size="sm" variant="ghost" className="mt-1 h-7 px-2 text-xs">
+            Отменить оплату
+          </Button>
+        </div>
+        <Button size="sm" variant="secondary" className="h-8 w-full">
+          оплачен
+        </Button>
+        <QtyCharge count={2} unitPrice={500} disabled={false} locked={false} onCharge={() => undefined} />
+        <QtyCharge count={1} unitPrice={500} disabled={false} locked={false} onCharge={() => undefined} />
+        <BarPicker extras={PREVIEW_BAR} count={2} disabled={false} locked={false} onPick={() => undefined} />
+        <div className="flex h-8 gap-1">
+          <Button size="sm" className="h-8 flex-1 px-2">
+            Выбыл 9
+          </Button>
+          <span className="field flex h-8 flex-1 items-center px-2 text-xs">игра</span>
+        </div>
+      </div>
+    </Card>
+  );
 }
 

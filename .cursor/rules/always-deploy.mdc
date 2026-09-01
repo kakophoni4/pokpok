@@ -9,10 +9,11 @@ When a task changes the site, API, bot or contracts, finish by putting it on the
 
 ## Order
 
-1. Commit with `GIT_AUTHOR_NAME=poker-league` and `GIT_AUTHOR_EMAIL=dev@localhost` (same for committer). Do not change git config.
-2. Push `main` to `origin`.
-3. Deploy: upload LF `infra/redeploy.sh` to `/root/redeploy.sh`, then `bash /root/redeploy.sh`. Never pipe the script over stdin (`docker compose exec` would swallow it). Never set `RESET_DB=1` on a routine deploy.
-4. Confirm `https://147-45-224-200.sslip.io` and API health.
+1. If the UI changed, open it in the browser first: click the flow, check a phone-width viewport, and confirm there is no horizontal scroll. Only then commit.
+2. Commit with `GIT_AUTHOR_NAME=poker-league` and `GIT_AUTHOR_EMAIL=dev@localhost` (same for committer). Do not change git config.
+3. Push `main` to `origin`.
+4. Deploy: upload LF `infra/redeploy.sh` to `/root/redeploy.sh`, then `bash /root/redeploy.sh`. Never pipe the script over stdin (`docker compose exec` would swallow it). Never set `RESET_DB=1` on a routine deploy.
+5. Confirm `https://147-45-224-200.sslip.io` and API health.
 
 ## Server
 

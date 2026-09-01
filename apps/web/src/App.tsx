@@ -9,6 +9,9 @@ import { EmptyState, Loading } from "./components/ui";
 const AdminPage = lazy(() =>
   import("./pages/admin/AdminPage").then((module) => ({ default: module.AdminPage })),
 );
+const EveningLayoutPreview = lazy(() =>
+  import("./pages/admin/AdminGame").then((module) => ({ default: module.EveningLayoutPreview })),
+);
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -59,6 +62,16 @@ export function App() {
                   </Suspense>
                 }
               />
+              {import.meta.env.DEV ? (
+                <Route
+                  path="dev/evening-preview"
+                  element={
+                    <Suspense fallback={<Loading />}>
+                      <EveningLayoutPreview />
+                    </Suspense>
+                  }
+                />
+              ) : null}
               <Route
                 path="*"
                 element={
