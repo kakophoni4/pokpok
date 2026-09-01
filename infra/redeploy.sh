@@ -31,8 +31,24 @@ set -a
 . ./.env
 set +a
 
+echo "── images ───────────────────────────────────────────"
+# This VPS gets Docker Hub 429s. Drop the Hub-only frontend snapshot and reuse
+# base images already on the machine (or pull them from the public ECR mirror).
+sed -i '1{/^# syntax=docker\/dockerfile:1$/d;}' "$REPO/infra/Dockerfile" || true
+ensure_image() {
+  local name="$1" mirror="$2"
+  if docker image inspect "$name" >/dev/null 2>&1; then
+    return 0
+  fi
+  docker pull "$mirror"
+  docker tag "$mirror" "$name"
+}
+ensure_image node:22-alpine public.ecr.aws/docker/library/node:22-alpine
+ensure_image caddy:2-alpine public.ecr.aws/docker/library/caddy:2-alpine
+ensure_image postgres:17-alpine public.ecr.aws/docker/library/postgres:17-alpine
+
 echo "── build ────────────────────────────────────────────"
-docker compose build --quiet
+docker compose build --quiet --pull=false
 
 if [ "${RESET_DB:-0}" = "1" ]; then
   echo "── database ─────────────────────────────────────────"
