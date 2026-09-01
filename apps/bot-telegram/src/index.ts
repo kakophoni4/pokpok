@@ -175,7 +175,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
     try {
       const topic = await bot.api.createForumTopic(
         chatId,
-        `🎲 ${clubDate(detail.startsAt)} - ${detail.title}`.slice(0, 128),
+        `${clubDate(detail.startsAt)} - ${detail.title}`.slice(0, 128),
       );
       topicId = topic.message_thread_id;
     } catch {

@@ -1,11 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import type { AddPaymentInput, TournamentPlayer } from "@poker/contracts";
-import { ADDON_MAX_STACKS, stacksOf } from "@poker/contracts";
+import type { AddPaymentInput, PromoGrant, TournamentPlayer } from "@poker/contracts";
+import { ADDON_MAX_STACKS, parsePromoBundle, stacksOf } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { SeasonsService } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
-import { chipsForKind, effectiveConfig } from "./tournament-config";
+import { chipsForKind, effectiveConfig, type EffectiveConfig } from "./tournament-config";
+import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
 
 /**
  * The cash desk. Every line is appended and never edited, so an evening can be
@@ -50,10 +51,30 @@ export class PaymentsService {
       throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция меню не найдена" });
     }
 
-    const kind = menuItem?.kind ?? input.kind;
     const season = await this.seasons.ratingConfig(tournament.seasonId);
     const config = effectiveConfig(tournament, season);
     const units = input.multiplier ?? 1;
+
+    const bundle = menuItem?.isPromo ? parsePromoBundle(menuItem.bundle) : [];
+    if (menuItem && bundle.length > 0) {
+      await this.addBundle(tournamentId, input.userId, actorId, menuItem, bundle, config, units);
+      await this.audit.record({
+        actorId,
+        action: "payment.add",
+        entity: "Tournament",
+        entityId: tournamentId,
+        after: {
+          userId: input.userId,
+          kind: menuItem.kind,
+          amountRub: menuItem.priceRub * units,
+          menuItemId: menuItem.id,
+          bundle,
+        },
+      });
+      return this.playerView(tournamentId, input.userId);
+    }
+
+    const kind = menuItem?.kind ?? input.kind;
     const amountRub = menuItem ? menuItem.priceRub * units : input.amountRub;
     const chips =
       input.chips ??
@@ -140,6 +161,105 @@ export class PaymentsService {
     return this.playerView(tournamentId, input.userId);
   }
 
+  /**
+   * A promo is one till tap that expands into whatever it grants: stacks,
+   * bar SKUs, or a mix. The promo price sits on the first line; the rest
+   * are zero-cost so voiding one grant does not invent money.
+   */
+  private async addBundle(
+    tournamentId: string,
+    userId: string,
+    actorId: string,
+    promo: MenuRow,
+    bundle: PromoGrant[],
+    config: EffectiveConfig,
+    units: number,
+  ): Promise<void> {
+    const catalogue = await this.prisma.clubMenuItem.findMany();
+    const byId = new Map(catalogue.map((item) => [item.id, item]));
+
+    type Line = { kind: PaymentKind; chips: number; note: string };
+    const lines: Line[] = [];
+
+    for (const grant of bundle) {
+      const source = grant.menuItemId ? byId.get(grant.menuItemId) : undefined;
+      const kind = grant.kind;
+      const title = grant.title?.trim() || source?.title || kindTitle(kind);
+      const unitChips =
+        source && source.chips > 0 ? source.chips : chipsForKind(kind, config);
+      const copies = grant.quantity * units;
+      for (let i = 0; i < copies; i += 1) {
+        lines.push({
+          kind,
+          chips: unitChips,
+          note: `${promo.title}: ${title}`,
+        });
+      }
+    }
+
+    if (lines.length === 0) {
+      throw new ConflictException({ code: "EMPTY_PROMO", message: "В акции нет позиций" });
+    }
+
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+
+    if (lines.some((line) => line.kind === "entry")) {
+      const alreadyIn = await this.prisma.payment.findFirst({
+        where: { tournamentId, userId, kind: "entry", voidedAt: null },
+        select: { id: true },
+      });
+      if (alreadyIn) {
+        throw new ConflictException({
+          code: "ENTRY_ALREADY_PAID",
+          message: `${user.nickname} уже оплатил вход`,
+        });
+      }
+    }
+
+    const addonCopies = lines.filter((line) => line.kind === "addon").length;
+    if (addonCopies > 0) {
+      const existing = await this.prisma.payment.findMany({
+        where: { tournamentId, userId, kind: "addon", voidedAt: null },
+        select: { kind: true, chips: true },
+      });
+      const have = stacksOf(existing, "addon", config.addonChips);
+      if (have + addonCopies > ADDON_MAX_STACKS) {
+        throw new ConflictException({
+          code: "ADDON_LIMIT",
+          message: `Адон максимум ×${ADDON_MAX_STACKS}${have > 0 ? ` (уже ${have})` : ""}`,
+        });
+      }
+    }
+
+    const price = promo.priceRub * units;
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const [index, line] of lines.entries()) {
+        await tx.payment.create({
+          data: {
+            tournamentId,
+            userId,
+            kind: line.kind,
+            amountRub: index === 0 ? price : 0,
+            chips: line.chips,
+            note: line.note,
+            createdById: actorId,
+          },
+        });
+      }
+
+      await tx.registration.upsert({
+        where: { tournamentId_userId: { tournamentId, userId } },
+        create: { tournamentId, userId, status: "registered", source: "admin" },
+        update: { status: "registered", waitlistPosition: null },
+      });
+
+      if (lines.some((line) => line.kind === "rebuy")) {
+        await tx.result.deleteMany({ where: { tournamentId, userId } });
+      }
+    });
+  }
+
   /** Reverses a line without erasing it. */
   async voidPayment(paymentId: string, actorId: string): Promise<TournamentPlayer> {
     const payment = await this.prisma.payment.findUnique({
@@ -209,4 +329,12 @@ export class PaymentsService {
       ratingPoints: ratingEvent?.points ?? null,
     };
   }
+}
+
+function kindTitle(kind: PaymentKind): string {
+  if (kind === "entry") return "Вход";
+  if (kind === "rebuy") return "Ребай";
+  if (kind === "addon") return "Адон";
+  if (kind === "drink") return "Напиток";
+  return "Прочее";
 }

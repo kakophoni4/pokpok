@@ -3,6 +3,22 @@ import { Id, IsoDateTime } from "./common.js";
 import { PaymentKind } from "./enums.js";
 
 /**
+ * One thing a promo hands out: a stack (адон / ребай) or a bar SKU, any count.
+ * Several grants make a combo — addon + hookah, two hookahs, whatever the
+ * evening needs.
+ */
+export const PromoGrant = z.object({
+  kind: PaymentKind,
+  quantity: z.number().int().min(1).max(20),
+  menuItemId: Id.optional(),
+  title: z.string().trim().min(1).max(80).optional(),
+});
+export type PromoGrant = z.infer<typeof PromoGrant>;
+
+export const PromoBundle = z.array(PromoGrant).max(8);
+export type PromoBundle = z.infer<typeof PromoBundle>;
+
+/**
  * One button on the till: a fixed fee (вход / адон / ребай), an extra SKU
  * such as a drink, or a promo that still hands out chips.
  */
@@ -17,6 +33,8 @@ export const ClubMenuItem = z.object({
   isPromo: z.boolean(),
   isActive: z.boolean(),
   sortOrder: z.number().int(),
+  /** Promo contents. Empty/null means the line is just `kind` (legacy). */
+  bundle: PromoBundle.nullable(),
 });
 export type ClubMenuItem = z.infer<typeof ClubMenuItem>;
 
@@ -27,6 +45,7 @@ export const CreateClubMenuItemInput = z.object({
   chips: z.number().int().min(0).max(10_000_000).default(0),
   isPromo: z.boolean().default(false),
   isActive: z.boolean().default(true),
+  bundle: PromoBundle.optional(),
 });
 export type CreateClubMenuItemInput = z.infer<typeof CreateClubMenuItemInput>;
 
@@ -38,8 +57,41 @@ export const UpdateClubMenuItemInput = z.object({
   isPromo: z.boolean().optional(),
   isActive: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(10_000).optional(),
+  bundle: PromoBundle.nullable().optional(),
 });
 export type UpdateClubMenuItemInput = z.infer<typeof UpdateClubMenuItemInput>;
+
+const KIND_TITLE: Record<PaymentKind, string> = {
+  entry: "Вход",
+  rebuy: "Ребай",
+  addon: "Адон",
+  drink: "Напиток",
+  other: "Прочее",
+};
+
+export function parsePromoBundle(raw: unknown): PromoGrant[] {
+  const parsed = PromoBundle.safeParse(raw);
+  return parsed.success ? parsed.data : [];
+}
+
+export function promoKindFromBundle(bundle: PromoGrant[]): PaymentKind {
+  if (bundle.length === 0) return "other";
+  const first = bundle[0]!.kind;
+  return bundle.every((grant) => grant.kind === first) ? first : "other";
+}
+
+export function promoGrantLabel(grant: PromoGrant): string {
+  const title = grant.title?.trim() || KIND_TITLE[grant.kind];
+  return grant.quantity > 1 ? `${title} ×${grant.quantity}` : title;
+}
+
+export function promoBundleLabel(
+  bundle: PromoGrant[] | null | undefined,
+  fallbackKind: PaymentKind,
+): string {
+  if (!bundle || bundle.length === 0) return KIND_TITLE[fallbackKind];
+  return bundle.map(promoGrantLabel).join(" + ");
+}
 
 /**
  * Club-wide settings: one row, edited by admins, read by everything.

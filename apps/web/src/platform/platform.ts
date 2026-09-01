@@ -10,6 +10,7 @@ export type PlatformKind = "web" | "telegram" | "vk";
 
 type TelegramWebApp = {
   initData: string;
+  platform?: string;
   colorScheme: "light" | "dark";
   themeParams: Record<string, string>;
   ready(): void;
@@ -38,29 +39,56 @@ type TelegramWebApp = {
 declare global {
   interface Window {
     Telegram?: { WebApp?: TelegramWebApp };
+    TelegramWebviewProxy?: unknown;
   }
-}
-
-function telegramApp(): TelegramWebApp | null {
-  const app = window.Telegram?.WebApp;
-  // The SDK is present on every page; a non-empty initData means we are really
-  // running inside Telegram rather than a plain browser tab.
-  return app && app.initData.length > 0 ? app : null;
 }
 
 function telegramShell(): TelegramWebApp | null {
   return window.Telegram?.WebApp ?? null;
 }
 
-/** The SDK object exists on every page; Telegram's WebView is what matters. */
+/**
+ * Telegram sometimes puts the signed payload in the URL hash instead of (or
+ * before) filling WebApp.initData. URLSearchParams already decodes it.
+ */
+function hashInitData(): string | null {
+  try {
+    const hash = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : window.location.hash;
+    const data = new URLSearchParams(hash).get("tgWebAppData");
+    return data && data.length > 0 ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True inside a Telegram WebView even when initData has not landed yet.
+ *
+ * The SDK object exists on every page of this site, so its mere presence is
+ * not enough. iOS Mini Apps often report a Safari user agent with no
+ * "Telegram" token; those still set WebApp.platform or inject TelegramWebviewProxy.
+ */
 function looksLikeTelegram(): boolean {
-  if (telegramApp()) return true;
-  return /Telegram/i.test(window.navigator.userAgent);
+  const app = telegramShell();
+  if (app && app.initData.length > 0) return true;
+  if (hashInitData()) return true;
+  if (typeof window.TelegramWebviewProxy !== "undefined") return true;
+  if (/Telegram/i.test(window.navigator.userAgent)) return true;
+  if (app?.platform && app.platform !== "unknown") return true;
+  try {
+    const query = new URLSearchParams(window.location.search);
+    if (query.has("tgWebAppStartParam") || query.has("tgWebAppData")) return true;
+  } catch {
+    /* ignore */
+  }
+  return false;
 }
 
 export const platform = {
   get kind(): PlatformKind {
-    return telegramApp() ? "telegram" : "web";
+    return looksLikeTelegram() ? "telegram" : "web";
   },
 
   get isEmbedded(): boolean {
@@ -69,15 +97,17 @@ export const platform = {
 
   /** Credentials for the matching /api/auth endpoint, or null on the plain web. */
   telegramInitData(): string | null {
-    const data = telegramShell()?.initData;
-    return data && data.length > 0 ? data : null;
+    const fromSdk = telegramShell()?.initData;
+    if (fromSdk && fromSdk.length > 0) return fromSdk;
+    return hashInitData();
   },
 
   /**
    * Mini App initData can arrive a beat after the script. Wait briefly so the
    * first paint inside Telegram does not fall through to the anonymous login.
    */
-  async telegramInitDataSoon(timeoutMs = 1500): Promise<string | null> {
+  async telegramInitDataSoon(timeoutMs = 3000): Promise<string | null> {
+    this.ready();
     const immediate = this.telegramInitData();
     if (immediate || !looksLikeTelegram()) return immediate;
     const started = Date.now();
@@ -99,16 +129,16 @@ export const platform = {
   },
 
   haptic(kind: "tap" | "success" | "error"): void {
-    const haptics = telegramApp()?.HapticFeedback;
-    if (!haptics) return;
+    const haptics = telegramShell()?.HapticFeedback;
+    if (!haptics || !looksLikeTelegram()) return;
     if (kind === "tap") haptics.impactOccurred("light");
     else haptics.notificationOccurred(kind);
   },
 
   /** Native back button inside Telegram; no-op elsewhere. */
   backButton(handler: (() => void) | null): void {
-    const button = telegramApp()?.BackButton;
-    if (!button) return;
+    const button = telegramShell()?.BackButton;
+    if (!button || !looksLikeTelegram()) return;
 
     if (!handler) {
       button.hide();
@@ -119,11 +149,15 @@ export const platform = {
   },
 
   openLink(url: string): void {
-    const app = telegramApp();
-    if (app) {
-      if (url.startsWith("https://t.me/")) app.openTelegramLink(url);
-      else app.openLink(url);
-      return;
+    const app = telegramShell();
+    if (app && looksLikeTelegram()) {
+      try {
+        if (url.startsWith("https://t.me/") || url.startsWith("tg:")) app.openTelegramLink(url);
+        else app.openLink(url);
+        return;
+      } catch {
+        // Fall through to a plain window.open if the SDK method is missing.
+      }
     }
     window.open(url, "_blank", "noopener");
   },
@@ -147,3 +181,11 @@ export const platform = {
     return /Android/i.test(window.navigator.userAgent);
   },
 };
+
+if (typeof window !== "undefined") {
+  try {
+    platform.ready();
+  } catch {
+    /* SDK not injected yet */
+  }
+}

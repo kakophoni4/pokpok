@@ -95,3 +95,30 @@ export function fit(value: string, max = 60): string {
 export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
   return formatPlayerName(user.displayName, user.nickname);
 }
+
+const GREETINGS: ((name: string) => string)[] = [
+  (name) => `Добрый вечер, <b>${name}</b>.\nКлуб спортивного покера · Ульяновск.`,
+  (name) => `<b>${name}</b>, рады вас видеть.\nИграем в Ульяновске.`,
+  (name) => `Здравствуйте, <b>${name}</b>.\nУльяновск, клуб спортивного покера.`,
+  (name) => `<b>${name}</b>, добро пожаловать.\nСтолы ждут в Ульяновске.`,
+  (name) => `Приветствуем, <b>${name}</b>.\nВечер в Ульяновске начинается здесь.`,
+];
+
+function hashSeed(value: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+/**
+ * One of a handful of greetings, stable for a given person on a given club day
+ * so tapping around the menu does not reshuffle the hello.
+ */
+export function clubGreeting(name: string, seed: string, now = new Date()): string {
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(now);
+  const index = hashSeed(`${seed}:${day}`) % GREETINGS.length;
+  return GREETINGS[index]!(escapeHtml(name));
+}

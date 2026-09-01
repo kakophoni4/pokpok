@@ -18,6 +18,8 @@ type AuthState = {
   status: "loading" | "authenticated" | "anonymous";
   can: (role: UserRole) => boolean;
   loginWithTelegramWidget: (payload: Record<string, unknown>) => Promise<void>;
+  /** Signs in from Telegram Mini App initData. Throws if Telegram sent nothing. */
+  loginWithMiniApp: () => Promise<void>;
   /** Opens a ticket to confirm in the bot; returns the deep link to follow. */
   startTelegramLogin: () => Promise<StartLoginResponse>;
   /** Asks whether the tap happened. A confirmed ticket signs us in on the spot. */
@@ -54,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function restore(): Promise<void> {
       platform.ready();
-      const initData = (await platform.telegramInitDataSoon()) ?? platform.telegramInitData();
+      const initData = await platform.telegramInitDataSoon();
 
       if (initData) {
         try {
@@ -62,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!cancelled) applySession(session);
           return;
         } catch {
-          // Fall through to the cookie path below.
+          // Cookie path below still runs: a previous Mini App session may be enough.
         }
       }
 
@@ -88,6 +90,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [applySession]);
 
+  /**
+   * Some Telegram clients fill initData after the first restore already gave up.
+   * Keep watching for a few seconds while we are still anonymous.
+   */
+  useEffect(() => {
+    if (status !== "anonymous" || !platform.isEmbedded) return;
+    let cancelled = false;
+    const timer = window.setInterval(() => {
+      void (async () => {
+        const initData = platform.telegramInitData();
+        if (!initData || cancelled) return;
+        window.clearInterval(timer);
+        try {
+          const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
+          if (!cancelled) applySession(session);
+        } catch {
+          /* LoginPage retry shows the error */
+        }
+      })();
+    }, 250);
+    const stop = window.setTimeout(() => window.clearInterval(timer), 4000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.clearTimeout(stop);
+    };
+  }, [status, applySession]);
+
   const value = useMemo<AuthState>(
     () => ({
       user,
@@ -96,6 +126,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       loginWithTelegramWidget: async (payload) => {
         applySession(await api.post<SessionResponse>("/auth/telegram/widget", payload));
+      },
+
+      loginWithMiniApp: async () => {
+        platform.ready();
+        const initData = (await platform.telegramInitDataSoon()) ?? platform.telegramInitData();
+        if (!initData) {
+          throw new Error("Telegram не передал данные входа. Откройте клуб из меню бота.");
+        }
+        applySession(await api.post<SessionResponse>("/auth/telegram/miniapp", { initData }));
       },
 
       startTelegramLogin: () => api.post<StartLoginResponse>("/auth/telegram/login"),

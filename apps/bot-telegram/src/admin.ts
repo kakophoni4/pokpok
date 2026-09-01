@@ -195,7 +195,7 @@ export class AdminScreens {
     const finished = detail.status === "finished";
 
     const text = [
-      `🎲 <b>${escapeHtml(detail.title)}</b>`,
+      `<b>${escapeHtml(detail.title)}</b>`,
       `${clubDate(detail.startsAt)} · ${clubClock(detail.startsAt)}`,
       "",
       `Играют: <b>${playing.length}</b> · Фишек в игре: <b>${num(detail.chipsInPlay)}</b>`,
@@ -205,7 +205,7 @@ export class AdminScreens {
       ...(finished || nextPlace(detail) == null
         ? []
         : [`Следующий выбывший займёт <b>${nextPlace(detail)}</b> место`]),
-      ...(finished ? ["", "🏁 <b>Турнир завершён, рейтинг начислен.</b>"] : []),
+      ...(finished ? ["", "<b>Турнир завершён, рейтинг начислен.</b>"] : []),
       ...(confirmFinish
         ? ["", "Завершить турнир и начислить рейтинг? Это действие обратимо."]
         : []),
@@ -214,20 +214,20 @@ export class AdminScreens {
     const keyboard = new InlineKeyboard();
 
     if (confirmFinish) {
-      keyboard.text("✅ Да, завершить", "finyes").text("Отмена", "sync");
+      keyboard.text("Да, завершить", "finyes").text("Отмена", "sync");
       return { text, keyboard };
     }
 
     if (finished) {
-      keyboard.text("↩️ Вернуть в игру", "reopen").row().text("🔄 Обновить", "sync");
+      keyboard.text("Вернуть в игру", "reopen").row().text("Обновить", "sync");
       return { text, keyboard };
     }
 
     keyboard
-      .text(`🏅 Призовых мест: ${detail.paidPlaces}`, "pp")
+      .text(`Призовых мест: ${detail.paidPlaces}`, "pp")
       .row()
-      .text("🔄 Обновить", "sync")
-      .text("🏁 Завершить", "fin");
+      .text("Обновить", "sync")
+      .text("Завершить", "fin");
     return { text, keyboard };
   }
 
@@ -244,7 +244,7 @@ export class AdminScreens {
 
     return {
       text: [
-        `🏅 <b>Призовых мест: ${detail.paidPlaces}</b>`,
+        `<b>Призовых мест: ${detail.paidPlaces}</b>`,
         "",
         "Сколько мест получают рейтинг. Можно менять по ходу игры -",
         "рейтинг считается только в момент завершения турнира.",
@@ -254,7 +254,7 @@ export class AdminScreens {
   }
 
   card(seat: Seat, detail: TournamentDetail, prices: ClubSettings, achievements: Achievement[] = []): Screen {
-    const lines: string[] = [`👤 <b>${escapeHtml(playerLabel(seat.user))}</b>`];
+    const lines: string[] = [`<b>${escapeHtml(playerLabel(seat.user))}</b>`];
 
     const tab: string[] = [];
     if (seat.paid.entry) tab.push("вход");
@@ -324,12 +324,12 @@ export class AdminScreens {
       hands.forEach((hand) => {
         const count = grants.filter((row) => row.achievementId === hand.id).length;
         const mark = count > 0 ? `×${count} ` : "";
-        keyboard.text(fit(`${mark}${hand.icon ?? "🏅"} ${hand.title}`, 22), `a:${hand.id}`);
+        keyboard.text(fit(`${mark}${hand.icon ? `${hand.icon} ` : ""}${hand.title}`, 22), `a:${hand.id}`);
         if (count > 0) keyboard.text("−", `ar:${hand.id}`);
         keyboard.row();
       });
-      keyboard.text("🏅 Другие ачивки", "ach");
-      if (seat.lastPaymentId) keyboard.text("✖️ Отменить оплату", "undo");
+      keyboard.text("Другие ачивки", "ach");
+      if (seat.lastPaymentId) keyboard.text("Отменить оплату", "undo");
     }
 
     return { text: lines.join("\n"), keyboard };
@@ -363,7 +363,7 @@ export class AdminScreens {
     for (const achievement of list.filter((row) => row.isActive).slice(0, 20)) {
       keyboard
         .text(
-          fit(`${achievement.icon ?? "🏅"} ${achievement.title} (+${achievement.ratingPoints})`, 55),
+          fit(`${achievement.icon ? `${achievement.icon} ` : ""}${achievement.title} (+${achievement.ratingPoints})`, 55),
           `a:${achievement.id}`,
         )
         .row();
@@ -371,7 +371,7 @@ export class AdminScreens {
     keyboard.text("← Назад", "card");
 
     return {
-      text: `🏅 <b>${escapeHtml(playerLabel(seat.user))}</b>\n\nЧто выдать?`,
+      text: `<b>${escapeHtml(playerLabel(seat.user))}</b>\n\nЧто выдать?`,
       keyboard,
     };
   }

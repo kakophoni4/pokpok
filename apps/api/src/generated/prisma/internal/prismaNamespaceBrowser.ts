@@ -279,6 +279,7 @@ export const ClubMenuItemScalarFieldEnum = {
   isPromo: 'isPromo',
   isActive: 'isActive',
   sortOrder: 'sortOrder',
+  bundle: 'bundle',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { platform } from "../platform/platform";
 import { Button } from "./ui";
 
 const STORAGE_KEY = "poker-club-rules-ok";
@@ -8,6 +9,10 @@ export function LegalNotice() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (platform.isEmbedded) {
+      setOpen(false);
+      return;
+    }
     try {
       setOpen(window.localStorage.getItem(STORAGE_KEY) !== "1");
     } catch {

@@ -355,6 +355,8 @@ model ClubMenuItem {
   isPromo   Boolean     @default(false)
   isActive  Boolean     @default(true)
   sortOrder Int         @default(0)
+  /// Promo contents: [{kind, quantity, menuItemId?, title?}]. Null = legacy single kind.
+  bundle    Json?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

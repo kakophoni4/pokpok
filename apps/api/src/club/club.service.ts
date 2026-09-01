@@ -4,6 +4,8 @@ import {
   type ClubMenuItem,
   type ClubSettings,
   type CreateClubMenuItemInput,
+  parsePromoBundle,
+  promoKindFromBundle,
   type SalesQuery,
   type SalesReport,
   type UpdateClubMenuItemInput,
@@ -109,17 +111,21 @@ export class ClubService {
       }
     }
 
+    const bundle = parsePromoBundle(input.bundle);
+    const kind = input.isPromo && bundle.length > 0 ? promoKindFromBundle(bundle) : input.kind;
+
     const last = await this.prisma.clubMenuItem.aggregate({ _max: { sortOrder: true } });
     const item = await this.prisma.clubMenuItem.create({
       data: {
         title: input.title,
-        kind: input.kind,
+        kind,
         priceRub: input.priceRub,
-        chips: input.chips,
+        chips: input.isPromo && bundle.length > 0 ? 0 : input.chips,
         isPromo: input.isPromo,
         isActive: input.isActive,
         isFixed: false,
         sortOrder: (last._max.sortOrder ?? 10) + 1,
+        bundle: bundle.length > 0 ? (bundle as never) : undefined,
       },
     });
 
@@ -150,16 +156,27 @@ export class ClubService {
       });
     }
 
+    const bundle = input.bundle === undefined ? undefined : parsePromoBundle(input.bundle);
+    const kind =
+      bundle && bundle.length > 0
+        ? promoKindFromBundle(bundle)
+        : before.isFixed || input.kind === undefined
+          ? undefined
+          : input.kind;
+
     const item = await this.prisma.clubMenuItem.update({
       where: { id },
       data: {
         ...(input.title === undefined ? {} : { title: input.title }),
-        ...(before.isFixed || input.kind === undefined ? {} : { kind: input.kind }),
+        ...(kind === undefined ? {} : { kind }),
         ...(input.priceRub === undefined ? {} : { priceRub: input.priceRub }),
         ...(input.chips === undefined ? {} : { chips: input.chips }),
         ...(input.isPromo === undefined || before.isFixed ? {} : { isPromo: input.isPromo }),
         ...(input.isActive === undefined ? {} : { isActive: input.isActive }),
         ...(input.sortOrder === undefined ? {} : { sortOrder: input.sortOrder }),
+        ...(bundle === undefined
+          ? {}
+          : { bundle: (bundle.length > 0 ? bundle : null) as never }),
       },
     });
 
@@ -350,6 +367,7 @@ export class ClubService {
 }
 
 function toMenuView(item: MenuRow): ClubMenuItem {
+  const bundle = parsePromoBundle("bundle" in item ? item.bundle : null);
   return {
     id: item.id,
     title: item.title,
@@ -360,6 +378,7 @@ function toMenuView(item: MenuRow): ClubMenuItem {
     isPromo: item.isPromo,
     isActive: item.isActive,
     sortOrder: item.sortOrder,
+    bundle: bundle.length > 0 ? bundle : null,
   };
 }
 

@@ -45,18 +45,26 @@ import {
 export function AdminGame() {
   const tournaments = useTournaments("all");
   const [selectedId, setSelectedId] = useState<string>("");
+  const [pool, setPool] = useState<"live" | "done">("live");
 
-  const candidates = useMemo(
+  const live = useMemo(
     () =>
       (tournaments.data ?? []).filter((tournament) =>
-        ["reg_open", "reg_closed", "running", "finished"].includes(tournament.status),
+        ["reg_open", "reg_closed", "running"].includes(tournament.status),
       ),
     [tournaments.data],
   );
+  const done = useMemo(
+    () => (tournaments.data ?? []).filter((tournament) => tournament.status === "finished"),
+    [tournaments.data],
+  );
+  const poolRows = pool === "live" ? live : done;
 
-  // Default to whatever is running, or the closest thing to it.
   const activeId =
-    selectedId || candidates.find((row) => row.status === "running")?.id || candidates[0]?.id || "";
+    (selectedId && poolRows.some((row) => row.id === selectedId) ? selectedId : "") ||
+    (pool === "live"
+      ? live.find((row) => row.status === "running")?.id || live[0]?.id || ""
+      : done[0]?.id || "");
 
   if (tournaments.isPending) return <Loading />;
   if (tournaments.isError) return <ErrorState error={tournaments.error} />;
@@ -66,23 +74,54 @@ export function AdminGame() {
       key={activeId || "none"}
       tournamentId={activeId}
       picker={
-        <div>
+        <div className="space-y-2">
           <label className="label" htmlFor="game-tournament">
             Турнир
           </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={cx(
+                "rounded-lg px-3 py-1.5 text-sm",
+                pool === "live" ? "bg-gold-500/20 text-gold-400" : "text-stone-400 hover:text-stone-200",
+              )}
+              onClick={() => {
+                setPool("live");
+                if (!live.some((row) => row.id === selectedId)) setSelectedId("");
+              }}
+            >
+              Текущие
+            </button>
+            <button
+              type="button"
+              className={cx(
+                "rounded-lg px-3 py-1.5 text-sm",
+                pool === "done" ? "bg-gold-500/20 text-gold-400" : "text-stone-400 hover:text-stone-200",
+              )}
+              onClick={() => {
+                setPool("done");
+                if (!done.some((row) => row.id === selectedId)) setSelectedId("");
+              }}
+            >
+              Завершённые
+            </button>
+          </div>
           <Select
             id="game-tournament"
             aria-label="Турнир"
             value={activeId}
             onChange={setSelectedId}
             options={
-              candidates.length === 0
-                ? [{ value: "", label: "- нет подходящих турниров -" }]
-                : candidates.map((tournament) => ({
+              poolRows.length === 0
+                ? [
+                    {
+                      value: "",
+                      label: pool === "live" ? "- нет текущих турниров -" : "- нет завершённых -",
+                    },
+                  ]
+                : poolRows.map((tournament) => ({
                     value: tournament.id,
-                    label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}${
-                      tournament.status === "finished" ? " (завершён)" : ""
-                    }`,
+                    label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}`,
                   }))
             }
           />
@@ -976,6 +1015,7 @@ const PREVIEW_BAR: ClubMenuItem[] = [
   isPromo: false,
   isActive: true,
   sortOrder: index,
+  bundle: null,
 }));
 
 /** DEV-only layout check: a full evening card with 18 bar items. */

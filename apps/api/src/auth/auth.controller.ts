@@ -268,7 +268,9 @@ export class AuthController {
     response.cookie(REFRESH_COOKIE, token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      // Mini App WebViews often treat the page as cross-site; "none" is what
+      // actually stores the cookie there. Local http still uses lax.
+      sameSite: isProduction ? "none" : "lax",
       // Scoped so the token is never attached to ordinary API calls.
       path: "/api/auth",
       maxAge: this.tokens.refreshTtl * 1000,

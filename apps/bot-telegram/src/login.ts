@@ -36,7 +36,7 @@ export class LoginConfirm {
         "Если вы не открывали сайт - нажмите «Это не я».",
       ].join("\n"),
       keyboard: new InlineKeyboard()
-        .text("✅ Это я, войти", `lg:y:${code}`)
+        .text("Это я, войти", `lg:y:${code}`)
         .row()
         .text("Это не я", `lg:n:${code}`),
     };

@@ -77,6 +77,7 @@ export type ClubMenuItemCountAggregateOutputType = {
   isPromo: number
   isActive: number
   sortOrder: number
+  bundle: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -133,6 +134,7 @@ export type ClubMenuItemCountAggregateInputType = {
   isPromo?: true
   isActive?: true
   sortOrder?: true
+  bundle?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -234,6 +236,7 @@ export type ClubMenuItemGroupByOutputType = {
   isPromo: boolean
   isActive: boolean
   sortOrder: number
+  bundle: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: ClubMenuItemCountAggregateOutputType | null
@@ -271,6 +274,7 @@ export type ClubMenuItemWhereInput = {
   isPromo?: Prisma.BoolFilter<"ClubMenuItem"> | boolean
   isActive?: Prisma.BoolFilter<"ClubMenuItem"> | boolean
   sortOrder?: Prisma.IntFilter<"ClubMenuItem"> | number
+  bundle?: Prisma.JsonNullableFilter<"ClubMenuItem">
   createdAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
 }
@@ -285,6 +289,7 @@ export type ClubMenuItemOrderByWithRelationInput = {
   isPromo?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  bundle?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -302,6 +307,7 @@ export type ClubMenuItemWhereUniqueInput = Prisma.AtLeast<{
   isPromo?: Prisma.BoolFilter<"ClubMenuItem"> | boolean
   isActive?: Prisma.BoolFilter<"ClubMenuItem"> | boolean
   sortOrder?: Prisma.IntFilter<"ClubMenuItem"> | number
+  bundle?: Prisma.JsonNullableFilter<"ClubMenuItem">
   createdAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
 }, "id">
@@ -316,6 +322,7 @@ export type ClubMenuItemOrderByWithAggregationInput = {
   isPromo?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  bundle?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ClubMenuItemCountOrderByAggregateInput
@@ -338,6 +345,7 @@ export type ClubMenuItemScalarWhereWithAggregatesInput = {
   isPromo?: Prisma.BoolWithAggregatesFilter<"ClubMenuItem"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"ClubMenuItem"> | boolean
   sortOrder?: Prisma.IntWithAggregatesFilter<"ClubMenuItem"> | number
+  bundle?: Prisma.JsonNullableWithAggregatesFilter<"ClubMenuItem">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClubMenuItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ClubMenuItem"> | Date | string
 }
@@ -352,6 +360,7 @@ export type ClubMenuItemCreateInput = {
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -366,6 +375,7 @@ export type ClubMenuItemUncheckedCreateInput = {
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -380,6 +390,7 @@ export type ClubMenuItemUpdateInput = {
   isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -394,6 +405,7 @@ export type ClubMenuItemUncheckedUpdateInput = {
   isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -408,6 +420,7 @@ export type ClubMenuItemCreateManyInput = {
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -422,6 +435,7 @@ export type ClubMenuItemUpdateManyMutationInput = {
   isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -436,6 +450,7 @@ export type ClubMenuItemUncheckedUpdateManyInput = {
   isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -450,6 +465,7 @@ export type ClubMenuItemCountOrderByAggregateInput = {
   isPromo?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  bundle?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -506,6 +522,7 @@ export type ClubMenuItemSelect<ExtArgs extends runtime.Types.Extensions.Internal
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: boolean
+  bundle?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["clubMenuItem"]>
@@ -520,6 +537,7 @@ export type ClubMenuItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: boolean
+  bundle?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["clubMenuItem"]>
@@ -534,6 +552,7 @@ export type ClubMenuItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: boolean
+  bundle?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["clubMenuItem"]>
@@ -548,11 +567,12 @@ export type ClubMenuItemSelectScalar = {
   isPromo?: boolean
   isActive?: boolean
   sortOrder?: boolean
+  bundle?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ClubMenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "kind" | "priceRub" | "chips" | "isFixed" | "isPromo" | "isActive" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["clubMenuItem"]>
+export type ClubMenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "kind" | "priceRub" | "chips" | "isFixed" | "isPromo" | "isActive" | "sortOrder" | "bundle" | "createdAt" | "updatedAt", ExtArgs["result"]["clubMenuItem"]>
 
 export type $ClubMenuItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClubMenuItem"
@@ -570,6 +590,10 @@ export type $ClubMenuItemPayload<ExtArgs extends runtime.Types.Extensions.Intern
     isPromo: boolean
     isActive: boolean
     sortOrder: number
+    /**
+     * Promo contents: [{kind, quantity, menuItemId?, title?}]. Null = legacy single kind.
+     */
+    bundle: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["clubMenuItem"]>
@@ -1004,6 +1028,7 @@ export interface ClubMenuItemFieldRefs {
   readonly isPromo: Prisma.FieldRef<"ClubMenuItem", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"ClubMenuItem", 'Boolean'>
   readonly sortOrder: Prisma.FieldRef<"ClubMenuItem", 'Int'>
+  readonly bundle: Prisma.FieldRef<"ClubMenuItem", 'Json'>
   readonly createdAt: Prisma.FieldRef<"ClubMenuItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ClubMenuItem", 'DateTime'>
 }

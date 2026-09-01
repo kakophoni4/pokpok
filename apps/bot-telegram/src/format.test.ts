@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   clubClock,
   clubDate,
+  clubGreeting,
   clubWhen,
   escapeHtml,
   fit,
@@ -86,5 +87,21 @@ describe("text safety", () => {
   it("trims labels to fit on a button", () => {
     expect(fit("a".repeat(80))).toHaveLength(60);
     expect(fit("короткая")).toBe("короткая");
+  });
+});
+
+describe("greetings", () => {
+  it("stays on the same variant for one person on one day", () => {
+    const first = clubGreeting("Тимур А.", "42", new Date("2026-09-01T12:00:00+04:00"));
+    const second = clubGreeting("Тимур А.", "42", new Date("2026-09-01T23:00:00+04:00"));
+    expect(first).toBe(second);
+    expect(first).toContain("Тимур А.");
+    expect(first).toMatch(/Ульяновск/);
+  });
+
+  it("escapes a name that would break HTML", () => {
+    expect(clubGreeting("<b>x</b>", "1", new Date("2026-09-01T12:00:00+04:00"))).toContain(
+      "&lt;b&gt;x&lt;/b&gt;",
+    );
   });
 });

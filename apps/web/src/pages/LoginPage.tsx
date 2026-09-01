@@ -8,13 +8,13 @@ import { platform } from "../platform/platform";
 const IS_DEV = import.meta.env.DEV;
 
 export function LoginPage() {
-  const { status, loginAsDev } = useAuth();
+  const { status, loginAsDev, loginWithMiniApp } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("Ferz");
   const [busy, setBusy] = useState(false);
-  const [agreed, setAgreed] = useState(false);
-  const telegram = useTelegramLogin(status === "anonymous" && !platform.isEmbedded);
+  const [agreed, setAgreed] = useState(platform.isEmbedded);
+  const telegram = useTelegramLogin(status === "anonymous");
 
   if (status === "loading") return <Loading />;
   if (status === "authenticated") return <Navigate to="/me" replace />;
@@ -25,12 +25,36 @@ export function LoginPage() {
         <Card className="space-y-3 p-5 text-center">
           <h1 className="text-xl font-semibold">Вход из Telegram</h1>
           <p className="text-sm text-stone-400">
-            Mini App входит сам при открытии. Если этого не произошло - закройте окно и
-            откройте клуб ещё раз из бота.
+            Клуб открыт из бота — вход должен произойти сам. Если этого не случилось,
+            нажмите ещё раз.
           </p>
-          <Button className="w-full" onClick={() => window.location.reload()}>
-            Повторить вход
+          {error && <p className="text-sm text-chip-red">{error}</p>}
+          <Button
+            className="w-full"
+            loading={busy}
+            onClick={() => {
+              setBusy(true);
+              setError(null);
+              loginWithMiniApp()
+                .then(() => navigate("/me"))
+                .catch((cause: Error) => setError(cause.message))
+                .finally(() => setBusy(false));
+            }}
+          >
+            Войти
           </Button>
+          {telegram.ticket && (
+            <button
+              type="button"
+              className="w-full text-sm text-stone-400 underline decoration-dotted"
+              onClick={() => {
+                telegram.follow();
+                platform.openLink(telegram.ticket!.url);
+              }}
+            >
+              Подтвердить вход в боте
+            </button>
+          )}
         </Card>
       </div>
     );
