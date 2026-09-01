@@ -7,7 +7,7 @@ import type {
   TournamentPlayer,
 } from "@poker/contracts";
 import type { ClubSettings } from "@poker/contracts";
-import { freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
+import { ADDON_MAX_STACKS, freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, Select, cx } from "../../components/ui";
@@ -18,6 +18,7 @@ import {
   formatTime,
   PAYMENT_KIND_LABELS,
   placeLabel,
+  playerLabel,
 } from "../../lib/format";
 import {
   useAchievements,
@@ -127,7 +128,10 @@ function GameDesk({
   const isFinished = detail.status === "finished";
   const needle = query.trim().toLowerCase();
   const visibleSeats = needle
-    ? seats.filter((seat) => seat.user.nickname.toLowerCase().includes(needle))
+    ? seats.filter((seat) => {
+        const hay = `${seat.user.nickname} ${seat.user.displayName ?? ""} ${playerLabel(seat.user)}`.toLowerCase();
+        return hay.includes(needle);
+      })
     : seats;
   const seatedIds = new Set(seats.map((seat) => seat.user.id));
 
@@ -217,7 +221,7 @@ function GameDesk({
               type="search"
               className="field max-w-80"
               value={query}
-              placeholder="Поиск по нику"
+              placeholder="Поиск по имени или нику"
               onChange={(event) => setQuery(event.target.value)}
               aria-label="Поиск игрока по нику"
             />
@@ -313,8 +317,8 @@ function WalkInPanel({
             <ul className="max-h-56 divide-y divide-felt-800 overflow-y-auto">
               {matches.map((player) => (
                 <li key={player.id} className="flex items-center gap-2 py-1.5">
-                  <Avatar nickname={player.nickname} url={player.avatarUrl} size={24} />
-                  <span className="min-w-0 flex-1 truncate text-sm">{player.nickname}</span>
+                  <Avatar nickname={playerLabel(player)} url={player.avatarUrl} size={24} />
+                  <span className="min-w-0 flex-1 truncate text-sm">{playerLabel(player)}</span>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -396,9 +400,9 @@ function PlayerCard({
   return (
     <div className="space-y-3 border-t border-felt-800/80 px-3 py-3">
       <div className="flex items-start gap-2">
-        <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={32} />
+        <Avatar nickname={playerLabel(seat.user)} url={seat.user.avatarUrl} size={32} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium leading-tight">{seat.user.nickname}</p>
+          <p className="truncate font-medium leading-tight">{playerLabel(seat.user)}</p>
           <p className="truncate text-xs text-stone-500">
             {seat.totalRub > 0 ? formatRub(seat.totalRub) : "не оплачен"}
             {seat.chips > 0 ? ` · ${formatNumber(seat.chips)} фишек` : ""}
@@ -431,12 +435,12 @@ function PlayerCard({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <DeskSection title="Вход">
-          {entries.map((payment) => (
+          {groupLines(entries, 0).map((line) => (
             <LineChip
-              key={payment.id}
-              label={lineLabel(payment, 0)}
+              key={line.voidId}
+              label={line.label}
               disabled={busy || locked}
-              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+              onVoid={locked ? undefined : () => voidPayment.mutate(line.voidId)}
             />
           ))}
           {!locked && entries.length === 0 && (
@@ -454,12 +458,12 @@ function PlayerCard({
         </DeskSection>
 
         <DeskSection title="Ребай">
-          {rebuys.map((payment) => (
+          {groupLines(rebuys, detail.startingStack).map((line) => (
             <LineChip
-              key={payment.id}
-              label={lineLabel(payment, detail.startingStack)}
+              key={line.voidId}
+              label={line.label}
               disabled={busy || locked}
-              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+              onVoid={locked ? undefined : () => voidPayment.mutate(line.voidId)}
             />
           ))}
           {!locked && (
@@ -473,18 +477,19 @@ function PlayerCard({
         </DeskSection>
 
         <DeskSection title="Адон">
-          {addons.map((payment) => (
+          {groupLines(addons, detail.addonChips).map((line) => (
             <LineChip
-              key={payment.id}
-              label={lineLabel(payment, detail.addonChips)}
+              key={line.voidId}
+              label={line.label}
               disabled={busy || locked}
-              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+              onVoid={locked ? undefined : () => voidPayment.mutate(line.voidId)}
             />
           ))}
-          {!locked && (
+          {!locked && seat.paid.addons < ADDON_MAX_STACKS && (
             <QtyCharge
               unitPrice={priceOf.addon}
               disabled={busy}
+              maxTimes={ADDON_MAX_STACKS - seat.paid.addons}
               onCharge={(times) => charge("addon", times)}
             />
           )}
@@ -492,12 +497,12 @@ function PlayerCard({
         </DeskSection>
 
         <DeskSection title="Бар">
-          {barLines.map((payment) => (
+          {groupLines(barLines, 0).map((line) => (
             <LineChip
-              key={payment.id}
-              label={lineLabel(payment, 0)}
+              key={line.voidId}
+              label={line.label}
               disabled={busy || locked}
-              onVoid={locked ? undefined : () => voidPayment.mutate(payment.id)}
+              onVoid={locked ? undefined : () => voidPayment.mutate(line.voidId)}
             />
           ))}
           {!locked && extras.length > 0 && (
@@ -607,7 +612,7 @@ function PlaceControls({
         {seat.place != null ? `Место ${seat.place}` : upcoming != null ? `Выбыл ${upcoming}` : "в игре"}
       </Button>
       <select
-        aria-label={`Место игрока ${seat.user.nickname}`}
+        aria-label={`Место игрока ${playerLabel(seat.user)}`}
         className="field h-8 w-[4.5rem] shrink-0 py-0 text-xs"
         disabled={busy}
         value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
@@ -662,15 +667,37 @@ function LineChip({
   );
 }
 
-function lineLabel(payment: PaymentView, unitChips: number): string {
-  const units = stackUnits(payment.chips, unitChips);
-  const kindName = PAYMENT_KIND_LABELS[payment.kind] ?? payment.kind;
-  const name =
-    payment.kind === "entry" || payment.kind === "rebuy" || payment.kind === "addon"
-      ? kindName
-      : payment.note?.trim() || kindName;
-  const times = (payment.kind === "rebuy" || payment.kind === "addon") && units > 1 ? ` ×${units}` : "";
-  return `${name}${times} · ${formatRub(payment.amountRub)}`;
+function groupLines(
+  payments: PaymentView[],
+  unitChips: number,
+): { label: string; voidId: string }[] {
+  const groups = new Map<string, PaymentView[]>();
+  for (const payment of payments) {
+    const name =
+      payment.kind === "entry" || payment.kind === "rebuy" || payment.kind === "addon"
+        ? payment.kind
+        : `${payment.note ?? payment.kind}|${payment.amountRub}`;
+    const list = groups.get(name) ?? [];
+    list.push(payment);
+    groups.set(name, list);
+  }
+
+  return [...groups.values()].map((rows) => {
+    const last = rows.at(-1)!;
+    const stacks = rows.reduce((sum, row) => sum + stackUnits(row.chips, unitChips), 0);
+    const totalRub = rows.reduce((sum, row) => sum + row.amountRub, 0);
+    const kindName = PAYMENT_KIND_LABELS[last.kind] ?? last.kind;
+    const name =
+      last.kind === "entry" || last.kind === "rebuy" || last.kind === "addon"
+        ? kindName
+        : last.note?.trim() || kindName;
+    const count = last.kind === "rebuy" || last.kind === "addon" ? stacks : rows.length;
+    const times = count > 1 ? ` ×${count}` : "";
+    return {
+      label: `${name}${times} · ${formatRub(totalRub)}`,
+      voidId: last.id,
+    };
+  });
 }
 
 function stackUnits(chips: number, stack: number): number {
@@ -793,14 +820,19 @@ function QtyCharge({
   unitPrice,
   disabled,
   onCharge,
+  maxTimes = 3,
 }: {
   unitPrice: number;
   disabled: boolean;
   onCharge: (times: number) => void;
+  maxTimes?: number;
 }) {
+  const options = QTY.filter((times) => times <= maxTimes);
+  if (options.length === 0) return null;
+
   return (
     <span className="inline-flex overflow-hidden rounded-lg border border-gold-500/25">
-      {QTY.map((times) => (
+      {options.map((times) => (
         <button
           key={times}
           type="button"
@@ -911,7 +943,7 @@ function seatsOf(detail: TournamentDetail): Seat[] {
     if (a.place != null && b.place != null) return a.place - b.place;
     if (a.place != null) return -1;
     if (b.place != null) return 1;
-    return a.user.nickname.localeCompare(b.user.nickname, "ru");
+    return playerLabel(a.user).localeCompare(playerLabel(b.user), "ru");
   });
 }
 
@@ -979,7 +1011,7 @@ export function EveningLayoutPreview() {
           </DeskSection>
           <DeskSection title="Бар">
             <LineChip label="Кальян · 1 500 ₽" onVoid={() => undefined} />
-            <LineChip label="Напиток · 200 ₽" onVoid={() => undefined} />
+            <LineChip label="Напиток ×2 · 400 ₽" onVoid={() => undefined} />
             <BarPicker extras={PREVIEW_BAR} disabled={false} onPick={() => undefined} />
           </DeskSection>
         </div>

@@ -3,10 +3,13 @@ import type { Identity, User } from "../generated/prisma/client";
 
 export type UserWithIdentities = User & { identities: Identity[] };
 
-export function toPublicUser(user: Pick<User, "id" | "nickname" | "avatarUrl" | "role">): PublicUser {
+export function toPublicUser(
+  user: Pick<User, "id" | "nickname" | "displayName" | "avatarUrl" | "role">,
+): PublicUser {
   return {
     id: user.id,
     nickname: user.nickname,
+    displayName: user.displayName,
     avatarUrl: user.avatarUrl,
     role: user.role,
   };

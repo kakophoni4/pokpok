@@ -4,6 +4,7 @@ import { platform } from "../platform/platform";
 import { InstallHint } from "./InstallHint";
 import { LegalNotice } from "./LegalNotice";
 import { Avatar, Button, cx } from "./ui";
+import { playerLabel } from "../lib/format";
 
 type NavItem = { to: string; label: string; staffOnly?: boolean };
 
@@ -52,8 +53,8 @@ export function Layout() {
               onClick={() => navigate("/me")}
               className="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 transition hover:bg-felt-800"
             >
-              <Avatar nickname={user.nickname} url={user.avatarUrl} size={28} />
-              <span className="hidden text-sm sm:inline">{user.nickname}</span>
+              <Avatar nickname={playerLabel(user)} url={user.avatarUrl} size={28} />
+              <span className="hidden text-sm sm:inline">{playerLabel(user)}</span>
             </button>
           ) : (
             <Button size="sm" onClick={() => navigate("/login")}>

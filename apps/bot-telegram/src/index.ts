@@ -6,14 +6,14 @@ import { AdminScreens, seatFor, seats } from "./admin.js";
 import { Api, ApiError, type TelegramProfile } from "./api.js";
 import { ClubInfo } from "./club.js";
 import { loadConfig } from "./config.js";
-import { clubDate, escapeHtml, points, rub } from "./format.js";
+import { clubDate, escapeHtml, playerLabel, points, rub } from "./format.js";
 import { LOGIN_CALLBACK, LoginConfirm } from "./login.js";
 import { PlayerScreens, type Screen } from "./player.js";
 
 const config = loadConfig();
 const api = new Api(config);
 const club = new ClubInfo(api);
-const player = new PlayerScreens(api, club);
+const player = new PlayerScreens(api, club, config.webUrl);
 const admin = new AdminScreens(api);
 const login = new LoginConfirm(api);
 const bot = new Bot(config.botToken);
@@ -571,8 +571,8 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     const added = await postMissingCards(ctx.chat.id, profile, fresh, topicId);
     await ctx.reply(
       added > 0
-        ? `Добавил ${found.nickname} - карточка ниже.`
-        : `${found.nickname} уже в теме турнира.`,
+        ? `Добавил ${playerLabel(found)} - карточка ниже.`
+        : `${playerLabel(found)} уже в теме турнира.`,
     );
     await refresh(ctx.chat.id, profile, await admin.detail(profile, detail.id), false);
     return;
@@ -658,6 +658,17 @@ bot.catch(async ({ ctx, error }) => {
 });
 
 await bot.api.setMyCommands([{ command: "start", description: "Открыть меню клуба" }]);
+try {
+  await bot.api.setChatMenuButton({
+    menu_button: {
+      type: "web_app",
+      text: "Клуб",
+      web_app: { url: config.webUrl },
+    },
+  });
+} catch (error) {
+  console.error("[bot] could not set Mini App menu button:", error);
+}
 await bot.api.setMyCommands(
   [
     { command: "game", description: "Открыть тему сегодняшней игры" },

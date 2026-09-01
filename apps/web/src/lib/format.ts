@@ -1,4 +1,4 @@
-import { CLUB_TIMEZONE } from "@poker/contracts";
+import { CLUB_TIMEZONE, formatPlayerName } from "@poker/contracts";
 
 /**
  * Dates are rendered on the club's wall clock, never on the visitor's.
@@ -159,3 +159,8 @@ export const PAYMENT_KIND_LABELS: Record<string, string> = {
   drink: "Напиток",
   other: "Прочее",
 };
+
+/** Name on cards and lists: Telegram first+last, abbreviated, never the @handle. */
+export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
+  return formatPlayerName(user.displayName, user.nickname);
+}

@@ -165,8 +165,11 @@ export class AuthService {
 
     return this.prisma.user.update({
       where: { id: userId },
-      // Only fill the avatar in; never overwrite one the player already has.
-      data: profile.photoUrl ? { avatarUrl: profile.photoUrl } : {},
+      // Keep the Telegram name current so the desk never shows a stale handle.
+      data: {
+        displayName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || undefined,
+        ...(profile.photoUrl ? { avatarUrl: profile.photoUrl } : {}),
+      },
       include: { identities: true },
     }) as Promise<UserWithIdentities>;
   }

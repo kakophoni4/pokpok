@@ -24,14 +24,42 @@ export type LinkedIdentity = z.infer<typeof LinkedIdentity>;
 export const PublicUser = z.object({
   id: Id,
   nickname: Nickname,
+  /** Telegram first+last name, when we have it. Format with `formatPlayerName`. */
+  displayName: z.string().nullable(),
   avatarUrl: z.url().nullable(),
   role: UserRole,
 });
 export type PublicUser = z.infer<typeof PublicUser>;
 
+/**
+ * What to put on a card instead of the Telegram handle.
+ *
+ * A real first+last name becomes "Дмитрий Т." so a username is not a public
+ * link. A phrase like "рома рома мен вил" (Telegram first_name with no surname)
+ * is shown in full - it is already the name they chose, not a handle.
+ */
+export function formatPlayerName(
+  displayName: string | null | undefined,
+  nickname: string,
+): string {
+  const raw = displayName?.trim();
+  if (!raw) return nickname;
+
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (parts.length === 2 && isSurname(parts[1] ?? "")) {
+    const initial = (parts[1] ?? "").charAt(0).toLocaleUpperCase("ru-RU");
+    return `${parts[0]} ${initial}.`;
+  }
+  return raw;
+}
+
+/** One alphabetic token: Ковалёв, Smith, Салтыкова-Щедрина. Not a nick or an initial. */
+function isSurname(word: string): boolean {
+  return /^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё'-]{1,23}$/u.test(word);
+}
+
 /** What the authenticated user sees about themselves. */
 export const MeUser = PublicUser.extend({
-  displayName: z.string().nullable(),
   status: UserStatus,
   identities: z.array(LinkedIdentity),
   createdAt: IsoDateTime,

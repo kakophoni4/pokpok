@@ -1,6 +1,12 @@
 import type { TournamentDetail } from "./tournament.js";
 
 /**
+ * How many add-on stacks one player may buy in a single evening.
+ * Rebuys have no such cap: a short stack can rebuy all night.
+ */
+export const ADDON_MAX_STACKS = 3;
+
+/**
  * Running an evening: who is at the table and which places are still free.
  *
  * The bot's game topic and the website's cash desk both need these answers and

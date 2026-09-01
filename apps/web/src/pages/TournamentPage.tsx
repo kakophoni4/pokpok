@@ -16,6 +16,7 @@ import {
   formatTime,
   formatWeekday,
   placeLabel,
+  playerLabel,
   REGISTRATION_STATUS_LABELS,
   TOURNAMENT_STATUS_LABELS,
 } from "../lib/format";
@@ -124,9 +125,9 @@ export function TournamentPage() {
                 >
                   {placeLabel(row.place)}
                 </span>
-                <Avatar nickname={row.user.nickname} url={row.user.avatarUrl} size={32} />
+                <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={32} />
                 <Link to={`/player/${row.user.id}`} className="flex-1 truncate hover:text-gold-400">
-                  {row.user.nickname}
+                  {playerLabel(row.user)}
                 </Link>
                 <span className="nums w-20 shrink-0 text-right font-medium text-gold-400">
                   {formatPoints(row.ratingPoints)}
@@ -147,9 +148,9 @@ export function TournamentPage() {
           <ul className="card divide-y divide-felt-800">
             {seated.map((row) => (
               <li key={row.id} className="flex items-center gap-3 px-4 py-2.5">
-                <Avatar nickname={row.user.nickname} url={row.user.avatarUrl} size={32} />
+                <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={32} />
                 <Link to={`/player/${row.user.id}`} className="flex-1 truncate hover:text-gold-400">
-                  {row.user.nickname}
+                  {playerLabel(row.user)}
                 </Link>
               </li>
             ))}
@@ -168,8 +169,8 @@ export function TournamentPage() {
                 <span className="nums w-6 text-center text-sm text-stone-500">
                   {row.waitlistPosition}
                 </span>
-                <Avatar nickname={row.user.nickname} url={row.user.avatarUrl} size={32} />
-                <span className="flex-1 truncate">{row.user.nickname}</span>
+                <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={32} />
+                <span className="flex-1 truncate">{playerLabel(row.user)}</span>
                 <span className="text-xs text-stone-500">
                   {REGISTRATION_STATUS_LABELS[row.status]}
                 </span>

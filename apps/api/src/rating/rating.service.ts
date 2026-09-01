@@ -72,7 +72,14 @@ export class RatingService {
       where: {
         seasonId,
         ...(query.search
-          ? { user: { nickname: { contains: query.search, mode: "insensitive" } } }
+          ? {
+              user: {
+                OR: [
+                  { nickname: { contains: query.search, mode: "insensitive" as const } },
+                  { displayName: { contains: query.search, mode: "insensitive" as const } },
+                ],
+              },
+            }
           : {}),
       },
       include: { user: true },
@@ -99,14 +106,21 @@ export class RatingService {
   private async allTimeLeaderboard(search?: string): Promise<LeaderboardRow[]> {
     const events = await this.prisma.ratingEvent.findMany({
       where: search
-        ? { user: { nickname: { contains: search, mode: "insensitive" } } }
+        ? {
+            user: {
+              OR: [
+                { nickname: { contains: search, mode: "insensitive" as const } },
+                { displayName: { contains: search, mode: "insensitive" as const } },
+              ],
+            },
+          }
         : undefined,
       select: {
         points: true,
         place: true,
         sourceType: true,
         fieldSize: true,
-        user: { select: { id: true, nickname: true, avatarUrl: true, role: true } },
+        user: { select: { id: true, nickname: true, displayName: true, avatarUrl: true, role: true } },
       },
     });
 

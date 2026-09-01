@@ -1,7 +1,7 @@
 import type { Achievement, CreateAchievementInput } from "@poker/contracts";
 import { useEffect, useState } from "react";
 import { Avatar, Badge, Button, Card, ErrorState, Loading } from "../../components/ui";
-import { formatPoints } from "../../lib/format";
+import { formatPoints, playerLabel } from "../../lib/format";
 import {
   useAchievements,
   useCreateAchievement,
@@ -191,8 +191,8 @@ function GrantPanel({ achievementId }: { achievementId: string }) {
       <ul className="max-h-56 divide-y divide-felt-800 overflow-y-auto">
         {players.data?.items.map((player) => (
           <li key={player.id} className="flex items-center gap-2 py-1.5">
-            <Avatar nickname={player.nickname} url={player.avatarUrl} size={24} />
-            <span className="min-w-0 flex-1 truncate text-sm">{player.nickname}</span>
+            <Avatar nickname={playerLabel(player)} url={player.avatarUrl} size={24} />
+            <span className="min-w-0 flex-1 truncate text-sm">{playerLabel(player)}</span>
             <Button
               size="sm"
               variant="ghost"

@@ -1,7 +1,7 @@
 import type { PlayerStats, UserAchievementView } from "@poker/contracts";
 import { Link } from "react-router-dom";
 import { lazy, Suspense } from "react";
-import { formatFullDate, formatPoints, placeLabel, plural } from "../lib/format";
+import { formatFullDate, formatPoints, placeLabel, playerLabel, plural } from "../lib/format";
 import { Avatar, Card, EmptyState, Stat, cx } from "./ui";
 
 function showsPrizePlace(place: number | null | undefined, paidPlaces: number): boolean {
@@ -31,9 +31,9 @@ export function PlayerProfile({
     <>
       <Card className="mb-4">
         <div className="flex items-center gap-3">
-          <Avatar nickname={stats.user.nickname} url={stats.user.avatarUrl} size={56} />
+          <Avatar nickname={playerLabel(stats.user)} url={stats.user.avatarUrl} size={56} />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-semibold">{stats.user.nickname}</h1>
+            <h1 className="truncate text-xl font-semibold">{playerLabel(stats.user)}</h1>
             <p className="mt-0.5 text-sm text-stone-400">
               {stats.rank ? (
                 <>

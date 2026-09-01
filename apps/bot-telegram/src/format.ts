@@ -1,4 +1,4 @@
-import { CLUB_TIMEZONE } from "@poker/contracts";
+import { CLUB_TIMEZONE, formatPlayerName } from "@poker/contracts";
 
 /**
  * Everything a human reads is rendered on the club's wall clock, never on the
@@ -90,4 +90,8 @@ export function points(value: number): string {
 /** Buttons have a hard label limit; cutting mid-word is better than a rejected keyboard. */
 export function fit(value: string, max = 60): string {
   return value.length <= max ? value : `${value.slice(0, max - 1)}…`;
+}
+
+export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
+  return formatPlayerName(user.displayName, user.nickname);
 }

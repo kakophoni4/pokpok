@@ -7,10 +7,10 @@ import type {
   TournamentPlayer,
   TournamentSummary,
 } from "@poker/contracts";
-import { fieldSize, freePlaces, isEveningHand, nextPlace, stacksOf } from "@poker/contracts";
+import { ADDON_MAX_STACKS, fieldSize, freePlaces, isEveningHand, nextPlace, stacksOf } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
-import { clubDate, clubClock, escapeHtml, fit, num, points, rub } from "./format.js";
+import { clubDate, clubClock, escapeHtml, fit, num, playerLabel, points, rub } from "./format.js";
 
 export type Screen = { text: string; keyboard: InlineKeyboard };
 
@@ -254,7 +254,7 @@ export class AdminScreens {
   }
 
   card(seat: Seat, detail: TournamentDetail, prices: ClubSettings, achievements: Achievement[] = []): Screen {
-    const lines: string[] = [`👤 <b>${escapeHtml(seat.user.nickname)}</b>`];
+    const lines: string[] = [`👤 <b>${escapeHtml(playerLabel(seat.user))}</b>`];
 
     const tab: string[] = [];
     if (seat.paid.entry) tab.push("вход");
@@ -290,11 +290,11 @@ export class AdminScreens {
         .text("×2", "p:rebuy:2")
         .text("×3", "p:rebuy:3")
         .row();
-      keyboard
-        .text("Адон ×1", "p:addon:1")
-        .text("×2", "p:addon:2")
-        .text("×3", "p:addon:3")
-        .row();
+      const addonLeft = ADDON_MAX_STACKS - seat.paid.addons;
+      if (addonLeft >= 1) keyboard.text("Адон ×1", "p:addon:1");
+      if (addonLeft >= 2) keyboard.text("×2", "p:addon:2");
+      if (addonLeft >= 3) keyboard.text("×3", "p:addon:3");
+      if (addonLeft > 0) keyboard.row();
 
       for (const item of extras) {
         const label = item.isPromo
@@ -353,7 +353,7 @@ export class AdminScreens {
     keyboard.row().text("← Назад", "card");
 
     return {
-      text: [`<b>${escapeHtml(seat.user.nickname)}</b>`, "", "Призовое место."].join("\n"),
+      text: [`<b>${escapeHtml(playerLabel(seat.user))}</b>`, "", "Призовое место."].join("\n"),
       keyboard,
     };
   }
@@ -371,7 +371,7 @@ export class AdminScreens {
     keyboard.text("← Назад", "card");
 
     return {
-      text: `🏅 <b>${escapeHtml(seat.user.nickname)}</b>\n\nЧто выдать?`,
+      text: `🏅 <b>${escapeHtml(playerLabel(seat.user))}</b>\n\nЧто выдать?`,
       keyboard,
     };
   }
@@ -420,7 +420,7 @@ export function seats(detail: TournamentDetail): Seat[] {
     if (a.place != null && b.place != null) return a.place - b.place;
     if (a.place != null) return -1;
     if (b.place != null) return 1;
-    return a.user.nickname.localeCompare(b.user.nickname, "ru");
+    return playerLabel(a.user).localeCompare(playerLabel(b.user), "ru");
   });
 }
 

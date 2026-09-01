@@ -104,7 +104,7 @@ export function tournament(overrides: Record<string, unknown> = {}) {
 }
 
 export function player(id: string, nickname: string) {
-  return { id, nickname, avatarUrl: null, role: "player" };
+  return { id, nickname, displayName: null, avatarUrl: null, role: "player" };
 }
 
 export const ME = {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { Avatar, EmptyState, ErrorState, Loading, PageHeader, Select, cx } from "../components/ui";
+import { playerLabel } from "../lib/format";
 import { useLeaderboard, useSeasons } from "../lib/queries";
 
 export function LeaderboardPage() {
@@ -38,7 +39,7 @@ export function LeaderboardPage() {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Поиск по нику"
+          placeholder="Поиск по имени"
           className="field w-full sm:max-w-52"
         />
       </div>
@@ -88,8 +89,8 @@ export function LeaderboardPage() {
                     to={`/player/${row.user.id}`}
                     className="flex min-w-0 items-center gap-2 hover:text-gold-400"
                   >
-                    <Avatar nickname={row.user.nickname} url={row.user.avatarUrl} size={28} />
-                    <span className="truncate">{row.user.nickname}</span>
+                    <Avatar nickname={playerLabel(row.user)} url={row.user.avatarUrl} size={28} />
+                    <span className="truncate">{playerLabel(row.user)}</span>
                     {isMe && <span className="shrink-0 text-sm text-gold-500">вы</span>}
                   </Link>
 

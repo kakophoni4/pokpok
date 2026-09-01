@@ -4,10 +4,11 @@ import type {
   RegistrationView,
   TournamentSummary,
 } from "@poker/contracts";
+import { formatPlayerName } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import type { ClubInfo } from "./club.js";
-import { clubWhen, escapeHtml, fit, num, plural, points } from "./format.js";
+import { clubWhen, escapeHtml, fit, num, playerLabel, plural, points } from "./format.js";
 
 export type Screen = { text: string; keyboard: InlineKeyboard };
 
@@ -23,6 +24,7 @@ export class PlayerScreens {
   constructor(
     private readonly api: Api,
     private readonly club: ClubInfo,
+    private readonly webUrl: string,
   ) {}
 
   async render(route: string, profile: TelegramProfile): Promise<Screen> {
@@ -44,15 +46,21 @@ export class PlayerScreens {
 
   private async home(profile: TelegramProfile): Promise<Screen> {
     const session = await this.api.session(profile);
+    const hello = formatPlayerName(
+      [profile.firstName, profile.lastName].filter(Boolean).join(" ") || null,
+      session.nickname,
+    );
 
     return {
       text: [
         "🃏 <b>Клуб спортивного покера</b>",
         "",
-        `Здравствуйте, ${escapeHtml(session.nickname)}.`,
+        `Здравствуйте, ${escapeHtml(hello)}.`,
         "Все игры и время - по Самаре.",
       ].join("\n"),
       keyboard: new InlineKeyboard()
+        .webApp("📱 Открыть клуб", this.webUrl)
+        .row()
         .text("📅 Расписание событий", "nav:sched")
         .row()
         .text("🏆 Рейтинг", "nav:rate")
@@ -110,7 +118,7 @@ export class PlayerScreens {
     const lines = rows.slice(0, TOP_SIZE).map((row) => {
       const rank = String(row.rank).padStart(width, " ");
       const own = row.user.id === session.userId ? "👉 " : "";
-      return `${own}${rank}. ${escapeHtml(row.user.nickname)} - ${num(row.points)}`;
+      return `${own}${rank}. ${escapeHtml(playerLabel(row.user))} - ${num(row.points)}`;
     });
 
     const me = rows.find((row) => row.user.id === session.userId);
@@ -192,7 +200,7 @@ export class PlayerScreens {
     // Players are buttons: tapping one shows that player's standing as a toast,
     // which keeps the screen count at one.
     for (const row of playing.slice(0, 30)) {
-      keyboard.text(fit(escapeHtml(row.user.nickname), 40), `plr:${row.user.id}`).row();
+      keyboard.text(fit(escapeHtml(playerLabel(row.user)), 40), `plr:${row.user.id}`).row();
     }
     keyboard.text(`← ${BACK}`, "nav:who");
 
@@ -219,10 +227,10 @@ export class PlayerScreens {
   /** One-line summary of a player, shown as a toast over the roster. */
   async playerToast(userId: string): Promise<string> {
     const stats = await this.api.public<PlayerStats>(`/rating/player/${userId}`);
-    if (stats.rank == null) return `${stats.user.nickname} - ещё не в рейтинге`;
+    if (stats.rank == null) return `${playerLabel(stats.user)} - ещё не в рейтинге`;
 
     const games = `${stats.gamesPlayed} ${plural(stats.gamesPlayed, "турнир", "турнира", "турниров")}`;
-    return `${stats.user.nickname}\n${stats.rank}-е место · ${points(stats.points)} · ${games}`;
+    return `${playerLabel(stats.user)}\n${stats.rank}-е место · ${points(stats.points)} · ${games}`;
   }
 
   /**

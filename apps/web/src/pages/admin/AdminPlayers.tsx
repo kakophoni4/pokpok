@@ -2,6 +2,7 @@ import type { PublicUser, UserRole } from "@poker/contracts";
 import { ROLE_LABELS } from "@poker/contracts";
 import { useState } from "react";
 import { Avatar, Badge, Button, ErrorState, Loading } from "../../components/ui";
+import { playerLabel } from "../../lib/format";
 import { usePlayers, useUpdatePlayer } from "../../lib/queries";
 
 export function AdminPlayers({
@@ -59,11 +60,13 @@ function PlayerRow({
   return (
     <li className="card p-3">
       <div className="flex items-center gap-3">
-        <Avatar nickname={player.nickname} url={player.avatarUrl} size={36} />
+        <Avatar nickname={playerLabel(player)} url={player.avatarUrl} size={36} />
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{player.nickname}</p>
+          <p className="truncate font-medium">{playerLabel(player)}</p>
           <p className="text-xs text-stone-500">
+            {player.nickname}
+            {" · "}
             {ROLE_LABELS[player.role]}
             {isBlocked && " · заблокирован"}
           </p>

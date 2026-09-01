@@ -3,7 +3,7 @@ import { fieldSize, freePlaces, nextPlace, stacksOf } from "./game.js";
 import type { TournamentDetail } from "./tournament.js";
 
 function user(id: string) {
-  return { id, nickname: id, avatarUrl: null, role: "player" as const };
+  return { id, nickname: id, displayName: null, avatarUrl: null, role: "player" as const };
 }
 
 function detail(overrides: {

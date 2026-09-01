@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import type { AddPaymentInput, TournamentPlayer } from "@poker/contracts";
+import { ADDON_MAX_STACKS, stacksOf } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { SeasonsService } from "../seasons/seasons.service";
@@ -73,18 +74,39 @@ export class PaymentsService {
       }
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.payment.create({
-        data: {
-          tournamentId,
-          userId: input.userId,
-          kind,
-          amountRub,
-          chips,
-          note: input.note ?? menuItem?.title ?? null,
-          createdById: actorId,
-        },
+    const split = kind === "rebuy" || kind === "addon";
+    const copies = split ? units : 1;
+    const perAmount = split ? Math.round(amountRub / copies) : amountRub;
+    const perChips = split ? Math.round(chips / copies) : chips;
+
+    if (kind === "addon") {
+      const existing = await this.prisma.payment.findMany({
+        where: { tournamentId, userId: input.userId, kind: "addon", voidedAt: null },
+        select: { kind: true, chips: true },
       });
+      const have = stacksOf(existing, "addon", config.addonChips);
+      if (have + copies > ADDON_MAX_STACKS) {
+        throw new ConflictException({
+          code: "ADDON_LIMIT",
+          message: `Адон максимум ×${ADDON_MAX_STACKS}${have > 0 ? ` (уже ${have})` : ""}`,
+        });
+      }
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      for (let i = 0; i < copies; i += 1) {
+        await tx.payment.create({
+          data: {
+            tournamentId,
+            userId: input.userId,
+            kind,
+            amountRub: perAmount,
+            chips: perChips,
+            note: input.note ?? menuItem?.title ?? null,
+            createdById: actorId,
+          },
+        });
+      }
 
       // A walk-in who never signed up still belongs on the roster: paying the
       // entry fee is what makes somebody a participant. A rebuy during the late
