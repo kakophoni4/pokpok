@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 export function cx(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
@@ -33,7 +33,7 @@ export function Button({
       className={cx(
         "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2.5 text-sm",
+        size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2.5 text-base",
         BUTTON_VARIANTS[variant],
         className,
       )}
@@ -89,7 +89,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium whitespace-nowrap",
         BADGE_TONES[tone],
         className,
       )}
@@ -165,8 +165,8 @@ export function Stat({
   return (
     <div className="card px-3 py-3 text-center">
       <div className="nums text-xl font-semibold text-gold-400">{value}</div>
-      <div className="mt-0.5 text-xs text-stone-400">{label}</div>
-      {hint && <div className="mt-0.5 text-[11px] text-stone-500">{hint}</div>}
+      <div className="mt-0.5 text-sm text-stone-400">{label}</div>
+      {hint && <div className="mt-0.5 text-sm text-stone-500">{hint}</div>}
     </div>
   );
 }
@@ -229,7 +229,7 @@ export function Tabs<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="tablist" className="mb-4 inline-flex rounded-xl bg-felt-850 p-1">
+    <div role="tablist" className="mb-5 flex flex-wrap gap-2">
       {options.map((option) => (
         <button
           key={option.value}
@@ -237,15 +237,114 @@ export function Tabs<T extends string>({
           aria-selected={option.value === value}
           onClick={() => onChange(option.value)}
           className={cx(
-            "rounded-lg px-3.5 py-1.5 text-sm font-medium transition",
+            "rounded-xl border px-3.5 py-2 text-sm font-medium transition",
             option.value === value
-              ? "bg-felt-700 text-stone-100"
-              : "text-stone-400 hover:text-stone-200",
+              ? "border-gold-500/50 bg-gold-500/15 text-gold-400"
+              : "border-gold-500/20 bg-felt-950 text-stone-300 hover:border-gold-500/40 hover:text-stone-100",
           )}
         >
           {option.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+export function Select({
+  id,
+  value,
+  options,
+  onChange,
+  className,
+  "aria-label": ariaLabel,
+}: {
+  id?: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  className?: string;
+  "aria-label"?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const selected = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    function onPointer(event: MouseEvent) {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  return (
+    <div ref={root} className={cx("relative", className)}>
+      <button
+        id={id}
+        type="button"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className="field flex w-full items-center justify-between gap-3 text-left"
+      >
+        <span className="min-w-0 truncate">{selected?.label ?? "—"}</span>
+        <svg
+          viewBox="0 0 12 8"
+          aria-hidden
+          className={cx(
+            "size-3 shrink-0 text-gold-400 transition",
+            open && "rotate-180",
+          )}
+        >
+          <path
+            d="M1.2 1.4L6 6.2L10.8 1.4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-gold-500/25 bg-felt-950 py-1 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+        >
+          {options.map((option) => {
+            const active = option.value === value;
+            return (
+              <li key={option.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  className={cx(
+                    "w-full px-3 py-2.5 text-left text-base",
+                    active
+                      ? "bg-gold-500/15 text-gold-400"
+                      : "text-stone-200 hover:bg-felt-800",
+                  )}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                >
+                  {option.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

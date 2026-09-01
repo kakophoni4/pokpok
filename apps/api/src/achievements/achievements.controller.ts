@@ -31,7 +31,7 @@ export class AchievementsController {
     return this.achievements.listForUser(userId);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post()
   @ApiOperation({ summary: "Create an achievement: title, description, rating points (admin)" })
   create(
@@ -41,7 +41,7 @@ export class AchievementsController {
     return this.achievements.create(actor.id, body);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Patch(":id")
   @ApiOperation({ summary: "Edit an achievement (admin)" })
   update(
@@ -52,7 +52,7 @@ export class AchievementsController {
     return this.achievements.update(actor.id, id, body);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post("grant")
   @ApiOperation({ summary: "Give an achievement to a player (staff)" })
   grant(
@@ -62,7 +62,7 @@ export class AchievementsController {
     return this.achievements.grant(actor.id, body);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Delete("grant/:id")
   @ApiOperation({ summary: "Take an achievement back, removing its rating (admin)" })
   revoke(@CurrentUser() actor: RequestUser, @Param("id") id: string): Promise<{ ok: true }> {

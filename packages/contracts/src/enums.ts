@@ -8,8 +8,12 @@ import { z } from "zod";
 export const AuthProvider = z.enum(["telegram", "vk"]);
 export type AuthProvider = z.infer<typeof AuthProvider>;
 
-/** The club runs on two roles: everyone plays, a few people run the evening. */
-export const UserRole = z.enum(["player", "admin"]);
+/**
+ * player — sits at the table.
+ * hostess — runs the evening: till, places, combo awards, player nicks.
+ * admin — everything, including schedule, seasons, club settings and the books.
+ */
+export const UserRole = z.enum(["player", "hostess", "admin"]);
 export type UserRole = z.infer<typeof UserRole>;
 
 export const UserStatus = z.enum(["active", "blocked"]);
@@ -66,12 +70,24 @@ export type RatingSourceType = z.infer<typeof RatingSourceType>;
 
 export const ROLE_LEVEL: Record<UserRole, number> = {
   player: 0,
-  admin: 1,
+  hostess: 1,
+  admin: 2,
 };
 
 export function hasRole(actual: UserRole, required: UserRole): boolean {
   return ROLE_LEVEL[actual] >= ROLE_LEVEL[required];
 }
+
+/** Hostess and admin: they may open the evening desk and the staff bot. */
+export function isStaff(role: UserRole): boolean {
+  return hasRole(role, "hostess");
+}
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  player: "Игрок",
+  hostess: "Хостес",
+  admin: "Администратор",
+};
 
 /** Statuses that occupy a seat at the table. */
 export const OCCUPYING_STATUSES: RegistrationStatus[] = ["registered"];

@@ -26,7 +26,7 @@ export function AdminSeasons() {
 
       {current.length > 0 && (
         <section className="mb-4">
-          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
             Сейчас
           </h2>
           <ul className="space-y-2">
@@ -39,7 +39,7 @@ export function AdminSeasons() {
 
       {archive.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
             Завершённые
           </h2>
           <ul className="space-y-2">

@@ -29,7 +29,7 @@ export function LoginPage() {
         <div className="p-5">
           <h1 className="text-xl font-semibold">Вход в клуб</h1>
 
-          <label className="mt-4 flex items-start gap-2 text-left text-xs text-stone-400">
+          <label className="mt-4 flex items-start gap-2 text-left text-sm text-stone-300">
             <input
               type="checkbox"
               className="mt-0.5"
@@ -37,11 +37,10 @@ export function LoginPage() {
               onChange={(event) => setAgreed(event.target.checked)}
             />
             <span>
-              Продолжая, я подтверждаю, что это не азартная игра и не игра на деньги, и принимаю{" "}
+              Принимаю{" "}
               <Link to="/rules" className="text-gold-400 underline">
                 правила клуба
               </Link>
-              .
             </span>
           </label>
 
@@ -122,7 +121,7 @@ function Waiting({ login }: { login: ReturnType<typeof useTelegramLogin> }) {
   return (
     <div>
       <p className="text-sm text-stone-300">Подтвердите вход в Telegram</p>
-      <p className="mt-3 text-xs uppercase tracking-wide text-stone-500">Кодовая фраза</p>
+      <p className="mt-3 text-sm text-stone-400">Кодовая фраза</p>
       <p className="text-lg font-semibold text-gold-400">{login.ticket?.phrase}</p>
       <div className="mt-4 flex flex-col gap-2">
         <a

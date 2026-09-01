@@ -35,7 +35,7 @@ export class UsersController {
     return this.users.findPublicById(id);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Get()
   @ApiOperation({ summary: "Player directory (staff)" })
   list(
@@ -45,9 +45,9 @@ export class UsersController {
     return this.users.list(query, pagination);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Patch(":id")
-  @ApiOperation({ summary: "Change nickname, role or status (admin)" })
+  @ApiOperation({ summary: "Change nickname, role or status (staff; role is admin-only)" })
   adminUpdate(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,

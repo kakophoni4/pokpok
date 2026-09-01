@@ -1,12 +1,13 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import type {
-  AdminUpdateUserInput,
-  MeUser,
-  Paginated,
-  PaginationQuery,
-  PublicUser,
-  UpdateMeInput,
-  UserListQuery,
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  hasRole,
+  type AdminUpdateUserInput,
+  type MeUser,
+  type Paginated,
+  type PaginationQuery,
+  type PublicUser,
+  type UpdateMeInput,
+  type UserListQuery,
 } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
@@ -64,11 +65,29 @@ export class UsersService {
    * the club wants stable names in the standings.
    */
   async adminUpdate(actorId: string, userId: string, input: AdminUpdateUserInput): Promise<MeUser> {
-    const before = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { identities: true },
-    });
+    const [before, actor] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { identities: true },
+      }),
+      this.prisma.user.findUnique({ where: { id: actorId }, select: { role: true } }),
+    ]);
     if (!before) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+    if (!actor) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+
+    const actorIsAdmin = hasRole(actor.role, "admin");
+    if (input.role !== undefined && !actorIsAdmin) {
+      throw new ForbiddenException({
+        code: "FORBIDDEN",
+        message: "Роль меняет только администратор",
+      });
+    }
+    if (!actorIsAdmin && before.role === "admin") {
+      throw new ForbiddenException({
+        code: "FORBIDDEN",
+        message: "Администратора может менять только другой администратор",
+      });
+    }
 
     if (input.nickname && (await this.isNicknameTaken(input.nickname, userId))) {
       throw new ConflictException({ code: "NICKNAME_TAKEN", message: "Такой ник уже занят" });

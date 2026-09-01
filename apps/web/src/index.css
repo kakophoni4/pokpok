@@ -29,21 +29,20 @@
   html {
     color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
+    font-size: 17px;
   }
 
   body {
     @apply text-stone-100 antialiased;
     font-family: var(--font-body);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
     min-height: 100dvh;
     background-color: #070d0b;
     background-image:
-      linear-gradient(180deg, rgba(7, 13, 11, 0.78) 0%, rgba(7, 13, 11, 0.92) 100%),
+      radial-gradient(ellipse at 50% 28%, rgba(7, 13, 11, 0.55) 0%, rgba(7, 13, 11, 0.88) 62%, #070d0b 100%),
       url("/images/felt.jpg");
     background-size: cover;
     background-attachment: fixed;
-    background-position: center;
+    background-position: center top;
   }
 
   .nums {
@@ -53,17 +52,26 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-gold-500/15 bg-felt-950/70 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md;
+    @apply rounded-xl border border-gold-500/20 bg-felt-950/80 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-md;
   }
 
   .field {
-    @apply w-full rounded-xl border border-gold-500/20 bg-felt-950/80 px-3 py-2 text-sm
+    @apply w-full rounded-xl border border-gold-500/25 bg-felt-950 px-3 py-2.5 text-base
       text-stone-100 outline-none transition
       placeholder:text-stone-500
       focus:border-gold-500/70 focus:ring-2 focus:ring-gold-500/20;
   }
 
+  select.field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.2 1.4L6 6.2L10.8 1.4' stroke='%23e5c07b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 0.72rem 0.48rem;
+    padding-right: 2.4rem;
+  }
+
   .label {
-    @apply mb-1.5 block text-xs font-medium tracking-wide text-stone-400 uppercase;
+    @apply mb-1.5 block text-sm font-medium text-stone-300;
   }
 }

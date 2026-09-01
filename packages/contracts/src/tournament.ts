@@ -117,6 +117,8 @@ export const TournamentDetail = TournamentSummary.extend({
   players: z.array(TournamentPlayer).nullish(),
   totalRub: z.number().int().nonnegative().nullish(),
   adminScreens: AdminScreens.nullish(),
+  /** Combo awards handed out this evening. Staff-only. */
+  eveningGrants: z.array(z.object({ userId: Id, achievementId: Id })).nullish(),
 });
 export type TournamentDetail = z.infer<typeof TournamentDetail>;
 
@@ -197,7 +199,7 @@ export const AddPaymentInput = z.object({
    * Double or triple stack in one tap. Multiplies the chips that kind would
    * normally hand out; the amount is whatever the till already sent.
    */
-  multiplier: z.number().int().min(1).max(3).optional(),
+  multiplier: z.number().int().min(1).max(10).optional(),
   chips: z.number().int().nonnegative().nullish(),
   note: z.string().trim().max(200).nullish(),
 });

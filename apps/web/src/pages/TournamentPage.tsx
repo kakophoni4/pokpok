@@ -108,7 +108,7 @@ export function TournamentPage() {
 
           {hasResults && (
         <section className="mb-4">
-          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
             Результаты
           </h2>
           <ul className="card divide-y divide-felt-800">
@@ -138,7 +138,7 @@ export function TournamentPage() {
       )}
 
       <section className="mb-4">
-        <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+        <h2 className="mb-2 text-base font-semibold text-stone-200">
           Записались ({seated.length})
         </h2>
         {seated.length === 0 ? (
@@ -159,7 +159,7 @@ export function TournamentPage() {
 
       {waiting.length > 0 && (
         <section>
-          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
             Лист ожидания ({waiting.length})
           </h2>
           <ul className="card divide-y divide-felt-800">

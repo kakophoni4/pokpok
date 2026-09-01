@@ -1,5 +1,5 @@
 import type { PaymentKind, TournamentDetail } from "@poker/contracts";
-import { nextPlace } from "@poker/contracts";
+import { isStaff, nextPlace } from "@poker/contracts";
 import { Bot, GrammyError } from "grammy";
 import type { Context } from "grammy";
 import { AdminScreens, seatFor, seats } from "./admin.js";
@@ -146,10 +146,10 @@ bot.chatType("private").on("message:text", async (ctx) => {
 
 const GROUP: ("group" | "supergroup")[] = ["group", "supergroup"];
 
-async function requireAdmin(profile: TelegramProfile): Promise<void> {
+async function requireStaff(profile: TelegramProfile): Promise<void> {
   const session = await api.session(profile);
-  if (session.role !== "admin") {
-    throw new ApiError(403, "FORBIDDEN", "Этот раздел только для администраторов клуба");
+  if (!isStaff(session.role)) {
+    throw new ApiError(403, "FORBIDDEN", "Этот раздел для персонала клуба");
   }
 }
 
@@ -159,7 +159,7 @@ async function requireAdmin(profile: TelegramProfile): Promise<void> {
  * bot restart or a second tap costs nothing.
  */
 async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
-  await requireAdmin(profile);
+  await requireStaff(profile);
 
   const chatId = ctx.chat!.id;
   const next = await admin.pickTournament(profile);
@@ -226,14 +226,14 @@ async function postMissingCards(
   detail: TournamentDetail,
   topicId: number | null,
 ): Promise<number> {
-  const prices = await admin.settings(profile);
+  const { prices, achievements } = await admin.till(profile);
   const known = new Set((detail.adminScreens?.cards ?? []).map((card) => card.userId));
   const fresh: { userId: string; msgId: number }[] = [];
 
   for (const seat of seats(detail)) {
     if (known.has(seat.user.id)) continue;
 
-    const card = admin.card(seat, detail, prices);
+    const card = admin.card(seat, detail, prices, achievements);
     const posted = await bot.api.sendMessage(chatId, card.text, {
       parse_mode: "HTML",
       reply_markup: card.keyboard,
@@ -258,10 +258,10 @@ async function refresh(
 
   if (!cardsToo) return;
 
-  const prices = await admin.settings(profile);
+  const { prices, achievements } = await admin.till(profile);
   for (const card of detail.adminScreens?.cards ?? []) {
     const seat = seatFor(detail, card.userId);
-    if (seat) await editById(chatId, card.msgId, admin.card(seat, detail, prices));
+    if (seat) await editById(chatId, card.msgId, admin.card(seat, detail, prices, achievements));
     await delay(50);
   }
 }
@@ -317,7 +317,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   const profile = profileOf(ctx);
   if (!profile) return;
 
-  await requireAdmin(profile);
+  await requireStaff(profile);
 
   const data = ctx.callbackQuery.data;
   const target = await resolve(ctx, profile);
@@ -388,7 +388,7 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
   const { userId } = target;
 
   if (data.startsWith("p:")) {
-    const match = data.match(/^p:(entry|rebuy|addon|drink)(?::([123]))?$/);
+    const match = data.match(/^p:(entry|rebuy|addon|drink)(?::([1-9]|10))?$/);
     if (!match) {
       await ctx.answerCallbackQuery();
       return;
@@ -429,9 +429,9 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
     const fresh = await admin.detail(profile, detail.id);
-    const prices = await admin.settings(profile);
+    const { prices, achievements } = await admin.till(profile);
     const seat = seatFor(fresh, userId);
-    if (seat) await edit(ctx, admin.card(seat, fresh, prices));
+    if (seat) await edit(ctx, admin.card(seat, fresh, prices, achievements));
     await refresh(chatId, profile, fresh, true);
     return;
   }
@@ -457,9 +457,9 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.answerCallbackQuery({ text: `Место ${place} записано` });
     const fresh = await admin.detail(profile, detail.id);
-    const prices = await admin.settings(profile);
+    const { prices, achievements } = await admin.till(profile);
     const seat = seatFor(fresh, userId);
-    if (seat) await edit(ctx, admin.card(seat, fresh, prices));
+    if (seat) await edit(ctx, admin.card(seat, fresh, prices, achievements));
     await refresh(chatId, profile, fresh, true);
     return;
   }
@@ -532,7 +532,7 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     return;
   }
 
-  await requireAdmin(profile);
+  await requireStaff(profile);
 
   const topicId = ctx.message.message_thread_id;
   if (topicId == null) {
@@ -619,7 +619,7 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
             : "drink";
 
     const prices = await admin.settings(profile);
-    const times = Number((rest.match(/[x×]\s*([123])/i) ?? [])[1] ?? 1);
+    const times = Number((rest.match(/[x×]\s*([1-9]|10)/i) ?? [])[1] ?? 1);
     const value =
       Number.isFinite(amount) && amount >= 0 ? amount : PRICE_OF[kind](prices) * times;
     await admin.charge(profile, detail.id, userId, kind, value, times);

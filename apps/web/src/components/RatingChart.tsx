@@ -13,7 +13,7 @@ export function RatingChart({ progression }: { progression: PlayerStats["progres
 
   return (
     <div className="card p-3">
-      <p className="mb-2 px-1 text-xs tracking-wide text-stone-500 uppercase">Динамика рейтинга</p>
+      <p className="mb-2 px-1 text-sm text-stone-400">Динамика рейтинга</p>
       <ResponsiveContainer width="100%" height={160}>
         <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
           <defs>

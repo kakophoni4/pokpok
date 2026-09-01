@@ -54,7 +54,7 @@ export class TournamentsController {
   }
 
   // Declared before ":id" so the literal segment wins the match.
-  @Roles("admin")
+  @Roles("hostess")
   @Get("by-topic/:topicId")
   @ApiOperation({ summary: "Tournament bound to a forum topic in the admin group (admin)" })
   byTopic(
@@ -84,9 +84,9 @@ export class TournamentsController {
     return this.tournaments.create(actor.id, body);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Patch(":id")
-  @ApiOperation({ summary: "Edit a tournament, including the paid-place count (admin)" })
+  @ApiOperation({ summary: "Edit a tournament, including the paid-place count (staff)" })
   update(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -112,10 +112,10 @@ export class TournamentsController {
     @Body(zodPipe(RegisterInput)) body: RegisterInput,
   ): Promise<RegisterResult> {
     // Signing somebody else up is an admin action.
-    if (body.userId && body.userId !== actor.id && !hasRole(actor.role, "admin")) {
+    if (body.userId && body.userId !== actor.id && !hasRole(actor.role, "hostess")) {
       throw new ForbiddenException({
         code: "FORBIDDEN",
-        message: "Записать другого игрока может только администратор",
+        message: "Записать другого игрока может только персонал клуба",
       });
     }
 
@@ -131,7 +131,7 @@ export class TournamentsController {
     @Param("id") id: string,
     @Query("userId") userId?: string,
   ): Promise<{ promotedUserId: string | null }> {
-    if (userId && userId !== actor.id && !hasRole(actor.role, "admin")) {
+    if (userId && userId !== actor.id && !hasRole(actor.role, "hostess")) {
       throw new ForbiddenException({ code: "FORBIDDEN", message: "Недостаточно прав" });
     }
     return this.registrations.cancel(id, userId ?? actor.id, actor.id);
@@ -144,7 +144,7 @@ export class TournamentsController {
     return this.registrations.listForTournament(id);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/admin-screens")
   @ApiOperation({ summary: "Remember where the bot posted its live screens (admin)" })
   saveAdminScreens(
@@ -156,7 +156,7 @@ export class TournamentsController {
 
   // ─── Cash desk ──────────────────────────────────────────────────────────────
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/payments")
   @ApiOperation({ summary: "Charge an entry, an add-on or a drink (admin)" })
   addPayment(
@@ -167,7 +167,7 @@ export class TournamentsController {
     return this.payments.add(id, body, actor.id);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Delete(":id/payments/:paymentId")
   @ApiOperation({ summary: "Void a mistaken line without erasing it (admin)" })
   voidPayment(
@@ -179,7 +179,7 @@ export class TournamentsController {
 
   // ─── Results ────────────────────────────────────────────────────────────────
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/place")
   @ApiOperation({ summary: "Record where one player finished as they bust out (admin)" })
   setPlace(
@@ -190,7 +190,7 @@ export class TournamentsController {
     return this.results.setPlace(id, body.userId, body.place, actor.id);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/finish")
   @ApiOperation({ summary: "Award rating for the evening; repeatable and reversible (admin)" })
   finish(
@@ -200,7 +200,7 @@ export class TournamentsController {
     return this.results.finish(id, actor.id);
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/reopen")
   @ApiOperation({ summary: "Withdraw the rating and put the tournament back in play (admin)" })
   async reopen(
@@ -211,7 +211,7 @@ export class TournamentsController {
     return { ok: true };
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Post(":id/results")
   @ApiOperation({ summary: "Submit the whole standings table at once (admin)" })
   async submitResults(
@@ -223,7 +223,7 @@ export class TournamentsController {
     return { ok: true };
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Delete(":id/results")
   @ApiOperation({ summary: "Wipe standings and the rating they produced (admin)" })
   async clearResults(

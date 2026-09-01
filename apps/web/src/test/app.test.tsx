@@ -182,9 +182,7 @@ describe("leaderboard", () => {
     expect(await screen.findByText("Ira_Chips")).toBeInTheDocument();
     expect(screen.getByText("261")).toBeInTheDocument();
     expect(screen.getByText("вы")).toBeInTheDocument();
-    expect(
-      screen.getByText("Сезон 2026 · в зачёт идут 10 лучших результатов"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Сезон" })).toHaveTextContent("Сезон 2026 · сейчас");
   });
 });
 

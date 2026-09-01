@@ -47,7 +47,7 @@ const PLAYERS = [
   { nickname: "Timur_TT", displayName: "Тимур Аскаров", role: "player" as const },
   { nickname: "LenaFlush", displayName: "Елена Кириллова", role: "player" as const },
   { nickname: "Grisha_UTG", displayName: "Григорий Ланин", role: "player" as const },
-  { nickname: "Vika_Nuts", displayName: "Виктория Панова", role: "player" as const },
+  { nickname: "Vika_Nuts", displayName: "Виктория Панова", role: "hostess" as const },
   { nickname: "Roma_Allin", displayName: "Роман Ефимов", role: "player" as const },
 ];
 
@@ -76,6 +76,15 @@ const ACHIEVEMENTS = [
     description: "Собрал каре",
     icon: "🎰",
     ratingPoints: 50,
+    isRepeatable: true,
+    rule: null,
+  },
+  {
+    code: "straight_flush",
+    title: "Стрит-флеш",
+    description: "Собрал стрит-флеш",
+    icon: "🌈",
+    ratingPoints: 120,
     isRepeatable: true,
     rule: null,
   },

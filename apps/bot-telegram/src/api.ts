@@ -1,4 +1,4 @@
-import type { SessionResponse } from "@poker/contracts";
+import type { SessionResponse, UserRole } from "@poker/contracts";
 import type { BotConfig } from "./config.js";
 
 export class ApiError extends Error {
@@ -24,7 +24,7 @@ type CachedSession = {
   expiresAt: number;
   userId: string;
   nickname: string;
-  role: "player" | "admin";
+  role: UserRole;
 };
 
 /**

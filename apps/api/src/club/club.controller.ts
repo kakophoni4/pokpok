@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   type ClubMenuItem,
   type ClubSettings,
+  type SalesReport,
   CreateClubMenuItemInput,
+  SalesQuery,
   UpdateClubMenuItemInput,
   UpdateClubSettingsInput,
 } from "@poker/contracts";
@@ -28,11 +30,18 @@ export class ClubController {
     return { infoText: settings.infoText, timezone: settings.timezone };
   }
 
-  @Roles("admin")
+  @Roles("hostess")
   @Get("settings")
-  @ApiOperation({ summary: "All club settings, prices and menu included (admin)" })
+  @ApiOperation({ summary: "All club settings, prices and menu included (staff)" })
   settings(): Promise<ClubSettings> {
     return this.club.get();
+  }
+
+  @Roles("admin")
+  @Get("sales")
+  @ApiOperation({ summary: "What the till took: by week, month or season (admin)" })
+  sales(@Query(zodPipe(SalesQuery)) query: SalesQuery): Promise<SalesReport> {
+    return this.club.sales(query);
   }
 
   @Roles("admin")

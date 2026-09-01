@@ -166,11 +166,13 @@ function MenuRow({
   return (
     <li className="flex flex-wrap items-end gap-2 rounded-xl border border-felt-700/60 p-3">
       <div className="min-w-40 flex-1">
-        <label className="label">{item.isFixed ? item.title : "Название"}</label>
         {item.isFixed ? (
-          <p className="text-sm text-stone-200">{item.title}</p>
+          <p className="pb-2.5 text-base font-medium text-stone-100">{item.title}</p>
         ) : (
-          <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} />
+          <>
+            <label className="label">Название</label>
+            <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} />
+          </>
         )}
       </div>
       <div className="w-24">

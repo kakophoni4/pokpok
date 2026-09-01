@@ -68,7 +68,7 @@ export function PlayerProfile({
 
       {achievements && achievements.length > 0 && (
         <section className="mb-4">
-          <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
             Достижения ({achievements.length})
           </h2>
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -90,7 +90,7 @@ export function PlayerProfile({
       )}
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold tracking-wide text-stone-400 uppercase">
+        <h2 className="mb-2 text-base font-semibold text-stone-200">
           История
         </h2>
 
@@ -110,9 +110,7 @@ export function PlayerProfile({
                         {placeLabel(event.place as number)}
                       </span>
                     ) : (
-                      <span className="text-[11px] tracking-wide text-stone-500 uppercase">
-                        участие
-                      </span>
+                      <span className="text-sm text-stone-400">участие</span>
                     )
                   ) : (
                     <span aria-hidden className="text-lg">

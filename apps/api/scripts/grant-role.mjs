@@ -14,7 +14,7 @@
 
 import pg from "pg";
 
-const ROLES = ["player", "admin"];
+const ROLES = ["player", "hostess", "admin"];
 
 const args = process.argv.slice(2);
 const listOnly = args.includes("--list");
@@ -25,7 +25,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 if (!listOnly) {
-  if (!nickname) fail('Usage: node scripts/grant-role.mjs "<nickname>" [player|admin]');
+  if (!nickname) fail('Usage: node scripts/grant-role.mjs "<nickname>" [player|hostess|admin]');
   if (!ROLES.includes(role)) fail(`Unknown role "${role}". Expected one of: ${ROLES.join(", ")}`);
 }
 
@@ -46,7 +46,7 @@ async function printRoster() {
   const { rows } = await client.query(
     `SELECT nickname, role, status, "createdAt"
        FROM "User"
-      ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, "createdAt"`,
+      ORDER BY CASE role WHEN 'admin' THEN 0 WHEN 'hostess' THEN 1 ELSE 2 END, "createdAt"`,
   );
 
   if (rows.length === 0) {

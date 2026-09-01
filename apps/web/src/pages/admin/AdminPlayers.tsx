@@ -1,14 +1,16 @@
 import type { PublicUser, UserRole } from "@poker/contracts";
+import { ROLE_LABELS } from "@poker/contracts";
 import { useState } from "react";
 import { Avatar, Badge, Button, ErrorState, Loading } from "../../components/ui";
 import { usePlayers, useUpdatePlayer } from "../../lib/queries";
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  player: "Игрок",
-  admin: "Администратор",
-};
-
-export function AdminPlayers({ canEdit }: { canEdit: boolean }) {
+export function AdminPlayers({
+  canEdit,
+  canChangeRole = false,
+}: {
+  canEdit: boolean;
+  canChangeRole?: boolean;
+}) {
   const [search, setSearch] = useState("");
   const players = usePlayers(search, true);
 
@@ -27,7 +29,12 @@ export function AdminPlayers({ canEdit }: { canEdit: boolean }) {
 
       <ul className="space-y-2">
         {players.data?.items.map((player) => (
-          <PlayerRow key={player.id} player={player} canEdit={canEdit} />
+          <PlayerRow
+            key={player.id}
+            player={player}
+            canEdit={canEdit}
+            canChangeRole={canChangeRole}
+          />
         ))}
       </ul>
     </>
@@ -37,9 +44,11 @@ export function AdminPlayers({ canEdit }: { canEdit: boolean }) {
 function PlayerRow({
   player,
   canEdit,
+  canChangeRole,
 }: {
   player: PublicUser & { status?: string };
   canEdit: boolean;
+  canChangeRole: boolean;
 }) {
   const update = useUpdatePlayer();
   const [nickname, setNickname] = useState(player.nickname);
@@ -97,51 +106,48 @@ function PlayerRow({
               </p>
             </div>
           ) : (
-            <p className="text-xs text-stone-500">
-              Ник, роль и блокировку меняет администратор. Организатору доступны расписание,
-              отметки о явке и ввод результатов.
-            </p>
+            <p className="text-sm text-stone-400">Ник меняет персонал клуба.</p>
           )}
 
-          {canEdit && (
-            <div className="flex flex-wrap items-end gap-2">
-              <div>
-                <label className="label" htmlFor={`role-${player.id}`}>
-                  Роль
-                </label>
-                <select
-                  id={`role-${player.id}`}
-                  className="field"
-                  value={player.role}
-                  onChange={(event) =>
-                    update.mutate({
-                      id: player.id,
-                      input: { role: event.target.value as UserRole },
-                    })
-                  }
-                >
-                  {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <Button
-                size="sm"
-                variant={isBlocked ? "secondary" : "danger"}
-                loading={update.isPending}
-                onClick={() =>
+          {canEdit && canChangeRole && (
+            <div>
+              <label className="label" htmlFor={`role-${player.id}`}>
+                Роль
+              </label>
+              <select
+                id={`role-${player.id}`}
+                className="field max-w-56"
+                value={player.role}
+                onChange={(event) =>
                   update.mutate({
                     id: player.id,
-                    input: { status: isBlocked ? "active" : "blocked" },
+                    input: { role: event.target.value as UserRole },
                   })
                 }
               >
-                {isBlocked ? "Разблокировать" : "Заблокировать"}
-              </Button>
+                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
+          )}
+
+          {canEdit && (
+            <Button
+              size="sm"
+              variant={isBlocked ? "secondary" : "danger"}
+              loading={update.isPending}
+              onClick={() =>
+                update.mutate({
+                  id: player.id,
+                  input: { status: isBlocked ? "active" : "blocked" },
+                })
+              }
+            >
+              {isBlocked ? "Разблокировать" : "Заблокировать"}
+            </Button>
           )}
 
           {update.isError && (

@@ -69,4 +69,13 @@ export const GrantAchievementInput = z.object({
   tournamentId: Id.nullish(),
   comment: z.string().trim().max(200).nullish(),
 });
+
+/** Hands awarded at the table this evening — каре, стрит-флеш, рука дня. */
+export function isEveningHand(achievement: {
+  isActive: boolean;
+  isRepeatable: boolean;
+  rule: unknown;
+}): boolean {
+  return achievement.isActive && achievement.isRepeatable && achievement.rule == null;
+}
 export type GrantAchievementInput = z.infer<typeof GrantAchievementInput>;

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, OnModuleInit, ConflictException, NotFoundException } from "@nestjs/common";
 import {
   type Achievement as AchievementView,
   AchievementRule,
@@ -15,13 +15,37 @@ import { SeasonsService } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
 
 @Injectable()
-export class AchievementsService {
+export class AchievementsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rating: RatingService,
     private readonly seasons: SeasonsService,
     private readonly audit: AuditService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.ensureComboCatalogue();
+  }
+
+  /** Hands that get awarded at the table. Inserted if a live club is missing them. */
+  private async ensureComboCatalogue(): Promise<void> {
+    for (const row of COMBO_HANDS) {
+      await this.prisma.achievement.upsert({
+        where: { code: row.code },
+        create: {
+          code: row.code,
+          title: row.title,
+          description: row.description,
+          icon: row.icon,
+          ratingPoints: row.ratingPoints,
+          isRepeatable: true,
+          isActive: true,
+          rule: null as never,
+        },
+        update: {},
+      });
+    }
+  }
 
   async list(includeInactive = false): Promise<AchievementView[]> {
     const rows = await this.prisma.achievement.findMany({
@@ -269,3 +293,34 @@ function toView(achievement: Achievement): AchievementView {
     rule: rule.success ? rule.data : null,
   };
 }
+
+const COMBO_HANDS = [
+  {
+    code: "hand_of_the_day",
+    title: "Рука дня",
+    description: "Лучшая рука вечера",
+    icon: "🃏",
+    ratingPoints: 100,
+  },
+  {
+    code: "quads",
+    title: "Каре",
+    description: "Собрал каре",
+    icon: "🎰",
+    ratingPoints: 50,
+  },
+  {
+    code: "straight_flush",
+    title: "Стрит-флеш",
+    description: "Собрал стрит-флеш",
+    icon: "🌈",
+    ratingPoints: 120,
+  },
+  {
+    code: "royal_flush",
+    title: "Роял-флеш",
+    description: "Собрал роял-флеш",
+    icon: "👑",
+    ratingPoints: 200,
+  },
+];

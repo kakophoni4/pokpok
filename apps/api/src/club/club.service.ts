@@ -4,6 +4,8 @@ import {
   type ClubMenuItem,
   type ClubSettings,
   type CreateClubMenuItemInput,
+  type SalesQuery,
+  type SalesReport,
   type UpdateClubMenuItemInput,
   type UpdateClubSettingsInput,
 } from "@poker/contracts";
@@ -263,6 +265,88 @@ export class ClubService {
       },
     });
   }
+
+  /**
+   * Till totals for the books: what was bought, how often, for how much.
+   * Week and month follow the club calendar in Samara; season follows the
+   * tournament's season, not the payment timestamp.
+   */
+  async sales(query: SalesQuery): Promise<SalesReport> {
+    const now = new Date();
+    let from: Date | null = null;
+    let seasonId: string | null = query.seasonId ?? null;
+    let seasonTitle: string | null = null;
+
+    if (query.period === "week") {
+      from = startOfClubWeek(now);
+    } else if (query.period === "month") {
+      from = startOfClubMonth(now);
+    } else if (query.period === "season") {
+      const season = seasonId
+        ? await this.prisma.season.findUnique({ where: { id: seasonId } })
+        : await this.prisma.season.findFirst({ where: { isActive: true }, orderBy: { startsAt: "desc" } });
+      if (season) {
+        seasonId = season.id;
+        seasonTitle = season.title;
+        from = season.startsAt;
+      }
+    }
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        voidedAt: null,
+        ...(query.period === "season" && seasonId
+          ? { tournament: { seasonId } }
+          : from
+            ? { createdAt: { gte: from } }
+            : {}),
+      },
+      select: {
+        kind: true,
+        amountRub: true,
+        chips: true,
+        note: true,
+        tournamentId: true,
+      },
+    });
+
+    const grouped = new Map<
+      string,
+      { title: string; kind: SalesReport["lines"][number]["kind"]; count: number; amountRub: number; chips: number }
+    >();
+
+    for (const payment of payments) {
+      const title = payment.note?.trim() || kindTitle(payment.kind);
+      const key = `${payment.kind}:${title}`;
+      const line = grouped.get(key) ?? {
+        title,
+        kind: payment.kind,
+        count: 0,
+        amountRub: 0,
+        chips: 0,
+      };
+      line.count += 1;
+      line.amountRub += payment.amountRub;
+      line.chips += payment.chips;
+      grouped.set(key, line);
+    }
+
+    const lines = [...grouped.values()].sort((a, b) => b.amountRub - a.amountRub || b.count - a.count);
+    const tournamentIds = new Set(payments.map((payment) => payment.tournamentId));
+
+    return {
+      period: query.period,
+      from: from?.toISOString() ?? null,
+      to: now.toISOString(),
+      seasonId,
+      seasonTitle,
+      tournamentCount: tournamentIds.size,
+      paymentCount: payments.length,
+      totalRub: payments.reduce((sum, payment) => sum + payment.amountRub, 0),
+      totalChips: payments.reduce((sum, payment) => sum + payment.chips, 0),
+      lines,
+    };
+  }
 }
 
 function toMenuView(item: MenuRow): ClubMenuItem {
@@ -277,4 +361,36 @@ function toMenuView(item: MenuRow): ClubMenuItem {
     isActive: item.isActive,
     sortOrder: item.sortOrder,
   };
+}
+
+function kindTitle(kind: MenuRow["kind"]): string {
+  if (kind === "entry") return "Вход";
+  if (kind === "rebuy") return "Ребай";
+  if (kind === "addon") return "Адон";
+  if (kind === "drink") return "Напиток";
+  return "Прочее";
+}
+
+function clubDay(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: CLUB_TIMEZONE }).format(date);
+}
+
+function startOfClubDay(ymd: string): Date {
+  return new Date(`${ymd}T00:00:00+04:00`);
+}
+
+function startOfClubMonth(date: Date): Date {
+  return startOfClubDay(`${clubDay(date).slice(0, 7)}-01`);
+}
+
+function startOfClubWeek(date: Date): Date {
+  const ymd = clubDay(date);
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: CLUB_TIMEZONE,
+    weekday: "short",
+  }).format(new Date(`${ymd}T12:00:00+04:00`));
+  const back = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[weekday] ?? 0;
+  const noon = new Date(`${ymd}T12:00:00+04:00`);
+  const monday = new Date(noon.getTime() - back * 86_400_000);
+  return startOfClubDay(clubDay(monday));
 }

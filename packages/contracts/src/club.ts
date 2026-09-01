@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id } from "./common.js";
+import { Id, IsoDateTime } from "./common.js";
 import { PaymentKind } from "./enums.js";
 
 /**
@@ -75,3 +75,35 @@ export type UpdateClubSettingsInput = z.infer<typeof UpdateClubSettingsInput>;
  * Europe despite the city being east of the Volga.
  */
 export const CLUB_TIMEZONE = "Europe/Samara";
+
+export const SalesPeriod = z.enum(["week", "month", "season", "all"]);
+export type SalesPeriod = z.infer<typeof SalesPeriod>;
+
+export const SalesQuery = z.object({
+  period: SalesPeriod.default("month"),
+  seasonId: Id.optional(),
+});
+export type SalesQuery = z.infer<typeof SalesQuery>;
+
+export const SalesLine = z.object({
+  title: z.string(),
+  kind: PaymentKind,
+  count: z.number().int().nonnegative(),
+  amountRub: z.number().int().nonnegative(),
+  chips: z.number().int().nonnegative(),
+});
+export type SalesLine = z.infer<typeof SalesLine>;
+
+export const SalesReport = z.object({
+  period: SalesPeriod,
+  from: IsoDateTime.nullable(),
+  to: IsoDateTime,
+  seasonId: Id.nullable(),
+  seasonTitle: z.string().nullable(),
+  tournamentCount: z.number().int().nonnegative(),
+  paymentCount: z.number().int().nonnegative(),
+  totalRub: z.number().int().nonnegative(),
+  totalChips: z.number().int().nonnegative(),
+  lines: z.array(SalesLine),
+});
+export type SalesReport = z.infer<typeof SalesReport>;

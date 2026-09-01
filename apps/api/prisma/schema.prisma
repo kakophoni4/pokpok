@@ -28,6 +28,7 @@ enum AuthProvider {
 
 enum UserRole {
   player
+  hostess
   admin
 }
 

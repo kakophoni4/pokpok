@@ -33,40 +33,39 @@ export function AchievementsPage() {
       )}
 
       {catalogue.data && catalogue.data.length > 0 && (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-2">
           {catalogue.data.map((achievement) => {
             const owned = ownedCodes.has(achievement.code);
             return (
               <li
                 key={achievement.id}
                 className={cx(
-                  "card flex items-start gap-3 p-4 transition",
-                  owned ? "border-gold-500/30 bg-gold-500/5" : "opacity-90",
+                  "card grid min-h-[7.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 p-4",
+                  owned ? "border-gold-500/35 bg-gold-500/5" : "opacity-90",
                 )}
               >
-                <span aria-hidden className={cx("text-3xl leading-none", !owned && "grayscale")}>
+                <span aria-hidden className={cx("w-10 text-center text-3xl leading-none", !owned && "grayscale")}>
                   {achievement.icon ?? "🏅"}
                 </span>
 
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium">{achievement.title}</h3>
+                    <h3 className="truncate font-medium">{achievement.title}</h3>
                     {owned && <Badge tone="gold">получено</Badge>}
                   </div>
 
-                  {achievement.description && (
-                    <p className="mt-1 text-sm text-stone-400">{achievement.description}</p>
-                  )}
+                  <p className="mt-1 line-clamp-2 min-h-10 text-sm leading-5 text-stone-300">
+                    {achievement.description || "\u00a0"}
+                  </p>
 
-                  {achievement.holdersCount != null && achievement.holdersCount > 0 && (
-                    <p className="mt-1 text-xs text-stone-500">
-                      {achievement.holdersCount}{" "}
-                      {plural(achievement.holdersCount, "игрок", "игрока", "игроков")} уже получили
-                    </p>
-                  )}
+                  <p className="mt-1 min-h-5 text-sm text-stone-400">
+                    {achievement.holdersCount != null && achievement.holdersCount > 0
+                      ? `${achievement.holdersCount} ${plural(achievement.holdersCount, "игрок", "игрока", "игроков")} уже получили`
+                      : "\u00a0"}
+                  </p>
                 </div>
 
-                <span className="nums shrink-0 font-semibold text-gold-400">
+                <span className="nums shrink-0 self-center font-semibold text-gold-400">
                   {formatPoints(achievement.ratingPoints)}
                 </span>
               </li>

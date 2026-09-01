@@ -1,8 +1,8 @@
-import type { PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
+import type { Achievement, PaymentKind, TournamentDetail, TournamentPlayer } from "@poker/contracts";
 import type { ClubSettings } from "@poker/contracts";
-import { freePlaces, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
+import { freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
 import { useMemo, useState } from "react";
-import { Avatar, Badge, Button, Card, ErrorState, Loading, cx } from "../../components/ui";
+import { Avatar, Badge, Button, Card, ErrorState, Loading, Select, cx } from "../../components/ui";
 import {
   formatFullDate,
   formatNumber,
@@ -12,9 +12,11 @@ import {
   placeLabel,
 } from "../../lib/format";
 import {
+  useAchievements,
   useAddPayment,
   useClubSettings,
   useFinishTournament,
+  useGrantAchievement,
   useSetPlace,
   useTournament,
   useTournaments,
@@ -52,20 +54,22 @@ export function AdminGame() {
         <label className="label" htmlFor="game-tournament">
           Турнир
         </label>
-        <select
+        <Select
           id="game-tournament"
-          className="field"
+          aria-label="Турнир"
           value={activeId}
-          onChange={(event) => setSelectedId(event.target.value)}
-        >
-          {candidates.length === 0 && <option value="">— нет подходящих турниров —</option>}
-          {candidates.map((tournament) => (
-            <option key={tournament.id} value={tournament.id}>
-              {formatFullDate(tournament.startsAt)} · {tournament.title}
-              {tournament.status === "finished" ? " (завершён)" : ""}
-            </option>
-          ))}
-        </select>
+          onChange={setSelectedId}
+          options={
+            candidates.length === 0
+              ? [{ value: "", label: "— нет подходящих турниров —" }]
+              : candidates.map((tournament) => ({
+                  value: tournament.id,
+                  label: `${formatFullDate(tournament.startsAt)} · ${tournament.title}${
+                    tournament.status === "finished" ? " (завершён)" : ""
+                  }`,
+                }))
+          }
+        />
       </Card>
 
       {activeId && <GameDesk key={activeId} tournamentId={activeId} />}
@@ -76,6 +80,7 @@ export function AdminGame() {
 function GameDesk({ tournamentId }: { tournamentId: string }) {
   const tournament = useTournament(tournamentId);
   const settings = useClubSettings(true);
+  const catalogue = useAchievements();
   const finish = useFinishTournament(tournamentId);
   const update = useUpdateTournament(tournamentId);
   const [confirming, setConfirming] = useState(false);
@@ -181,6 +186,7 @@ function GameDesk({ tournamentId }: { tournamentId: string }) {
               seat={seat}
               detail={detail}
               prices={settings.data}
+              hands={eveningHands(catalogue.data ?? [])}
               locked={isFinished}
             />
           ))}
@@ -194,17 +200,20 @@ function PlayerRow({
   seat,
   detail,
   prices,
+  hands,
   locked,
 }: {
   seat: Seat;
   detail: TournamentDetail;
   prices: ClubSettings;
+  hands: Achievement[];
   locked: boolean;
 }) {
   const addPayment = useAddPayment(detail.id);
   const voidPayment = useVoidPayment(detail.id);
   const setPlace = useSetPlace(detail.id);
-  const busy = addPayment.isPending || voidPayment.isPending || setPlace.isPending;
+  const grant = useGrantAchievement();
+  const busy = addPayment.isPending || voidPayment.isPending || setPlace.isPending || grant.isPending;
 
   const priceOf: Record<Exclude<PaymentKind, "other">, number> = {
     entry: prices.entryPriceRub,
@@ -218,6 +227,12 @@ function PlayerRow({
   if (seat.paid.rebuys > 0) tab.push(`ребай ×${seat.paid.rebuys}`);
   if (seat.paid.addons > 0) tab.push(`адон ×${seat.paid.addons}`);
   if (seat.paid.drinks > 0) tab.push(`напиток ×${seat.paid.drinks}`);
+
+  const granted = new Set(
+    (detail.eveningGrants ?? [])
+      .filter((row) => row.userId === seat.user.id)
+      .map((row) => row.achievementId),
+  );
 
   return (
     <li className="card p-3">
@@ -233,7 +248,7 @@ function PlayerRow({
         <Avatar nickname={seat.user.nickname} url={seat.user.avatarUrl} size={32} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{seat.user.nickname}</p>
-          <p className="truncate text-xs text-stone-500">
+          <p className="truncate text-sm text-stone-400">
             {tab.length > 0 ? `${tab.join(", ")} — ${formatRub(seat.totalRub)}` : "ничего не оплачено"}
             {seat.chips > 0 && ` · ${formatNumber(seat.chips)} фишек`}
             {seat.ratingPoints != null && ` · ${formatNumber(seat.ratingPoints)} очков`}
@@ -242,115 +257,195 @@ function PlayerRow({
       </div>
 
       {!locked && (
-        <div className="mt-2 flex flex-wrap gap-2 border-t border-felt-800 pt-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={busy || seat.paid.entry}
-            onClick={() =>
-              addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
-            }
-          >
-            Вход {priceOf.entry}
-          </Button>
-          {(["rebuy", "addon"] as const).map((kind) => (
-            <span key={kind} className="inline-flex gap-1">
-              {([1, 2, 3] as const).map((times) => (
+        <div className="mt-3 space-y-3 border-t border-felt-800 pt-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={busy || seat.paid.entry}
+              onClick={() =>
+                addPayment.mutate({ userId: seat.user.id, kind: "entry", amountRub: priceOf.entry })
+              }
+            >
+              Вход {priceOf.entry}
+            </Button>
+
+            {(["rebuy", "addon"] as const).map((kind) => (
+              <QtyCharge
+                key={kind}
+                label={PAYMENT_KIND_LABELS[kind] ?? kind}
+                unitPrice={priceOf[kind]}
+                disabled={busy}
+                onCharge={(times) =>
+                  addPayment.mutate({
+                    userId: seat.user.id,
+                    kind,
+                    amountRub: priceOf[kind] * times,
+                    multiplier: times,
+                  })
+                }
+              />
+            ))}
+
+            {(prices.menuItems ?? [])
+              .filter((item) => item.isActive && !item.isFixed)
+              .map((item) => (
                 <Button
-                  key={times}
+                  key={item.id}
                   size="sm"
                   variant="ghost"
                   disabled={busy}
                   onClick={() =>
                     addPayment.mutate({
                       userId: seat.user.id,
-                      kind,
-                      amountRub: priceOf[kind] * times,
-                      multiplier: times,
+                      kind: item.kind,
+                      amountRub: item.priceRub,
+                      menuItemId: item.id,
                     })
                   }
                 >
-                  {times === 1 ? `${PAYMENT_KIND_LABELS[kind]} ${priceOf[kind]}` : `×${times}`}
+                  {item.title}
+                  {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
                 </Button>
               ))}
-            </span>
-          ))}
-          {(prices.menuItems ?? [])
-            .filter((item) => item.isActive && !item.isFixed)
-            .map((item) => (
+          </div>
+
+          {hands.length > 0 && (
+            <div>
+              <p className="mb-1.5 text-sm text-stone-300">Комбинации</p>
+              <div className="flex flex-wrap gap-2">
+                {hands.map((hand) => {
+                  const already = granted.has(hand.id);
+                  return (
+                    <Button
+                      key={hand.id}
+                      size="sm"
+                      variant={already ? "secondary" : "ghost"}
+                      disabled={busy || already}
+                      onClick={() =>
+                        grant.mutate({
+                          userId: seat.user.id,
+                          achievementId: hand.id,
+                          tournamentId: detail.id,
+                        })
+                      }
+                    >
+                      {hand.icon ? `${hand.icon} ` : ""}
+                      {hand.title}
+                      {already ? " ✓" : ""}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            {seat.place == null && nextPlace(detail) != null && (
               <Button
-                key={item.id}
+                size="sm"
+                disabled={busy}
+                onClick={() => {
+                  const place = nextPlace(detail);
+                  if (place != null) setPlace.mutate({ userId: seat.user.id, place });
+                }}
+              >
+                Выбыл — {nextPlace(detail)} место
+              </Button>
+            )}
+
+            <select
+              aria-label={`Место игрока ${seat.user.nickname}`}
+              className="field h-10 w-auto py-0 text-sm"
+              disabled={busy}
+              value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
+              onChange={(event) =>
+                setPlace.mutate({
+                  userId: seat.user.id,
+                  place: event.target.value ? Number(event.target.value) : null,
+                })
+              }
+            >
+              <option value="">в игре</option>
+              {placeOptions(detail, seat.place).map((place) => (
+                <option key={place} value={place}>
+                  {place} место
+                </option>
+              ))}
+            </select>
+
+            {seat.lastPaymentId && (
+              <Button
                 size="sm"
                 variant="ghost"
                 disabled={busy}
-                onClick={() =>
-                  addPayment.mutate({
-                    userId: seat.user.id,
-                    kind: item.kind,
-                    amountRub: item.priceRub,
-                    menuItemId: item.id,
-                  })
-                }
+                onClick={() => voidPayment.mutate(seat.lastPaymentId as string)}
               >
-                {item.title}
-                {item.priceRub > 0 ? ` ${item.priceRub}` : ""}
+                Отменить оплату
               </Button>
-            ))}
-
-          {seat.place == null && nextPlace(detail) != null && (
-            <Button
-              size="sm"
-              disabled={busy}
-              onClick={() => {
-                const place = nextPlace(detail);
-                if (place != null) setPlace.mutate({ userId: seat.user.id, place });
-              }}
-            >
-              Выбыл — {nextPlace(detail)} место
-            </Button>
-          )}
-
-          <select
-            aria-label={`Место игрока ${seat.user.nickname}`}
-            className="field h-8 w-auto py-0 text-sm"
-            disabled={busy}
-            value={isPrizePlace(seat.place, detail.paidPlaces) ? String(seat.place) : ""}
-            onChange={(event) =>
-              setPlace.mutate({
-                userId: seat.user.id,
-                place: event.target.value ? Number(event.target.value) : null,
-              })
-            }
-          >
-            <option value="">в игре</option>
-            {placeOptions(detail, seat.place).map((place) => (
-              <option key={place} value={place}>
-                {place} место
-              </option>
-            ))}
-          </select>
-
-          {seat.lastPaymentId && (
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => voidPayment.mutate(seat.lastPaymentId as string)}
-            >
-              Отменить оплату
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       )}
 
       {addPayment.isError && (
-        <p className="mt-2 text-xs text-chip-red">{(addPayment.error as Error).message}</p>
+        <p className="mt-2 text-sm text-chip-red">{(addPayment.error as Error).message}</p>
+      )}
+      {grant.isError && (
+        <p className="mt-2 text-sm text-chip-red">{(grant.error as Error).message}</p>
       )}
       {setPlace.isError && (
-        <p className="mt-2 text-xs text-chip-red">{(setPlace.error as Error).message}</p>
+        <p className="mt-2 text-sm text-chip-red">{(setPlace.error as Error).message}</p>
       )}
     </li>
   );
+}
+
+const QTY = [1, 2, 3, 4, 5] as const;
+
+function QtyCharge({
+  label,
+  unitPrice,
+  disabled,
+  onCharge,
+}: {
+  label: string;
+  unitPrice: number;
+  disabled: boolean;
+  onCharge: (times: number) => void;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-xl border border-gold-500/20 bg-felt-950 p-1">
+      <span className="px-2 text-sm whitespace-nowrap">{label}</span>
+      {QTY.map((times) => (
+        <button
+          key={times}
+          type="button"
+          disabled={disabled}
+          onClick={() => onCharge(times)}
+          className="rounded-lg px-2 py-1 text-sm text-gold-400 transition hover:bg-gold-500/15 disabled:opacity-50"
+        >
+          ×{times}
+        </button>
+      ))}
+      <span className="pr-2 text-sm text-stone-500">{unitPrice} ₽</span>
+    </span>
+  );
+}
+
+const HAND_ORDER = ["hand_of_the_day", "quads", "straight_flush", "royal_flush"];
+
+function eveningHands(list: Achievement[]): Achievement[] {
+  return list
+    .filter(isEveningHand)
+    .sort((a, b) => {
+      const ai = HAND_ORDER.indexOf(a.code);
+      const bi = HAND_ORDER.indexOf(b.code);
+      if (ai === -1 && bi === -1) return b.ratingPoints - a.ratingPoints;
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

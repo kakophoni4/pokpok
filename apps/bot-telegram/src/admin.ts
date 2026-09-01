@@ -7,7 +7,7 @@ import type {
   TournamentPlayer,
   TournamentSummary,
 } from "@poker/contracts";
-import { fieldSize, freePlaces, nextPlace, stacksOf } from "@poker/contracts";
+import { fieldSize, freePlaces, isEveningHand, nextPlace, stacksOf } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import { clubDate, clubClock, escapeHtml, fit, num, points, rub } from "./format.js";
@@ -49,6 +49,11 @@ export class AdminScreens {
 
   settings(profile: TelegramProfile): Promise<ClubSettings> {
     return this.api.asUser<ClubSettings>(profile, "GET", "/club/settings");
+  }
+
+  async till(profile: TelegramProfile): Promise<{ prices: ClubSettings; achievements: Achievement[] }> {
+    const [prices, achievements] = await Promise.all([this.settings(profile), this.achievements(profile)]);
+    return { prices, achievements };
   }
 
   achievements(profile: TelegramProfile): Promise<Achievement[]> {
@@ -233,7 +238,7 @@ export class AdminScreens {
     };
   }
 
-  card(seat: Seat, detail: TournamentDetail, prices: ClubSettings): Screen {
+  card(seat: Seat, detail: TournamentDetail, prices: ClubSettings, achievements: Achievement[] = []): Screen {
     const lines: string[] = [`👤 <b>${escapeHtml(seat.user.nickname)}</b>`];
 
     const tab: string[] = [];
@@ -263,17 +268,17 @@ export class AdminScreens {
     if (detail.status !== "finished") {
       const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
       const entry = prices.menuItems?.find((item) => item.isFixed && item.kind === "entry");
-      const rebuy = prices.menuItems?.find((item) => item.isFixed && item.kind === "rebuy");
-      const addon = prices.menuItems?.find((item) => item.isFixed && item.kind === "addon");
 
       keyboard.text(`Вход ${entry?.priceRub ?? prices.entryPriceRub}`, "p:entry:1").row();
       keyboard
-        .text(`Ребай ${rebuy?.priceRub ?? prices.rebuyPriceRub}`, "p:rebuy:1")
+        .text("Ребай ×1", "p:rebuy:1")
         .text("×2", "p:rebuy:2")
         .text("×3", "p:rebuy:3")
+        .text("×4", "p:rebuy:4")
+        .text("×5", "p:rebuy:5")
         .row();
       keyboard
-        .text(`Адон ${addon?.priceRub ?? prices.addonPriceRub}`, "p:addon:1")
+        .text("Адон ×1", "p:addon:1")
         .text("×2", "p:addon:2")
         .text("×3", "p:addon:3")
         .row();
@@ -297,7 +302,23 @@ export class AdminScreens {
         keyboard.text("Изменить место", "place").text("Вернуть в игру", "unbust");
       }
 
-      keyboard.row().text("🏅 Ачивка", "ach");
+      keyboard.row();
+      const granted = new Set(
+        (detail.eveningGrants ?? [])
+          .filter((row) => row.userId === seat.user.id)
+          .map((row) => row.achievementId),
+      );
+      const hands = achievements
+        .filter(isEveningHand)
+        .sort((a, b) => b.ratingPoints - a.ratingPoints)
+        .slice(0, 6);
+      hands.forEach((hand, index) => {
+        const mark = granted.has(hand.id) ? "✓ " : "";
+        keyboard.text(fit(`${mark}${hand.icon ?? "🏅"} ${hand.title}`, 28), `a:${hand.id}`);
+        if (index % 2 === 1) keyboard.row();
+      });
+      if (hands.length % 2 === 1) keyboard.row();
+      keyboard.text("🏅 Другие ачивки", "ach");
       if (seat.lastPaymentId) keyboard.text("✖️ Отменить оплату", "undo");
     }
 

@@ -17,6 +17,8 @@ import type {
   RegistrationView,
   Season,
   SubmitResultsInput,
+  SalesPeriod,
+  SalesReport,
   TournamentDetail,
   TournamentPlayer,
   TournamentSummary,
@@ -47,6 +49,7 @@ export const keys = {
   players: (search: string) => ["players", search] as const,
   clubInfo: () => ["club", "info"] as const,
   clubSettings: () => ["club", "settings"] as const,
+  sales: (period: string, seasonId: string) => ["club", "sales", period, seasonId] as const,
 };
 
 export function useTournaments(scope: "upcoming" | "past" | "all", enabled = true) {
@@ -174,6 +177,13 @@ export function useClubSettings(enabled: boolean) {
     queryKey: keys.clubSettings(),
     queryFn: () => api.get<ClubSettings>("/club/settings"),
     enabled,
+  });
+}
+
+export function useSales(period: SalesPeriod, seasonId?: string) {
+  return useQuery({
+    queryKey: keys.sales(period, seasonId ?? ""),
+    queryFn: () => api.get<SalesReport>(`/club/sales${query({ period, seasonId })}`),
   });
 }
 
@@ -339,6 +349,7 @@ export function useGrantAchievement() {
       void client.invalidateQueries({ queryKey: ["achievements"] });
       void client.invalidateQueries({ queryKey: ["leaderboard"] });
       void client.invalidateQueries({ queryKey: ["rating"] });
+      void client.invalidateQueries({ queryKey: ["tournament"] });
     },
   });
 }

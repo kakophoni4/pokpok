@@ -99,26 +99,33 @@ export class TournamentsService {
       throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
     }
 
-    const [counts, configs] = await Promise.all([
+    const staffViewer = viewer != null && hasRole(viewer.role, "hostess");
+    const [counts, configs, ratingEvents, eveningGrants] = await Promise.all([
       this.countRegistrations([id]),
       this.seasonConfigs(),
+      this.prisma.ratingEvent.findMany({
+        where: { tournamentId: id, sourceType: "tournament_result" },
+        select: { userId: true, points: true },
+      }),
+      staffViewer
+        ? this.prisma.userAchievement.findMany({
+            where: { tournamentId: id },
+            select: { userId: true, achievementId: true },
+          })
+        : Promise.resolve([]),
     ]);
     const config = effectiveConfig(tournament, configs.get(tournament.seasonId) ?? configs.get(null)!);
     const mine = tournament.registrations.find((row) => row.userId === viewer?.id) ?? null;
 
     // Rating earned per player is read from the ledger, not recomputed here,
     // so the page always shows exactly what was actually awarded.
-    const ratingEvents = await this.prisma.ratingEvent.findMany({
-      where: { tournamentId: id, sourceType: "tournament_result" },
-      select: { userId: true, points: true },
-    });
     const pointsByUser = new Map(ratingEvents.map((event) => [event.userId, event.points]));
 
     const live = tournament.payments.filter((payment) => payment.voidedAt == null);
     const chipsInPlay = live.reduce((sum, payment) => sum + payment.chips, 0);
     const placeByUser = new Map(tournament.results.map((row) => [row.userId, row.place]));
 
-    const isStaff = viewer != null && hasRole(viewer.role, "admin");
+    const isStaff = staffViewer;
 
     return {
       ...toSummary(tournament, counts, mine, configs),
@@ -159,6 +166,7 @@ export class TournamentsService {
               .map((row) => ({ userId: row.userId, msgId: row.adminCardMsgId as number })),
           }
         : null,
+      eveningGrants: isStaff ? eveningGrants : null,
     };
   }
 
