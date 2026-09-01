@@ -34,12 +34,12 @@
 	handle {
 		root * /srv
 
-		# Long cache for fingerprinted assets, none for the entry point — otherwise
-		# a returning phone keeps running last week's build from its cache.
+		# SPA HTML is requested as `/`, `/rating`, … — not as `/index.html`.
+		# Telegram's Mini App webview caches that document aggressively.
+		@html not path /assets/*
+		header @html Cache-Control "no-store, no-cache, must-revalidate"
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
-		header /index.html Cache-Control "no-cache"
-		header /sw.js Cache-Control "no-cache"
 
 		# Client-side routing: unknown paths are React Router's business, not 404s.
 		try_files {path} /index.html

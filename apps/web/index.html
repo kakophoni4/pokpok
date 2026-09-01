@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="Cache-Control" content="no-store" />
     <title>Клуб спортивного покера</title>
     <meta
       name="description"
@@ -24,7 +25,33 @@
     <meta name="apple-mobile-web-app-title" content="Покер клуб" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    <!-- Loaded before React so Mini App ready()/initData exist on the first paint. -->
+    <!--
+      Capture the launch hash BEFORE telegram-web-app.js. That script reads
+      tgWebAppData and then strips location.hash, so a later script never sees it.
+    -->
+    <script>
+      (function () {
+        try {
+          var raw = location.hash.charAt(0) === "#" ? location.hash.slice(1) : location.hash;
+          var params = new URLSearchParams(raw);
+          var data = params.get("tgWebAppData");
+          var plat = params.get("tgWebAppPlatform");
+          if (!data) {
+            var query = new URLSearchParams(location.search);
+            data = query.get("tgWebAppData");
+            plat = plat || query.get("tgWebAppPlatform");
+          }
+          if (data) {
+            window.__TG_INIT_DATA__ = data;
+            sessionStorage.setItem("__poker_tg_init_data", data);
+          }
+          if (plat) {
+            window.__TG_PLATFORM__ = plat;
+            sessionStorage.setItem("__poker_tg_platform", plat);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
       (function () {
@@ -33,15 +60,25 @@
           if (app) {
             app.ready();
             app.expand();
-            if (app.initData) window.__TG_INIT_DATA__ = app.initData;
-            if (app.platform && app.platform !== "unknown") window.__TG_PLATFORM__ = app.platform;
+            if (app.initData) {
+              window.__TG_INIT_DATA__ = app.initData;
+              sessionStorage.setItem("__poker_tg_init_data", app.initData);
+            }
+            if (app.platform && app.platform !== "unknown") {
+              window.__TG_PLATFORM__ = app.platform;
+              sessionStorage.setItem("__poker_tg_platform", app.platform);
+            }
           }
-          var hash = location.hash.charAt(0) === "#" ? location.hash.slice(1) : location.hash;
-          var params = new URLSearchParams(hash);
-          var data = params.get("tgWebAppData");
-          var plat = params.get("tgWebAppPlatform");
-          if (data) window.__TG_INIT_DATA__ = data;
-          if (plat) window.__TG_PLATFORM__ = plat;
+          var view = window.Telegram && window.Telegram.WebView;
+          var params = view && view.initParams;
+          if (params && params.tgWebAppData) {
+            window.__TG_INIT_DATA__ = params.tgWebAppData;
+            sessionStorage.setItem("__poker_tg_init_data", params.tgWebAppData);
+          }
+          if (params && params.tgWebAppPlatform) {
+            window.__TG_PLATFORM__ = params.tgWebAppPlatform;
+            sessionStorage.setItem("__poker_tg_platform", params.tgWebAppPlatform);
+          }
         } catch (e) {}
       })();
     </script>

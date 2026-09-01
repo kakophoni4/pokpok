@@ -13,7 +13,7 @@ import { PlayerScreens, type Screen } from "./player.js";
 const config = loadConfig();
 const api = new Api(config);
 const club = new ClubInfo(api);
-const player = new PlayerScreens(api, club, config.webUrl);
+const player = new PlayerScreens(api, club, config.miniAppUrl);
 const admin = new AdminScreens(api);
 const login = new LoginConfirm(api);
 const bot = new Bot(config.botToken);
@@ -611,7 +611,7 @@ try {
     menu_button: {
       type: "web_app",
       text: "Клуб",
-      web_app: { url: config.webUrl },
+      web_app: { url: config.miniAppUrl },
     },
   });
 } catch (error) {

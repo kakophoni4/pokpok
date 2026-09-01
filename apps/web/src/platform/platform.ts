@@ -36,9 +36,13 @@ type TelegramWebApp = {
   openLink(url: string): void;
 };
 
+type TelegramWebView = {
+  initParams?: Record<string, string>;
+};
+
 declare global {
   interface Window {
-    Telegram?: { WebApp?: TelegramWebApp };
+    Telegram?: { WebApp?: TelegramWebApp; WebView?: TelegramWebView };
     TelegramWebviewProxy?: unknown;
     TelegramGameProxy?: unknown;
     __TG_INIT_DATA__?: string;
@@ -47,8 +51,43 @@ declare global {
   }
 }
 
+const INIT_DATA_KEY = "__poker_tg_init_data";
+const PLATFORM_KEY = "__poker_tg_platform";
+
 function telegramShell(): TelegramWebApp | null {
   return window.Telegram?.WebApp ?? null;
+}
+
+function rememberInitData(data: string | null | undefined): void {
+  if (!data || data.length === 0) return;
+  window.__TG_INIT_DATA__ = data;
+  try {
+    sessionStorage.setItem(INIT_DATA_KEY, data);
+  } catch {
+    /* private mode */
+  }
+}
+
+function stored(key: string): string | null {
+  try {
+    const value = sessionStorage.getItem(key);
+    return value && value.length > 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function sdkInitParams(): Record<string, string> {
+  const fromView = window.Telegram?.WebView?.initParams;
+  if (fromView && Object.keys(fromView).length > 0) return fromView;
+  try {
+    const raw = sessionStorage.getItem("__telegram__initParams");
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
 }
 
 function hashParams(): URLSearchParams {
@@ -62,43 +101,29 @@ function hashParams(): URLSearchParams {
   }
 }
 
-/**
- * Telegram sometimes puts the signed payload in the URL hash instead of (or
- * before) filling WebApp.initData. URLSearchParams already decodes it.
- */
 function hashInitData(): string | null {
   const data = hashParams().get("tgWebAppData");
   return data && data.length > 0 ? data : null;
-}
-
-function hashLooksLikeMiniApp(): boolean {
-  const params = hashParams();
-  return Boolean(
-    params.get("tgWebAppData") ||
-      params.get("tgWebAppPlatform") ||
-      params.get("tgWebAppVersion") ||
-      params.get("tgWebAppThemeParams"),
-  );
 }
 
 /**
  * True inside a Telegram WebView even when initData has not landed yet.
  *
  * The SDK object exists on every page of this site, so its mere presence is
- * not enough. iOS Mini Apps often report a Safari user agent with no
- * "Telegram" token; those still set WebApp.platform, inject TelegramWebviewProxy,
- * or put launch params in the URL hash.
+ * not enough. Launch params live in the hash, then in Telegram.WebView.initParams
+ * after the SDK strips the hash, then in sessionStorage for the rest of the visit.
  */
 function looksLikeTelegram(): boolean {
-  if (window.__TG_INIT_DATA__) return true;
-  if (window.__TG_PLATFORM__ && window.__TG_PLATFORM__ !== "unknown") return true;
-  if (hashInitData() || hashLooksLikeMiniApp()) return true;
+  if (readInitData()) return true;
+  const platform =
+    window.__TG_PLATFORM__ || stored(PLATFORM_KEY) || sdkInitParams().tgWebAppPlatform || "";
+  if (platform && platform !== "unknown") return true;
+  if (hashParams().get("tgWebAppData") || hashParams().get("tgWebAppPlatform")) return true;
   if (typeof window.TelegramWebviewProxy !== "undefined") return true;
   if (typeof window.TelegramGameProxy !== "undefined") return true;
   if (window.webkit?.messageHandlers?.TelegramWebView) return true;
   if (/Telegram/i.test(window.navigator.userAgent)) return true;
   const app = telegramShell();
-  if (app && app.initData.length > 0) return true;
   if (app?.platform && app.platform !== "unknown") return true;
   try {
     const query = new URLSearchParams(window.location.search);
@@ -106,7 +131,36 @@ function looksLikeTelegram(): boolean {
   } catch {
     /* ignore */
   }
+  try {
+    if (window.parent != null && window.parent !== window) {
+      if (/telegram\.org/i.test(document.referrer)) return true;
+    }
+  } catch {
+    /* cross-origin parent */
+  }
   return false;
+}
+
+function readInitData(): string | null {
+  const fromSdk = telegramShell()?.initData;
+  if (fromSdk && fromSdk.length > 0) {
+    rememberInitData(fromSdk);
+    return fromSdk;
+  }
+  const fromParams = sdkInitParams().tgWebAppData;
+  if (fromParams && fromParams.length > 0) {
+    rememberInitData(fromParams);
+    return fromParams;
+  }
+  if (window.__TG_INIT_DATA__ && window.__TG_INIT_DATA__.length > 0) return window.__TG_INIT_DATA__;
+  const fromStore = stored(INIT_DATA_KEY);
+  if (fromStore) return fromStore;
+  const fromHash = hashInitData();
+  if (fromHash) {
+    rememberInitData(fromHash);
+    return fromHash;
+  }
+  return null;
 }
 
 export const platform = {
@@ -120,12 +174,7 @@ export const platform = {
 
   /** Credentials for the matching /api/auth endpoint, or null on the plain web. */
   telegramInitData(): string | null {
-    const fromSdk = telegramShell()?.initData;
-    if (fromSdk && fromSdk.length > 0) return fromSdk;
-    if (window.__TG_INIT_DATA__ && window.__TG_INIT_DATA__.length > 0) {
-      return window.__TG_INIT_DATA__;
-    }
-    return hashInitData();
+    return readInitData();
   },
 
   /**
@@ -135,7 +184,7 @@ export const platform = {
   async telegramInitDataSoon(timeoutMs = 8000): Promise<string | null> {
     this.ready();
     const immediate = this.telegramInitData();
-    if (immediate || !looksLikeTelegram()) return immediate;
+    if (immediate || timeoutMs <= 0) return immediate;
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
       this.ready();
@@ -147,12 +196,11 @@ export const platform = {
   },
 
   ready(): void {
-    // Call even before initData arrives: some Telegram clients fill it only
-    // after ready(), and skipping that leaves Mini App login stuck anonymous.
     const app = telegramShell();
     if (!app) return;
     app.ready();
     app.expand();
+    if (app.initData) rememberInitData(app.initData);
   },
 
   haptic(kind: "tap" | "success" | "error"): void {

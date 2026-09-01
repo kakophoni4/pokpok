@@ -48,16 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   /**
-   * Restores a session on load. Inside Telegram we stay on "loading" until
-   * Mini App initData signs us in — the player should never have to tap Войти.
+   * Restores a session on load. Cookie first for the plain web; Mini App initData
+   * is also polled in the background so a late WebView payload still signs us in.
    */
   useEffect(() => {
     let cancelled = false;
 
-    async function tryMiniApp(waitMs: number): Promise<boolean> {
-      platform.ready();
-      const initData = await platform.telegramInitDataSoon(waitMs);
-      if (!initData || cancelled) return false;
+    async function loginWithInitData(initData: string): Promise<boolean> {
       try {
         const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
         if (!cancelled) applySession(session);
@@ -69,15 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function restore(): Promise<void> {
       platform.ready();
-      if (cancelled) return;
+      const immediate = platform.telegramInitData();
+      if (immediate && (await loginWithInitData(immediate))) return;
 
       if (platform.isEmbedded) {
-        // Give the inline Telegram boot script a tick to fill initData.
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        if (cancelled) return;
-        if (await tryMiniApp(8000)) return;
-      } else if (await tryMiniApp(0)) {
-        return;
+        const later = await platform.telegramInitDataSoon(8000);
+        if (later && (await loginWithInitData(later))) return;
       }
 
       const restored = await refreshSession();
@@ -103,17 +97,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession]);
 
   /**
-   * Mini App initData can appear after the first restore. Keep signing in
-   * silently for as long as this WebView is open — never ask the player to tap.
+   * Telegram can fill initData after the first paint. Keep trying for a while
+   * whether or not we already decided this is a Mini App — detection is racy.
    */
   useEffect(() => {
-    if (status !== "anonymous" || !platform.isEmbedded) return;
+    if (status === "authenticated") return;
     let cancelled = false;
     const tick = (): void => {
+      platform.ready();
+      const initData = platform.telegramInitData();
+      if (!initData || cancelled) return;
       void (async () => {
-        platform.ready();
-        const initData = platform.telegramInitData() ?? (await platform.telegramInitDataSoon(400));
-        if (!initData || cancelled) return;
         try {
           const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
           if (!cancelled) applySession(session);
@@ -123,10 +117,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })();
     };
     tick();
-    const timer = window.setInterval(tick, 1500);
+    const timer = window.setInterval(tick, 250);
+    const stop = window.setTimeout(() => window.clearInterval(timer), 15_000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
+      window.clearTimeout(stop);
     };
   }, [status, applySession]);
 

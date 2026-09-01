@@ -23,6 +23,13 @@ export function RegisterButton({ tournament }: { tournament: TournamentSummary }
   const tooLate = closesAt != null && closesAt < new Date();
 
   if (!user) {
+    if (platform.isEmbedded) {
+      return (
+        <Button variant="secondary" className="w-full" disabled>
+          Входим…
+        </Button>
+      );
+    }
     return (
       <Button variant="secondary" className="w-full" onClick={() => navigate("/login")}>
         Войти, чтобы записаться

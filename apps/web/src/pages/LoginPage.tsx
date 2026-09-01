@@ -17,7 +17,8 @@ export function LoginPage() {
   const telegram = useTelegramLogin(status === "anonymous" && !platform.isEmbedded);
 
   useEffect(() => {
-    if (!platform.isEmbedded || status !== "anonymous") return;
+    if (status !== "anonymous") return;
+    if (!platform.isEmbedded && !platform.telegramInitData()) return;
     let cancelled = false;
     setBusy(true);
     setError(null);
