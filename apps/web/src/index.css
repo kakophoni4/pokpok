@@ -37,12 +37,18 @@
     font-family: var(--font-body);
     min-height: 100dvh;
     background-color: #070d0b;
+    /*
+     * The backdrop photo is lit and colourful, so the veil over it carries most
+     * of the contrast: page titles sit straight on it with no card behind them.
+     * It stays heaviest at the edges, which keeps the bokeh readable as a mood
+     * in the middle without letting a highlight land under a line of text.
+     */
     background-image:
-      radial-gradient(ellipse at 50% 28%, rgba(7, 13, 11, 0.55) 0%, rgba(7, 13, 11, 0.88) 62%, #070d0b 100%),
-      url("/images/felt.jpg");
+      radial-gradient(ellipse at 50% 40%, rgba(6, 10, 9, 0.7) 0%, rgba(6, 10, 9, 0.9) 60%, #070d0b 100%),
+      url("/images/backdrop.jpg");
     background-size: cover;
     background-attachment: fixed;
-    background-position: center top;
+    background-position: center;
   }
 
   .nums {

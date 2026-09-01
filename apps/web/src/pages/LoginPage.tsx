@@ -75,8 +75,9 @@ export function LoginPage() {
   return (
     <div className="mx-auto max-w-md">
       <Card className="overflow-hidden p-0 text-center">
+        {/* The photo's own aspect ratio, so the four aces are never cropped. */}
         <div
-          className="h-36 bg-cover bg-center"
+          className="aspect-[16/9] bg-cover bg-center"
           style={{ backgroundImage: "url(/images/login-hero.jpg)" }}
           aria-hidden
         />
