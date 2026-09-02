@@ -277,6 +277,7 @@ export type ClubMenuItemWhereInput = {
   bundle?: Prisma.JsonNullableFilter<"ClubMenuItem">
   createdAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
+  prizes?: Prisma.PlayerPrizeListRelationFilter
 }
 
 export type ClubMenuItemOrderByWithRelationInput = {
@@ -292,6 +293,7 @@ export type ClubMenuItemOrderByWithRelationInput = {
   bundle?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  prizes?: Prisma.PlayerPrizeOrderByRelationAggregateInput
 }
 
 export type ClubMenuItemWhereUniqueInput = Prisma.AtLeast<{
@@ -310,6 +312,7 @@ export type ClubMenuItemWhereUniqueInput = Prisma.AtLeast<{
   bundle?: Prisma.JsonNullableFilter<"ClubMenuItem">
   createdAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ClubMenuItem"> | Date | string
+  prizes?: Prisma.PlayerPrizeListRelationFilter
 }, "id">
 
 export type ClubMenuItemOrderByWithAggregationInput = {
@@ -363,6 +366,7 @@ export type ClubMenuItemCreateInput = {
   bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  prizes?: Prisma.PlayerPrizeCreateNestedManyWithoutMenuItemInput
 }
 
 export type ClubMenuItemUncheckedCreateInput = {
@@ -378,6 +382,7 @@ export type ClubMenuItemUncheckedCreateInput = {
   bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  prizes?: Prisma.PlayerPrizeUncheckedCreateNestedManyWithoutMenuItemInput
 }
 
 export type ClubMenuItemUpdateInput = {
@@ -393,6 +398,7 @@ export type ClubMenuItemUpdateInput = {
   bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prizes?: Prisma.PlayerPrizeUpdateManyWithoutMenuItemNestedInput
 }
 
 export type ClubMenuItemUncheckedUpdateInput = {
@@ -408,6 +414,7 @@ export type ClubMenuItemUncheckedUpdateInput = {
   bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prizes?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutMenuItemNestedInput
 }
 
 export type ClubMenuItemCreateManyInput = {
@@ -453,6 +460,11 @@ export type ClubMenuItemUncheckedUpdateManyInput = {
   bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ClubMenuItemNullableScalarRelationFilter = {
+  is?: Prisma.ClubMenuItemWhereInput | null
+  isNot?: Prisma.ClubMenuItemWhereInput | null
 }
 
 export type ClubMenuItemCountOrderByAggregateInput = {
@@ -510,6 +522,127 @@ export type ClubMenuItemSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
+export type ClubMenuItemCreateNestedOneWithoutPrizesInput = {
+  create?: Prisma.XOR<Prisma.ClubMenuItemCreateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedCreateWithoutPrizesInput>
+  connectOrCreate?: Prisma.ClubMenuItemCreateOrConnectWithoutPrizesInput
+  connect?: Prisma.ClubMenuItemWhereUniqueInput
+}
+
+export type ClubMenuItemUpdateOneWithoutPrizesNestedInput = {
+  create?: Prisma.XOR<Prisma.ClubMenuItemCreateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedCreateWithoutPrizesInput>
+  connectOrCreate?: Prisma.ClubMenuItemCreateOrConnectWithoutPrizesInput
+  upsert?: Prisma.ClubMenuItemUpsertWithoutPrizesInput
+  disconnect?: Prisma.ClubMenuItemWhereInput | boolean
+  delete?: Prisma.ClubMenuItemWhereInput | boolean
+  connect?: Prisma.ClubMenuItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClubMenuItemUpdateToOneWithWhereWithoutPrizesInput, Prisma.ClubMenuItemUpdateWithoutPrizesInput>, Prisma.ClubMenuItemUncheckedUpdateWithoutPrizesInput>
+}
+
+export type ClubMenuItemCreateWithoutPrizesInput = {
+  id?: string
+  title: string
+  kind: $Enums.PaymentKind
+  priceRub?: number
+  chips?: number
+  isFixed?: boolean
+  isPromo?: boolean
+  isActive?: boolean
+  sortOrder?: number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ClubMenuItemUncheckedCreateWithoutPrizesInput = {
+  id?: string
+  title: string
+  kind: $Enums.PaymentKind
+  priceRub?: number
+  chips?: number
+  isFixed?: boolean
+  isPromo?: boolean
+  isActive?: boolean
+  sortOrder?: number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ClubMenuItemCreateOrConnectWithoutPrizesInput = {
+  where: Prisma.ClubMenuItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClubMenuItemCreateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedCreateWithoutPrizesInput>
+}
+
+export type ClubMenuItemUpsertWithoutPrizesInput = {
+  update: Prisma.XOR<Prisma.ClubMenuItemUpdateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedUpdateWithoutPrizesInput>
+  create: Prisma.XOR<Prisma.ClubMenuItemCreateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedCreateWithoutPrizesInput>
+  where?: Prisma.ClubMenuItemWhereInput
+}
+
+export type ClubMenuItemUpdateToOneWithWhereWithoutPrizesInput = {
+  where?: Prisma.ClubMenuItemWhereInput
+  data: Prisma.XOR<Prisma.ClubMenuItemUpdateWithoutPrizesInput, Prisma.ClubMenuItemUncheckedUpdateWithoutPrizesInput>
+}
+
+export type ClubMenuItemUpdateWithoutPrizesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
+  priceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  chips?: Prisma.IntFieldUpdateOperationsInput | number
+  isFixed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ClubMenuItemUncheckedUpdateWithoutPrizesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
+  priceRub?: Prisma.IntFieldUpdateOperationsInput | number
+  chips?: Prisma.IntFieldUpdateOperationsInput | number
+  isFixed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPromo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  bundle?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type ClubMenuItemCountOutputType
+ */
+
+export type ClubMenuItemCountOutputType = {
+  prizes: number
+}
+
+export type ClubMenuItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  prizes?: boolean | ClubMenuItemCountOutputTypeCountPrizesArgs
+}
+
+/**
+ * ClubMenuItemCountOutputType without action
+ */
+export type ClubMenuItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClubMenuItemCountOutputType
+   */
+  select?: Prisma.ClubMenuItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ClubMenuItemCountOutputType without action
+ */
+export type ClubMenuItemCountOutputTypeCountPrizesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlayerPrizeWhereInput
+}
 
 
 export type ClubMenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -525,6 +658,8 @@ export type ClubMenuItemSelect<ExtArgs extends runtime.Types.Extensions.Internal
   bundle?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  prizes?: boolean | Prisma.ClubMenuItem$prizesArgs<ExtArgs>
+  _count?: boolean | Prisma.ClubMenuItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["clubMenuItem"]>
 
 export type ClubMenuItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -573,10 +708,18 @@ export type ClubMenuItemSelectScalar = {
 }
 
 export type ClubMenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "kind" | "priceRub" | "chips" | "isFixed" | "isPromo" | "isActive" | "sortOrder" | "bundle" | "createdAt" | "updatedAt", ExtArgs["result"]["clubMenuItem"]>
+export type ClubMenuItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  prizes?: boolean | Prisma.ClubMenuItem$prizesArgs<ExtArgs>
+  _count?: boolean | Prisma.ClubMenuItemCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ClubMenuItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ClubMenuItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ClubMenuItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClubMenuItem"
-  objects: {}
+  objects: {
+    prizes: Prisma.$PlayerPrizePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
@@ -990,6 +1133,7 @@ readonly fields: ClubMenuItemFieldRefs;
  */
 export interface Prisma__ClubMenuItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  prizes<T extends Prisma.ClubMenuItem$prizesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubMenuItem$prizesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerPrizePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1048,6 +1192,10 @@ export type ClubMenuItemFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * Filter, which ClubMenuItem to fetch.
    */
   where: Prisma.ClubMenuItemWhereUniqueInput
@@ -1066,6 +1214,10 @@ export type ClubMenuItemFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * Filter, which ClubMenuItem to fetch.
    */
   where: Prisma.ClubMenuItemWhereUniqueInput
@@ -1083,6 +1235,10 @@ export type ClubMenuItemFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ClubMenuItem
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
   /**
    * Filter, which ClubMenuItem to fetch.
    */
@@ -1132,6 +1288,10 @@ export type ClubMenuItemFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * Filter, which ClubMenuItem to fetch.
    */
   where?: Prisma.ClubMenuItemWhereInput
@@ -1179,6 +1339,10 @@ export type ClubMenuItemFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ClubMenuItem
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
   /**
    * Filter, which ClubMenuItems to fetch.
    */
@@ -1228,6 +1392,10 @@ export type ClubMenuItemCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * The data needed to create a ClubMenuItem.
    */
   data: Prisma.XOR<Prisma.ClubMenuItemCreateInput, Prisma.ClubMenuItemUncheckedCreateInput>
@@ -1275,6 +1443,10 @@ export type ClubMenuItemUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the ClubMenuItem
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
   /**
    * The data needed to update a ClubMenuItem.
    */
@@ -1342,6 +1514,10 @@ export type ClubMenuItemUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * The filter to search for the ClubMenuItem to update in case it exists.
    */
   where: Prisma.ClubMenuItemWhereUniqueInput
@@ -1368,6 +1544,10 @@ export type ClubMenuItemDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
+  /**
    * Filter which ClubMenuItem to delete.
    */
   where: Prisma.ClubMenuItemWhereUniqueInput
@@ -1388,6 +1568,30 @@ export type ClubMenuItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * ClubMenuItem.prizes
+ */
+export type ClubMenuItem$prizesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlayerPrize
+   */
+  select?: Prisma.PlayerPrizeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlayerPrize
+   */
+  omit?: Prisma.PlayerPrizeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlayerPrizeInclude<ExtArgs> | null
+  where?: Prisma.PlayerPrizeWhereInput
+  orderBy?: Prisma.PlayerPrizeOrderByWithRelationInput | Prisma.PlayerPrizeOrderByWithRelationInput[]
+  cursor?: Prisma.PlayerPrizeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlayerPrizeScalarFieldEnum | Prisma.PlayerPrizeScalarFieldEnum[]
+}
+
+/**
  * ClubMenuItem without action
  */
 export type ClubMenuItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1399,4 +1603,8 @@ export type ClubMenuItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ClubMenuItem
    */
   omit?: Prisma.ClubMenuItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClubMenuItemInclude<ExtArgs> | null
 }

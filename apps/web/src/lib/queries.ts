@@ -10,11 +10,14 @@ import type {
   CreateClubMenuItemInput,
   CreateSeasonInput,
   CreateTournamentInput,
+  EveningJournal,
   GrantAchievementInput,
+  GrantPrizeInput,
   LeaderboardRow,
   MeUser,
   Paginated,
   PlayerStats,
+  PrizeWallet,
   PublicUser,
   RegistrationView,
   Season,
@@ -52,6 +55,9 @@ export const keys = {
   clubInfo: () => ["club", "info"] as const,
   clubSettings: () => ["club", "settings"] as const,
   sales: (period: string, seasonId: string) => ["club", "sales", period, seasonId] as const,
+  journal: (tournamentId: string) => ["club", "journal", tournamentId] as const,
+  myPrizes: () => ["prizes", "me"] as const,
+  playerPrizes: (userId: string) => ["prizes", "user", userId] as const,
 };
 
 export function useTournaments(scope: "upcoming" | "past" | "all", enabled = true) {
@@ -189,6 +195,30 @@ export function useSales(period: SalesPeriod, seasonId?: string) {
   });
 }
 
+export function useJournal(tournamentId: string | undefined) {
+  return useQuery({
+    queryKey: keys.journal(tournamentId ?? ""),
+    queryFn: () => api.get<EveningJournal>(`/club/journal${query({ tournamentId })}`),
+    enabled: Boolean(tournamentId),
+  });
+}
+
+export function useMyPrizes(enabled: boolean) {
+  return useQuery({
+    queryKey: keys.myPrizes(),
+    queryFn: () => api.get<PrizeWallet>("/prizes/me"),
+    enabled,
+  });
+}
+
+export function usePlayerPrizes(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.playerPrizes(userId ?? ""),
+    queryFn: () => api.get<PrizeWallet>(`/prizes/user/${userId}`),
+    enabled: Boolean(userId),
+  });
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export function useRegister(tournamentId: string) {
@@ -288,6 +318,43 @@ export function useVoidPayment(tournamentId: string) {
     mutationFn: (paymentId: string) =>
       api.delete(`/tournaments/${tournamentId}/payments/${paymentId}`),
     onSuccess: () => invalidateSchedule(client, tournamentId),
+  });
+}
+
+export function useGrantPrize(tournamentId?: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: GrantPrizeInput) => api.post<PrizeWallet>("/prizes", input),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["prizes"] });
+      if (tournamentId) invalidateSchedule(client, tournamentId);
+      void client.invalidateQueries({ queryKey: ["club", "journal"] });
+    },
+  });
+}
+
+export function useRedeemPrize(tournamentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (prizeId: string) =>
+      api.post<TournamentPlayer>(`/prizes/${prizeId}/redeem`, { tournamentId }),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["prizes"] });
+      invalidateSchedule(client, tournamentId);
+      void client.invalidateQueries({ queryKey: ["club", "journal"] });
+    },
+  });
+}
+
+export function useRevokePrize() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (prizeId: string) => api.delete<PrizeWallet>(`/prizes/${prizeId}`),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["prizes"] });
+      void client.invalidateQueries({ queryKey: ["tournament"] });
+      void client.invalidateQueries({ queryKey: ["club", "journal"] });
+    },
   });
 }
 

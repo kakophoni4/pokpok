@@ -4,9 +4,11 @@ import {
   type ClubMenuItem,
   type ClubSettings,
   type ClubVenue,
+  type EveningJournal,
   type SalesReport,
   ClubVenueInput,
   CreateClubMenuItemInput,
+  JournalQuery,
   SalesQuery,
   UpdateClubMenuItemInput,
   UpdateClubSettingsInput,
@@ -44,6 +46,13 @@ export class ClubController {
   @ApiOperation({ summary: "What the till took: by week, month or season (admin)" })
   sales(@Query(zodPipe(SalesQuery)) query: SalesQuery): Promise<SalesReport> {
     return this.club.sales(query);
+  }
+
+  @Roles("admin")
+  @Get("journal")
+  @ApiOperation({ summary: "Everything that happened at one evening's desk, and who did it (admin)" })
+  journal(@Query(zodPipe(JournalQuery)) query: JournalQuery): Promise<EveningJournal> {
+    return this.club.journal(query.tournamentId);
   }
 
   @Roles("admin")

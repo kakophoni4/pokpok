@@ -62,6 +62,7 @@ export const ModelName = {
   Registration: 'Registration',
   Result: 'Result',
   Payment: 'Payment',
+  PlayerPrize: 'PlayerPrize',
   ClubSettings: 'ClubSettings',
   ClubMenuItem: 'ClubMenuItem',
   Achievement: 'Achievement',
@@ -252,6 +253,27 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const PlayerPrizeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  menuItemId: 'menuItemId',
+  title: 'title',
+  kind: 'kind',
+  comment: 'comment',
+  grantedById: 'grantedById',
+  wonAtId: 'wonAtId',
+  grantedAt: 'grantedAt',
+  redeemedAt: 'redeemedAt',
+  redeemedById: 'redeemedById',
+  spentAtId: 'spentAtId',
+  paymentId: 'paymentId',
+  voidedAt: 'voidedAt',
+  voidedById: 'voidedById'
+} as const
+
+export type PlayerPrizeScalarFieldEnum = (typeof PlayerPrizeScalarFieldEnum)[keyof typeof PlayerPrizeScalarFieldEnum]
 
 
 export const ClubSettingsScalarFieldEnum = {

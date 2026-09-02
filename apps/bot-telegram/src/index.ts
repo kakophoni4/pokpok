@@ -8,6 +8,7 @@ import { ClubInfo } from "./club.js";
 import { loadConfig } from "./config.js";
 import { escapeHtml, playerLabel, points, rub } from "./format.js";
 import { LOGIN_CALLBACK, LoginConfirm } from "./login.js";
+import { Notifier } from "./notifier.js";
 import { PlayerScreens, type Screen } from "./player.js";
 
 const config = loadConfig();
@@ -17,6 +18,9 @@ const player = new PlayerScreens(api, club, config.miniAppUrl);
 const admin = new AdminScreens(api);
 const login = new LoginConfirm(api);
 const bot = new Bot(config.botToken);
+const notifier = new Notifier(bot, api, config.miniAppUrl, (message) =>
+  console.error(`[bot] ${message}`),
+);
 
 function profileOf(ctx: Context): TelegramProfile | null {
   const from = ctx.from;
@@ -676,11 +680,17 @@ for (const [what, set] of [
   }
 }
 
-const stop = () => void bot.stop();
+const stop = () => {
+  notifier.stop();
+  void bot.stop();
+};
 process.once("SIGINT", stop);
 process.once("SIGTERM", stop);
 
 console.log(`[bot] starting, API at ${config.apiBase}`);
 await bot.start({
-  onStart: (info) => console.log(`[bot] @${info.username} is listening`),
+  onStart: (info) => {
+    console.log(`[bot] @${info.username} is listening`);
+    notifier.start();
+  },
 });

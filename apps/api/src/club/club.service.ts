@@ -6,6 +6,8 @@ import {
   type ClubVenue,
   type ClubVenueInput,
   type CreateClubMenuItemInput,
+  type EveningJournal,
+  formatPlayerName,
   parsePromoBundle,
   promoKindFromBundle,
   type SalesQuery,
@@ -15,6 +17,7 @@ import {
 } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
+import { describe, summariseStaff } from "./journal";
 import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
 
 /** There is exactly one club, so exactly one settings row. */
@@ -416,6 +419,83 @@ export class ClubService {
       totalRub: payments.reduce((sum, payment) => sum + payment.amountRub, 0),
       totalChips: payments.reduce((sum, payment) => sum + payment.chips, 0),
       lines,
+    };
+  }
+
+  /**
+   * Everything that happened at one evening's desk, in order, with a name
+   * against each line.
+   *
+   * Read from the audit trail rather than from the payments themselves, because
+   * the question this answers is "who did that", and a voided line, a prize
+   * written off and a place typed in wrong all belong in the same list.
+   */
+  async journal(tournamentId: string): Promise<EveningJournal> {
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { id: true, title: true, startsAt: true },
+    });
+    if (!tournament) {
+      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+    }
+
+    // Combos are keyed by their own grant id, so the evening has to be looked
+    // up first — there is no tournament id inside the audit row to filter on.
+    const grants = await this.prisma.userAchievement.findMany({
+      where: { tournamentId },
+      select: { id: true },
+    });
+
+    const rows = await this.prisma.auditLog.findMany({
+      where: {
+        OR: [
+          { entity: "Tournament", entityId: tournamentId },
+          { entity: "Registration", entityId: { startsWith: `${tournamentId}:` } },
+          ...(grants.length > 0
+            ? [{ entity: "UserAchievement", entityId: { in: grants.map((row) => row.id) } }]
+            : []),
+        ],
+      },
+      orderBy: { createdAt: "asc" },
+      include: { actor: { select: { nickname: true, displayName: true } } },
+    });
+
+    const achievements = await this.prisma.achievement.findMany({
+      select: { code: true, title: true },
+    });
+    const titles = new Map(achievements.map((row) => [row.code, row.title]));
+
+    const described = rows.map((row) => ({ row, told: describe(row, titles) }));
+
+    const playerIds = [
+      ...new Set(described.map((item) => item.told.playerId).filter((id): id is string => id != null)),
+    ];
+    const players = await this.prisma.user.findMany({
+      where: { id: { in: playerIds } },
+      select: { id: true, nickname: true, displayName: true },
+    });
+    const nameById = new Map(
+      players.map((row) => [row.id, formatPlayerName(row.displayName, row.nickname)]),
+    );
+
+    const entries: EveningJournal["entries"] = described.map(({ row, told }) => ({
+      id: row.id,
+      at: row.createdAt.toISOString(),
+      action: row.action,
+      label: told.label,
+      actor: row.actor ? formatPlayerName(row.actor.displayName, row.actor.nickname) : null,
+      player: told.playerId ? (nameById.get(told.playerId) ?? null) : null,
+      playerId: told.playerId,
+      amountRub: told.amountRub,
+    }));
+
+    return {
+      tournamentId: tournament.id,
+      title: tournament.title,
+      startsAt: tournament.startsAt.toISOString(),
+      totalRub: entries.reduce((sum, entry) => sum + entry.amountRub, 0),
+      staff: summariseStaff(entries),
+      entries,
     };
   }
 }

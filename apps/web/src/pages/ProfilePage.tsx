@@ -2,13 +2,14 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { PlayerProfile } from "../components/PlayerProfile";
 import { Badge, Button, ErrorState, Loading } from "../components/ui";
-import { useMyStats, useUserAchievements } from "../lib/queries";
+import { useMyPrizes, useMyStats, useUserAchievements } from "../lib/queries";
 
 export function ProfilePage() {
   const { user, status, signingIn, logout, can } = useAuth();
   const navigate = useNavigate();
   const stats = useMyStats(status === "authenticated");
   const achievements = useUserAchievements(user?.id);
+  const prizes = useMyPrizes(status === "authenticated");
 
   if (status === "loading") return <Loading />;
   if (status === "anonymous") {
@@ -24,6 +25,7 @@ export function ProfilePage() {
       <PlayerProfile
         stats={stats.data}
         achievements={achievements.data}
+        wallet={prizes.data}
         canRevoke={can("hostess")}
         extra={
           <div className="mt-4 space-y-3 border-t border-felt-800 pt-3">

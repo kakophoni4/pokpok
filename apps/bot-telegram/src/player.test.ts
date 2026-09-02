@@ -113,11 +113,22 @@ const registrations = Array.from({ length: 12 }, (_, index) => ({
   createdAt: START,
 }));
 
+const wallet = {
+  lines: [
+    { title: "Пиво <светлое>", kind: "drink", count: 2 },
+    { title: "Ребай", kind: "rebuy", count: 1 },
+  ],
+  total: 3,
+  active: [],
+  history: [],
+};
+
 const api = {
   session: async () => ({ accessToken: "t", expiresAt: 0, userId: ME, nickname: "Тимур А.", role: "player" }),
   asUser: async (_profile: TelegramProfile, _method: string, path: string) => {
     if (path.startsWith("/tournaments")) return tournaments;
     if (path === "/rating/me") return stats;
+    if (path === "/prizes/me") return wallet;
     throw new Error(`unexpected asUser path ${path}`);
   },
   public: async (path: string) => {
@@ -226,5 +237,18 @@ describe("player screens", () => {
 
   it("puts a player's record in the toast over the roster", async () => {
     expect(await screens.playerToast(ME)).toContain("4-е место");
+  });
+
+  it("shows unspent prizes where the player will see them first", async () => {
+    const home = await screens.render("home", profile);
+    const me = await screens.render("me", profile);
+
+    // A prize title is club-entered text, so it goes through the same escaping
+    // as a tournament name — a stray bracket must not eat the message.
+    expect(home.text).toContain("Пиво &lt;светлое&gt; ×2 · Ребай");
+    expect(home.text).toContain("<b>Ваши призы</b> · 3");
+    expect(me.text).toContain("Спишем на кассе");
+    expect(tagErrors(home.text)).toEqual([]);
+    expect(tagErrors(me.text)).toEqual([]);
   });
 });

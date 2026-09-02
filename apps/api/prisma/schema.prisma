@@ -112,6 +112,10 @@ model User {
   grantedAchievements UserAchievement[] @relation("achievementGranter")
   auditEntries        AuditLog[]
   notifications       Outbox[]
+  prizes              PlayerPrize[]     @relation("prizeHolder")
+  grantedPrizes       PlayerPrize[]     @relation("prizeGranter")
+  redeemedPrizes      PlayerPrize[]     @relation("prizeRedeemer")
+  voidedPrizes        PlayerPrize[]     @relation("prizeVoider")
 
   @@index([role])
   @@index([status])
@@ -254,6 +258,8 @@ model Tournament {
   payments      Payment[]
   ratingEvents  RatingEvent[]
   achievements  UserAchievement[]
+  prizesWon     PlayerPrize[]     @relation("prizeWon")
+  prizesSpent   PlayerPrize[]     @relation("prizeSpent")
 
   @@index([startsAt])
   @@index([status, startsAt])
@@ -321,10 +327,56 @@ model Payment {
   voidedById   String?
   voidedBy     User?       @relation("paymentVoider", fields: [voidedById], references: [id], onDelete: SetNull)
   createdAt    DateTime    @default(now())
+  /// Set when this line was paid for with a prize rather than with money.
+  prize        PlayerPrize?
 
   @@index([tournamentId, userId])
   @@index([userId])
   @@index([createdAt])
+}
+
+/// A prize a player won and has not spent: a free beer, a free rebuy.
+///
+/// One row per unit rather than a counter, so a «тройной ребай» can be spent
+/// one at a time and each unit keeps its own trail. Spending one writes a
+/// normal Payment costing nothing, which is why `menuItemId` matters: it is
+/// what tells the desk how many chips a free rebuy hands out.
+model PlayerPrize {
+  id         String       @id @default(cuid(2))
+  userId     String
+  user       User         @relation("prizeHolder", fields: [userId], references: [id], onDelete: Cascade)
+  /// Nullable so deleting a till button does not erase what people are owed.
+  menuItemId String?
+  menuItem   ClubMenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  /// Copied at grant time for the same reason.
+  title      String
+  kind       PaymentKind
+  comment    String?
+
+  grantedById  String?
+  grantedBy    User?       @relation("prizeGranter", fields: [grantedById], references: [id], onDelete: SetNull)
+  /// The evening it was won at, if it was won at one.
+  wonAtId      String?
+  wonAt        Tournament? @relation("prizeWon", fields: [wonAtId], references: [id], onDelete: SetNull)
+  grantedAt    DateTime    @default(now())
+
+  redeemedAt   DateTime?
+  redeemedById String?
+  redeemedBy   User?       @relation("prizeRedeemer", fields: [redeemedById], references: [id], onDelete: SetNull)
+  spentAtId    String?
+  spentAt      Tournament? @relation("prizeSpent", fields: [spentAtId], references: [id], onDelete: SetNull)
+  /// The zero-rouble till line spending it produced.
+  paymentId    String?     @unique
+  payment      Payment?    @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  /// Granted by mistake. Kept rather than deleted, like a voided payment.
+  voidedAt   DateTime?
+  voidedById String?
+  voidedBy   User?    @relation("prizeVoider", fields: [voidedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, redeemedAt, voidedAt])
+  @@index([wonAtId])
+  @@index([spentAtId])
 }
 
 /// Club-wide settings, exactly one row. The timezone lives here because it is
@@ -359,6 +411,8 @@ model ClubMenuItem {
   bundle    Json?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+
+  prizes PlayerPrize[]
 
   @@index([sortOrder])
 }

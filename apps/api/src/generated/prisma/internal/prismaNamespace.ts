@@ -408,6 +408,7 @@ export const ModelName = {
   Registration: 'Registration',
   Result: 'Result',
   Payment: 'Payment',
+  PlayerPrize: 'PlayerPrize',
   ClubSettings: 'ClubSettings',
   ClubMenuItem: 'ClubMenuItem',
   Achievement: 'Achievement',
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
+    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "playerPrize" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1249,6 +1250,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlayerPrize: {
+      payload: Prisma.$PlayerPrizePayload<ExtArgs>
+      fields: Prisma.PlayerPrizeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlayerPrizeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlayerPrizeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        findFirst: {
+          args: Prisma.PlayerPrizeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlayerPrizeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        findMany: {
+          args: Prisma.PlayerPrizeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>[]
+        }
+        create: {
+          args: Prisma.PlayerPrizeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        createMany: {
+          args: Prisma.PlayerPrizeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlayerPrizeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>[]
+        }
+        delete: {
+          args: Prisma.PlayerPrizeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        update: {
+          args: Prisma.PlayerPrizeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlayerPrizeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlayerPrizeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlayerPrizeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlayerPrizeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerPrizePayload>
+        }
+        aggregate: {
+          args: Prisma.PlayerPrizeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlayerPrize>
+        }
+        groupBy: {
+          args: Prisma.PlayerPrizeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerPrizeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlayerPrizeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerPrizeCountAggregateOutputType> | number
+        }
+      }
+    }
     ClubSettings: {
       payload: Prisma.$ClubSettingsPayload<ExtArgs>
       fields: Prisma.ClubSettingsFieldRefs
@@ -2046,6 +2121,27 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const PlayerPrizeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  menuItemId: 'menuItemId',
+  title: 'title',
+  kind: 'kind',
+  comment: 'comment',
+  grantedById: 'grantedById',
+  wonAtId: 'wonAtId',
+  grantedAt: 'grantedAt',
+  redeemedAt: 'redeemedAt',
+  redeemedById: 'redeemedById',
+  spentAtId: 'spentAtId',
+  paymentId: 'paymentId',
+  voidedAt: 'voidedAt',
+  voidedById: 'voidedById'
+} as const
+
+export type PlayerPrizeScalarFieldEnum = (typeof PlayerPrizeScalarFieldEnum)[keyof typeof PlayerPrizeScalarFieldEnum]
+
+
 export const ClubSettingsScalarFieldEnum = {
   id: 'id',
   infoText: 'infoText',
@@ -2595,6 +2691,7 @@ export type GlobalOmitConfig = {
   registration?: Prisma.RegistrationOmit
   result?: Prisma.ResultOmit
   payment?: Prisma.PaymentOmit
+  playerPrize?: Prisma.PlayerPrizeOmit
   clubSettings?: Prisma.ClubSettingsOmit
   clubMenuItem?: Prisma.ClubMenuItemOmit
   achievement?: Prisma.AchievementOmit

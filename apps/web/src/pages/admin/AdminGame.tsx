@@ -3,6 +3,7 @@ import type {
   ClubMenuItem,
   PaymentKind,
   PaymentView,
+  PlayerPrize,
   TournamentDetail,
   TournamentPlayer,
 } from "@poker/contracts";
@@ -26,7 +27,9 @@ import {
   useClubSettings,
   useFinishTournament,
   useGrantAchievement,
+  useGrantPrize,
   usePlayers,
+  useRedeemPrize,
   useRevokeAchievement,
   useSetPlace,
   useStaffCancelRegistration,
@@ -394,6 +397,8 @@ function PlayerCard({
   const setPlace = useSetPlace(detail.id);
   const grant = useGrantAchievement();
   const revoke = useRevokeAchievement();
+  const grantPrize = useGrantPrize(detail.id);
+  const redeemPrize = useRedeemPrize(detail.id);
   const unseat = useStaffCancelRegistration(detail.id);
   const busy =
     addPayment.isPending ||
@@ -401,6 +406,8 @@ function PlayerCard({
     setPlace.isPending ||
     grant.isPending ||
     revoke.isPending ||
+    grantPrize.isPending ||
+    redeemPrize.isPending ||
     unseat.isPending;
 
   const priceOf: Record<Exclude<PaymentKind, "other">, number> = {
@@ -411,6 +418,8 @@ function PlayerCard({
   };
 
   const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
+  const catalogue = (prices.menuItems ?? []).filter((item) => item.isActive);
+  const held = (detail.prizes ?? []).filter((prize) => prize.userId === seat.user.id);
   const upcoming = nextPlace(detail);
   const entries = seat.payments.filter((payment) => payment.kind === "entry");
   const rebuys = seat.payments.filter((payment) => payment.kind === "rebuy");
@@ -425,7 +434,9 @@ function PlayerCard({
     (grant.error as Error | null)?.message ??
     (revoke.error as Error | null)?.message ??
     (setPlace.error as Error | null)?.message ??
-    (unseat.error as Error | null)?.message;
+    (unseat.error as Error | null)?.message ??
+    (grantPrize.error as Error | null)?.message ??
+    (redeemPrize.error as Error | null)?.message;
 
   function charge(kind: "entry" | "rebuy" | "addon", times = 1) {
     addPayment.mutate({
@@ -559,6 +570,50 @@ function PlayerCard({
             />
           )}
           {extras.length === 0 && barLines.length === 0 && (
+            <span className="text-xs text-stone-600">нет позиций</span>
+          )}
+        </DeskSection>
+
+        <DeskSection title="Призы">
+          {groupPrizes(held).map((line) => (
+            <span
+              key={line.sample.id}
+              className="inline-flex h-8 overflow-hidden rounded-lg border border-gold-500/25"
+            >
+              <span className="inline-flex min-w-0 items-center truncate px-2 text-xs whitespace-nowrap text-gold-400">
+                {line.title}
+                {line.count > 1 ? ` ×${line.count}` : ""}
+              </span>
+              {!locked ? (
+                <button
+                  type="button"
+                  title={`Списать: ${line.title}`}
+                  disabled={busy}
+                  onClick={() => redeemPrize.mutate(line.sample.id)}
+                  className="h-8 shrink-0 border-l border-gold-500/20 px-2 text-xs text-stone-300 hover:bg-gold-500/15 hover:text-gold-400 disabled:opacity-20"
+                >
+                  списать
+                </button>
+              ) : null}
+            </span>
+          ))}
+          {!locked && catalogue.length > 0 && (
+            <BarPicker
+              extras={catalogue}
+              disabled={busy}
+              label="Начислить"
+              ariaLabel="Начислить приз из меню"
+              onPick={(item) =>
+                grantPrize.mutate({
+                  userId: seat.user.id,
+                  menuItemId: item.id,
+                  quantity: 1,
+                  tournamentId: detail.id,
+                })
+              }
+            />
+          )}
+          {held.length === 0 && catalogue.length === 0 && (
             <span className="text-xs text-stone-600">нет позиций</span>
           )}
         </DeskSection>
@@ -750,10 +805,14 @@ function BarPicker({
   extras,
   disabled,
   onPick,
+  label = "Добавить",
+  ariaLabel = "Добавить из бара",
 }: {
   extras: ClubMenuItem[];
   disabled: boolean;
   onPick: (item: ClubMenuItem) => void;
+  label?: string;
+  ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -800,11 +859,11 @@ function BarPicker({
         disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Добавить из бара"
+        aria-label={ariaLabel}
         onClick={() => setOpen((current) => !current)}
         className="field flex h-8 items-center justify-between gap-1 px-2 py-0 text-xs"
       >
-        <span>Добавить</span>
+        <span>{label}</span>
         <svg viewBox="0 0 12 8" aria-hidden className={cx("size-2.5 shrink-0 text-gold-400", open && "rotate-180")}>
           <path
             d="M1.2 1.4L6 6.2L10.8 1.4"
@@ -885,6 +944,20 @@ function QtyCharge({
       ))}
     </span>
   );
+}
+
+function groupPrizes(prizes: PlayerPrize[]): { title: string; count: number; sample: PlayerPrize }[] {
+  const groups = new Map<string, PlayerPrize[]>();
+  for (const prize of prizes) {
+    const list = groups.get(prize.title) ?? [];
+    list.push(prize);
+    groups.set(prize.title, list);
+  }
+  return [...groups.entries()].map(([title, rows]) => ({
+    title,
+    count: rows.length,
+    sample: rows[0]!,
+  }));
 }
 
 function grantCount(detail: TournamentDetail, userId: string, achievementId: string): number {

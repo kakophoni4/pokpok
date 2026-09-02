@@ -1,10 +1,17 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import type { AddPaymentInput, PromoGrant, TournamentPlayer } from "@poker/contracts";
-import { ADDON_MAX_STACKS, parsePromoBundle, stacksOf } from "@poker/contracts";
+import { parsePromoBundle } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { SeasonsService } from "../seasons/seasons.service";
-import { toPublicUser } from "../users/user.mapper";
+import {
+  assertAddonRoom,
+  assertEntryUnpaid,
+  kindTitle,
+  playerView,
+  returnToPlay,
+  seatPlayer,
+} from "./cash-desk";
 import { chipsForKind, effectiveConfig, type EffectiveConfig } from "./tournament-config";
 import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
 
@@ -66,6 +73,7 @@ export class PaymentsService {
         after: {
           userId: input.userId,
           kind: menuItem.kind,
+          title: menuItem.title,
           amountRub: menuItem.priceRub * units,
           menuItemId: menuItem.id,
           bundle,
@@ -83,16 +91,7 @@ export class PaymentsService {
         : chipsForKind(kind, config) * units);
 
     if (kind === "entry") {
-      const alreadyIn = await this.prisma.payment.findFirst({
-        where: { tournamentId, userId: input.userId, kind: "entry", voidedAt: null },
-        select: { id: true },
-      });
-      if (alreadyIn) {
-        throw new ConflictException({
-          code: "ENTRY_ALREADY_PAID",
-          message: `${user.nickname} уже оплатил вход`,
-        });
-      }
+      await assertEntryUnpaid(this.prisma, tournamentId, input.userId, user.nickname);
     }
 
     const split = kind === "rebuy" || kind === "addon";
@@ -101,17 +100,7 @@ export class PaymentsService {
     const perChips = split ? Math.round(chips / copies) : chips;
 
     if (kind === "addon") {
-      const existing = await this.prisma.payment.findMany({
-        where: { tournamentId, userId: input.userId, kind: "addon", voidedAt: null },
-        select: { kind: true, chips: true },
-      });
-      const have = stacksOf(existing, "addon", config.addonChips);
-      if (have + copies > ADDON_MAX_STACKS) {
-        throw new ConflictException({
-          code: "ADDON_LIMIT",
-          message: `Адон максимум ×${ADDON_MAX_STACKS}${have > 0 ? ` (уже ${have})` : ""}`,
-        });
-      }
+      await assertAddonRoom(this.prisma, tournamentId, input.userId, copies, config.addonChips);
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -129,18 +118,8 @@ export class PaymentsService {
         });
       }
 
-      // A walk-in who never signed up still belongs on the roster: paying the
-      // entry fee is what makes somebody a participant. A rebuy during the late
-      // period does the same, and puts a busted player back at the table.
-      await tx.registration.upsert({
-        where: { tournamentId_userId: { tournamentId, userId: input.userId } },
-        create: { tournamentId, userId: input.userId, status: "registered", source: "admin" },
-        update: { status: "registered", waitlistPosition: null },
-      });
-
-      if (kind === "rebuy") {
-        await tx.result.deleteMany({ where: { tournamentId, userId: input.userId } });
-      }
+      await seatPlayer(tx, tournamentId, input.userId);
+      if (kind === "rebuy") await returnToPlay(tx, tournamentId, input.userId);
     });
 
     await this.audit.record({
@@ -151,6 +130,7 @@ export class PaymentsService {
       after: {
         userId: input.userId,
         kind,
+        title: input.note ?? menuItem?.title ?? kindTitle(kind),
         amountRub,
         chips,
         multiplier: units,
@@ -204,31 +184,12 @@ export class PaymentsService {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
     if (lines.some((line) => line.kind === "entry")) {
-      const alreadyIn = await this.prisma.payment.findFirst({
-        where: { tournamentId, userId, kind: "entry", voidedAt: null },
-        select: { id: true },
-      });
-      if (alreadyIn) {
-        throw new ConflictException({
-          code: "ENTRY_ALREADY_PAID",
-          message: `${user.nickname} уже оплатил вход`,
-        });
-      }
+      await assertEntryUnpaid(this.prisma, tournamentId, userId, user.nickname);
     }
 
     const addonCopies = lines.filter((line) => line.kind === "addon").length;
     if (addonCopies > 0) {
-      const existing = await this.prisma.payment.findMany({
-        where: { tournamentId, userId, kind: "addon", voidedAt: null },
-        select: { kind: true, chips: true },
-      });
-      const have = stacksOf(existing, "addon", config.addonChips);
-      if (have + addonCopies > ADDON_MAX_STACKS) {
-        throw new ConflictException({
-          code: "ADDON_LIMIT",
-          message: `Адон максимум ×${ADDON_MAX_STACKS}${have > 0 ? ` (уже ${have})` : ""}`,
-        });
-      }
+      await assertAddonRoom(this.prisma, tournamentId, userId, addonCopies, config.addonChips);
     }
 
     const price = promo.priceRub * units;
@@ -248,15 +209,8 @@ export class PaymentsService {
         });
       }
 
-      await tx.registration.upsert({
-        where: { tournamentId_userId: { tournamentId, userId } },
-        create: { tournamentId, userId, status: "registered", source: "admin" },
-        update: { status: "registered", waitlistPosition: null },
-      });
-
-      if (lines.some((line) => line.kind === "rebuy")) {
-        await tx.result.deleteMany({ where: { tournamentId, userId } });
-      }
+      await seatPlayer(tx, tournamentId, userId);
+      if (lines.some((line) => line.kind === "rebuy")) await returnToPlay(tx, tournamentId, userId);
     });
   }
 
@@ -289,52 +243,21 @@ export class PaymentsService {
       action: "payment.void",
       entity: "Tournament",
       entityId: payment.tournamentId,
-      before: { paymentId, kind: payment.kind, amountRub: payment.amountRub, chips: payment.chips },
+      before: {
+        paymentId,
+        userId: payment.userId,
+        kind: payment.kind,
+        amountRub: payment.amountRub,
+        chips: payment.chips,
+        note: payment.note,
+      },
     });
 
     return this.playerView(payment.tournamentId, payment.userId);
   }
 
   /** Everything the admin card for one player needs to redraw itself. */
-  async playerView(tournamentId: string, userId: string): Promise<TournamentPlayer> {
-    const [user, payments, result, ratingEvent] = await Promise.all([
-      this.prisma.user.findUniqueOrThrow({ where: { id: userId } }),
-      this.prisma.payment.findMany({
-        where: { tournamentId, userId, voidedAt: null },
-        orderBy: { createdAt: "asc" },
-      }),
-      this.prisma.result.findUnique({
-        where: { tournamentId_userId: { tournamentId, userId } },
-        select: { place: true },
-      }),
-      this.prisma.ratingEvent.findFirst({
-        where: { tournamentId, userId, sourceType: "tournament_result" },
-        select: { points: true },
-      }),
-    ]);
-
-    return {
-      user: toPublicUser(user),
-      payments: payments.map((payment) => ({
-        id: payment.id,
-        kind: payment.kind,
-        amountRub: payment.amountRub,
-        chips: payment.chips,
-        note: payment.note,
-        createdAt: payment.createdAt.toISOString(),
-      })),
-      totalRub: payments.reduce((sum, payment) => sum + payment.amountRub, 0),
-      chips: payments.reduce((sum, payment) => sum + payment.chips, 0),
-      place: result?.place ?? null,
-      ratingPoints: ratingEvent?.points ?? null,
-    };
+  playerView(tournamentId: string, userId: string): Promise<TournamentPlayer> {
+    return playerView(this.prisma, tournamentId, userId);
   }
-}
-
-function kindTitle(kind: PaymentKind): string {
-  if (kind === "entry") return "Вход";
-  if (kind === "rebuy") return "Ребай";
-  if (kind === "addon") return "Адон";
-  if (kind === "drink") return "Напиток";
-  return "Прочее";
 }

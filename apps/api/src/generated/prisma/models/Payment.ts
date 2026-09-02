@@ -277,6 +277,7 @@ export type PaymentWhereInput = {
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   voidedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  prize?: Prisma.XOR<Prisma.PlayerPrizeNullableScalarRelationFilter, Prisma.PlayerPrizeWhereInput> | null
 }
 
 export type PaymentOrderByWithRelationInput = {
@@ -295,6 +296,7 @@ export type PaymentOrderByWithRelationInput = {
   user?: Prisma.UserOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   voidedBy?: Prisma.UserOrderByWithRelationInput
+  prize?: Prisma.PlayerPrizeOrderByWithRelationInput
 }
 
 export type PaymentWhereUniqueInput = Prisma.AtLeast<{
@@ -316,6 +318,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   voidedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  prize?: Prisma.XOR<Prisma.PlayerPrizeNullableScalarRelationFilter, Prisma.PlayerPrizeWhereInput> | null
 }, "id">
 
 export type PaymentOrderByWithAggregationInput = {
@@ -366,6 +369,7 @@ export type PaymentCreateInput = {
   user: Prisma.UserCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutAuthoredPaymentsInput
   voidedBy?: Prisma.UserCreateNestedOneWithoutVoidedPaymentsInput
+  prize?: Prisma.PlayerPrizeCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUncheckedCreateInput = {
@@ -380,6 +384,7 @@ export type PaymentUncheckedCreateInput = {
   voidedAt?: Date | string | null
   voidedById?: string | null
   createdAt?: Date | string
+  prize?: Prisma.PlayerPrizeUncheckedCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUpdateInput = {
@@ -394,6 +399,7 @@ export type PaymentUpdateInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutAuthoredPaymentsNestedInput
   voidedBy?: Prisma.UserUpdateOneWithoutVoidedPaymentsNestedInput
+  prize?: Prisma.PlayerPrizeUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateInput = {
@@ -408,6 +414,7 @@ export type PaymentUncheckedUpdateInput = {
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   voidedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prize?: Prisma.PlayerPrizeUncheckedUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentCreateManyInput = {
@@ -508,6 +515,11 @@ export type PaymentMinOrderByAggregateInput = {
 export type PaymentSumOrderByAggregateInput = {
   amountRub?: Prisma.SortOrder
   chips?: Prisma.SortOrder
+}
+
+export type PaymentNullableScalarRelationFilter = {
+  is?: Prisma.PaymentWhereInput | null
+  isNot?: Prisma.PaymentWhereInput | null
 }
 
 export type PaymentCreateNestedManyWithoutUserInput = {
@@ -682,6 +694,22 @@ export type EnumPaymentKindFieldUpdateOperationsInput = {
   set?: $Enums.PaymentKind
 }
 
+export type PaymentCreateNestedOneWithoutPrizeInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutPrizeInput, Prisma.PaymentUncheckedCreateWithoutPrizeInput>
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutPrizeInput
+  connect?: Prisma.PaymentWhereUniqueInput
+}
+
+export type PaymentUpdateOneWithoutPrizeNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutPrizeInput, Prisma.PaymentUncheckedCreateWithoutPrizeInput>
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutPrizeInput
+  upsert?: Prisma.PaymentUpsertWithoutPrizeInput
+  disconnect?: Prisma.PaymentWhereInput | boolean
+  delete?: Prisma.PaymentWhereInput | boolean
+  connect?: Prisma.PaymentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentUpdateToOneWithWhereWithoutPrizeInput, Prisma.PaymentUpdateWithoutPrizeInput>, Prisma.PaymentUncheckedUpdateWithoutPrizeInput>
+}
+
 export type PaymentCreateWithoutUserInput = {
   id?: string
   kind: $Enums.PaymentKind
@@ -693,6 +721,7 @@ export type PaymentCreateWithoutUserInput = {
   tournament: Prisma.TournamentCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutAuthoredPaymentsInput
   voidedBy?: Prisma.UserCreateNestedOneWithoutVoidedPaymentsInput
+  prize?: Prisma.PlayerPrizeCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUncheckedCreateWithoutUserInput = {
@@ -706,6 +735,7 @@ export type PaymentUncheckedCreateWithoutUserInput = {
   voidedAt?: Date | string | null
   voidedById?: string | null
   createdAt?: Date | string
+  prize?: Prisma.PlayerPrizeUncheckedCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentCreateOrConnectWithoutUserInput = {
@@ -729,6 +759,7 @@ export type PaymentCreateWithoutCreatedByInput = {
   tournament: Prisma.TournamentCreateNestedOneWithoutPaymentsInput
   user: Prisma.UserCreateNestedOneWithoutPaymentsInput
   voidedBy?: Prisma.UserCreateNestedOneWithoutVoidedPaymentsInput
+  prize?: Prisma.PlayerPrizeCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUncheckedCreateWithoutCreatedByInput = {
@@ -742,6 +773,7 @@ export type PaymentUncheckedCreateWithoutCreatedByInput = {
   voidedAt?: Date | string | null
   voidedById?: string | null
   createdAt?: Date | string
+  prize?: Prisma.PlayerPrizeUncheckedCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentCreateOrConnectWithoutCreatedByInput = {
@@ -765,6 +797,7 @@ export type PaymentCreateWithoutVoidedByInput = {
   tournament: Prisma.TournamentCreateNestedOneWithoutPaymentsInput
   user: Prisma.UserCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutAuthoredPaymentsInput
+  prize?: Prisma.PlayerPrizeCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUncheckedCreateWithoutVoidedByInput = {
@@ -778,6 +811,7 @@ export type PaymentUncheckedCreateWithoutVoidedByInput = {
   createdById?: string | null
   voidedAt?: Date | string | null
   createdAt?: Date | string
+  prize?: Prisma.PlayerPrizeUncheckedCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentCreateOrConnectWithoutVoidedByInput = {
@@ -866,6 +900,7 @@ export type PaymentCreateWithoutTournamentInput = {
   user: Prisma.UserCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutAuthoredPaymentsInput
   voidedBy?: Prisma.UserCreateNestedOneWithoutVoidedPaymentsInput
+  prize?: Prisma.PlayerPrizeCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentUncheckedCreateWithoutTournamentInput = {
@@ -879,6 +914,7 @@ export type PaymentUncheckedCreateWithoutTournamentInput = {
   voidedAt?: Date | string | null
   voidedById?: string | null
   createdAt?: Date | string
+  prize?: Prisma.PlayerPrizeUncheckedCreateNestedOneWithoutPaymentInput
 }
 
 export type PaymentCreateOrConnectWithoutTournamentInput = {
@@ -905,6 +941,78 @@ export type PaymentUpdateWithWhereUniqueWithoutTournamentInput = {
 export type PaymentUpdateManyWithWhereWithoutTournamentInput = {
   where: Prisma.PaymentScalarWhereInput
   data: Prisma.XOR<Prisma.PaymentUpdateManyMutationInput, Prisma.PaymentUncheckedUpdateManyWithoutTournamentInput>
+}
+
+export type PaymentCreateWithoutPrizeInput = {
+  id?: string
+  kind: $Enums.PaymentKind
+  amountRub: number
+  chips?: number
+  note?: string | null
+  voidedAt?: Date | string | null
+  createdAt?: Date | string
+  tournament: Prisma.TournamentCreateNestedOneWithoutPaymentsInput
+  user: Prisma.UserCreateNestedOneWithoutPaymentsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutAuthoredPaymentsInput
+  voidedBy?: Prisma.UserCreateNestedOneWithoutVoidedPaymentsInput
+}
+
+export type PaymentUncheckedCreateWithoutPrizeInput = {
+  id?: string
+  tournamentId: string
+  userId: string
+  kind: $Enums.PaymentKind
+  amountRub: number
+  chips?: number
+  note?: string | null
+  createdById?: string | null
+  voidedAt?: Date | string | null
+  voidedById?: string | null
+  createdAt?: Date | string
+}
+
+export type PaymentCreateOrConnectWithoutPrizeInput = {
+  where: Prisma.PaymentWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentCreateWithoutPrizeInput, Prisma.PaymentUncheckedCreateWithoutPrizeInput>
+}
+
+export type PaymentUpsertWithoutPrizeInput = {
+  update: Prisma.XOR<Prisma.PaymentUpdateWithoutPrizeInput, Prisma.PaymentUncheckedUpdateWithoutPrizeInput>
+  create: Prisma.XOR<Prisma.PaymentCreateWithoutPrizeInput, Prisma.PaymentUncheckedCreateWithoutPrizeInput>
+  where?: Prisma.PaymentWhereInput
+}
+
+export type PaymentUpdateToOneWithWhereWithoutPrizeInput = {
+  where?: Prisma.PaymentWhereInput
+  data: Prisma.XOR<Prisma.PaymentUpdateWithoutPrizeInput, Prisma.PaymentUncheckedUpdateWithoutPrizeInput>
+}
+
+export type PaymentUpdateWithoutPrizeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
+  amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  chips?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tournament?: Prisma.TournamentUpdateOneRequiredWithoutPaymentsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPaymentsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutAuthoredPaymentsNestedInput
+  voidedBy?: Prisma.UserUpdateOneWithoutVoidedPaymentsNestedInput
+}
+
+export type PaymentUncheckedUpdateWithoutPrizeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
+  amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  chips?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  voidedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PaymentCreateManyUserInput = {
@@ -957,6 +1065,7 @@ export type PaymentUpdateWithoutUserInput = {
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutAuthoredPaymentsNestedInput
   voidedBy?: Prisma.UserUpdateOneWithoutVoidedPaymentsNestedInput
+  prize?: Prisma.PlayerPrizeUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutUserInput = {
@@ -970,6 +1079,7 @@ export type PaymentUncheckedUpdateWithoutUserInput = {
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   voidedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prize?: Prisma.PlayerPrizeUncheckedUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateManyWithoutUserInput = {
@@ -996,6 +1106,7 @@ export type PaymentUpdateWithoutCreatedByInput = {
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutPaymentsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentsNestedInput
   voidedBy?: Prisma.UserUpdateOneWithoutVoidedPaymentsNestedInput
+  prize?: Prisma.PlayerPrizeUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutCreatedByInput = {
@@ -1009,6 +1120,7 @@ export type PaymentUncheckedUpdateWithoutCreatedByInput = {
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   voidedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prize?: Prisma.PlayerPrizeUncheckedUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1035,6 +1147,7 @@ export type PaymentUpdateWithoutVoidedByInput = {
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutPaymentsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutAuthoredPaymentsNestedInput
+  prize?: Prisma.PlayerPrizeUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutVoidedByInput = {
@@ -1048,6 +1161,7 @@ export type PaymentUncheckedUpdateWithoutVoidedByInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prize?: Prisma.PlayerPrizeUncheckedUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateManyWithoutVoidedByInput = {
@@ -1087,6 +1201,7 @@ export type PaymentUpdateWithoutTournamentInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutAuthoredPaymentsNestedInput
   voidedBy?: Prisma.UserUpdateOneWithoutVoidedPaymentsNestedInput
+  prize?: Prisma.PlayerPrizeUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutTournamentInput = {
@@ -1100,6 +1215,7 @@ export type PaymentUncheckedUpdateWithoutTournamentInput = {
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   voidedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prize?: Prisma.PlayerPrizeUncheckedUpdateOneWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateManyWithoutTournamentInput = {
@@ -1133,6 +1249,7 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
   voidedBy?: boolean | Prisma.Payment$voidedByArgs<ExtArgs>
+  prize?: boolean | Prisma.Payment$prizeArgs<ExtArgs>
 }, ExtArgs["result"]["payment"]>
 
 export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1191,6 +1308,7 @@ export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
   voidedBy?: boolean | Prisma.Payment$voidedByArgs<ExtArgs>
+  prize?: boolean | Prisma.Payment$prizeArgs<ExtArgs>
 }
 export type PaymentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
@@ -1212,6 +1330,10 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     user: Prisma.$UserPayload<ExtArgs>
     createdBy: Prisma.$UserPayload<ExtArgs> | null
     voidedBy: Prisma.$UserPayload<ExtArgs> | null
+    /**
+     * Set when this line was paid for with a prize rather than with money.
+     */
+    prize: Prisma.$PlayerPrizePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1627,6 +1749,7 @@ export interface Prisma__PaymentClient<T, Null = never, ExtArgs extends runtime.
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.Payment$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   voidedBy<T extends Prisma.Payment$voidedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$voidedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  prize<T extends Prisma.Payment$prizeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$prizeArgs<ExtArgs>>): Prisma.Prisma__PlayerPrizeClient<runtime.Types.Result.GetResult<Prisma.$PlayerPrizePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2103,6 +2226,25 @@ export type Payment$voidedByArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * Payment.prize
+ */
+export type Payment$prizeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlayerPrize
+   */
+  select?: Prisma.PlayerPrizeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlayerPrize
+   */
+  omit?: Prisma.PlayerPrizeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlayerPrizeInclude<ExtArgs> | null
+  where?: Prisma.PlayerPrizeWhereInput
 }
 
 /**

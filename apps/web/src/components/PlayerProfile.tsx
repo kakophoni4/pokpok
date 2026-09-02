@@ -1,4 +1,5 @@
-import type { PlayerStats, UserAchievementView } from "@poker/contracts";
+import type { PlayerStats, PrizeWallet, UserAchievementView } from "@poker/contracts";
+import { walletLabel } from "@poker/contracts";
 import { Link } from "react-router-dom";
 import { lazy, Suspense, useState } from "react";
 import { formatFullDate, formatPoints, placeLabel, playerLabel, plural } from "../lib/format";
@@ -22,11 +23,13 @@ const RatingChart = lazy(() =>
 export function PlayerProfile({
   stats,
   achievements,
+  wallet,
   extra,
   canRevoke = false,
 }: {
   stats: PlayerStats;
   achievements: UserAchievementView[] | undefined;
+  wallet?: PrizeWallet;
   extra?: React.ReactNode;
   canRevoke?: boolean;
 }) {
@@ -68,6 +71,30 @@ export function PlayerProfile({
           <RatingChart progression={stats.progression} />
         </Suspense>
       </div>
+
+      {wallet && wallet.total > 0 && (
+        <section className="mb-4">
+          <h2 className="mb-2 text-base font-semibold text-stone-200">
+            Призы ({wallet.total})
+          </h2>
+          <Card>
+            <p className="text-sm text-gold-400">{walletLabel(wallet.lines)}</p>
+            <p className="mt-1 text-xs text-stone-500">Спишем на кассе — просто скажите.</p>
+            {wallet.history.length > 0 && (
+              <ul className="mt-3 space-y-1 border-t border-felt-800 pt-3 text-sm text-stone-400">
+                {wallet.history.slice(0, 6).map((prize) => (
+                  <li key={prize.id} className="flex justify-between gap-3">
+                    <span className="min-w-0 truncate">{prize.title}</span>
+                    <span className="shrink-0 text-xs text-stone-500">
+                      {prize.spentAt ? prize.spentAt.title : "списан"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </section>
+      )}
 
       {achievements && achievements.length > 0 && (
         <section className="mb-4">

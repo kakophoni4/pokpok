@@ -21,6 +21,7 @@ import { ratingPool } from "@poker/rating";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import type { Prisma, Tournament, Venue } from "../generated/prisma/client";
+import { PrizesService } from "../prizes/prizes.service";
 import { parseRatingConfig } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
 import { effectiveConfig } from "./tournament-config";
@@ -36,6 +37,7 @@ export class TournamentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly prizes: PrizesService,
   ) {}
 
   async list(query: TournamentListQuery, viewerId?: string): Promise<TournamentSummary[]> {
@@ -100,7 +102,7 @@ export class TournamentsService {
     }
 
     const staffViewer = viewer != null && hasRole(viewer.role, "hostess");
-    const [counts, configs, ratingEvents, eveningGrants] = await Promise.all([
+    const [counts, configs, ratingEvents, eveningGrants, prizes] = await Promise.all([
       this.countRegistrations([id]),
       this.seasonConfigs(),
       this.prisma.ratingEvent.findMany({
@@ -114,6 +116,9 @@ export class TournamentsService {
             orderBy: { grantedAt: "asc" },
           })
         : Promise.resolve([]),
+      // Everything the players at this table are owed, so the desk can offer to
+      // write it off without asking the server once per seat.
+      staffViewer ? this.prizes.forTournament(id) : Promise.resolve([]),
     ]);
     const config = effectiveConfig(tournament, configs.get(tournament.seasonId) ?? configs.get(null)!);
     const mine = tournament.registrations.find((row) => row.userId === viewer?.id) ?? null;
@@ -169,6 +174,7 @@ export class TournamentsService {
           }
         : null,
       eveningGrants: isStaff ? eveningGrants : null,
+      prizes: isStaff ? prizes : null,
     };
   }
 

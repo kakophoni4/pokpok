@@ -3,7 +3,7 @@ import { ROLE_LABELS } from "@poker/contracts";
 import { useState } from "react";
 import { Avatar, Badge, Button, ErrorState, Loading } from "../../components/ui";
 import { playerLabel } from "../../lib/format";
-import { usePlayers, useUpdatePlayer } from "../../lib/queries";
+import { useClubSettings, useGrantPrize, usePlayerPrizes, usePlayers, useRevokePrize, useUpdatePlayer } from "../../lib/queries";
 
 export function AdminPlayers({
   canEdit,
@@ -54,6 +54,11 @@ function PlayerRow({
   const update = useUpdatePlayer();
   const [nickname, setNickname] = useState(player.nickname);
   const [editing, setEditing] = useState(false);
+  const settings = useClubSettings(editing);
+  const wallet = usePlayerPrizes(editing ? player.id : undefined);
+  const grantPrize = useGrantPrize();
+  const revokePrize = useRevokePrize();
+  const catalogue = (settings.data?.menuItems ?? []).filter((item) => item.isActive);
 
   const isBlocked = player.status === "blocked";
 
@@ -151,6 +156,58 @@ function PlayerRow({
             >
               {isBlocked ? "Разблокировать" : "Заблокировать"}
             </Button>
+          )}
+
+          {canEdit && (
+            <div>
+              <label className="label" htmlFor={`prize-${player.id}`}>
+                Начислить приз
+              </label>
+              <select
+                id={`prize-${player.id}`}
+                className="field"
+                defaultValue=""
+                disabled={grantPrize.isPending || catalogue.length === 0}
+                onChange={(event) => {
+                  const menuItemId = event.target.value;
+                  event.target.value = "";
+                  if (!menuItemId) return;
+                  grantPrize.mutate({ userId: player.id, menuItemId, quantity: 1 });
+                }}
+              >
+                <option value="">Позиция из меню или акции…</option>
+                {catalogue.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.title}
+                    {item.priceRub > 0 ? ` · ${item.priceRub} ₽` : ""}
+                  </option>
+                ))}
+              </select>
+              {wallet.data && wallet.data.total > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {wallet.data.active.map((prize) => (
+                    <li key={prize.id} className="flex items-center justify-between gap-2 text-sm">
+                      <span className="min-w-0 truncate text-stone-300">{prize.title}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-xs"
+                        loading={revokePrize.isPending}
+                        onClick={() => revokePrize.mutate(prize.id)}
+                      >
+                        Отменить
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(grantPrize.error || revokePrize.error) && (
+                <p className="mt-1 text-xs text-chip-red">
+                  {(grantPrize.error as Error | null)?.message ??
+                    (revokePrize.error as Error | null)?.message}
+                </p>
+              )}
+            </div>
           )}
 
           {update.isError && (

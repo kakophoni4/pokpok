@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Id, IsoDateTime, patchShape } from "./common.js";
 import { PaymentKind, RegistrationSource, RegistrationStatus, TournamentStatus } from "./enums.js";
+import { PlayerPrize } from "./prize.js";
 import { PublicUser } from "./user.js";
 
 export const Venue = z.object({
@@ -122,6 +123,8 @@ export const TournamentDetail = TournamentSummary.extend({
   adminScreens: AdminScreens.nullish(),
   /** Combo awards handed out this evening. Staff-only. */
   eveningGrants: z.array(z.object({ id: Id, userId: Id, achievementId: Id })).nullish(),
+  /** Unspent prizes of everyone at this table, so the desk can write them off. */
+  prizes: z.array(PlayerPrize).nullish(),
 });
 export type TournamentDetail = z.infer<typeof TournamentDetail>;
 

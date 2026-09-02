@@ -86,6 +86,16 @@ export type Result = Prisma.ResultModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model PlayerPrize
+ * A prize a player won and has not spent: a free beer, a free rebuy.
+ * 
+ * One row per unit rather than a counter, so a «тройной ребай» can be spent
+ * one at a time and each unit keeps its own trail. Spending one writes a
+ * normal Payment costing nothing, which is why `menuItemId` matters: it is
+ * what tells the desk how many chips a free rebuy hands out.
+ */
+export type PlayerPrize = Prisma.PlayerPrizeModel
+/**
  * Model ClubSettings
  * Club-wide settings, exactly one row. The timezone lives here because it is
  * what every date shown to a human is rendered in, on the site and in the bot.

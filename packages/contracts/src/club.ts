@@ -160,6 +160,48 @@ export const SalesLine = z.object({
 });
 export type SalesLine = z.infer<typeof SalesLine>;
 
+/**
+ * One thing that happened at the desk during an evening, and who did it.
+ *
+ * The label is composed server-side. The client would otherwise have to keep
+ * its own copy of the action vocabulary, and the vocabulary grows every time a
+ * new staff action is added.
+ */
+export const JournalEntry = z.object({
+  id: Id,
+  at: IsoDateTime,
+  /** Machine name, e.g. "payment.add". Kept for grouping and future filters. */
+  action: z.string(),
+  label: z.string(),
+  actor: z.string().nullable(),
+  player: z.string().nullable(),
+  playerId: Id.nullable(),
+  /** Signed: a void gives back what the payment took. */
+  amountRub: z.number().int(),
+});
+export type JournalEntry = z.infer<typeof JournalEntry>;
+
+export const JournalStaffLine = z.object({
+  name: z.string(),
+  actions: z.number().int().nonnegative(),
+  amountRub: z.number().int(),
+});
+export type JournalStaffLine = z.infer<typeof JournalStaffLine>;
+
+export const JournalQuery = z.object({ tournamentId: Id });
+export type JournalQuery = z.infer<typeof JournalQuery>;
+
+export const EveningJournal = z.object({
+  tournamentId: Id,
+  title: z.string(),
+  startsAt: IsoDateTime,
+  totalRub: z.number().int(),
+  /** Who worked the desk, and for how much. */
+  staff: z.array(JournalStaffLine),
+  entries: z.array(JournalEntry),
+});
+export type EveningJournal = z.infer<typeof EveningJournal>;
+
 export const SalesReport = z.object({
   period: SalesPeriod,
   from: IsoDateTime.nullable(),

@@ -13,6 +13,8 @@ import { RolesGuard } from "./common/auth/roles.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { type Env, validateEnv } from "./config/env";
 import { HealthController } from "./health/health.controller";
+import { NotificationsModule } from "./notifications/notifications.module";
+import { PrizesModule } from "./prizes/prizes.module";
 import { RatingModule } from "./rating/rating.module";
 import { SeasonsModule } from "./seasons/seasons.module";
 import { TournamentsModule } from "./tournaments/tournaments.module";
@@ -44,6 +46,8 @@ import { UsersModule } from "./users/users.module";
     RatingModule,
     TournamentsModule,
     AchievementsModule,
+    NotificationsModule,
+    PrizesModule,
   ],
   controllers: [HealthController],
   providers: [

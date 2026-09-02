@@ -1,11 +1,12 @@
 import type {
   LeaderboardRow,
   PlayerStats,
+  PrizeWallet,
   RegistrationView,
   TournamentSummary,
   UserAchievementView,
 } from "@poker/contracts";
-import { formatPlayerName } from "@poker/contracts";
+import { formatPlayerName, walletLabel } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
 import type { ClubInfo } from "./club.js";
@@ -77,11 +78,12 @@ export class PlayerScreens {
 
   private async home(profile: TelegramProfile): Promise<Screen> {
     // The club info is fetched for its timezone, which every date below depends on.
-    const [session, , tournaments, stats] = await Promise.all([
+    const [session, , tournaments, stats, wallet] = await Promise.all([
       this.api.session(profile),
       this.club.get(),
       this.upcoming(profile).catch(() => [] as TournamentSummary[]),
       this.api.asUser<PlayerStats>(profile, "GET", "/rating/me").catch(() => null),
+      this.wallet(profile),
     ]);
 
     const name = formatPlayerName(
@@ -101,6 +103,17 @@ export class PlayerScreens {
           : ["<b>Ближайшая игра</b>", "Расписание пока пустое — заглядывайте позже."],
       ),
     ];
+
+    // Worth the first screen: an unspent prize is something to act on tonight,
+    // unlike a rating that will still be there next week.
+    if (wallet && wallet.total > 0) {
+      blocks.push(
+        quote([
+          `<b>Ваши призы</b> · ${wallet.total}`,
+          escapeHtml(walletLabel(wallet.lines)),
+        ]),
+      );
+    }
 
     if (stats) blocks.push(quote(standingLines(stats)));
 
@@ -201,6 +214,16 @@ export class PlayerScreens {
     };
   }
 
+  /**
+   * Prizes the player has not spent.
+   *
+   * Never fatal: a wallet that fails to load should cost the player a line on
+   * the screen, not the whole screen.
+   */
+  private async wallet(profile: TelegramProfile): Promise<PrizeWallet | null> {
+    return this.api.asUser<PrizeWallet>(profile, "GET", "/prizes/me").catch(() => null);
+  }
+
   /** For a player who is outside the visible top: their own line, fetched separately. */
   private async myPlaceLine(profile: TelegramProfile): Promise<string> {
     const stats = await this.api.asUser<PlayerStats>(profile, "GET", "/rating/me");
@@ -212,11 +235,12 @@ export class PlayerScreens {
 
   private async profile(profile: TelegramProfile): Promise<Screen> {
     const session = await this.api.session(profile);
-    const [stats, awards] = await Promise.all([
+    const [stats, awards, wallet] = await Promise.all([
       this.api.asUser<PlayerStats>(profile, "GET", "/rating/me"),
       this.api
         .public<UserAchievementView[]>(`/achievements/user/${session.userId}`)
         .catch(() => [] as UserAchievementView[]),
+      this.wallet(profile),
     ]);
 
     const keyboard = new InlineKeyboard()
@@ -238,6 +262,16 @@ export class PlayerScreens {
         stats.avgPlace != null ? `Средний финиш: <b>${stats.avgPlace.toFixed(1)}</b>` : null,
       ]),
     ];
+
+    if (wallet && wallet.total > 0) {
+      blocks.push(
+        quote([
+          "<b>Ваши призы</b>",
+          escapeHtml(walletLabel(wallet.lines)),
+          "<i>Спишем на кассе — просто скажите</i>",
+        ]),
+      );
+    }
 
     if (awards.length > 0) {
       const names = awards
