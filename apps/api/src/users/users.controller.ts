@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Query, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import type { Response } from "express";
 import {
   AdminUpdateUserInput,
   type MeUser,
@@ -12,12 +13,16 @@ import {
 import type { RequestUser } from "../common/auth/auth.types";
 import { CurrentUser, Public, Roles } from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
+import { AvatarService } from "./avatar.service";
 import { UsersService } from "./users.service";
 
 @ApiTags("users")
 @Controller("users")
 export class UsersController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly avatars: AvatarService,
+  ) {}
 
   @Patch("me")
   @ApiOperation({ summary: "Update your own preferences (nickname is staff-only)" })
@@ -33,6 +38,23 @@ export class UsersController {
   @ApiOperation({ summary: "Public profile card" })
   findOne(@Param("id") id: string): Promise<PublicUser> {
     return this.users.findPublicById(id);
+  }
+
+  @Public()
+  @Get(":id/avatar")
+  @ApiOperation({ summary: "Player photo, re-served from this origin" })
+  async avatar(@Param("id") id: string, @Res() response: Response): Promise<void> {
+    const image = await this.avatars.forUser(id);
+    if (!image) {
+      // The UI draws initials for anyone without a picture, so a miss is normal.
+      response.status(404).end();
+      return;
+    }
+
+    response
+      .type(image.contentType)
+      .set("Cache-Control", "public, max-age=86400")
+      .send(image.body);
   }
 
   @Roles("hostess")

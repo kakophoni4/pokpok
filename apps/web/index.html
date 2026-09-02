@@ -74,7 +74,14 @@
         } catch (e) {}
       })();
     </script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!--
+      Served from our own origin, not telegram.org. Russian ISPs block that host,
+      and a render-blocking script that has to time out first left the whole site
+      staring at a blank page. The file is a verbatim copy of
+      https://telegram.org/js/telegram-web-app.js; re-download it when Telegram
+      ships Mini App features we start using.
+    -->
+    <script src="/vendor/telegram-web-app.js"></script>
     <script>
       (function () {
         try {

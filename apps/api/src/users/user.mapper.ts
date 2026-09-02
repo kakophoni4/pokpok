@@ -10,7 +10,9 @@ export function toPublicUser(
     id: user.id,
     nickname: user.nickname,
     displayName: user.displayName,
-    avatarUrl: user.avatarUrl,
+    // Never the Telegram URL itself: t.me is blocked for most of the club, so
+    // the API hands out its own copy instead. See AvatarService.
+    avatarUrl: user.avatarUrl ? `/api/users/${user.id}/avatar` : null,
     role: user.role,
   };
 }

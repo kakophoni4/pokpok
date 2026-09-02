@@ -26,7 +26,11 @@ export const PublicUser = z.object({
   nickname: Nickname,
   /** Telegram first+last name, when we have it. Format with `formatPlayerName`. */
   displayName: z.string().nullable(),
-  avatarUrl: z.url().nullable(),
+  /**
+   * A path on this origin, not the photo's original home. Telegram hosts
+   * avatars on t.me, which Russian ISPs block, so the API serves its own copy.
+   */
+  avatarUrl: z.string().nullable(),
   role: UserRole,
 });
 export type PublicUser = z.infer<typeof PublicUser>;

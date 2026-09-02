@@ -18,8 +18,9 @@
 		}
 	}
 
-	# Everything the browser is allowed to do. The Telegram widget and the Mini App
-	# SDK both load scripts from telegram.org, and avatars come from Telegram's CDN.
+	# Nothing here is loaded from telegram.org: that host is blocked for most of
+	# the club, so the Mini App SDK is served from /vendor and player photos are
+	# re-served by the API.
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
@@ -36,12 +37,20 @@
 
 		# SPA HTML is requested as `/`, `/rating`, … — not as `/index.html`.
 		# Telegram's Mini App webview caches that document aggressively.
-		@html not path /assets/*
+		@html {
+			not path /assets/*
+			not path /vendor/*
+		}
 		header @html Cache-Control "no-store, no-cache, must-revalidate"
 		@sw path /sw.js /sw.js.map /workbox-* /registerSW.js /manifest.webmanifest
 		header @sw Cache-Control "no-store, no-cache, must-revalidate"
 		@immutable path /assets/*
 		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		# Vendored third-party scripts have no hash in their name, so they get a
+		# day rather than a year: long enough to stop re-downloading 113 kB on
+		# every visit, short enough that replacing the file actually lands.
+		@vendor path /vendor/*
+		header @vendor Cache-Control "public, max-age=86400"
 
 		# Client-side routing: unknown paths are React Router's business, not 404s.
 		try_files {path} /index.html

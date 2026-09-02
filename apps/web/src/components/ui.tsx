@@ -109,7 +109,11 @@ export function Avatar({
   url?: string | null;
   size?: number;
 }) {
-  if (url) {
+  // Remembering which URL failed, rather than a bare flag, means a player who
+  // changes their photo gets a fresh attempt without any resetting logic.
+  const [broken, setBroken] = useState<string | null>(null);
+
+  if (url && broken !== url) {
     return (
       <img
         src={url}
@@ -117,6 +121,7 @@ export function Avatar({
         width={size}
         height={size}
         loading="lazy"
+        onError={() => setBroken(url)}
         className="shrink-0 rounded-full object-cover"
         style={{ width: size, height: size }}
       />
