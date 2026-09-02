@@ -1,4 +1,4 @@
-﻿-- CreateTable
+-- CreateTable
 CREATE TABLE "PlayerPrize" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
