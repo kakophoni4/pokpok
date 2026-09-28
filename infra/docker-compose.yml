@@ -66,10 +66,8 @@ services:
       context: ..
       dockerfile: infra/Dockerfile
       target: bot
-    # Bounded on purpose: with no TELEGRAM_BOT_TOKEN the bot refuses to start, and
-    # `unless-stopped` would turn a first deploy without a bot into an endless
-    # restart loop in the logs. It gives up instead, and the site is unaffected.
-    restart: on-failure:3
+    # Resume after host/Docker restarts and recover from temporary network failures.
+    restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
