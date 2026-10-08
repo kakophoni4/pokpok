@@ -43,7 +43,10 @@ function grantCatalog(extras: ClubMenuItem[]): GrantOption[] {
 }
 
 /** Collapse repeated catalog picks into {kind, qty, ...} for the API. */
-function toBundle(picks: { option: string; quantity: number }[], catalog: GrantOption[]): PromoGrant[] {
+function toBundle(
+  picks: { option: string; quantity: number }[],
+  catalog: GrantOption[],
+): PromoGrant[] {
   const grants: PromoGrant[] = [];
   for (const pick of picks) {
     const option = catalog.find((row) => row.value === pick.option);
@@ -99,10 +102,19 @@ export function AdminSettings() {
           />
         </div>
 
-        {save.isError && <p className="text-sm text-chip-red">{(save.error as Error).message}</p>}
-        {save.isSuccess && <p className="text-sm text-emerald-400">Сохранено.</p>}
+        {save.isError && (
+          <p className="text-sm text-chip-red">
+            {(save.error as Error).message}
+          </p>
+        )}
+        {save.isSuccess && (
+          <p className="text-sm text-emerald-400">Сохранено.</p>
+        )}
 
-        <Button loading={save.isPending} onClick={() => save.mutate({ infoText })}>
+        <Button
+          loading={save.isPending}
+          onClick={() => save.mutate({ infoText })}
+        >
           Сохранить текст
         </Button>
       </Card>
@@ -121,7 +133,11 @@ export function AdminSettings() {
       <Card className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-semibold">Меню</h2>
-          <Button size="sm" variant="secondary" onClick={() => setAdding("extra")}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setAdding("extra")}
+          >
             + Позиция
           </Button>
         </div>
@@ -132,11 +148,15 @@ export function AdminSettings() {
             busy={createItem.isPending}
             error={createItem.error}
             onCancel={() => setAdding(null)}
-            onCreate={(input) => createItem.mutate(input, { onSuccess: () => setAdding(null) })}
+            onCreate={(input) =>
+              createItem.mutate(input, { onSuccess: () => setAdding(null) })
+            }
           />
         )}
         {extras.length === 0 && adding !== "extra" && (
-          <p className="text-sm text-stone-500">Пока только вход, адон и ребай.</p>
+          <p className="text-sm text-stone-500">
+            Пока только вход, адон и ребай.
+          </p>
         )}
         <ul className="space-y-2">
           {extras.map((item) => (
@@ -155,7 +175,11 @@ export function AdminSettings() {
       <Card className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-semibold">Акции</h2>
-          <Button size="sm" variant="secondary" onClick={() => setAdding("promo")}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setAdding("promo")}
+          >
             + Акция
           </Button>
         </div>
@@ -166,11 +190,15 @@ export function AdminSettings() {
             busy={createItem.isPending}
             error={createItem.error}
             onCancel={() => setAdding(null)}
-            onCreate={(input) => createItem.mutate(input, { onSuccess: () => setAdding(null) })}
+            onCreate={(input) =>
+              createItem.mutate(input, { onSuccess: () => setAdding(null) })
+            }
           />
         )}
         {promos.length === 0 && adding !== "promo" && (
-          <p className="text-sm text-stone-500">Адон, кальян, два кальяна, адон + кальян — что угодно.</p>
+          <p className="text-sm text-stone-500">
+            Адон, кальян, два кальяна, адон + кальян - что угодно.
+          </p>
         )}
         <ul className="space-y-2">
           {promos.map((item) => (
@@ -233,21 +261,29 @@ function VenuesCard({ venues }: { venues: ClubVenue[] }) {
     <Card className="space-y-3">
       <h2 className="font-semibold">Адреса клуба</h2>
       <p className="text-sm text-stone-400">
-        Здесь хранятся места проведения. В расписании у каждого турнира выбирается один адрес —
-        можно переехать и добавить новый, не трогая старые игры.
+        Здесь хранятся места проведения. В расписании у каждого турнира
+        выбирается один адрес - можно переехать и добавить новый, не трогая
+        старые игры.
       </p>
 
       {venues.length === 0 && (
-        <p className="text-sm text-stone-500">Пока ни одного адреса — добавьте, куда приходить.</p>
+        <p className="text-sm text-stone-500">
+          Пока ни одного адреса - добавьте, куда приходить.
+        </p>
       )}
 
       <ul className="space-y-2">
         {venues.map((venue) => (
-          <li key={venue.id} className="flex items-start justify-between gap-2 rounded-xl bg-felt-900 px-3 py-2">
+          <li
+            key={venue.id}
+            className="flex items-start justify-between gap-2 rounded-xl bg-felt-900 px-3 py-2"
+          >
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{venue.title}</p>
               {venue.address && venue.address !== venue.title && (
-                <p className="truncate text-xs text-stone-400">{venue.address}</p>
+                <p className="truncate text-xs text-stone-400">
+                  {venue.address}
+                </p>
               )}
             </div>
             <div className="flex shrink-0 gap-1">
@@ -262,7 +298,12 @@ function VenuesCard({ venues }: { venues: ClubVenue[] }) {
               >
                 Изменить
               </Button>
-              <Button size="sm" variant="ghost" loading={remove.isPending} onClick={() => remove.mutate(venue.id)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                loading={remove.isPending}
+                onClick={() => remove.mutate(venue.id)}
+              >
                 Удалить
               </Button>
             </div>
@@ -391,7 +432,9 @@ function CashierRow({
           <Button
             size="sm"
             disabled={busy}
-            onClick={() => onSave(item.id, { priceRub: Number(price), chips: Number(chips) })}
+            onClick={() =>
+              onSave(item.id, { priceRub: Number(price), chips: Number(chips) })
+            }
           >
             Ок
           </Button>
@@ -430,7 +473,9 @@ function MenuRow({
 
   const bundle = item.isPromo ? toBundle(picks, catalog) : undefined;
   const bundleDirty =
-    item.isPromo && promoBundleLabel(bundle ?? null, item.kind) !== promoBundleLabel(item.bundle, item.kind);
+    item.isPromo &&
+    promoBundleLabel(bundle ?? null, item.kind) !==
+      promoBundleLabel(item.bundle, item.kind);
   const dirty =
     title.trim() !== item.title ||
     Number(price) !== item.priceRub ||
@@ -442,7 +487,11 @@ function MenuRow({
       <div className="grid grid-cols-[minmax(8rem,1fr)_5.5rem_5.5rem] items-end gap-x-3 gap-y-2 max-sm:grid-cols-2">
         <div className="min-w-0 max-sm:col-span-2">
           <label className="label">Название</label>
-          <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} />
+          <input
+            className="field"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
         </div>
         <div>
           <label className="label">Цена, ₽</label>
@@ -467,7 +516,9 @@ function MenuRow({
           </div>
         )}
       </div>
-      {item.isPromo && <GrantEditor catalog={catalog} picks={picks} onChange={setPicks} />}
+      {item.isPromo && (
+        <GrantEditor catalog={catalog} picks={picks} onChange={setPicks} />
+      )}
       <div className="flex h-8 items-center gap-1">
         {dirty && (
           <Button
@@ -478,7 +529,11 @@ function MenuRow({
                 title: title.trim(),
                 priceRub: Number(price),
                 ...(item.isPromo
-                  ? { chips: 0, kind: promoKindFromBundle(bundle ?? []), bundle: bundle ?? [] }
+                  ? {
+                      chips: 0,
+                      kind: promoKindFromBundle(bundle ?? []),
+                      bundle: bundle ?? [],
+                    }
                   : { chips: Number(chips) }),
               })
             }
@@ -514,9 +569,9 @@ function NewItemForm({
   const [title, setTitle] = useState(promo ? "Бесплатный адон" : "");
   const [price, setPrice] = useState(promo ? "0" : "200");
   const [chips, setChips] = useState("0");
-  const [picks, setPicks] = useState<{ option: string; quantity: number }[]>(() => [
-    { option: catalog[0]?.value ?? "kind:addon", quantity: 1 },
-  ]);
+  const [picks, setPicks] = useState<{ option: string; quantity: number }[]>(
+    () => [{ option: catalog[0]?.value ?? "kind:addon", quantity: 1 }],
+  );
 
   const bundle = promo ? toBundle(picks, catalog) : [];
 
@@ -555,8 +610,12 @@ function NewItemForm({
           </div>
         )}
       </div>
-      {promo && <GrantEditor catalog={catalog} picks={picks} onChange={setPicks} />}
-      {error instanceof Error && <p className="text-xs text-chip-red">{error.message}</p>}
+      {promo && (
+        <GrantEditor catalog={catalog} picks={picks} onChange={setPicks} />
+      )}
+      {error instanceof Error && (
+        <p className="text-xs text-chip-red">{error.message}</p>
+      )}
       <div className="flex gap-2">
         <Button
           size="sm"
@@ -604,7 +663,9 @@ function GrantEditor({
             onChange={(event) =>
               onChange(
                 picks.map((row, rowIndex) =>
-                  rowIndex === index ? { ...row, option: event.target.value } : row,
+                  rowIndex === index
+                    ? { ...row, option: event.target.value }
+                    : row,
                 ),
               )
             }
@@ -625,7 +686,12 @@ function GrantEditor({
             onChange={(event) =>
               onChange(
                 picks.map((row, rowIndex) =>
-                  rowIndex === index ? { ...row, quantity: Math.max(1, Number(event.target.value) || 1) } : row,
+                  rowIndex === index
+                    ? {
+                        ...row,
+                        quantity: Math.max(1, Number(event.target.value) || 1),
+                      }
+                    : row,
                 ),
               )
             }
@@ -634,7 +700,9 @@ function GrantEditor({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => onChange(picks.filter((_, rowIndex) => rowIndex !== index))}
+              onClick={() =>
+                onChange(picks.filter((_, rowIndex) => rowIndex !== index))
+              }
             >
               −
             </Button>
@@ -662,13 +730,20 @@ function picksFromItem(
 ): { option: string; quantity: number }[] {
   const bundle = item.bundle ?? [];
   if (bundle.length === 0) {
-    const fallback = catalog.find((option) => option.kind === item.kind && !option.menuItemId) ?? catalog[0];
+    const fallback =
+      catalog.find(
+        (option) => option.kind === item.kind && !option.menuItemId,
+      ) ?? catalog[0];
     return [{ option: fallback?.value ?? "kind:addon", quantity: 1 }];
   }
   return bundle.map((grant) => {
     const match =
-      (grant.menuItemId ? catalog.find((option) => option.menuItemId === grant.menuItemId) : undefined) ??
-      catalog.find((option) => option.kind === grant.kind && !option.menuItemId);
+      (grant.menuItemId
+        ? catalog.find((option) => option.menuItemId === grant.menuItemId)
+        : undefined) ??
+      catalog.find(
+        (option) => option.kind === grant.kind && !option.menuItemId,
+      );
     return { option: match?.value ?? "kind:addon", quantity: grant.quantity };
   });
 }

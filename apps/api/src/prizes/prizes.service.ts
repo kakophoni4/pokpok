@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   formatPlayerName,
   type GrantPrizeInput,
@@ -12,7 +16,10 @@ import {
 } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
-import { escapeHtml, NotificationsService } from "../notifications/notifications.service";
+import {
+  escapeHtml,
+  NotificationsService,
+} from "../notifications/notifications.service";
 import { SeasonsService } from "../seasons/seasons.service";
 import {
   assertAddonRoom,
@@ -22,8 +29,15 @@ import {
   returnToPlay,
   seatPlayer,
 } from "../tournaments/cash-desk";
-import { chipsForKind, effectiveConfig } from "../tournaments/tournament-config";
-import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
+import {
+  chipsForKind,
+  effectiveConfig,
+} from "../tournaments/tournament-config";
+import type {
+  ClubMenuItem as MenuRow,
+  PaymentKind,
+} from "../generated/prisma/client";
+import { LiveService } from "../live/live.service";
 
 /** One tap should not be able to write hundreds of rows into somebody's wallet. */
 const MAX_PER_GRANT = 20;
@@ -43,7 +57,7 @@ const PRIZE_ROWS = {
  * Prizes: things a player won and can spend later.
  *
  * Spending one is deliberately not a special case at the desk. It writes the
- * same till line an ordinary purchase would, priced at nothing — so a free
+ * same till line an ordinary purchase would, priced at nothing - so a free
  * rebuy still hands out its chips, still puts a busted player back in the game,
  * and still shows up on the evening's tab. The only difference is that the club
  * took no money for it, which is exactly what the takings report should say.
@@ -55,21 +69,35 @@ export class PrizesService {
     private readonly seasons: SeasonsService,
     private readonly notifications: NotificationsService,
     private readonly audit: AuditService,
+    private readonly live: LiveService,
   ) {}
 
   async grant(input: GrantPrizeInput, actorId: string): Promise<PrizeWallet> {
     const [user, menuItem] = await Promise.all([
-      this.prisma.user.findUnique({ where: { id: input.userId }, select: { id: true } }),
+      this.prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { id: true },
+      }),
       this.prisma.clubMenuItem.findUnique({ where: { id: input.menuItemId } }),
     ]);
-    if (!user) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+    if (!user)
+      throw new NotFoundException({
+        code: "USER_NOT_FOUND",
+        message: "Игрок не найден",
+      });
     if (!menuItem) {
-      throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция меню не найдена" });
+      throw new NotFoundException({
+        code: "MENU_ITEM_NOT_FOUND",
+        message: "Позиция меню не найдена",
+      });
     }
 
     const units = await this.expand(menuItem, input.quantity);
     if (units.length === 0) {
-      throw new ConflictException({ code: "EMPTY_PROMO", message: "В акции нет позиций" });
+      throw new ConflictException({
+        code: "EMPTY_PROMO",
+        message: "В акции нет позиций",
+      });
     }
     if (units.length > MAX_PER_GRANT) {
       throw new ConflictException({
@@ -80,7 +108,8 @@ export class PrizesService {
 
     // A promo names itself if the staff member did not: «Тройной ребай» is more
     // use to the player later than three separate lines saying «Ребай».
-    const bundled = menuItem.isPromo && parsePromoBundle(menuItem.bundle).length > 0;
+    const bundled =
+      menuItem.isPromo && parsePromoBundle(menuItem.bundle).length > 0;
     const comment = input.comment?.trim() || (bundled ? menuItem.title : null);
 
     const lines = walletLines(units);
@@ -142,19 +171,32 @@ export class PrizesService {
       where: { id: prizeId },
       include: { menuItem: true, user: { select: { nickname: true } } },
     });
-    if (!prize) throw new NotFoundException({ code: "PRIZE_NOT_FOUND", message: "Приз не найден" });
+    if (!prize)
+      throw new NotFoundException({
+        code: "PRIZE_NOT_FOUND",
+        message: "Приз не найден",
+      });
     if (prize.voidedAt != null) {
-      throw new ConflictException({ code: "PRIZE_VOIDED", message: "Приз отменён" });
+      throw new ConflictException({
+        code: "PRIZE_VOIDED",
+        message: "Приз отменён",
+      });
     }
     if (prize.redeemedAt != null) {
-      throw new ConflictException({ code: "PRIZE_SPENT", message: "Приз уже списан" });
+      throw new ConflictException({
+        code: "PRIZE_SPENT",
+        message: "Приз уже списан",
+      });
     }
 
     const tournament = await this.prisma.tournament.findUnique({
       where: { id: input.tournamentId },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
     if (tournament.status === "finished") {
       throw new ConflictException({
@@ -171,13 +213,42 @@ export class PrizesService {
         : chipsForKind(prize.kind, config);
 
     if (prize.kind === "entry") {
-      await assertEntryUnpaid(this.prisma, tournament.id, prize.userId, prize.user.nickname);
+      await assertEntryUnpaid(
+        this.prisma,
+        tournament.id,
+        prize.userId,
+        prize.user.nickname,
+      );
     }
     if (prize.kind === "addon") {
-      await assertAddonRoom(this.prisma, tournament.id, prize.userId, 1, config.addonChips);
+      await assertAddonRoom(
+        this.prisma,
+        tournament.id,
+        prize.userId,
+        1,
+        config.addonChips,
+      );
     }
 
     await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id = ${tournament.id} FOR UPDATE`;
+      if (prize.kind === "entry") {
+        await assertEntryUnpaid(
+          tx,
+          tournament.id,
+          prize.userId,
+          prize.user.nickname,
+        );
+      }
+      if (prize.kind === "addon") {
+        await assertAddonRoom(
+          tx,
+          tournament.id,
+          prize.userId,
+          1,
+          config.addonChips,
+        );
+      }
       const payment = await tx.payment.create({
         data: {
           tournamentId: tournament.id,
@@ -192,7 +263,7 @@ export class PrizesService {
       });
 
       // Guarded on redeemedAt so two hostesses tapping at once cannot spend the
-      // same prize twice — the second update matches nothing and throws.
+      // same prize twice - the second update matches nothing and throws.
       const spent = await tx.playerPrize.updateMany({
         where: { id: prize.id, redeemedAt: null, voidedAt: null },
         data: {
@@ -203,11 +274,31 @@ export class PrizesService {
         },
       });
       if (spent.count === 0) {
-        throw new ConflictException({ code: "PRIZE_SPENT", message: "Приз уже списан" });
+        throw new ConflictException({
+          code: "PRIZE_SPENT",
+          message: "Приз уже списан",
+        });
       }
 
       await seatPlayer(tx, tournament.id, prize.userId);
-      if (prize.kind === "rebuy") await returnToPlay(tx, tournament.id, prize.userId);
+      if (prize.kind === "rebuy")
+        await returnToPlay(tx, tournament.id, prize.userId);
+      await this.live.recordPurchase(
+        tx,
+        tournament.id,
+        prize.userId,
+        actorId,
+        prize.kind,
+        chips,
+        0,
+        payment.id,
+      );
+      await this.notifications.queue(tx, {
+        userId: prize.userId,
+        kind: "prize.redeem",
+        dedupeKey: prize.id,
+        text: escapeHtml(`Использован приз: ${prize.title}.`),
+      });
     });
 
     await this.audit.record({
@@ -215,7 +306,12 @@ export class PrizesService {
       action: "prize.redeem",
       entity: "Tournament",
       entityId: tournament.id,
-      after: { userId: prize.userId, prizeId: prize.id, title: prize.title, chips },
+      after: {
+        userId: prize.userId,
+        prizeId: prize.id,
+        title: prize.title,
+        chips,
+      },
     });
 
     return playerView(this.prisma, tournament.id, prize.userId);
@@ -223,21 +319,42 @@ export class PrizesService {
 
   /** Granted by mistake. Kept on the record, like a voided payment. */
   async revoke(prizeId: string, actorId: string): Promise<PrizeWallet> {
-    const prize = await this.prisma.playerPrize.findUnique({ where: { id: prizeId } });
-    if (!prize) throw new NotFoundException({ code: "PRIZE_NOT_FOUND", message: "Приз не найден" });
+    const prize = await this.prisma.playerPrize.findUnique({
+      where: { id: prizeId },
+    });
+    if (!prize)
+      throw new NotFoundException({
+        code: "PRIZE_NOT_FOUND",
+        message: "Приз не найден",
+      });
     if (prize.redeemedAt != null) {
       throw new ConflictException({
         code: "PRIZE_SPENT",
-        message: "Приз уже списан — отмените оплату в вечере",
+        message: "Приз уже списан - отмените оплату в вечере",
       });
     }
     if (prize.voidedAt != null) {
-      throw new ConflictException({ code: "PRIZE_VOIDED", message: "Приз уже отменён" });
+      throw new ConflictException({
+        code: "PRIZE_VOIDED",
+        message: "Приз уже отменён",
+      });
     }
 
-    await this.prisma.playerPrize.update({
-      where: { id: prizeId },
-      data: { voidedAt: new Date(), voidedById: actorId },
+    await this.prisma.$transaction(async (tx) => {
+      const changed = await tx.playerPrize.updateMany({
+        where: { id: prizeId, redeemedAt: null, voidedAt: null },
+        data: { voidedAt: new Date(), voidedById: actorId },
+      });
+      if (!changed.count)
+        throw new ConflictException("Приз уже использован или отменён");
+      await this.notifications.queue(tx, {
+        userId: prize.userId,
+        kind: "prize.revoke",
+        dedupeKey: prizeId,
+        text: escapeHtml(
+          `Приз «${prize.title}» отменён. Проверьте доступные призы в кабинете.`,
+        ),
+      });
     });
 
     await this.audit.record({
@@ -258,19 +375,29 @@ export class PrizesService {
       include: PRIZE_ROWS,
     });
 
-    const active = rows.filter((row) => row.redeemedAt == null).map(toPrizeView);
+    const active = rows
+      .filter((row) => row.redeemedAt == null)
+      .map(toPrizeView);
     const history = rows
       .filter((row) => row.redeemedAt != null)
       .slice(0, HISTORY_LIMIT)
       .map(toPrizeView);
 
-    return { lines: walletLines(active), total: active.length, active, history };
+    return {
+      lines: walletLines(active),
+      total: active.length,
+      active,
+      history,
+    };
   }
 
   /** Unspent prizes of everyone at one evening, so the desk can offer them. */
   async forTournament(tournamentId: string): Promise<PlayerPrize[]> {
     const [registered, payers] = await Promise.all([
-      this.prisma.registration.findMany({ where: { tournamentId }, select: { userId: true } }),
+      this.prisma.registration.findMany({
+        where: { tournamentId },
+        select: { userId: true },
+      }),
       this.prisma.payment.findMany({
         where: { tournamentId, voidedAt: null },
         select: { userId: true },
@@ -278,7 +405,9 @@ export class PrizesService {
       }),
     ]);
 
-    const userIds = [...new Set([...registered, ...payers].map((row) => row.userId))];
+    const userIds = [
+      ...new Set([...registered, ...payers].map((row) => row.userId)),
+    ];
     if (userIds.length === 0) return [];
 
     const rows = await this.prisma.playerPrize.findMany({
@@ -310,7 +439,8 @@ export class PrizesService {
     const units: Unit[] = [];
     for (const grant of bundle) {
       const source = grant.menuItemId ? byId.get(grant.menuItemId) : undefined;
-      const title = grant.title?.trim() || source?.title || kindTitle(grant.kind);
+      const title =
+        grant.title?.trim() || source?.title || kindTitle(grant.kind);
       for (let i = 0; i < grant.quantity * quantity; i += 1) {
         units.push({ title, kind: grant.kind, menuItemId: source?.id ?? null });
       }
@@ -351,7 +481,9 @@ function toPrizeView(row: PrizeRow): PlayerPrize {
   };
 }
 
-function staffName(user: { nickname: string; displayName: string | null } | null): string | null {
+function staffName(
+  user: { nickname: string; displayName: string | null } | null,
+): string | null {
   return user ? formatPlayerName(user.displayName, user.nickname) : null;
 }
 
@@ -362,7 +494,7 @@ function grantedMessage(what: string, comment: string | null): string {
     `<b>${escapeHtml(what)}</b>`,
     comment ? `<i>${escapeHtml(comment)}</i>` : null,
     "",
-    "Списать можно на любой игре — скажите об этом на кассе.",
+    "Списать можно на любой игре - скажите об этом на кассе.",
   ]
     .filter((line) => line !== null)
     .join("\n");

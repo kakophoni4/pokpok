@@ -25,6 +25,8 @@ import { PrizesService } from "../prizes/prizes.service";
 import { parseRatingConfig } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
 import { effectiveConfig } from "./tournament-config";
+import { DEFAULT_LIVE_CONFIG, LiveConfig } from "@poker/contracts";
+import { initialState } from "../live/live-engine";
 
 type TournamentWithVenue = Tournament & { venue: Venue | null };
 
@@ -40,7 +42,10 @@ export class TournamentsService {
     private readonly prizes: PrizesService,
   ) {}
 
-  async list(query: TournamentListQuery, viewerId?: string): Promise<TournamentSummary[]> {
+  async list(
+    query: TournamentListQuery,
+    viewerId?: string,
+  ): Promise<TournamentSummary[]> {
     const where = this.buildWhere(query);
     const tournaments = await this.prisma.tournament.findMany({
       where,
@@ -68,7 +73,10 @@ export class TournamentsService {
    * topic identifies the evening, the message identifies the player, and neither
    * has to be squeezed into Telegram's 64 bytes of callback data.
    */
-  async byAdminTopic(topicId: number, viewer?: Viewer): Promise<TournamentDetail> {
+  async byAdminTopic(
+    topicId: number,
+    viewer?: Viewer,
+  ): Promise<TournamentDetail> {
     const found = await this.prisma.tournament.findFirst({
       where: { adminTopicId: topicId },
       orderBy: { startsAt: "desc" },
@@ -98,38 +106,52 @@ export class TournamentsService {
     });
 
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
 
     const staffViewer = viewer != null && hasRole(viewer.role, "hostess");
-    const [counts, configs, ratingEvents, eveningGrants, prizes] = await Promise.all([
-      this.countRegistrations([id]),
-      this.seasonConfigs(),
-      this.prisma.ratingEvent.findMany({
-        where: { tournamentId: id, sourceType: "tournament_result" },
-        select: { userId: true, points: true },
-      }),
-      staffViewer
-        ? this.prisma.userAchievement.findMany({
-            where: { tournamentId: id },
-            select: { id: true, userId: true, achievementId: true },
-            orderBy: { grantedAt: "asc" },
-          })
-        : Promise.resolve([]),
-      // Everything the players at this table are owed, so the desk can offer to
-      // write it off without asking the server once per seat.
-      staffViewer ? this.prizes.forTournament(id) : Promise.resolve([]),
-    ]);
-    const config = effectiveConfig(tournament, configs.get(tournament.seasonId) ?? configs.get(null)!);
-    const mine = tournament.registrations.find((row) => row.userId === viewer?.id) ?? null;
+    const [counts, configs, ratingEvents, eveningGrants, prizes] =
+      await Promise.all([
+        this.countRegistrations([id]),
+        this.seasonConfigs(),
+        this.prisma.ratingEvent.findMany({
+          where: { tournamentId: id, sourceType: "tournament_result" },
+          select: { userId: true, points: true },
+        }),
+        staffViewer
+          ? this.prisma.userAchievement.findMany({
+              where: { tournamentId: id },
+              select: { id: true, userId: true, achievementId: true },
+              orderBy: { grantedAt: "asc" },
+            })
+          : Promise.resolve([]),
+        // Everything the players at this table are owed, so the desk can offer to
+        // write it off without asking the server once per seat.
+        staffViewer ? this.prizes.forTournament(id) : Promise.resolve([]),
+      ]);
+    const config = effectiveConfig(
+      tournament,
+      configs.get(tournament.seasonId) ?? configs.get(null)!,
+    );
+    const mine =
+      tournament.registrations.find((row) => row.userId === viewer?.id) ?? null;
 
     // Rating earned per player is read from the ledger, not recomputed here,
     // so the page always shows exactly what was actually awarded.
-    const pointsByUser = new Map(ratingEvents.map((event) => [event.userId, event.points]));
+    const pointsByUser = new Map(
+      ratingEvents.map((event) => [event.userId, event.points]),
+    );
 
-    const live = tournament.payments.filter((payment) => payment.voidedAt == null);
+    const live = tournament.payments.filter(
+      (payment) => payment.voidedAt == null,
+    );
     const chipsInPlay = live.reduce((sum, payment) => sum + payment.chips, 0);
-    const placeByUser = new Map(tournament.results.map((row) => [row.userId, row.place]));
+    const placeByUser = new Map(
+      tournament.results.map((row) => [row.userId, row.place]),
+    );
 
     const isStaff = staffViewer;
 
@@ -163,14 +185,19 @@ export class TournamentsService {
       })),
       // The cash desk is staff-only. Everyone else gets the same card without it.
       players: isStaff ? groupPlayers(live, placeByUser, pointsByUser) : null,
-      totalRub: isStaff ? live.reduce((sum, payment) => sum + payment.amountRub, 0) : null,
+      totalRub: isStaff
+        ? live.reduce((sum, payment) => sum + payment.amountRub, 0)
+        : null,
       adminScreens: isStaff
         ? {
             topicId: tournament.adminTopicId,
             boardMsgId: tournament.adminBoardMsgId,
             cards: tournament.registrations
               .filter((row) => row.adminCardMsgId != null)
-              .map((row) => ({ userId: row.userId, msgId: row.adminCardMsgId as number })),
+              .map((row) => ({
+                userId: row.userId,
+                msgId: row.adminCardMsgId as number,
+              })),
           }
         : null,
       eveningGrants: isStaff ? eveningGrants : null,
@@ -179,13 +206,18 @@ export class TournamentsService {
   }
 
   /** Remembers where the bot put its live screens for this tournament. */
-  async saveAdminScreens(id: string, input: SaveAdminScreensInput): Promise<{ ok: true }> {
+  async saveAdminScreens(
+    id: string,
+    input: SaveAdminScreensInput,
+  ): Promise<{ ok: true }> {
     await this.prisma.$transaction(async (tx) => {
       if (input.topicId !== undefined || input.boardMsgId !== undefined) {
         await tx.tournament.update({
           where: { id },
           data: {
-            ...(input.topicId === undefined ? {} : { adminTopicId: input.topicId ?? null }),
+            ...(input.topicId === undefined
+              ? {}
+              : { adminTopicId: input.topicId ?? null }),
             ...(input.boardMsgId === undefined
               ? {}
               : { adminBoardMsgId: input.boardMsgId ?? null }),
@@ -195,7 +227,9 @@ export class TournamentsService {
 
       for (const card of input.cards ?? []) {
         await tx.registration.upsert({
-          where: { tournamentId_userId: { tournamentId: id, userId: card.userId } },
+          where: {
+            tournamentId_userId: { tournamentId: id, userId: card.userId },
+          },
           create: {
             tournamentId: id,
             userId: card.userId,
@@ -211,8 +245,19 @@ export class TournamentsService {
     return { ok: true };
   }
 
-  async create(actorId: string, input: CreateTournamentInput): Promise<TournamentSummary> {
+  async create(
+    actorId: string,
+    input: CreateTournamentInput,
+  ): Promise<TournamentSummary> {
     const seasonId = input.seasonId ?? (await this.defaultSeasonId());
+    const settings = await this.prisma.clubSettings.findUnique({
+      where: { id: "club" },
+    });
+    const templates = (settings?.blindTemplates ?? []) as unknown as {
+      config: unknown;
+    }[];
+    const parsed = LiveConfig.safeParse(templates[0]?.config);
+    const structure = parsed.success ? parsed.data : DEFAULT_LIVE_CONFIG;
 
     const tournament = await this.prisma.tournament.create({
       data: {
@@ -223,7 +268,24 @@ export class TournamentsService {
         startsAt: new Date(input.startsAt),
         regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null,
         regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null,
-        capacity: input.capacity ?? null,
+        capacity: input.maxTables
+          ? input.maxTables * (input.seatsPerTable ?? 9)
+          : (input.capacity ?? null),
+        maxTables: input.maxTables ?? null,
+        seatsPerTable: input.seatsPerTable ?? 9,
+        ...(input.maxTables
+          ? {
+              live: {
+                create: {
+                  state: initialState({
+                    ...structure,
+                    maxTables: input.maxTables,
+                    seatsPerTable: input.seatsPerTable ?? 9,
+                  }) as never,
+                },
+              },
+            }
+          : {}),
         paidPlaces: input.paidPlaces ?? null,
         startingStack: input.startingStack ?? null,
         addonChips: input.addonChips ?? null,
@@ -252,8 +314,29 @@ export class TournamentsService {
   ): Promise<TournamentSummary> {
     const before = await this.prisma.tournament.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
+    const live = await this.prisma.liveTournament.findUnique({
+      where: { tournamentId: id },
+    });
+    if (
+      live &&
+      (input.maxTables !== undefined || input.seatsPerTable !== undefined)
+    )
+      throw new BadRequestException(
+        "Столы настроены. Меняйте структуру в разделе управления вечером до начала посадки",
+      );
+    if (
+      live &&
+      input.capacity !== undefined &&
+      input.capacity !== before.capacity
+    )
+      throw new BadRequestException(
+        "Вместимость определяется количеством столов",
+      );
 
     if (input.capacity != null) {
       const occupied = await this.prisma.registration.count({
@@ -262,7 +345,7 @@ export class TournamentsService {
       if (input.capacity < occupied) {
         throw new BadRequestException({
           code: "CAPACITY_TOO_SMALL",
-          message: `Уже записано ${occupied} игроков — лимит не может быть меньше`,
+          message: `Уже записано ${occupied} игроков - лимит не может быть меньше`,
         });
       }
     }
@@ -271,26 +354,48 @@ export class TournamentsService {
       where: { id },
       data: {
         ...(input.title === undefined ? {} : { title: input.title }),
-        ...(input.description === undefined ? {} : { description: input.description ?? null }),
-        ...(input.seasonId === undefined ? {} : { seasonId: input.seasonId ?? null }),
-        ...(input.venueId === undefined ? {} : { venueId: input.venueId ?? null }),
-        ...(input.startsAt === undefined ? {} : { startsAt: new Date(input.startsAt) }),
+        ...(input.description === undefined
+          ? {}
+          : { description: input.description ?? null }),
+        ...(input.seasonId === undefined
+          ? {}
+          : { seasonId: input.seasonId ?? null }),
+        ...(input.venueId === undefined
+          ? {}
+          : { venueId: input.venueId ?? null }),
+        ...(input.startsAt === undefined
+          ? {}
+          : { startsAt: new Date(input.startsAt) }),
         ...(input.regOpensAt === undefined
           ? {}
-          : { regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null }),
+          : {
+              regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null,
+            }),
         ...(input.regClosesAt === undefined
           ? {}
-          : { regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null }),
-        ...(input.capacity === undefined ? {} : { capacity: input.capacity ?? null }),
-        ...(input.paidPlaces === undefined ? {} : { paidPlaces: input.paidPlaces ?? null }),
+          : {
+              regClosesAt: input.regClosesAt
+                ? new Date(input.regClosesAt)
+                : null,
+            }),
+        ...(input.capacity === undefined
+          ? {}
+          : { capacity: input.capacity ?? null }),
+        ...(input.paidPlaces === undefined
+          ? {}
+          : { paidPlaces: input.paidPlaces ?? null }),
         ...(input.startingStack === undefined
           ? {}
           : { startingStack: input.startingStack ?? null }),
-        ...(input.addonChips === undefined ? {} : { addonChips: input.addonChips ?? null }),
+        ...(input.addonChips === undefined
+          ? {}
+          : { addonChips: input.addonChips ?? null }),
         ...(input.ratingMultiplier === undefined
           ? {}
           : { ratingMultiplier: input.ratingMultiplier }),
-        ...(input.minRating === undefined ? {} : { minRating: input.minRating ?? null }),
+        ...(input.minRating === undefined
+          ? {}
+          : { minRating: input.minRating ?? null }),
         ...(input.status === undefined ? {} : { status: input.status }),
       },
       include: { venue: true },
@@ -325,15 +430,22 @@ export class TournamentsService {
   async remove(actorId: string, id: string): Promise<{ ok: true }> {
     const tournament = await this.prisma.tournament.findUnique({
       where: { id },
-      include: { results: { select: { id: true } }, payments: { select: { id: true } } },
+      include: {
+        results: { select: { id: true } },
+        payments: { select: { id: true } },
+      },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
     if (tournament.results.length > 0 || tournament.payments.length > 0) {
       throw new ConflictException({
         code: "TOURNAMENT_HAS_HISTORY",
-        message: "По турниру уже есть места или оплаты — отмените его вместо удаления",
+        message:
+          "По турниру уже есть места или оплаты - отмените его вместо удаления",
       });
     }
 
@@ -385,7 +497,9 @@ export class TournamentsService {
     };
   }
 
-  private async countRegistrations(tournamentIds: string[]): Promise<CountsByTournament> {
+  private async countRegistrations(
+    tournamentIds: string[],
+  ): Promise<CountsByTournament> {
     if (tournamentIds.length === 0) return new Map();
 
     const grouped = await this.prisma.registration.groupBy({
@@ -396,8 +510,12 @@ export class TournamentsService {
 
     const counts: CountsByTournament = new Map();
     for (const row of grouped) {
-      const entry = counts.get(row.tournamentId) ?? { registered: 0, waitlist: 0 };
-      if (OCCUPYING_STATUSES.includes(row.status)) entry.registered += row._count._all;
+      const entry = counts.get(row.tournamentId) ?? {
+        registered: 0,
+        waitlist: 0,
+      };
+      if (OCCUPYING_STATUSES.includes(row.status))
+        entry.registered += row._count._all;
       if (row.status === "waitlist") entry.waitlist += row._count._all;
       counts.set(row.tournamentId, entry);
     }
@@ -427,7 +545,8 @@ export class TournamentsService {
 
     const map = new Map<string | null, RatingConfig>();
     map.set(null, parseRatingConfig(undefined));
-    for (const season of seasons) map.set(season.id, parseRatingConfig(season.ratingConfig));
+    for (const season of seasons)
+      map.set(season.id, parseRatingConfig(season.ratingConfig));
     return map;
   }
 
@@ -516,11 +635,17 @@ function toSummary(
     regOpensAt: tournament.regOpensAt?.toISOString() ?? null,
     regClosesAt: tournament.regClosesAt?.toISOString() ?? null,
     capacity: tournament.capacity,
+    maxTables: tournament.maxTables,
+    seatsPerTable: tournament.seatsPerTable,
     ratingMultiplier: tournament.ratingMultiplier,
     paidPlaces: tournament.paidPlaces ?? season.defaultPaidPlaces,
     minRating: tournament.minRating,
     venue: tournament.venue
-      ? { id: tournament.venue.id, title: tournament.venue.title, address: tournament.venue.address }
+      ? {
+          id: tournament.venue.id,
+          title: tournament.venue.title,
+          address: tournament.venue.address,
+        }
       : null,
     registeredCount: count.registered,
     waitlistCount: count.waitlist,
@@ -534,4 +659,3 @@ function toSummary(
       : null,
   };
 }
-

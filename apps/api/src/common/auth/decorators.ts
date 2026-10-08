@@ -1,4 +1,8 @@
-import { SetMetadata, createParamDecorator, type ExecutionContext } from "@nestjs/common";
+import {
+  SetMetadata,
+  createParamDecorator,
+  type ExecutionContext,
+} from "@nestjs/common";
 import type { UserRole } from "@poker/contracts";
 import type { AuthedRequest, RequestUser } from "./auth.types";
 
@@ -10,7 +14,7 @@ export const OPTIONAL_AUTH_KEY = "auth:optional";
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 /**
- * Route works for guests but enriches the response when a token is present —
+ * Route works for guests but enriches the response when a token is present -
  * used by the schedule, which shows "you are registered" only to a known user.
  */
 export const OptionalAuth = () => SetMetadata(OPTIONAL_AUTH_KEY, true);

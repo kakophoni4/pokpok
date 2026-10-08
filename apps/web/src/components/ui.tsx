@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 
 export function cx(...classes: (string | false | null | undefined)[]): string {
@@ -32,9 +38,11 @@ export function Button({
       {...rest}
       disabled={disabled || loading}
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-400",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "px-2.5 py-1 text-sm" : "px-3.5 py-1.5 text-sm",
+        size === "sm"
+          ? "min-h-8 px-3 py-1.5 text-sm"
+          : "min-h-10 px-4 py-2 text-sm",
         BUTTON_VARIANTS[variant],
         className,
       )}
@@ -196,19 +204,33 @@ export function EmptyState({
         </span>
       )}
       <p className="font-medium">{title}</p>
-      {description && <p className="max-w-sm text-sm text-stone-400">{description}</p>}
+      {description && (
+        <p className="max-w-sm text-sm text-stone-400">{description}</p>
+      )}
       {action}
     </div>
   );
 }
 
-export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
-  const message = error instanceof Error ? error.message : "Что-то пошло не так";
+export function ErrorState({
+  error,
+  onRetry,
+}: {
+  error: unknown;
+  onRetry?: () => void;
+}) {
+  const message =
+    error instanceof Error ? error.message : "Что-то пошло не так";
   return (
     <div className="card border-chip-red/40 px-6 py-8 text-center">
       <p className="font-medium text-chip-red">{message}</p>
       {onRetry && (
-        <Button variant="secondary" size="sm" className="mt-3" onClick={onRetry}>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="mt-3"
+          onClick={onRetry}
+        >
           Повторить
         </Button>
       )}
@@ -281,7 +303,8 @@ export function Select({
   useEffect(() => {
     function onPointer(event: MouseEvent) {
       const target = event.target as Node;
-      if (root.current?.contains(target) || list.current?.contains(target)) return;
+      if (root.current?.contains(target) || list.current?.contains(target))
+        return;
       setOpen(false);
     }
     function onKey(event: KeyboardEvent) {

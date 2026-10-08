@@ -18,7 +18,7 @@ import {
   setTimezone,
 } from "./format.js";
 
-/** 19:00 in Samara, which is 15:00 UTC — the club plays at UTC+4 all year. */
+/** 19:00 in Samara, which is 15:00 UTC - the club plays at UTC+4 all year. */
 const GAME_START = "2026-08-25T15:00:00.000Z";
 
 describe("club clock", () => {
@@ -64,27 +64,37 @@ describe("clubMoment", () => {
   const at = (iso: string) => new Date(iso);
 
   it("says today and tomorrow instead of a date", () => {
-    expect(clubMoment(friday, at("2026-09-04T09:00:00.000Z"))).toBe("сегодня в 19:00");
-    expect(clubMoment(friday, at("2026-09-03T09:00:00.000Z"))).toBe("завтра в 19:00");
-    expect(clubMoment("2026-09-03T15:00:00.000Z", at("2026-09-04T09:00:00.000Z"))).toBe(
-      "вчера в 19:00",
+    expect(clubMoment(friday, at("2026-09-04T09:00:00.000Z"))).toBe(
+      "сегодня в 19:00",
     );
+    expect(clubMoment(friday, at("2026-09-03T09:00:00.000Z"))).toBe(
+      "завтра в 19:00",
+    );
+    expect(
+      clubMoment("2026-09-03T15:00:00.000Z", at("2026-09-04T09:00:00.000Z")),
+    ).toBe("вчера в 19:00");
   });
 
   it("names the weekday within the coming week, in the accusative", () => {
-    expect(clubMoment(friday, at("2026-09-01T09:00:00.000Z"))).toBe("в пятницу, 19:00");
-    expect(clubMoment("2026-09-02T15:00:00.000Z", at("2026-08-31T09:00:00.000Z"))).toBe(
-      "в среду, 19:00",
+    expect(clubMoment(friday, at("2026-09-01T09:00:00.000Z"))).toBe(
+      "в пятницу, 19:00",
     );
+    expect(
+      clubMoment("2026-09-02T15:00:00.000Z", at("2026-08-31T09:00:00.000Z")),
+    ).toBe("в среду, 19:00");
   });
 
   it("falls back to the date once there is more than one such weekday left", () => {
-    expect(clubMoment(friday, at("2026-08-20T09:00:00.000Z"))).toBe("4 сентября, 19:00");
+    expect(clubMoment(friday, at("2026-08-20T09:00:00.000Z"))).toBe(
+      "4 сентября, 19:00",
+    );
   });
 
   it("uses the club's day boundary, not the reader's", () => {
     // 22:00 UTC on the 3rd is already the 4th in Samara.
-    expect(clubMoment(friday, at("2026-09-03T21:00:00.000Z"))).toBe("сегодня в 19:00");
+    expect(clubMoment(friday, at("2026-09-03T21:00:00.000Z"))).toBe(
+      "сегодня в 19:00",
+    );
   });
 });
 
@@ -101,7 +111,9 @@ describe("layout", () => {
   });
 
   it("drops the lines a screen decided not to show", () => {
-    expect(quote(["раз", null, false, "", "два"])).toBe("<blockquote>раз\nдва</blockquote>");
+    expect(quote(["раз", null, false, "", "два"])).toBe(
+      "<blockquote>раз\nдва</blockquote>",
+    );
   });
 });
 
@@ -150,15 +162,23 @@ describe("text safety", () => {
 
 describe("greetings", () => {
   it("stays on the same variant for one person on one day", () => {
-    const first = clubGreeting("Тимур А.", "42", new Date("2026-09-01T12:00:00+04:00"));
-    const second = clubGreeting("Тимур А.", "42", new Date("2026-09-01T23:00:00+04:00"));
+    const first = clubGreeting(
+      "Тимур А.",
+      "42",
+      new Date("2026-09-01T12:00:00+04:00"),
+    );
+    const second = clubGreeting(
+      "Тимур А.",
+      "42",
+      new Date("2026-09-01T23:00:00+04:00"),
+    );
     expect(first).toBe(second);
     expect(first).toContain("Тимур А.");
   });
 
   it("escapes a name that would break HTML", () => {
-    expect(clubGreeting("<b>x</b>", "1", new Date("2026-09-01T12:00:00+04:00"))).toContain(
-      "&lt;b&gt;x&lt;/b&gt;",
-    );
+    expect(
+      clubGreeting("<b>x</b>", "1", new Date("2026-09-01T12:00:00+04:00")),
+    ).toContain("&lt;b&gt;x&lt;/b&gt;");
   });
 });

@@ -19,7 +19,11 @@ export type AuditRow = {
   createdAt: Date;
 };
 
-export type Described = { label: string; amountRub: number; playerId: string | null };
+export type Described = {
+  label: string;
+  amountRub: number;
+  playerId: string | null;
+};
 
 const KIND_TITLE: Record<string, string> = {
   entry: "Вход",
@@ -29,15 +33,20 @@ const KIND_TITLE: Record<string, string> = {
   other: "Прочее",
 };
 
-export function describe(row: AuditRow, achievementTitles: Map<string, string>): Described {
+export function describe(
+  row: AuditRow,
+  achievementTitles: Map<string, string>,
+): Described {
   const after = asRecord(row.after);
   const before = asRecord(row.before);
-  const player = str(after, "userId") ?? str(before, "userId") ?? playerFromKey(row);
+  const player =
+    str(after, "userId") ?? str(before, "userId") ?? playerFromKey(row);
 
   switch (row.action) {
     case "payment.add": {
       const times = num(after, "multiplier") ?? 1;
-      const what = str(after, "title") ?? KIND_TITLE[str(after, "kind") ?? ""] ?? "Оплата";
+      const what =
+        str(after, "title") ?? KIND_TITLE[str(after, "kind") ?? ""] ?? "Оплата";
       return {
         label: `Оплата · ${what}${times > 1 ? ` ×${times}` : ""}`,
         amountRub: num(after, "amountRub") ?? 0,
@@ -45,7 +54,10 @@ export function describe(row: AuditRow, achievementTitles: Map<string, string>):
       };
     }
     case "payment.void": {
-      const what = str(before, "note") ?? KIND_TITLE[str(before, "kind") ?? ""] ?? "оплата";
+      const what =
+        str(before, "note") ??
+        KIND_TITLE[str(before, "kind") ?? ""] ??
+        "оплата";
       // Negative, so the column adds up to what the evening actually took.
       return {
         label: `Отмена оплаты · ${what}`,
@@ -116,14 +128,62 @@ export function describe(row: AuditRow, achievementTitles: Map<string, string>):
     case "tournament.create":
       return { label: "Турнир создан", amountRub: 0, playerId: null };
     case "tournament.update":
-      return { label: `Турнир изменён${changedFields(before, after)}`, amountRub: 0, playerId: null };
+      return {
+        label: `Турнир изменён${changedFields(before, after)}`,
+        amountRub: 0,
+        playerId: null,
+      };
+    case "live.receipt":
+      return {
+        label: `Получена оплата · ${str(after, "method") === "cash" ? "наличные" : "терминал"}`,
+        amountRub: num(after, "amountRub") ?? 0,
+        playerId: player,
+      };
+    case "live.receipt.cancel":
+      return {
+        label: "Отмена полученной оплаты",
+        amountRub: -(num(after, "amountRub") ?? 0),
+        playerId: player,
+      };
     default:
+      if (row.action.startsWith("live.")) {
+        const titles: Record<string, string> = {
+          configure: "Настроена структура",
+          table: "Изменён стол",
+          clock: "Управление часами",
+          arrive: "Приход игрока",
+          bust: "Игрок выбыл",
+          restore: "Исправлен вылет",
+          stack: "Записан стек",
+          wantMove: "Запрос пересадки",
+          move: "Пересадка",
+          breakRequest: "Запрос расформирования",
+          breakApprove: "Расформирован стол",
+          ack: "Принято уведомление",
+          deferBalance: "Отложена балансировка",
+          bounty: "Начислено баунти",
+          lottery: "Результат лототрона",
+          voidBounty: "Отменено баунти",
+          cancelLottery: "Восстановлена попытка лототрона",
+          order: "Создан заказ",
+          "order.fulfil": "Выдан заказ",
+          "order.cancel": "Отменён заказ",
+        };
+        return {
+          label: `${titles[row.action.slice(5)] ?? row.action}${str(after, "title") ? ` - ${str(after, "title")} x${num(after, "quantity") ?? 1}` : ""}${num(after, "stack") != null ? ` - ${num(after, "stack")} фишек` : ""}${num(after, "targetTable") != null ? ` - стол ${num(after, "targetTable")}` : ""} · ${str(after, "interface") === "dealer" ? "планшет дилера" : "сайт / Mini App"}`,
+          amountRub: 0,
+          playerId: player,
+        };
+      }
       return { label: row.action, amountRub: 0, playerId: player };
   }
 }
 
-/** "· цена входа, стек" — enough to see what an edit touched without a diff view. */
-function changedFields(before: Record<string, unknown>, after: Record<string, unknown>): string {
+/** "· цена входа, стек" - enough to see what an edit touched without a diff view. */
+function changedFields(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+): string {
   const changed = Object.keys(after).filter(
     (key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]),
   );
@@ -159,7 +219,10 @@ export function summariseStaff(entries: JournalEntry[]): {
   actions: number;
   amountRub: number;
 }[] {
-  const byName = new Map<string, { name: string; actions: number; amountRub: number }>();
+  const byName = new Map<
+    string,
+    { name: string; actions: number; amountRub: number }
+  >();
   for (const entry of entries) {
     const name = entry.actor ?? "Система";
     const line = byName.get(name) ?? { name, actions: 0, amountRub: 0 };

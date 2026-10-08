@@ -45,7 +45,7 @@ export function clubClock(iso: string): string {
   }).format(new Date(iso));
 }
 
-/** "25 авг, вт · 19:00" — compact enough to fit on a button. */
+/** "25 авг, вт · 19:00" - compact enough to fit on a button. */
 export function clubWhen(iso: string): string {
   const date = new Intl.DateTimeFormat("ru-RU", {
     timeZone: timezone,
@@ -103,7 +103,9 @@ export function clubMoment(iso: string, now = new Date()): string {
 
 /** "среда" → "в среду": Russian wants the accusative after "в". */
 function weekdayPrefix(weekday: string): string {
-  const accusative = weekday.endsWith("а") ? `${weekday.slice(0, -1)}у` : weekday;
+  const accusative = weekday.endsWith("а")
+    ? `${weekday.slice(0, -1)}у`
+    : weekday;
   return `в ${accusative}`;
 }
 
@@ -115,8 +117,11 @@ export function gauge(taken: number, total: number, width = 10): string {
   if (total <= 0) return "";
   if (taken >= total) return "▰".repeat(width);
   // A lone sign-up still has to show, and a table with a seat left must not be
-  // rounded up into looking full — that is the one thing the bar is read for.
-  const shown = Math.min(width - 1, Math.max(taken > 0 ? 1 : 0, Math.round((taken / total) * width)));
+  // rounded up into looking full - that is the one thing the bar is read for.
+  const shown = Math.min(
+    width - 1,
+    Math.max(taken > 0 ? 1 : 0, Math.round((taken / total) * width)),
+  );
   return `${"▰".repeat(shown)}${"▱".repeat(width - shown)}`;
 }
 
@@ -136,7 +141,12 @@ export function rub(value: number): string {
   return `${num(value)} ₽`;
 }
 
-export function plural(count: number, one: string, few: string, many: string): string {
+export function plural(
+  count: number,
+  one: string,
+  few: string,
+  many: string,
+): string {
   const mod100 = Math.abs(count) % 100;
   const mod10 = mod100 % 10;
   if (mod100 >= 11 && mod100 <= 14) return many;
@@ -162,7 +172,10 @@ export function rankMark(rank: number): string {
   return `${rank}.`;
 }
 
-export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
+export function playerLabel(user: {
+  nickname: string;
+  displayName?: string | null;
+}): string {
   return formatPlayerName(user.displayName, user.nickname);
 }
 
@@ -187,8 +200,14 @@ function hashSeed(value: string): number {
  * One of a handful of greetings, stable for a given person on a given club day
  * so tapping around the menu does not reshuffle the hello.
  */
-export function clubGreeting(name: string, seed: string, now = new Date()): string {
-  const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(now);
+export function clubGreeting(
+  name: string,
+  seed: string,
+  now = new Date(),
+): string {
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(
+    now,
+  );
   const index = hashSeed(`${seed}:${day}`) % GREETINGS.length;
   return GREETINGS[index]!(escapeHtml(name));
 }

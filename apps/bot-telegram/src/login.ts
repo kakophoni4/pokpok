@@ -10,7 +10,7 @@ export const LOGIN_CALLBACK = /^lg:([yn]):([\da-f]+)$/;
 /**
  * Signing in to the website by pressing a button here.
  *
- * The bot never sees the session — it only tells the server «yes, this Telegram
+ * The bot never sees the session - it only tells the server «yes, this Telegram
  * account asked for that ticket». The browser is waiting on the other side and
  * collects the tokens itself.
  */
@@ -22,9 +22,12 @@ export class LoginConfirm {
    * forwarded by somebody else: it only matches on the screen that asked.
    */
   async ask(code: string): Promise<Screen> {
-    const prompt = await this.api.internal<LoginTicketPrompt>("/auth/internal/login/prompt", {
-      code,
-    });
+    const prompt = await this.api.internal<LoginTicketPrompt>(
+      "/auth/internal/login/prompt",
+      {
+        code,
+      },
+    );
 
     return {
       text: [
@@ -42,7 +45,11 @@ export class LoginConfirm {
     };
   }
 
-  async settle(code: string, profile: TelegramProfile, approve: boolean): Promise<void> {
+  async settle(
+    code: string,
+    profile: TelegramProfile,
+    approve: boolean,
+  ): Promise<void> {
     await this.api.internal("/auth/internal/login/settle", {
       code,
       approve,

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   CLUB_TIMEZONE,
   type ClubMenuItem,
@@ -18,12 +23,19 @@ import {
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { describe, summariseStaff } from "./journal";
-import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
+import type {
+  ClubMenuItem as MenuRow,
+  PaymentKind,
+} from "../generated/prisma/client";
 
 /** There is exactly one club, so exactly one settings row. */
 const ROW_ID = "club";
 
-const FIXED: { kind: "entry" | "rebuy" | "addon"; title: string; sortOrder: number }[] = [
+const FIXED: {
+  kind: "entry" | "rebuy" | "addon";
+  title: string;
+  sortOrder: number;
+}[] = [
   { kind: "entry", title: "Вход", sortOrder: 0 },
   { kind: "rebuy", title: "Ребай", sortOrder: 1 },
   { kind: "addon", title: "Адон", sortOrder: 2 },
@@ -35,6 +47,50 @@ export class ClubService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  async handOfDay() {
+    const row = await this.prisma.clubSettings.findUnique({
+      where: { id: ROW_ID },
+    });
+    return { hand: row?.handOfDay ?? null };
+  }
+
+  async setHandOfDay(
+    actorId: string,
+    hand: string | null,
+    expected: string | null,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.clubSettings.upsert({
+        where: { id: ROW_ID },
+        create: { id: ROW_ID },
+        update: {},
+      });
+      await tx.$queryRaw`SELECT id FROM "ClubSettings" WHERE id='club' FOR UPDATE`;
+      const before = await tx.clubSettings.findUniqueOrThrow({
+        where: { id: ROW_ID },
+      });
+      if (before.handOfDay !== expected)
+        throw new ConflictException(
+          "Рука дня уже изменена. Обновите страницу.",
+        );
+      await tx.clubSettings.update({
+        where: { id: ROW_ID },
+        data: { handOfDay: hand },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: "club.handOfDay",
+          entity: "ClubSettings",
+          entityId: ROW_ID,
+          before: { hand: before.handOfDay },
+          after: { hand },
+        },
+      });
+      return { hand };
+    });
+  }
 
   /**
    * Reads the settings, creating them on first use. Doing it lazily means a fresh
@@ -53,9 +109,12 @@ export class ClubService {
     const items = await this.prisma.clubMenuItem.findMany({
       orderBy: [{ isPromo: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
     });
-    const venues = await this.prisma.venue.findMany({ orderBy: { createdAt: "asc" } });
+    const venues = await this.prisma.venue.findMany({
+      orderBy: { createdAt: "asc" },
+    });
 
     return {
+      handOfDay: row.handOfDay,
       infoText: row.infoText,
       entryPriceRub: row.entryPriceRub,
       rebuyPriceRub: row.rebuyPriceRub,
@@ -68,26 +127,45 @@ export class ClubService {
     };
   }
 
-  async update(actorId: string, input: UpdateClubSettingsInput): Promise<ClubSettings> {
+  async update(
+    actorId: string,
+    input: UpdateClubSettingsInput,
+  ): Promise<ClubSettings> {
     const before = await this.get();
 
     await this.prisma.clubSettings.update({
       where: { id: ROW_ID },
       data: {
         ...(input.infoText === undefined ? {} : { infoText: input.infoText }),
-        ...(input.entryPriceRub === undefined ? {} : { entryPriceRub: input.entryPriceRub }),
-        ...(input.rebuyPriceRub === undefined ? {} : { rebuyPriceRub: input.rebuyPriceRub }),
-        ...(input.addonPriceRub === undefined ? {} : { addonPriceRub: input.addonPriceRub }),
-        ...(input.drinkPriceRub === undefined ? {} : { drinkPriceRub: input.drinkPriceRub }),
-        ...(input.adminChatId === undefined ? {} : { adminChatId: input.adminChatId ?? null }),
+        ...(input.entryPriceRub === undefined
+          ? {}
+          : { entryPriceRub: input.entryPriceRub }),
+        ...(input.rebuyPriceRub === undefined
+          ? {}
+          : { rebuyPriceRub: input.rebuyPriceRub }),
+        ...(input.addonPriceRub === undefined
+          ? {}
+          : { addonPriceRub: input.addonPriceRub }),
+        ...(input.drinkPriceRub === undefined
+          ? {}
+          : { drinkPriceRub: input.drinkPriceRub }),
+        ...(input.adminChatId === undefined
+          ? {}
+          : { adminChatId: input.adminChatId ?? null }),
         timezone: CLUB_TIMEZONE,
       },
     });
 
     const prices: Partial<Record<PaymentKind, number>> = {
-      ...(input.entryPriceRub === undefined ? {} : { entry: input.entryPriceRub }),
-      ...(input.rebuyPriceRub === undefined ? {} : { rebuy: input.rebuyPriceRub }),
-      ...(input.addonPriceRub === undefined ? {} : { addon: input.addonPriceRub }),
+      ...(input.entryPriceRub === undefined
+        ? {}
+        : { entry: input.entryPriceRub }),
+      ...(input.rebuyPriceRub === undefined
+        ? {}
+        : { rebuy: input.rebuyPriceRub }),
+      ...(input.addonPriceRub === undefined
+        ? {}
+        : { addon: input.addonPriceRub }),
     };
     for (const [kind, priceRub] of Object.entries(prices)) {
       await this.prisma.clubMenuItem.updateMany({
@@ -108,20 +186,33 @@ export class ClubService {
     return after;
   }
 
-  async createMenuItem(actorId: string, input: CreateClubMenuItemInput): Promise<ClubMenuItem> {
-    if (input.kind === "entry" || input.kind === "rebuy" || input.kind === "addon") {
+  async createMenuItem(
+    actorId: string,
+    input: CreateClubMenuItemInput,
+  ): Promise<ClubMenuItem> {
+    if (
+      input.kind === "entry" ||
+      input.kind === "rebuy" ||
+      input.kind === "addon"
+    ) {
       if (!input.isPromo) {
         throw new BadRequestException({
           code: "FIXED_KIND",
-          message: "Вход, адон и ребай уже есть — добавьте другую позицию или акцию",
+          message:
+            "Вход, адон и ребай уже есть - добавьте другую позицию или акцию",
         });
       }
     }
 
     const bundle = parsePromoBundle(input.bundle);
-    const kind = input.isPromo && bundle.length > 0 ? promoKindFromBundle(bundle) : input.kind;
+    const kind =
+      input.isPromo && bundle.length > 0
+        ? promoKindFromBundle(bundle)
+        : input.kind;
 
-    const last = await this.prisma.clubMenuItem.aggregate({ _max: { sortOrder: true } });
+    const last = await this.prisma.clubMenuItem.aggregate({
+      _max: { sortOrder: true },
+    });
     const item = await this.prisma.clubMenuItem.create({
       data: {
         title: input.title,
@@ -141,7 +232,12 @@ export class ClubService {
       action: "club.menu.create",
       entity: "ClubMenuItem",
       entityId: item.id,
-      after: { title: item.title, kind: item.kind, priceRub: item.priceRub, chips: item.chips },
+      after: {
+        title: item.title,
+        kind: item.kind,
+        priceRub: item.priceRub,
+        chips: item.chips,
+      },
     });
     return toMenuView(item);
   }
@@ -153,7 +249,10 @@ export class ClubService {
   ): Promise<ClubMenuItem> {
     const before = await this.prisma.clubMenuItem.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция не найдена" });
+      throw new NotFoundException({
+        code: "MENU_ITEM_NOT_FOUND",
+        message: "Позиция не найдена",
+      });
     }
 
     if (before.isFixed && input.kind != null && input.kind !== before.kind) {
@@ -163,7 +262,8 @@ export class ClubService {
       });
     }
 
-    const bundle = input.bundle === undefined ? undefined : parsePromoBundle(input.bundle);
+    const bundle =
+      input.bundle === undefined ? undefined : parsePromoBundle(input.bundle);
     const kind =
       bundle && bundle.length > 0
         ? promoKindFromBundle(bundle)
@@ -178,9 +278,13 @@ export class ClubService {
         ...(kind === undefined ? {} : { kind }),
         ...(input.priceRub === undefined ? {} : { priceRub: input.priceRub }),
         ...(input.chips === undefined ? {} : { chips: input.chips }),
-        ...(input.isPromo === undefined || before.isFixed ? {} : { isPromo: input.isPromo }),
+        ...(input.isPromo === undefined || before.isFixed
+          ? {}
+          : { isPromo: input.isPromo }),
         ...(input.isActive === undefined ? {} : { isActive: input.isActive }),
-        ...(input.sortOrder === undefined ? {} : { sortOrder: input.sortOrder }),
+        ...(input.sortOrder === undefined
+          ? {}
+          : { sortOrder: input.sortOrder }),
         ...(bundle === undefined
           ? {}
           : { bundle: (bundle.length > 0 ? bundle : null) as never }),
@@ -209,7 +313,11 @@ export class ClubService {
       action: "club.menu.update",
       entity: "ClubMenuItem",
       entityId: id,
-      before: { title: before.title, priceRub: before.priceRub, chips: before.chips },
+      before: {
+        title: before.title,
+        priceRub: before.priceRub,
+        chips: before.chips,
+      },
       after: { title: item.title, priceRub: item.priceRub, chips: item.chips },
     });
     return toMenuView(item);
@@ -218,7 +326,10 @@ export class ClubService {
   async deleteMenuItem(actorId: string, id: string): Promise<{ ok: true }> {
     const before = await this.prisma.clubMenuItem.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция не найдена" });
+      throw new NotFoundException({
+        code: "MENU_ITEM_NOT_FOUND",
+        message: "Позиция не найдена",
+      });
     }
     if (before.isFixed) {
       throw new BadRequestException({
@@ -238,7 +349,10 @@ export class ClubService {
     return { ok: true };
   }
 
-  async createVenue(actorId: string, input: ClubVenueInput): Promise<ClubVenue> {
+  async createVenue(
+    actorId: string,
+    input: ClubVenueInput,
+  ): Promise<ClubVenue> {
     const venue = await this.prisma.venue.create({
       data: { title: input.title, address: input.address },
     });
@@ -252,10 +366,17 @@ export class ClubService {
     return toVenueView(venue);
   }
 
-  async updateVenue(actorId: string, id: string, input: ClubVenueInput): Promise<ClubVenue> {
+  async updateVenue(
+    actorId: string,
+    id: string,
+    input: ClubVenueInput,
+  ): Promise<ClubVenue> {
     const before = await this.prisma.venue.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "VENUE_NOT_FOUND", message: "Адрес не найден" });
+      throw new NotFoundException({
+        code: "VENUE_NOT_FOUND",
+        message: "Адрес не найден",
+      });
     }
     const venue = await this.prisma.venue.update({
       where: { id },
@@ -275,7 +396,10 @@ export class ClubService {
   async deleteVenue(actorId: string, id: string): Promise<{ ok: true }> {
     const before = await this.prisma.venue.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "VENUE_NOT_FOUND", message: "Адрес не найден" });
+      throw new NotFoundException({
+        code: "VENUE_NOT_FOUND",
+        message: "Адрес не найден",
+      });
     }
     await this.prisma.venue.delete({ where: { id } });
     await this.audit.record({
@@ -358,7 +482,10 @@ export class ClubService {
     } else if (query.period === "season") {
       const season = seasonId
         ? await this.prisma.season.findUnique({ where: { id: seasonId } })
-        : await this.prisma.season.findFirst({ where: { isActive: true }, orderBy: { startsAt: "desc" } });
+        : await this.prisma.season.findFirst({
+            where: { isActive: true },
+            orderBy: { startsAt: "desc" },
+          });
       if (season) {
         seasonId = season.id;
         seasonTitle = season.title;
@@ -378,6 +505,7 @@ export class ClubService {
       select: {
         kind: true,
         amountRub: true,
+        deferred: true,
         chips: true,
         note: true,
         tournamentId: true,
@@ -386,7 +514,13 @@ export class ClubService {
 
     const grouped = new Map<
       string,
-      { title: string; kind: SalesReport["lines"][number]["kind"]; count: number; amountRub: number; chips: number }
+      {
+        title: string;
+        kind: SalesReport["lines"][number]["kind"];
+        count: number;
+        amountRub: number;
+        chips: number;
+      }
     >();
 
     for (const payment of payments) {
@@ -405,8 +539,26 @@ export class ClubService {
       grouped.set(key, line);
     }
 
-    const lines = [...grouped.values()].sort((a, b) => b.amountRub - a.amountRub || b.count - a.count);
-    const tournamentIds = new Set(payments.map((payment) => payment.tournamentId));
+    const lines = [...grouped.values()].sort(
+      (a, b) => b.amountRub - a.amountRub || b.count - a.count,
+    );
+    const tournamentIds = new Set(
+      payments.map((payment) => payment.tournamentId),
+    );
+    const receipts = await this.prisma.cashReceipt.aggregate({
+      where: {
+        voidedAt: null,
+        ...(query.period === "season" && seasonId
+          ? { tournament: { seasonId } }
+          : from
+            ? { createdAt: { gte: from } }
+            : {}),
+      },
+      _sum: { amountRub: true },
+    });
+    const receivedRub =
+      payments.filter((p) => !p.deferred).reduce((n, p) => n + p.amountRub, 0) +
+      (receipts._sum.amountRub ?? 0);
 
     return {
       period: query.period,
@@ -417,6 +569,10 @@ export class ClubService {
       tournamentCount: tournamentIds.size,
       paymentCount: payments.length,
       totalRub: payments.reduce((sum, payment) => sum + payment.amountRub, 0),
+      receivedRub,
+      deferredRub: payments
+        .filter((p) => p.deferred)
+        .reduce((n, p) => n + p.amountRub, 0),
       totalChips: payments.reduce((sum, payment) => sum + payment.chips, 0),
       lines,
     };
@@ -436,11 +592,14 @@ export class ClubService {
       select: { id: true, title: true, startsAt: true },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
 
     // Combos are keyed by their own grant id, so the evening has to be looked
-    // up first — there is no tournament id inside the audit row to filter on.
+    // up first - there is no tournament id inside the audit row to filter on.
     const grants = await this.prisma.userAchievement.findMany({
       where: { tournamentId },
       select: { id: true },
@@ -450,9 +609,17 @@ export class ClubService {
       where: {
         OR: [
           { entity: "Tournament", entityId: tournamentId },
-          { entity: "Registration", entityId: { startsWith: `${tournamentId}:` } },
+          {
+            entity: "Registration",
+            entityId: { startsWith: `${tournamentId}:` },
+          },
           ...(grants.length > 0
-            ? [{ entity: "UserAchievement", entityId: { in: grants.map((row) => row.id) } }]
+            ? [
+                {
+                  entity: "UserAchievement",
+                  entityId: { in: grants.map((row) => row.id) },
+                },
+              ]
             : []),
         ],
       },
@@ -468,39 +635,66 @@ export class ClubService {
     const described = rows.map((row) => ({ row, told: describe(row, titles) }));
 
     const playerIds = [
-      ...new Set(described.map((item) => item.told.playerId).filter((id): id is string => id != null)),
+      ...new Set(
+        described
+          .map((item) => item.told.playerId)
+          .filter((id): id is string => id != null),
+      ),
     ];
     const players = await this.prisma.user.findMany({
       where: { id: { in: playerIds } },
       select: { id: true, nickname: true, displayName: true },
     });
     const nameById = new Map(
-      players.map((row) => [row.id, formatPlayerName(row.displayName, row.nickname)]),
+      players.map((row) => [
+        row.id,
+        formatPlayerName(row.displayName, row.nickname),
+      ]),
     );
 
-    const entries: EveningJournal["entries"] = described.map(({ row, told }) => ({
-      id: row.id,
-      at: row.createdAt.toISOString(),
-      action: row.action,
-      label: told.label,
-      actor: row.actor ? formatPlayerName(row.actor.displayName, row.actor.nickname) : null,
-      player: told.playerId ? (nameById.get(told.playerId) ?? null) : null,
-      playerId: told.playerId,
-      amountRub: told.amountRub,
-    }));
+    const entries: EveningJournal["entries"] = described.map(
+      ({ row, told }) => ({
+        id: row.id,
+        at: row.createdAt.toISOString(),
+        action: row.action,
+        label: told.label,
+        actor: row.actor
+          ? formatPlayerName(row.actor.displayName, row.actor.nickname)
+          : null,
+        player: told.playerId ? (nameById.get(told.playerId) ?? null) : null,
+        playerId: told.playerId,
+        amountRub: told.amountRub,
+      }),
+    );
 
     return {
       tournamentId: tournament.id,
       title: tournament.title,
       startsAt: tournament.startsAt.toISOString(),
-      totalRub: entries.reduce((sum, entry) => sum + entry.amountRub, 0),
+      totalRub:
+        ((
+          await this.prisma.payment.aggregate({
+            where: { tournamentId, voidedAt: null, deferred: false },
+            _sum: { amountRub: true },
+          })
+        )._sum.amountRub ?? 0) +
+        ((
+          await this.prisma.cashReceipt.aggregate({
+            where: { tournamentId, voidedAt: null },
+            _sum: { amountRub: true },
+          })
+        )._sum.amountRub ?? 0),
       staff: summariseStaff(entries),
       entries,
     };
   }
 }
 
-function toVenueView(venue: { id: string; title: string; address: string | null }): ClubVenue {
+function toVenueView(venue: {
+  id: string;
+  title: string;
+  address: string | null;
+}): ClubVenue {
   return { id: venue.id, title: venue.title, address: venue.address };
 }
 
@@ -529,7 +723,9 @@ function kindTitle(kind: MenuRow["kind"]): string {
 }
 
 function clubDay(date: Date): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: CLUB_TIMEZONE }).format(date);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: CLUB_TIMEZONE }).format(
+    date,
+  );
 }
 
 function startOfClubDay(ymd: string): Date {
@@ -546,7 +742,8 @@ function startOfClubWeek(date: Date): Date {
     timeZone: CLUB_TIMEZONE,
     weekday: "short",
   }).format(new Date(`${ymd}T12:00:00+04:00`));
-  const back = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[weekday] ?? 0;
+  const back =
+    { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }[weekday] ?? 0;
   const noon = new Date(`${ymd}T12:00:00+04:00`);
   const monday = new Date(noon.getTime() - back * 86_400_000);
   return startOfClubDay(clubDay(monday));

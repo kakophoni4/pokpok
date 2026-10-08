@@ -31,22 +31,28 @@ export function formatWeekday(iso: string): string {
 }
 
 export function formatTime(iso: string): string {
-  return formatter({ hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+  return formatter({ hour: "2-digit", minute: "2-digit" }).format(
+    new Date(iso),
+  );
 }
 
 export function formatFullDate(iso: string): string {
-  return formatter({ day: "numeric", month: "long", year: "numeric" }).format(new Date(iso));
+  return formatter({ day: "numeric", month: "long", year: "numeric" }).format(
+    new Date(iso),
+  );
 }
 
-/** "сегодня" / "завтра" / "через 5 дней" / "12 марта" — whichever reads best. */
+/** "сегодня" / "завтра" / "через 5 дней" / "12 марта" - whichever reads best. */
 export function formatRelativeDay(iso: string): string {
   const days = clubDaysUntil(iso);
 
   if (days === 0) return "сегодня";
   if (days === 1) return "завтра";
   if (days === -1) return "вчера";
-  if (days > 1 && days <= 7) return `через ${days} ${plural(days, "день", "дня", "дней")}`;
-  if (days < -1 && days >= -7) return `${-days} ${plural(-days, "день", "дня", "дней")} назад`;
+  if (days > 1 && days <= 7)
+    return `через ${days} ${plural(days, "день", "дня", "дней")}`;
+  if (days < -1 && days >= -7)
+    return `${-days} ${plural(-days, "день", "дня", "дней")} назад`;
   return formatDayMonth(iso);
 }
 
@@ -60,15 +66,17 @@ export function clubDaysUntil(iso: string): number {
     new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(date);
   const asUtc = (day: string) => Date.parse(`${day}T00:00:00Z`);
 
-  return Math.round((asUtc(key(new Date(iso))) - asUtc(key(new Date()))) / 86_400_000);
+  return Math.round(
+    (asUtc(key(new Date(iso))) - asUtc(key(new Date()))) / 86_400_000,
+  );
 }
 
 /**
  * The club's offset from UTC at a given moment, in milliseconds.
  *
  * Derived from Intl rather than hard-coded: Samara does not observe daylight
- * saving today, but a club that moves — or a zone whose rules change, which
- * Russian zones have done before — must not silently shift every game by an hour.
+ * saving today, but a club that moves - or a zone whose rules change, which
+ * Russian zones have done before - must not silently shift every game by an hour.
  */
 function offsetAt(date: Date): number {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -82,7 +90,8 @@ function offsetAt(date: Date): number {
     second: "2-digit",
   }).formatToParts(date);
 
-  const get = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
+  const get = (type: string) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
   const asIfUtc = Date.UTC(
     get("year"),
     get("month") - 1,
@@ -111,7 +120,12 @@ export function fromClubParts(date: string, time: string): Date {
   return new Date(naive - offsetAt(new Date(naive)));
 }
 
-export function plural(count: number, one: string, few: string, many: string): string {
+export function plural(
+  count: number,
+  one: string,
+  few: string,
+  many: string,
+): string {
   const mod100 = Math.abs(count) % 100;
   const mod10 = mod100 % 10;
   if (mod100 >= 11 && mod100 <= 14) return many;
@@ -161,6 +175,9 @@ export const PAYMENT_KIND_LABELS: Record<string, string> = {
 };
 
 /** Name on cards and lists: Telegram first+last, abbreviated, never the @handle. */
-export function playerLabel(user: { nickname: string; displayName?: string | null }): string {
+export function playerLabel(user: {
+  nickname: string;
+  displayName?: string | null;
+}): string {
   return formatPlayerName(user.displayName, user.nickname);
 }

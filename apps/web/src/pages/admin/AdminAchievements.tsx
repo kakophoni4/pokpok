@@ -1,6 +1,13 @@
 import type { Achievement, CreateAchievementInput } from "@poker/contracts";
 import { useEffect, useState } from "react";
-import { Avatar, Badge, Button, Card, ErrorState, Loading } from "../../components/ui";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  ErrorState,
+  Loading,
+} from "../../components/ui";
 import { formatPoints, playerLabel } from "../../lib/format";
 import {
   useAchievements,
@@ -31,7 +38,11 @@ export function AdminAchievements({ canEdit }: { canEdit: boolean }) {
 
       <ul className="space-y-2">
         {achievements.data?.map((achievement) => (
-          <AchievementRow key={achievement.id} achievement={achievement} canEdit={canEdit} />
+          <AchievementRow
+            key={achievement.id}
+            achievement={achievement}
+            canEdit={canEdit}
+          />
         ))}
       </ul>
     </>
@@ -49,6 +60,9 @@ function AchievementRow({
   const [title, setTitle] = useState(achievement.title);
   const [description, setDescription] = useState(achievement.description ?? "");
   const [points, setPoints] = useState(String(achievement.ratingPoints));
+  const [category, setCategory] = useState<"game" | "club">(
+    achievement.category,
+  );
   const [granting, setGranting] = useState(false);
 
   useEffect(() => {
@@ -58,6 +72,7 @@ function AchievementRow({
   }, [achievement.title, achievement.description, achievement.ratingPoints]);
 
   const dirty =
+    category !== achievement.category ||
     title.trim() !== achievement.title ||
     description.trim() !== (achievement.description ?? "") ||
     Number(points) !== achievement.ratingPoints;
@@ -76,10 +91,14 @@ function AchievementRow({
             {achievement.isRepeatable && <Badge>повторная</Badge>}
           </div>
           {achievement.description && (
-            <p className="mt-0.5 text-sm text-stone-400">{achievement.description}</p>
+            <p className="mt-0.5 text-sm text-stone-400">
+              {achievement.description}
+            </p>
           )}
           {achievement.holdersCount != null && achievement.holdersCount > 0 && (
-            <p className="mt-0.5 text-xs text-stone-500">выдана {achievement.holdersCount} раз</p>
+            <p className="mt-0.5 text-xs text-stone-500">
+              выдана {achievement.holdersCount} раз
+            </p>
           )}
         </div>
 
@@ -89,12 +108,29 @@ function AchievementRow({
       </div>
 
       <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-felt-800 pt-3">
-        <Button size="sm" variant="secondary" onClick={() => setGranting((value) => !value)}>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => setGranting((value) => !value)}
+        >
           {granting ? "Свернуть" : "Выдать игроку"}
         </Button>
 
         {canEdit && (
           <>
+            <label className="text-sm">
+              Категория
+              <select
+                className="field mt-1"
+                value={category}
+                onChange={(event) =>
+                  setCategory(event.target.value as "game" | "club")
+                }
+              >
+                <option value="club">Клубная награда</option>
+                <option value="game">Игровая комбинация</option>
+              </select>
+            </label>
             <div className="min-w-40 flex-1">
               <label className="label" htmlFor={`title-${achievement.id}`}>
                 Название
@@ -137,6 +173,7 @@ function AchievementRow({
                 update.mutate({
                   id: achievement.id,
                   input: {
+                    category,
                     title: title.trim(),
                     description: description.trim() || null,
                     ratingPoints: Number(points),
@@ -163,7 +200,11 @@ function AchievementRow({
         )}
       </div>
 
-      {update.isError && <p className="mt-2 text-xs text-chip-red">{(update.error as Error).message}</p>}
+      {update.isError && (
+        <p className="mt-2 text-xs text-chip-red">
+          {(update.error as Error).message}
+        </p>
+      )}
 
       {granting && <GrantPanel achievementId={achievement.id} />}
     </li>
@@ -185,14 +226,26 @@ function GrantPanel({ achievementId }: { achievementId: string }) {
         onChange={(event) => setSearch(event.target.value)}
       />
 
-      {grant.isError && <p className="text-xs text-chip-red">{(grant.error as Error).message}</p>}
-      {grant.isSuccess && <p className="text-xs text-emerald-400">Ачивка выдана.</p>}
+      {grant.isError && (
+        <p className="text-xs text-chip-red">
+          {(grant.error as Error).message}
+        </p>
+      )}
+      {grant.isSuccess && (
+        <p className="text-xs text-emerald-400">Ачивка выдана.</p>
+      )}
 
       <ul className="max-h-56 divide-y divide-felt-800 overflow-y-auto">
         {players.data?.items.map((player) => (
           <li key={player.id} className="flex items-center gap-2 py-1.5">
-            <Avatar nickname={playerLabel(player)} url={player.avatarUrl} size={24} />
-            <span className="min-w-0 flex-1 truncate text-sm">{playerLabel(player)}</span>
+            <Avatar
+              nickname={playerLabel(player)}
+              url={player.avatarUrl}
+              size={24}
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {playerLabel(player)}
+            </span>
             <Button
               size="sm"
               variant="ghost"
@@ -211,6 +264,7 @@ function GrantPanel({ achievementId }: { achievementId: string }) {
 function AchievementForm({ onDone }: { onDone: () => void }) {
   const create = useCreateAchievement();
   const [form, setForm] = useState({
+    category: "club" as "game" | "club",
     title: "",
     description: "",
     icon: "🏅",
@@ -220,6 +274,23 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
 
   return (
     <Card className="mb-4 space-y-3">
+      <label className="text-sm">
+        Категория
+        <select
+          className="field mt-1"
+          value={form.category}
+          onChange={(event) =>
+            setForm({
+              ...form,
+              category: event.target.value as "game" | "club",
+              isRepeatable: event.target.value === "game",
+            })
+          }
+        >
+          <option value="club">Клубная награда</option>
+          <option value="game">Игровая комбинация</option>
+        </select>
+      </label>
       <div className="grid grid-cols-[4rem_1fr] gap-3">
         <div>
           <label className="label" htmlFor="a-icon">
@@ -241,7 +312,9 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
             className="field"
             value={form.title}
             placeholder="Например: Железный характер"
-            onChange={(event) => setForm({ ...form, title: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, title: event.target.value })
+            }
           />
         </div>
       </div>
@@ -255,7 +328,9 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
           className="field"
           value={form.description}
           placeholder="За что выдаётся"
-          onChange={(event) => setForm({ ...form, description: event.target.value })}
+          onChange={(event) =>
+            setForm({ ...form, description: event.target.value })
+          }
         />
       </div>
 
@@ -268,7 +343,9 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
           type="number"
           className="field nums w-20"
           value={form.ratingPoints}
-          onChange={(event) => setForm({ ...form, ratingPoints: event.target.value })}
+          onChange={(event) =>
+            setForm({ ...form, ratingPoints: event.target.value })
+          }
         />
       </div>
 
@@ -276,12 +353,18 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
         <input
           type="checkbox"
           checked={form.isRepeatable}
-          onChange={(event) => setForm({ ...form, isRepeatable: event.target.checked })}
+          onChange={(event) =>
+            setForm({ ...form, isRepeatable: event.target.checked })
+          }
         />
         Можно выдавать одному игроку несколько раз
       </label>
 
-      {create.isError && <p className="text-xs text-chip-red">{(create.error as Error).message}</p>}
+      {create.isError && (
+        <p className="text-xs text-chip-red">
+          {(create.error as Error).message}
+        </p>
+      )}
 
       <div className="flex gap-2">
         <Button
@@ -290,6 +373,7 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
           onClick={() =>
             create.mutate(
               {
+                category: form.category,
                 title: form.title.trim(),
                 description: form.description.trim() || null,
                 icon: form.icon || null,
@@ -309,4 +393,3 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
     </Card>
   );
 }
-

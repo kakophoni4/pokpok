@@ -46,10 +46,14 @@ export class Api {
     // A minute of slack so a long-running command cannot expire mid-flight.
     if (cached && cached.expiresAt > Date.now() + 60_000) return cached;
 
-    const response = await this.request("POST", "/auth/internal/provider-session", {
-      internal: true,
-      body: Api.profilePayload(profile),
-    });
+    const response = await this.request(
+      "POST",
+      "/auth/internal/provider-session",
+      {
+        internal: true,
+        body: Api.profilePayload(profile),
+      },
+    );
 
     const session = response as SessionResponse;
     const entry: CachedSession = {
@@ -72,15 +76,24 @@ export class Api {
     const session = await this.session(profile);
 
     try {
-      return (await this.request(method, path, { token: session.accessToken, body })) as T;
+      return (await this.request(method, path, {
+        token: session.accessToken,
+        body,
+      })) as T;
     } catch (error) {
       // A revoked token, or an account that no longer exists because the database
       // was reseeded under us. Either way the cached session is worthless: drop it
       // and let the internal endpoint mint a new account before giving up.
-      if (error instanceof ApiError && (error.status === 401 || error.code === "USER_NOT_FOUND")) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 401 || error.code === "USER_NOT_FOUND")
+      ) {
         this.sessions.delete(profile.id);
         const fresh = await this.session(profile);
-        return (await this.request(method, path, { token: fresh.accessToken, body })) as T;
+        return (await this.request(method, path, {
+          token: fresh.accessToken,
+          body,
+        })) as T;
       }
       throw error;
     }
@@ -93,7 +106,7 @@ export class Api {
 
   /**
    * Server-to-server calls that speak about a Telegram user without acting as
-   * them — confirming a website login, for instance.
+   * them - confirming a website login, for instance.
    */
   async internal<T>(path: string, body: unknown): Promise<T> {
     return (await this.request("POST", path, { internal: true, body })) as T;
@@ -120,11 +133,17 @@ export class Api {
     const response = await fetch(`${this.config.apiBase}${path}`, {
       method,
       headers: {
-        ...(options.body === undefined ? {} : { "content-type": "application/json" }),
+        ...(options.body === undefined
+          ? {}
+          : { "content-type": "application/json" }),
         ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
-        ...(options.internal ? { "x-internal-token": this.config.internalToken } : {}),
+        ...(options.internal
+          ? { "x-internal-token": this.config.internalToken }
+          : {}),
       },
-      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+      ...(options.body === undefined
+        ? {}
+        : { body: JSON.stringify(options.body) }),
     });
 
     const text = await response.text();

@@ -35,6 +35,7 @@ export type AchievementSumAggregateOutputType = {
 }
 
 export type AchievementMinAggregateOutputType = {
+  category: string | null
   id: string | null
   code: string | null
   title: string | null
@@ -48,6 +49,7 @@ export type AchievementMinAggregateOutputType = {
 }
 
 export type AchievementMaxAggregateOutputType = {
+  category: string | null
   id: string | null
   code: string | null
   title: string | null
@@ -61,6 +63,7 @@ export type AchievementMaxAggregateOutputType = {
 }
 
 export type AchievementCountAggregateOutputType = {
+  category: number
   id: number
   code: number
   title: number
@@ -85,6 +88,7 @@ export type AchievementSumAggregateInputType = {
 }
 
 export type AchievementMinAggregateInputType = {
+  category?: true
   id?: true
   code?: true
   title?: true
@@ -98,6 +102,7 @@ export type AchievementMinAggregateInputType = {
 }
 
 export type AchievementMaxAggregateInputType = {
+  category?: true
   id?: true
   code?: true
   title?: true
@@ -111,6 +116,7 @@ export type AchievementMaxAggregateInputType = {
 }
 
 export type AchievementCountAggregateInputType = {
+  category?: true
   id?: true
   code?: true
   title?: true
@@ -212,6 +218,7 @@ export type AchievementGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 export type AchievementGroupByOutputType = {
+  category: string
   id: string
   code: string
   title: string
@@ -249,6 +256,7 @@ export type AchievementWhereInput = {
   AND?: Prisma.AchievementWhereInput | Prisma.AchievementWhereInput[]
   OR?: Prisma.AchievementWhereInput[]
   NOT?: Prisma.AchievementWhereInput | Prisma.AchievementWhereInput[]
+  category?: Prisma.StringFilter<"Achievement"> | string
   id?: Prisma.StringFilter<"Achievement"> | string
   code?: Prisma.StringFilter<"Achievement"> | string
   title?: Prisma.StringFilter<"Achievement"> | string
@@ -265,6 +273,7 @@ export type AchievementWhereInput = {
 }
 
 export type AchievementOrderByWithRelationInput = {
+  category?: Prisma.SortOrder
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -286,6 +295,7 @@ export type AchievementWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AchievementWhereInput | Prisma.AchievementWhereInput[]
   OR?: Prisma.AchievementWhereInput[]
   NOT?: Prisma.AchievementWhereInput | Prisma.AchievementWhereInput[]
+  category?: Prisma.StringFilter<"Achievement"> | string
   title?: Prisma.StringFilter<"Achievement"> | string
   description?: Prisma.StringNullableFilter<"Achievement"> | string | null
   icon?: Prisma.StringNullableFilter<"Achievement"> | string | null
@@ -300,6 +310,7 @@ export type AchievementWhereUniqueInput = Prisma.AtLeast<{
 }, "id" | "code">
 
 export type AchievementOrderByWithAggregationInput = {
+  category?: Prisma.SortOrder
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -322,6 +333,7 @@ export type AchievementScalarWhereWithAggregatesInput = {
   AND?: Prisma.AchievementScalarWhereWithAggregatesInput | Prisma.AchievementScalarWhereWithAggregatesInput[]
   OR?: Prisma.AchievementScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AchievementScalarWhereWithAggregatesInput | Prisma.AchievementScalarWhereWithAggregatesInput[]
+  category?: Prisma.StringWithAggregatesFilter<"Achievement"> | string
   id?: Prisma.StringWithAggregatesFilter<"Achievement"> | string
   code?: Prisma.StringWithAggregatesFilter<"Achievement"> | string
   title?: Prisma.StringWithAggregatesFilter<"Achievement"> | string
@@ -336,6 +348,7 @@ export type AchievementScalarWhereWithAggregatesInput = {
 }
 
 export type AchievementCreateInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -352,6 +365,7 @@ export type AchievementCreateInput = {
 }
 
 export type AchievementUncheckedCreateInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -368,6 +382,7 @@ export type AchievementUncheckedCreateInput = {
 }
 
 export type AchievementUpdateInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -384,6 +399,7 @@ export type AchievementUpdateInput = {
 }
 
 export type AchievementUncheckedUpdateInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -400,6 +416,7 @@ export type AchievementUncheckedUpdateInput = {
 }
 
 export type AchievementCreateManyInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -414,6 +431,7 @@ export type AchievementCreateManyInput = {
 }
 
 export type AchievementUpdateManyMutationInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -428,6 +446,7 @@ export type AchievementUpdateManyMutationInput = {
 }
 
 export type AchievementUncheckedUpdateManyInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -442,6 +461,7 @@ export type AchievementUncheckedUpdateManyInput = {
 }
 
 export type AchievementCountOrderByAggregateInput = {
+  category?: Prisma.SortOrder
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -460,6 +480,7 @@ export type AchievementAvgOrderByAggregateInput = {
 }
 
 export type AchievementMaxOrderByAggregateInput = {
+  category?: Prisma.SortOrder
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -473,6 +494,7 @@ export type AchievementMaxOrderByAggregateInput = {
 }
 
 export type AchievementMinOrderByAggregateInput = {
+  category?: Prisma.SortOrder
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -530,6 +552,7 @@ export type AchievementUpdateOneWithoutRatingEventsNestedInput = {
 }
 
 export type AchievementCreateWithoutHoldersInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -545,6 +568,7 @@ export type AchievementCreateWithoutHoldersInput = {
 }
 
 export type AchievementUncheckedCreateWithoutHoldersInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -576,6 +600,7 @@ export type AchievementUpdateToOneWithWhereWithoutHoldersInput = {
 }
 
 export type AchievementUpdateWithoutHoldersInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -591,6 +616,7 @@ export type AchievementUpdateWithoutHoldersInput = {
 }
 
 export type AchievementUncheckedUpdateWithoutHoldersInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -606,6 +632,7 @@ export type AchievementUncheckedUpdateWithoutHoldersInput = {
 }
 
 export type AchievementCreateWithoutRatingEventsInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -621,6 +648,7 @@ export type AchievementCreateWithoutRatingEventsInput = {
 }
 
 export type AchievementUncheckedCreateWithoutRatingEventsInput = {
+  category?: string
   id?: string
   code: string
   title: string
@@ -652,6 +680,7 @@ export type AchievementUpdateToOneWithWhereWithoutRatingEventsInput = {
 }
 
 export type AchievementUpdateWithoutRatingEventsInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -667,6 +696,7 @@ export type AchievementUpdateWithoutRatingEventsInput = {
 }
 
 export type AchievementUncheckedUpdateWithoutRatingEventsInput = {
+  category?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -722,6 +752,7 @@ export type AchievementCountOutputTypeCountRatingEventsArgs<ExtArgs extends runt
 
 
 export type AchievementSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  category?: boolean
   id?: boolean
   code?: boolean
   title?: boolean
@@ -739,6 +770,7 @@ export type AchievementSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 }, ExtArgs["result"]["achievement"]>
 
 export type AchievementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  category?: boolean
   id?: boolean
   code?: boolean
   title?: boolean
@@ -753,6 +785,7 @@ export type AchievementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
 }, ExtArgs["result"]["achievement"]>
 
 export type AchievementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  category?: boolean
   id?: boolean
   code?: boolean
   title?: boolean
@@ -767,6 +800,7 @@ export type AchievementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 }, ExtArgs["result"]["achievement"]>
 
 export type AchievementSelectScalar = {
+  category?: boolean
   id?: boolean
   code?: boolean
   title?: boolean
@@ -780,7 +814,7 @@ export type AchievementSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AchievementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "title" | "description" | "icon" | "ratingPoints" | "isActive" | "isRepeatable" | "rule" | "createdAt" | "updatedAt", ExtArgs["result"]["achievement"]>
+export type AchievementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"category" | "id" | "code" | "title" | "description" | "icon" | "ratingPoints" | "isActive" | "isRepeatable" | "rule" | "createdAt" | "updatedAt", ExtArgs["result"]["achievement"]>
 export type AchievementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   holders?: boolean | Prisma.Achievement$holdersArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.Achievement$ratingEventsArgs<ExtArgs>
@@ -796,6 +830,7 @@ export type $AchievementPayload<ExtArgs extends runtime.Types.Extensions.Interna
     ratingEvents: Prisma.$RatingEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    category: string
     id: string
     code: string
     title: string
@@ -893,8 +928,8 @@ export interface AchievementDelegate<ExtArgs extends runtime.Types.Extensions.In
    * // Get first 10 Achievements
    * const achievements = await prisma.achievement.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const achievementWithIdOnly = await prisma.achievement.findMany({ select: { id: true } })
+   * // Only select the `category`
+   * const achievementWithCategoryOnly = await prisma.achievement.findMany({ select: { category: true } })
    * 
    */
   findMany<T extends AchievementFindManyArgs>(args?: Prisma.SelectSubset<T, AchievementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AchievementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -938,9 +973,9 @@ export interface AchievementDelegate<ExtArgs extends runtime.Types.Extensions.In
    *   ]
    * })
    * 
-   * // Create many Achievements and only return the `id`
-   * const achievementWithIdOnly = await prisma.achievement.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many Achievements and only return the `category`
+   * const achievementWithCategoryOnly = await prisma.achievement.createManyAndReturn({
+   *   select: { category: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -1029,9 +1064,9 @@ export interface AchievementDelegate<ExtArgs extends runtime.Types.Extensions.In
    *   ]
    * })
    * 
-   * // Update zero or more Achievements and only return the `id`
-   * const achievementWithIdOnly = await prisma.achievement.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more Achievements and only return the `category`
+   * const achievementWithCategoryOnly = await prisma.achievement.updateManyAndReturn({
+   *   select: { category: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1235,6 +1270,7 @@ export interface Prisma__AchievementClient<T, Null = never, ExtArgs extends runt
  * Fields of the Achievement model
  */
 export interface AchievementFieldRefs {
+  readonly category: Prisma.FieldRef<"Achievement", 'String'>
   readonly id: Prisma.FieldRef<"Achievement", 'String'>
   readonly code: Prisma.FieldRef<"Achievement", 'String'>
   readonly title: Prisma.FieldRef<"Achievement", 'String'>

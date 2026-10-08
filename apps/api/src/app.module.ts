@@ -14,6 +14,7 @@ import { PrismaModule } from "./common/prisma/prisma.module";
 import { type Env, validateEnv } from "./config/env";
 import { HealthController } from "./health/health.controller";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { LiveModule } from "./live/live.module";
 import { PrizesModule } from "./prizes/prizes.module";
 import { RatingModule } from "./rating/rating.module";
 import { SeasonsModule } from "./seasons/seasons.module";
@@ -33,7 +34,9 @@ import { UsersModule } from "./users/users.module";
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
         secret: config.get("JWT_SECRET", { infer: true }),
-        signOptions: { expiresIn: config.get("ACCESS_TOKEN_TTL", { infer: true }) },
+        signOptions: {
+          expiresIn: config.get("ACCESS_TOKEN_TTL", { infer: true }),
+        },
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
@@ -47,6 +50,7 @@ import { UsersModule } from "./users/users.module";
     TournamentsModule,
     AchievementsModule,
     NotificationsModule,
+    LiveModule,
     PrizesModule,
   ],
   controllers: [HealthController],

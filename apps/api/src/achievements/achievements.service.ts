@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { Injectable, OnModuleInit, ConflictException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  OnModuleInit,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   type Achievement as AchievementView,
   AchievementRule,
@@ -14,6 +19,10 @@ import type { Achievement } from "../generated/prisma/client";
 import { RatingService } from "../rating/rating.service";
 import { SeasonsService } from "../seasons/seasons.service";
 import { toPublicUser } from "../users/user.mapper";
+import {
+  NotificationsService,
+  escapeHtml,
+} from "../notifications/notifications.service";
 
 @Injectable()
 export class AchievementsService implements OnModuleInit {
@@ -22,6 +31,7 @@ export class AchievementsService implements OnModuleInit {
     private readonly rating: RatingService,
     private readonly seasons: SeasonsService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -34,6 +44,7 @@ export class AchievementsService implements OnModuleInit {
       await this.prisma.achievement.upsert({
         where: { code: row.code },
         create: {
+          category: "game",
           code: row.code,
           title: row.title,
           description: row.description,
@@ -55,21 +66,32 @@ export class AchievementsService implements OnModuleInit {
       orderBy: [{ ratingPoints: "desc" }, { title: "asc" }],
     });
 
-    return rows.map((row) => ({ ...toView(row), holdersCount: row._count.holders }));
+    return rows.map((row) => ({
+      ...toView(row),
+      holdersCount: row._count.holders,
+    }));
   }
 
-  async create(actorId: string, input: CreateAchievementInput): Promise<AchievementView> {
+  async create(
+    actorId: string,
+    input: CreateAchievementInput,
+  ): Promise<AchievementView> {
     const code = await this.uniqueCode(input.code, input.title);
+    if (input.category === "game" && input.rule)
+      throw new ConflictException(
+        "Для игровой комбинации нельзя задать автоматическое правило",
+      );
 
     const achievement = await this.prisma.achievement.create({
       data: {
+        category: input.category,
         code,
         title: input.title,
         description: input.description ?? null,
         icon: input.icon ?? null,
         ratingPoints: input.ratingPoints,
         isActive: input.isActive,
-        isRepeatable: input.isRepeatable,
+        isRepeatable: input.category === "game" ? true : input.isRepeatable,
         rule: (input.rule ?? null) as never,
       },
     });
@@ -96,19 +118,39 @@ export class AchievementsService implements OnModuleInit {
   ): Promise<AchievementView> {
     const before = await this.prisma.achievement.findUnique({ where: { id } });
     if (!before) {
-      throw new NotFoundException({ code: "ACHIEVEMENT_NOT_FOUND", message: "Ачивка не найдена" });
+      throw new NotFoundException({
+        code: "ACHIEVEMENT_NOT_FOUND",
+        message: "Ачивка не найдена",
+      });
     }
 
+    const category = input.category ?? before.category;
+    const rule = input.rule === undefined ? before.rule : input.rule;
+    if (category === "game" && rule)
+      throw new ConflictException(
+        "Для игровой комбинации нельзя задать автоматическое правило",
+      );
     const achievement = await this.prisma.achievement.update({
       where: { id },
       data: {
+        ...(input.category === undefined ? {} : { category: input.category }),
         ...(input.title === undefined ? {} : { title: input.title }),
-        ...(input.description === undefined ? {} : { description: input.description ?? null }),
+        ...(input.description === undefined
+          ? {}
+          : { description: input.description ?? null }),
         ...(input.icon === undefined ? {} : { icon: input.icon ?? null }),
-        ...(input.ratingPoints === undefined ? {} : { ratingPoints: input.ratingPoints }),
+        ...(input.ratingPoints === undefined
+          ? {}
+          : { ratingPoints: input.ratingPoints }),
         ...(input.isActive === undefined ? {} : { isActive: input.isActive }),
-        ...(input.isRepeatable === undefined ? {} : { isRepeatable: input.isRepeatable }),
-        ...(input.rule === undefined ? {} : { rule: (input.rule ?? null) as never }),
+        ...(category === "game"
+          ? { isRepeatable: true }
+          : input.isRepeatable === undefined
+            ? {}
+            : { isRepeatable: input.isRepeatable }),
+        ...(input.rule === undefined
+          ? {}
+          : { rule: (input.rule ?? null) as never }),
       },
     });
 
@@ -118,22 +160,37 @@ export class AchievementsService implements OnModuleInit {
       entity: "Achievement",
       entityId: id,
       before: { title: before.title, ratingPoints: before.ratingPoints },
-      after: { title: achievement.title, ratingPoints: achievement.ratingPoints },
+      after: {
+        title: achievement.title,
+        ratingPoints: achievement.ratingPoints,
+      },
     });
     return toView(achievement);
   }
 
   /** Hands an achievement to a player and books its rating in the ledger. */
-  async grant(actorId: string, input: GrantAchievementInput): Promise<UserAchievementView> {
+  async grant(
+    actorId: string,
+    input: GrantAchievementInput,
+  ): Promise<UserAchievementView> {
     const [achievement, user] = await Promise.all([
-      this.prisma.achievement.findUnique({ where: { id: input.achievementId } }),
+      this.prisma.achievement.findUnique({
+        where: { id: input.achievementId },
+      }),
       this.prisma.user.findUnique({ where: { id: input.userId } }),
     ]);
 
     if (!achievement) {
-      throw new NotFoundException({ code: "ACHIEVEMENT_NOT_FOUND", message: "Ачивка не найдена" });
+      throw new NotFoundException({
+        code: "ACHIEVEMENT_NOT_FOUND",
+        message: "Ачивка не найдена",
+      });
     }
-    if (!user) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+    if (!user)
+      throw new NotFoundException({
+        code: "USER_NOT_FOUND",
+        message: "Игрок не найден",
+      });
 
     // One-off achievements share an empty key so the unique index blocks a repeat.
     // Repeatable hands (рука дня, каре, стрит-флеш) get a fresh key every grant.
@@ -159,7 +216,14 @@ export class AchievementsService implements OnModuleInit {
       }
     }
 
-    const seasonId = (await this.seasons.findActive())?.id ?? null;
+    const seasonId = input.tournamentId
+      ? (
+          await this.prisma.tournament.findUniqueOrThrow({
+            where: { id: input.tournamentId },
+            select: { seasonId: true },
+          })
+        ).seasonId
+      : ((await this.seasons.findActive())?.id ?? null);
 
     const granted = await this.prisma.$transaction(async (tx) => {
       const row = await tx.userAchievement.create({
@@ -189,6 +253,14 @@ export class AchievementsService implements OnModuleInit {
         });
       }
 
+      await this.notifications.queue(tx, {
+        userId: input.userId,
+        kind: "achievement.grant",
+        dedupeKey: row.id,
+        text: escapeHtml(
+          `Ачивка: ${achievement.title}. +${achievement.ratingPoints} очков.`,
+        ),
+      });
       return row;
     });
 
@@ -198,7 +270,11 @@ export class AchievementsService implements OnModuleInit {
       action: "achievement.grant",
       entity: "UserAchievement",
       entityId: granted.id,
-      after: { userId: input.userId, code: achievement.code, points: achievement.ratingPoints },
+      after: {
+        userId: input.userId,
+        code: achievement.code,
+        points: achievement.ratingPoints,
+      },
     });
 
     return {
@@ -212,18 +288,38 @@ export class AchievementsService implements OnModuleInit {
   }
 
   /** Removing a grant also removes its rating event, via the cascade in the schema. */
-  async revoke(actorId: string, userAchievementId: string): Promise<{ ok: true }> {
+  async revoke(
+    actorId: string,
+    userAchievementId: string,
+  ): Promise<{ ok: true }> {
     const row = await this.prisma.userAchievement.findUnique({
       where: { id: userAchievementId },
-      include: { achievement: { select: { code: true } } },
+      include: {
+        achievement: { select: { code: true } },
+        ratingEvents: { select: { seasonId: true } },
+      },
     });
     if (!row) {
-      throw new NotFoundException({ code: "GRANT_NOT_FOUND", message: "Выдача не найдена" });
+      throw new NotFoundException({
+        code: "GRANT_NOT_FOUND",
+        message: "Выдача не найдена",
+      });
     }
 
-    const seasonId = (await this.seasons.findActive())?.id ?? null;
-    await this.prisma.userAchievement.delete({ where: { id: userAchievementId } });
-    await this.rating.recomputeStats([row.userId], seasonId);
+    const seasonIds = [
+      ...new Set(row.ratingEvents.map((event) => event.seasonId)),
+    ];
+    await this.prisma.$transaction(async (tx) => {
+      await tx.userAchievement.delete({ where: { id: userAchievementId } });
+      await this.notifications.queue(tx, {
+        userId: row.userId,
+        kind: "achievement.revoke",
+        dedupeKey: row.id,
+        text: escapeHtml("Ошибочно выданная ачивка отменена."),
+      });
+    });
+    for (const seasonId of seasonIds)
+      await this.rating.recomputeStats([row.userId], seasonId);
 
     await this.audit.record({
       actorId,
@@ -252,11 +348,22 @@ export class AchievementsService implements OnModuleInit {
     }));
   }
 
-  private async uniqueCode(requested: string | undefined, title: string): Promise<string> {
-    const base = requested && requested.length >= 2 ? requested : slugify(title) || `ach_${Date.now()}`;
+  private async uniqueCode(
+    requested: string | undefined,
+    title: string,
+  ): Promise<string> {
+    const base =
+      requested && requested.length >= 2
+        ? requested
+        : slugify(title) || `ach_${Date.now()}`;
     let code = base;
     let attempt = 2;
-    while (await this.prisma.achievement.findUnique({ where: { code }, select: { id: true } })) {
+    while (
+      await this.prisma.achievement.findUnique({
+        where: { code },
+        select: { id: true },
+      })
+    ) {
       code = `${base}_${attempt}`;
       attempt += 1;
     }
@@ -266,10 +373,39 @@ export class AchievementsService implements OnModuleInit {
 
 function slugify(value: string): string {
   const map: Record<string, string> = {
-    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i",
-    й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t",
-    у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "",
-    э: "e", ю: "yu", я: "ya",
+    а: "a",
+    б: "b",
+    в: "v",
+    г: "g",
+    д: "d",
+    е: "e",
+    ё: "e",
+    ж: "zh",
+    з: "z",
+    и: "i",
+    й: "y",
+    к: "k",
+    л: "l",
+    м: "m",
+    н: "n",
+    о: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ф: "f",
+    х: "h",
+    ц: "c",
+    ч: "ch",
+    ш: "sh",
+    щ: "sch",
+    ъ: "",
+    ы: "y",
+    ь: "",
+    э: "e",
+    ю: "yu",
+    я: "ya",
   };
 
   return value
@@ -287,6 +423,7 @@ function toView(achievement: Achievement): AchievementView {
 
   return {
     id: achievement.id,
+    category: achievement.category === "game" ? "game" : "club",
     code: achievement.code,
     title: achievement.title,
     description: achievement.description,
@@ -302,7 +439,7 @@ const COMBO_HANDS = [
   {
     code: "hand_of_the_day",
     title: "Рука дня",
-    description: "Лучшая рука вечера",
+    description: "Комбинация, установленная флором для текущей игры",
     icon: "🃏",
     ratingPoints: 100,
   },

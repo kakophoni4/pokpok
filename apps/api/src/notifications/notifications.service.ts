@@ -23,7 +23,7 @@ export type QueuedMessage = {
  * The outbox.
  *
  * Messages are written in the same transaction as the change that causes them,
- * so a prize that exists is always a prize the player was told about — even if
+ * so a prize that exists is always a prize the player was told about - even if
  * the bot was down at that second. Delivery is the bot's job; it claims batches
  * from here and reports back.
  */
@@ -33,7 +33,10 @@ export class NotificationsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async queue(db: Prisma.TransactionClient, message: QueuedMessage): Promise<void> {
+  async queue(
+    db: Prisma.TransactionClient,
+    message: QueuedMessage,
+  ): Promise<void> {
     await db.outbox.upsert({
       where: {
         userId_kind_dedupeKey: {
@@ -85,15 +88,23 @@ export class NotificationsService {
     });
     if (rows.length === 0) return [];
 
-    await this.prisma.outbox.updateMany({
-      where: { id: { in: rows.map((row) => row.id) } },
-      data: { attempts: { increment: 1 } },
-    });
-
     const ready: PendingNotification[] = [];
     const undeliverable: string[] = [];
 
     for (const row of rows) {
+      const claimed = await this.prisma.outbox.updateMany({
+        where: {
+          id: row.id,
+          sentAt: null,
+          attempts: row.attempts,
+          scheduledAt: { lte: new Date() },
+        },
+        data: {
+          attempts: { increment: 1 },
+          scheduledAt: new Date(Date.now() + RETRY_AFTER_MS),
+        },
+      });
+      if (!claimed.count) continue;
       const telegramId = row.user.identities[0]?.providerUserId;
       if (!telegramId) {
         undeliverable.push(row.id);
@@ -113,7 +124,10 @@ export class NotificationsService {
       // that for ever would bury the queue under messages nobody can receive.
       await this.prisma.outbox.updateMany({
         where: { id: { in: undeliverable } },
-        data: { sentAt: new Date(), lastError: "Нет Telegram, доставить некуда" },
+        data: {
+          sentAt: new Date(),
+          lastError: "Нет Telegram, доставить некуда",
+        },
       });
     }
 
@@ -122,11 +136,16 @@ export class NotificationsService {
 
   async settle(id: string, ok: boolean, error?: string | null): Promise<void> {
     if (ok) {
-      await this.prisma.outbox.update({ where: { id }, data: { sentAt: new Date(), lastError: null } });
+      await this.prisma.outbox.update({
+        where: { id },
+        data: { sentAt: new Date(), lastError: null },
+      });
       return;
     }
 
-    this.logger.warn(`Notification ${id} was not delivered: ${error ?? "unknown"}`);
+    this.logger.warn(
+      `Notification ${id} was not delivered: ${error ?? "unknown"}`,
+    );
     await this.prisma.outbox.update({
       where: { id },
       data: {
@@ -139,5 +158,8 @@ export class NotificationsService {
 
 /** Telegram's HTML parser is strict about these three, and only these three. */
 export function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }

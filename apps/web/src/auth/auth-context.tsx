@@ -76,7 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function loginWithInitData(initData: string): Promise<boolean> {
       try {
-        const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
+        const session = await api.post<SessionResponse>(
+          "/auth/telegram/miniapp",
+          { initData },
+        );
         if (!cancelled) applySession(session);
         return true;
       } catch {
@@ -85,6 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     async function restore(): Promise<void> {
+      if (location.pathname === "/dealer") {
+        setStatus("anonymous");
+        return;
+      }
       platform.ready();
       const immediate = platform.telegramInitData();
       if (immediate && (await loginWithInitData(immediate))) return;
@@ -118,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Telegram can fill initData after the first paint. Keep trying for a while
-   * whether or not we already decided this is a Mini App — detection is racy.
+   * whether or not we already decided this is a Mini App - detection is racy.
    */
   useEffect(() => {
     if (status === "authenticated") {
@@ -141,7 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!initData) return;
       void (async () => {
         try {
-          const session = await api.post<SessionResponse>("/auth/telegram/miniapp", { initData });
+          const session = await api.post<SessionResponse>(
+            "/auth/telegram/miniapp",
+            { initData },
+          );
           if (!cancelled) applySession(session);
         } catch {
           /* next tick retries until the deadline */
@@ -165,30 +175,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       can: (role) => (user ? hasRole(user.role, role) : false),
 
       loginWithTelegramWidget: async (payload) => {
-        applySession(await api.post<SessionResponse>("/auth/telegram/widget", payload));
+        applySession(
+          await api.post<SessionResponse>("/auth/telegram/widget", payload),
+        );
       },
 
       loginWithMiniApp: async () => {
         platform.ready();
-        const initData = (await platform.telegramInitDataSoon()) ?? platform.telegramInitData();
+        const initData =
+          (await platform.telegramInitDataSoon()) ??
+          platform.telegramInitData();
         if (!initData) {
-          throw new Error("Telegram не передал данные входа. Откройте клуб из меню бота.");
+          throw new Error(
+            "Telegram не передал данные входа. Откройте клуб из меню бота.",
+          );
         }
-        applySession(await api.post<SessionResponse>("/auth/telegram/miniapp", { initData }));
+        applySession(
+          await api.post<SessionResponse>("/auth/telegram/miniapp", {
+            initData,
+          }),
+        );
       },
 
-      startTelegramLogin: () => api.post<StartLoginResponse>("/auth/telegram/login"),
+      startTelegramLogin: () =>
+        api.post<StartLoginResponse>("/auth/telegram/login"),
 
       pollTelegramLogin: async (code) => {
         const status = await api.get<LoginTicketStatus>(
           `/auth/telegram/login/${encodeURIComponent(code)}`,
         );
-        if (status.state === "confirmed" && status.session) applySession(status.session);
+        if (status.state === "confirmed" && status.session)
+          applySession(status.session);
         return status.state;
       },
 
       loginAsDev: async (nickname) => {
-        applySession(await api.post<SessionResponse>("/auth/dev/login", { nickname }));
+        applySession(
+          await api.post<SessionResponse>("/auth/dev/login", { nickname }),
+        );
       },
 
       logout: async () => {

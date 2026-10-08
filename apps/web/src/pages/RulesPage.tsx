@@ -110,12 +110,14 @@ const SECTIONS: { title: string; points: string[] }[] = [
 export function RulesPage() {
   return (
     <>
-      <PageHeader title="Правила клуба спортивного покера Хроники" />
+      <PageHeader title="Правила клуба спортивного покера CONCEPT" />
 
       <Card className="space-y-6 text-base leading-relaxed text-stone-200">
         {SECTIONS.map((section) => (
           <section key={section.title}>
-            <h2 className="mb-2 font-semibold text-stone-50">{section.title}</h2>
+            <h2 className="mb-2 font-semibold text-stone-50">
+              {section.title}
+            </h2>
             <ul className="space-y-2">
               {section.points.map((point) => (
                 <li key={point}>{point}</li>

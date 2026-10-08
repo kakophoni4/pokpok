@@ -9,12 +9,16 @@ import { JwtService } from "@nestjs/jwt";
 import type { AccessTokenClaims } from "@poker/contracts";
 import type { AuthedRequest } from "./auth.types";
 import { IS_PUBLIC_KEY, OPTIONAL_AUTH_KEY } from "./decorators";
+import { DealerService } from "../../live/dealer.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly jwt: JwtService,
+    private readonly db: PrismaService,
+    private readonly dealer: DealerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -23,21 +27,41 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    const optional = this.reflector.getAllAndOverride<boolean>(OPTIONAL_AUTH_KEY, targets) ?? false;
+    const optional =
+      this.reflector.getAllAndOverride<boolean>(OPTIONAL_AUTH_KEY, targets) ??
+      false;
     const request = context.switchToHttp().getRequest<AuthedRequest>();
     const token = extractBearer(request);
 
     if (!token) {
       if (optional) return true;
-      throw new UnauthorizedException({ code: "NO_TOKEN", message: "Нужна авторизация" });
+      throw new UnauthorizedException({
+        code: "NO_TOKEN",
+        message: "Нужна авторизация",
+      });
     }
 
     try {
-      const claims = await this.jwt.verifyAsync<AccessTokenClaims>(token);
+      const claims = await this.jwt.verifyAsync<
+        AccessTokenClaims & {
+          dealerShiftId?: string;
+          dealerTable?: number;
+          dealerTournamentId?: string;
+        }
+      >(token);
+      const user = await this.db.user.findUnique({
+        where: { id: claims.sub },
+        select: { role: true, status: true, nickname: true },
+      });
+      if (!user || user.status !== "active") throw new UnauthorizedException();
+      if (claims.dealerShiftId) await this.dealer.session(claims.dealerShiftId);
       request.user = {
+        dealerShiftId: claims.dealerShiftId,
+        dealerTable: claims.dealerTable,
+        dealerTournamentId: claims.dealerTournamentId,
         id: claims.sub,
-        role: claims.role,
-        nickname: claims.nickname,
+        role: user.role,
+        nickname: user.nickname,
         audience: claims.aud,
       };
       return true;

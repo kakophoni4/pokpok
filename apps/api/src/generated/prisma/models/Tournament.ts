@@ -28,6 +28,8 @@ export type AggregateTournament = {
 
 export type TournamentAvgAggregateOutputType = {
   capacity: number | null
+  maxTables: number | null
+  seatsPerTable: number | null
   paidPlaces: number | null
   startingStack: number | null
   addonChips: number | null
@@ -39,6 +41,8 @@ export type TournamentAvgAggregateOutputType = {
 
 export type TournamentSumAggregateOutputType = {
   capacity: number | null
+  maxTables: number | null
+  seatsPerTable: number | null
   paidPlaces: number | null
   startingStack: number | null
   addonChips: number | null
@@ -58,6 +62,8 @@ export type TournamentMinAggregateOutputType = {
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
+  maxTables: number | null
+  seatsPerTable: number | null
   paidPlaces: number | null
   startingStack: number | null
   addonChips: number | null
@@ -80,6 +86,8 @@ export type TournamentMaxAggregateOutputType = {
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
+  maxTables: number | null
+  seatsPerTable: number | null
   paidPlaces: number | null
   startingStack: number | null
   addonChips: number | null
@@ -102,6 +110,8 @@ export type TournamentCountAggregateOutputType = {
   regOpensAt: number
   regClosesAt: number
   capacity: number
+  maxTables: number
+  seatsPerTable: number
   paidPlaces: number
   startingStack: number
   addonChips: number
@@ -118,6 +128,8 @@ export type TournamentCountAggregateOutputType = {
 
 export type TournamentAvgAggregateInputType = {
   capacity?: true
+  maxTables?: true
+  seatsPerTable?: true
   paidPlaces?: true
   startingStack?: true
   addonChips?: true
@@ -129,6 +141,8 @@ export type TournamentAvgAggregateInputType = {
 
 export type TournamentSumAggregateInputType = {
   capacity?: true
+  maxTables?: true
+  seatsPerTable?: true
   paidPlaces?: true
   startingStack?: true
   addonChips?: true
@@ -148,6 +162,8 @@ export type TournamentMinAggregateInputType = {
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
+  maxTables?: true
+  seatsPerTable?: true
   paidPlaces?: true
   startingStack?: true
   addonChips?: true
@@ -170,6 +186,8 @@ export type TournamentMaxAggregateInputType = {
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
+  maxTables?: true
+  seatsPerTable?: true
   paidPlaces?: true
   startingStack?: true
   addonChips?: true
@@ -192,6 +210,8 @@ export type TournamentCountAggregateInputType = {
   regOpensAt?: true
   regClosesAt?: true
   capacity?: true
+  maxTables?: true
+  seatsPerTable?: true
   paidPlaces?: true
   startingStack?: true
   addonChips?: true
@@ -301,6 +321,8 @@ export type TournamentGroupByOutputType = {
   regOpensAt: Date | null
   regClosesAt: Date | null
   capacity: number | null
+  maxTables: number | null
+  seatsPerTable: number
   paidPlaces: number | null
   startingStack: number | null
   addonChips: number | null
@@ -346,6 +368,8 @@ export type TournamentWhereInput = {
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  maxTables?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  seatsPerTable?: Prisma.IntFilter<"Tournament"> | number
   paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -359,6 +383,8 @@ export type TournamentWhereInput = {
   season?: Prisma.XOR<Prisma.SeasonNullableScalarRelationFilter, Prisma.SeasonWhereInput> | null
   venue?: Prisma.XOR<Prisma.VenueNullableScalarRelationFilter, Prisma.VenueWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
+  live?: Prisma.XOR<Prisma.LiveTournamentNullableScalarRelationFilter, Prisma.LiveTournamentWhereInput> | null
+  cashReceipts?: Prisma.CashReceiptListRelationFilter
   results?: Prisma.ResultListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
@@ -377,6 +403,8 @@ export type TournamentOrderByWithRelationInput = {
   regOpensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   regClosesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxTables?: Prisma.SortOrderInput | Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrderInput | Prisma.SortOrder
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
   addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -390,6 +418,8 @@ export type TournamentOrderByWithRelationInput = {
   season?: Prisma.SeasonOrderByWithRelationInput
   venue?: Prisma.VenueOrderByWithRelationInput
   registrations?: Prisma.RegistrationOrderByRelationAggregateInput
+  live?: Prisma.LiveTournamentOrderByWithRelationInput
+  cashReceipts?: Prisma.CashReceiptOrderByRelationAggregateInput
   results?: Prisma.ResultOrderByRelationAggregateInput
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   ratingEvents?: Prisma.RatingEventOrderByRelationAggregateInput
@@ -411,6 +441,8 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  maxTables?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  seatsPerTable?: Prisma.IntFilter<"Tournament"> | number
   paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -424,6 +456,8 @@ export type TournamentWhereUniqueInput = Prisma.AtLeast<{
   season?: Prisma.XOR<Prisma.SeasonNullableScalarRelationFilter, Prisma.SeasonWhereInput> | null
   venue?: Prisma.XOR<Prisma.VenueNullableScalarRelationFilter, Prisma.VenueWhereInput> | null
   registrations?: Prisma.RegistrationListRelationFilter
+  live?: Prisma.XOR<Prisma.LiveTournamentNullableScalarRelationFilter, Prisma.LiveTournamentWhereInput> | null
+  cashReceipts?: Prisma.CashReceiptListRelationFilter
   results?: Prisma.ResultListRelationFilter
   payments?: Prisma.PaymentListRelationFilter
   ratingEvents?: Prisma.RatingEventListRelationFilter
@@ -442,6 +476,8 @@ export type TournamentOrderByWithAggregationInput = {
   regOpensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   regClosesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxTables?: Prisma.SortOrderInput | Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrderInput | Prisma.SortOrder
   startingStack?: Prisma.SortOrderInput | Prisma.SortOrder
   addonChips?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -472,6 +508,8 @@ export type TournamentScalarWhereWithAggregatesInput = {
   regOpensAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  maxTables?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
+  seatsPerTable?: Prisma.IntWithAggregatesFilter<"Tournament"> | number
   paidPlaces?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   startingStack?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableWithAggregatesFilter<"Tournament"> | number | null
@@ -492,6 +530,8 @@ export type TournamentCreateInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -505,6 +545,8 @@ export type TournamentCreateInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -523,6 +565,8 @@ export type TournamentUncheckedCreateInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -534,6 +578,8 @@ export type TournamentUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -550,6 +596,8 @@ export type TournamentUpdateInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -563,6 +611,8 @@ export type TournamentUpdateInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -581,6 +631,8 @@ export type TournamentUncheckedUpdateInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -592,6 +644,8 @@ export type TournamentUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -610,6 +664,8 @@ export type TournamentCreateManyInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -630,6 +686,8 @@ export type TournamentUpdateManyMutationInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -652,6 +710,8 @@ export type TournamentUncheckedUpdateManyInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -684,6 +744,8 @@ export type TournamentCountOrderByAggregateInput = {
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  maxTables?: Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
@@ -698,6 +760,8 @@ export type TournamentCountOrderByAggregateInput = {
 
 export type TournamentAvgOrderByAggregateInput = {
   capacity?: Prisma.SortOrder
+  maxTables?: Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
@@ -717,6 +781,8 @@ export type TournamentMaxOrderByAggregateInput = {
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  maxTables?: Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
@@ -739,6 +805,8 @@ export type TournamentMinOrderByAggregateInput = {
   regOpensAt?: Prisma.SortOrder
   regClosesAt?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
+  maxTables?: Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
@@ -753,6 +821,8 @@ export type TournamentMinOrderByAggregateInput = {
 
 export type TournamentSumOrderByAggregateInput = {
   capacity?: Prisma.SortOrder
+  maxTables?: Prisma.SortOrder
+  seatsPerTable?: Prisma.SortOrder
   paidPlaces?: Prisma.SortOrder
   startingStack?: Prisma.SortOrder
   addonChips?: Prisma.SortOrder
@@ -858,6 +928,14 @@ export type TournamentUncheckedUpdateManyWithoutVenueNestedInput = {
 
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
   increment?: number
   decrement?: number
   multiply?: number
@@ -982,6 +1060,34 @@ export type TournamentUpdateOneWithoutRatingEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutRatingEventsInput, Prisma.TournamentUpdateWithoutRatingEventsInput>, Prisma.TournamentUncheckedUpdateWithoutRatingEventsInput>
 }
 
+export type TournamentCreateNestedOneWithoutLiveInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutLiveInput, Prisma.TournamentUncheckedCreateWithoutLiveInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutLiveInput
+  connect?: Prisma.TournamentWhereUniqueInput
+}
+
+export type TournamentUpdateOneRequiredWithoutLiveNestedInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutLiveInput, Prisma.TournamentUncheckedCreateWithoutLiveInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutLiveInput
+  upsert?: Prisma.TournamentUpsertWithoutLiveInput
+  connect?: Prisma.TournamentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutLiveInput, Prisma.TournamentUpdateWithoutLiveInput>, Prisma.TournamentUncheckedUpdateWithoutLiveInput>
+}
+
+export type TournamentCreateNestedOneWithoutCashReceiptsInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutCashReceiptsInput, Prisma.TournamentUncheckedCreateWithoutCashReceiptsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutCashReceiptsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+}
+
+export type TournamentUpdateOneRequiredWithoutCashReceiptsNestedInput = {
+  create?: Prisma.XOR<Prisma.TournamentCreateWithoutCashReceiptsInput, Prisma.TournamentUncheckedCreateWithoutCashReceiptsInput>
+  connectOrCreate?: Prisma.TournamentCreateOrConnectWithoutCashReceiptsInput
+  upsert?: Prisma.TournamentUpsertWithoutCashReceiptsInput
+  connect?: Prisma.TournamentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TournamentUpdateToOneWithWhereWithoutCashReceiptsInput, Prisma.TournamentUpdateWithoutCashReceiptsInput>, Prisma.TournamentUncheckedUpdateWithoutCashReceiptsInput>
+}
+
 export type TournamentCreateWithoutSeasonInput = {
   id?: string
   title: string
@@ -990,6 +1096,8 @@ export type TournamentCreateWithoutSeasonInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1002,6 +1110,8 @@ export type TournamentCreateWithoutSeasonInput = {
   updatedAt?: Date | string
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1019,6 +1129,8 @@ export type TournamentUncheckedCreateWithoutSeasonInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1030,6 +1142,8 @@ export type TournamentUncheckedCreateWithoutSeasonInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1077,6 +1191,8 @@ export type TournamentScalarWhereInput = {
   regOpensAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   regClosesAt?: Prisma.DateTimeNullableFilter<"Tournament"> | Date | string | null
   capacity?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  maxTables?: Prisma.IntNullableFilter<"Tournament"> | number | null
+  seatsPerTable?: Prisma.IntFilter<"Tournament"> | number
   paidPlaces?: Prisma.IntNullableFilter<"Tournament"> | number | null
   startingStack?: Prisma.IntNullableFilter<"Tournament"> | number | null
   addonChips?: Prisma.IntNullableFilter<"Tournament"> | number | null
@@ -1097,6 +1213,8 @@ export type TournamentCreateWithoutVenueInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1109,6 +1227,8 @@ export type TournamentCreateWithoutVenueInput = {
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1126,6 +1246,8 @@ export type TournamentUncheckedCreateWithoutVenueInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1137,6 +1259,8 @@ export type TournamentUncheckedCreateWithoutVenueInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1179,6 +1303,8 @@ export type TournamentCreateWithoutRegistrationsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1191,6 +1317,8 @@ export type TournamentCreateWithoutRegistrationsInput = {
   updatedAt?: Date | string
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1209,6 +1337,8 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1219,6 +1349,8 @@ export type TournamentUncheckedCreateWithoutRegistrationsInput = {
   adminBoardMsgId?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1251,6 +1383,8 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1263,6 +1397,8 @@ export type TournamentUpdateWithoutRegistrationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -1281,6 +1417,8 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1291,6 +1429,8 @@ export type TournamentUncheckedUpdateWithoutRegistrationsInput = {
   adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1307,6 +1447,8 @@ export type TournamentCreateWithoutResultsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1320,6 +1462,8 @@ export type TournamentCreateWithoutResultsInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
@@ -1337,6 +1481,8 @@ export type TournamentUncheckedCreateWithoutResultsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1348,6 +1494,8 @@ export type TournamentUncheckedCreateWithoutResultsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
@@ -1379,6 +1527,8 @@ export type TournamentUpdateWithoutResultsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1392,6 +1542,8 @@ export type TournamentUpdateWithoutResultsInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
@@ -1409,6 +1561,8 @@ export type TournamentUncheckedUpdateWithoutResultsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1420,6 +1574,8 @@ export type TournamentUncheckedUpdateWithoutResultsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1435,6 +1591,8 @@ export type TournamentCreateWithoutPaymentsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1448,6 +1606,8 @@ export type TournamentCreateWithoutPaymentsInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
@@ -1465,6 +1625,8 @@ export type TournamentUncheckedCreateWithoutPaymentsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1476,6 +1638,8 @@ export type TournamentUncheckedCreateWithoutPaymentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
@@ -1507,6 +1671,8 @@ export type TournamentUpdateWithoutPaymentsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1520,6 +1686,8 @@ export type TournamentUpdateWithoutPaymentsInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
@@ -1537,6 +1705,8 @@ export type TournamentUncheckedUpdateWithoutPaymentsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1548,6 +1718,8 @@ export type TournamentUncheckedUpdateWithoutPaymentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1563,6 +1735,8 @@ export type TournamentCreateWithoutPrizesWonInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1576,6 +1750,8 @@ export type TournamentCreateWithoutPrizesWonInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1593,6 +1769,8 @@ export type TournamentUncheckedCreateWithoutPrizesWonInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1604,6 +1782,8 @@ export type TournamentUncheckedCreateWithoutPrizesWonInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1624,6 +1804,8 @@ export type TournamentCreateWithoutPrizesSpentInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1637,6 +1819,8 @@ export type TournamentCreateWithoutPrizesSpentInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1654,6 +1838,8 @@ export type TournamentUncheckedCreateWithoutPrizesSpentInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1665,6 +1851,8 @@ export type TournamentUncheckedCreateWithoutPrizesSpentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1696,6 +1884,8 @@ export type TournamentUpdateWithoutPrizesWonInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1709,6 +1899,8 @@ export type TournamentUpdateWithoutPrizesWonInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -1726,6 +1918,8 @@ export type TournamentUncheckedUpdateWithoutPrizesWonInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1737,6 +1931,8 @@ export type TournamentUncheckedUpdateWithoutPrizesWonInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1763,6 +1959,8 @@ export type TournamentUpdateWithoutPrizesSpentInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1776,6 +1974,8 @@ export type TournamentUpdateWithoutPrizesSpentInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -1793,6 +1993,8 @@ export type TournamentUncheckedUpdateWithoutPrizesSpentInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1804,6 +2006,8 @@ export type TournamentUncheckedUpdateWithoutPrizesSpentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1819,6 +2023,8 @@ export type TournamentCreateWithoutAchievementsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1832,6 +2038,8 @@ export type TournamentCreateWithoutAchievementsInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
@@ -1849,6 +2057,8 @@ export type TournamentUncheckedCreateWithoutAchievementsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1860,6 +2070,8 @@ export type TournamentUncheckedCreateWithoutAchievementsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
@@ -1891,6 +2103,8 @@ export type TournamentUpdateWithoutAchievementsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1904,6 +2118,8 @@ export type TournamentUpdateWithoutAchievementsInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -1921,6 +2137,8 @@ export type TournamentUncheckedUpdateWithoutAchievementsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1932,6 +2150,8 @@ export type TournamentUncheckedUpdateWithoutAchievementsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -1947,6 +2167,8 @@ export type TournamentCreateWithoutRatingEventsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1960,6 +2182,8 @@ export type TournamentCreateWithoutRatingEventsInput = {
   season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
   venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
   registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
@@ -1977,6 +2201,8 @@ export type TournamentUncheckedCreateWithoutRatingEventsInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -1988,6 +2214,8 @@ export type TournamentUncheckedCreateWithoutRatingEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
   results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
   achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
@@ -2019,6 +2247,8 @@ export type TournamentUpdateWithoutRatingEventsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2032,6 +2262,8 @@ export type TournamentUpdateWithoutRatingEventsInput = {
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
@@ -2049,6 +2281,8 @@ export type TournamentUncheckedUpdateWithoutRatingEventsInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2060,8 +2294,298 @@ export type TournamentUncheckedUpdateWithoutRatingEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
+  prizesWon?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutWonAtNestedInput
+  prizesSpent?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutSpentAtNestedInput
+}
+
+export type TournamentCreateWithoutLiveInput = {
+  id?: string
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  minRating?: number | null
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
+  venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptCreateNestedManyWithoutTournamentInput
+  results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
+  prizesWon?: Prisma.PlayerPrizeCreateNestedManyWithoutWonAtInput
+  prizesSpent?: Prisma.PlayerPrizeCreateNestedManyWithoutSpentAtInput
+}
+
+export type TournamentUncheckedCreateWithoutLiveInput = {
+  id?: string
+  seasonId?: string | null
+  venueId?: string | null
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  minRating?: number | null
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  cashReceipts?: Prisma.CashReceiptUncheckedCreateNestedManyWithoutTournamentInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
+  prizesWon?: Prisma.PlayerPrizeUncheckedCreateNestedManyWithoutWonAtInput
+  prizesSpent?: Prisma.PlayerPrizeUncheckedCreateNestedManyWithoutSpentAtInput
+}
+
+export type TournamentCreateOrConnectWithoutLiveInput = {
+  where: Prisma.TournamentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutLiveInput, Prisma.TournamentUncheckedCreateWithoutLiveInput>
+}
+
+export type TournamentUpsertWithoutLiveInput = {
+  update: Prisma.XOR<Prisma.TournamentUpdateWithoutLiveInput, Prisma.TournamentUncheckedUpdateWithoutLiveInput>
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutLiveInput, Prisma.TournamentUncheckedCreateWithoutLiveInput>
+  where?: Prisma.TournamentWhereInput
+}
+
+export type TournamentUpdateToOneWithWhereWithoutLiveInput = {
+  where?: Prisma.TournamentWhereInput
+  data: Prisma.XOR<Prisma.TournamentUpdateWithoutLiveInput, Prisma.TournamentUncheckedUpdateWithoutLiveInput>
+}
+
+export type TournamentUpdateWithoutLiveInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
+  venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
+  results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
+  prizesWon?: Prisma.PlayerPrizeUpdateManyWithoutWonAtNestedInput
+  prizesSpent?: Prisma.PlayerPrizeUpdateManyWithoutSpentAtNestedInput
+}
+
+export type TournamentUncheckedUpdateWithoutLiveInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  seasonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
+  prizesWon?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutWonAtNestedInput
+  prizesSpent?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutSpentAtNestedInput
+}
+
+export type TournamentCreateWithoutCashReceiptsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  minRating?: number | null
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  season?: Prisma.SeasonCreateNestedOneWithoutTournamentsInput
+  venue?: Prisma.VenueCreateNestedOneWithoutTournamentsInput
+  registrations?: Prisma.RegistrationCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentCreateNestedOneWithoutTournamentInput
+  results?: Prisma.ResultCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementCreateNestedManyWithoutTournamentInput
+  prizesWon?: Prisma.PlayerPrizeCreateNestedManyWithoutWonAtInput
+  prizesSpent?: Prisma.PlayerPrizeCreateNestedManyWithoutSpentAtInput
+}
+
+export type TournamentUncheckedCreateWithoutCashReceiptsInput = {
+  id?: string
+  seasonId?: string | null
+  venueId?: string | null
+  title: string
+  description?: string | null
+  startsAt: Date | string
+  regOpensAt?: Date | string | null
+  regClosesAt?: Date | string | null
+  capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
+  paidPlaces?: number | null
+  startingStack?: number | null
+  addonChips?: number | null
+  ratingMultiplier?: number
+  minRating?: number | null
+  status?: $Enums.TournamentStatus
+  adminTopicId?: number | null
+  adminBoardMsgId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  registrations?: Prisma.RegistrationUncheckedCreateNestedManyWithoutTournamentInput
+  live?: Prisma.LiveTournamentUncheckedCreateNestedOneWithoutTournamentInput
+  results?: Prisma.ResultUncheckedCreateNestedManyWithoutTournamentInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutTournamentInput
+  ratingEvents?: Prisma.RatingEventUncheckedCreateNestedManyWithoutTournamentInput
+  achievements?: Prisma.UserAchievementUncheckedCreateNestedManyWithoutTournamentInput
+  prizesWon?: Prisma.PlayerPrizeUncheckedCreateNestedManyWithoutWonAtInput
+  prizesSpent?: Prisma.PlayerPrizeUncheckedCreateNestedManyWithoutSpentAtInput
+}
+
+export type TournamentCreateOrConnectWithoutCashReceiptsInput = {
+  where: Prisma.TournamentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutCashReceiptsInput, Prisma.TournamentUncheckedCreateWithoutCashReceiptsInput>
+}
+
+export type TournamentUpsertWithoutCashReceiptsInput = {
+  update: Prisma.XOR<Prisma.TournamentUpdateWithoutCashReceiptsInput, Prisma.TournamentUncheckedUpdateWithoutCashReceiptsInput>
+  create: Prisma.XOR<Prisma.TournamentCreateWithoutCashReceiptsInput, Prisma.TournamentUncheckedCreateWithoutCashReceiptsInput>
+  where?: Prisma.TournamentWhereInput
+}
+
+export type TournamentUpdateToOneWithWhereWithoutCashReceiptsInput = {
+  where?: Prisma.TournamentWhereInput
+  data: Prisma.XOR<Prisma.TournamentUpdateWithoutCashReceiptsInput, Prisma.TournamentUncheckedUpdateWithoutCashReceiptsInput>
+}
+
+export type TournamentUpdateWithoutCashReceiptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
+  venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
+  registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
+  achievements?: Prisma.UserAchievementUpdateManyWithoutTournamentNestedInput
+  prizesWon?: Prisma.PlayerPrizeUpdateManyWithoutWonAtNestedInput
+  prizesSpent?: Prisma.PlayerPrizeUpdateManyWithoutSpentAtNestedInput
+}
+
+export type TournamentUncheckedUpdateWithoutCashReceiptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  seasonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  venueId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
+  paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  minRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumTournamentStatusFieldUpdateOperationsInput | $Enums.TournamentStatus
+  adminTopicId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  adminBoardMsgId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
+  ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
   achievements?: Prisma.UserAchievementUncheckedUpdateManyWithoutTournamentNestedInput
   prizesWon?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutWonAtNestedInput
   prizesSpent?: Prisma.PlayerPrizeUncheckedUpdateManyWithoutSpentAtNestedInput
@@ -2076,6 +2600,8 @@ export type TournamentCreateManySeasonInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -2096,6 +2622,8 @@ export type TournamentUpdateWithoutSeasonInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2108,6 +2636,8 @@ export type TournamentUpdateWithoutSeasonInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   venue?: Prisma.VenueUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -2125,6 +2655,8 @@ export type TournamentUncheckedUpdateWithoutSeasonInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2136,6 +2668,8 @@ export type TournamentUncheckedUpdateWithoutSeasonInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -2153,6 +2687,8 @@ export type TournamentUncheckedUpdateManyWithoutSeasonInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2174,6 +2710,8 @@ export type TournamentCreateManyVenueInput = {
   regOpensAt?: Date | string | null
   regClosesAt?: Date | string | null
   capacity?: number | null
+  maxTables?: number | null
+  seatsPerTable?: number
   paidPlaces?: number | null
   startingStack?: number | null
   addonChips?: number | null
@@ -2194,6 +2732,8 @@ export type TournamentUpdateWithoutVenueInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2206,6 +2746,8 @@ export type TournamentUpdateWithoutVenueInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   season?: Prisma.SeasonUpdateOneWithoutTournamentsNestedInput
   registrations?: Prisma.RegistrationUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUpdateManyWithoutTournamentNestedInput
@@ -2223,6 +2765,8 @@ export type TournamentUncheckedUpdateWithoutVenueInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2234,6 +2778,8 @@ export type TournamentUncheckedUpdateWithoutVenueInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.RegistrationUncheckedUpdateManyWithoutTournamentNestedInput
+  live?: Prisma.LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput
+  cashReceipts?: Prisma.CashReceiptUncheckedUpdateManyWithoutTournamentNestedInput
   results?: Prisma.ResultUncheckedUpdateManyWithoutTournamentNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutTournamentNestedInput
   ratingEvents?: Prisma.RatingEventUncheckedUpdateManyWithoutTournamentNestedInput
@@ -2251,6 +2797,8 @@ export type TournamentUncheckedUpdateManyWithoutVenueInput = {
   regOpensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   regClosesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxTables?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  seatsPerTable?: Prisma.IntFieldUpdateOperationsInput | number
   paidPlaces?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startingStack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   addonChips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2270,6 +2818,7 @@ export type TournamentUncheckedUpdateManyWithoutVenueInput = {
 
 export type TournamentCountOutputType = {
   registrations: number
+  cashReceipts: number
   results: number
   payments: number
   ratingEvents: number
@@ -2280,6 +2829,7 @@ export type TournamentCountOutputType = {
 
 export type TournamentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrations?: boolean | TournamentCountOutputTypeCountRegistrationsArgs
+  cashReceipts?: boolean | TournamentCountOutputTypeCountCashReceiptsArgs
   results?: boolean | TournamentCountOutputTypeCountResultsArgs
   payments?: boolean | TournamentCountOutputTypeCountPaymentsArgs
   ratingEvents?: boolean | TournamentCountOutputTypeCountRatingEventsArgs
@@ -2303,6 +2853,13 @@ export type TournamentCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.E
  */
 export type TournamentCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RegistrationWhereInput
+}
+
+/**
+ * TournamentCountOutputType without action
+ */
+export type TournamentCountOutputTypeCountCashReceiptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CashReceiptWhereInput
 }
 
 /**
@@ -2358,6 +2915,8 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
+  maxTables?: boolean
+  seatsPerTable?: boolean
   paidPlaces?: boolean
   startingStack?: boolean
   addonChips?: boolean
@@ -2371,6 +2930,8 @@ export type TournamentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
   venue?: boolean | Prisma.Tournament$venueArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
+  live?: boolean | Prisma.Tournament$liveArgs<ExtArgs>
+  cashReceipts?: boolean | Prisma.Tournament$cashReceiptsArgs<ExtArgs>
   results?: boolean | Prisma.Tournament$resultsArgs<ExtArgs>
   payments?: boolean | Prisma.Tournament$paymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.Tournament$ratingEventsArgs<ExtArgs>
@@ -2390,6 +2951,8 @@ export type TournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
+  maxTables?: boolean
+  seatsPerTable?: boolean
   paidPlaces?: boolean
   startingStack?: boolean
   addonChips?: boolean
@@ -2414,6 +2977,8 @@ export type TournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
+  maxTables?: boolean
+  seatsPerTable?: boolean
   paidPlaces?: boolean
   startingStack?: boolean
   addonChips?: boolean
@@ -2438,6 +3003,8 @@ export type TournamentSelectScalar = {
   regOpensAt?: boolean
   regClosesAt?: boolean
   capacity?: boolean
+  maxTables?: boolean
+  seatsPerTable?: boolean
   paidPlaces?: boolean
   startingStack?: boolean
   addonChips?: boolean
@@ -2450,11 +3017,13 @@ export type TournamentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "paidPlaces" | "startingStack" | "addonChips" | "ratingMultiplier" | "minRating" | "status" | "adminTopicId" | "adminBoardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
+export type TournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "venueId" | "title" | "description" | "startsAt" | "regOpensAt" | "regClosesAt" | "capacity" | "maxTables" | "seatsPerTable" | "paidPlaces" | "startingStack" | "addonChips" | "ratingMultiplier" | "minRating" | "status" | "adminTopicId" | "adminBoardMsgId" | "createdAt" | "updatedAt", ExtArgs["result"]["tournament"]>
 export type TournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   season?: boolean | Prisma.Tournament$seasonArgs<ExtArgs>
   venue?: boolean | Prisma.Tournament$venueArgs<ExtArgs>
   registrations?: boolean | Prisma.Tournament$registrationsArgs<ExtArgs>
+  live?: boolean | Prisma.Tournament$liveArgs<ExtArgs>
+  cashReceipts?: boolean | Prisma.Tournament$cashReceiptsArgs<ExtArgs>
   results?: boolean | Prisma.Tournament$resultsArgs<ExtArgs>
   payments?: boolean | Prisma.Tournament$paymentsArgs<ExtArgs>
   ratingEvents?: boolean | Prisma.Tournament$ratingEventsArgs<ExtArgs>
@@ -2478,6 +3047,8 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     season: Prisma.$SeasonPayload<ExtArgs> | null
     venue: Prisma.$VenuePayload<ExtArgs> | null
     registrations: Prisma.$RegistrationPayload<ExtArgs>[]
+    live: Prisma.$LiveTournamentPayload<ExtArgs> | null
+    cashReceipts: Prisma.$CashReceiptPayload<ExtArgs>[]
     results: Prisma.$ResultPayload<ExtArgs>[]
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     ratingEvents: Prisma.$RatingEventPayload<ExtArgs>[]
@@ -2495,6 +3066,8 @@ export type $TournamentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     regOpensAt: Date | null
     regClosesAt: Date | null
     capacity: number | null
+    maxTables: number | null
+    seatsPerTable: number
     /**
      * Null on all three means "use the season's rating config". Kept per
      * tournament because the paid-place count changes while the game is running.
@@ -2916,6 +3489,8 @@ export interface Prisma__TournamentClient<T, Null = never, ExtArgs extends runti
   season<T extends Prisma.Tournament$seasonArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$seasonArgs<ExtArgs>>): Prisma.Prisma__SeasonClient<runtime.Types.Result.GetResult<Prisma.$SeasonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   venue<T extends Prisma.Tournament$venueArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$venueArgs<ExtArgs>>): Prisma.Prisma__VenueClient<runtime.Types.Result.GetResult<Prisma.$VenuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   registrations<T extends Prisma.Tournament$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  live<T extends Prisma.Tournament$liveArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$liveArgs<ExtArgs>>): Prisma.Prisma__LiveTournamentClient<runtime.Types.Result.GetResult<Prisma.$LiveTournamentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  cashReceipts<T extends Prisma.Tournament$cashReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$cashReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   results<T extends Prisma.Tournament$resultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$resultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payments<T extends Prisma.Tournament$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ratingEvents<T extends Prisma.Tournament$ratingEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tournament$ratingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RatingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2960,6 +3535,8 @@ export interface TournamentFieldRefs {
   readonly regOpensAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly regClosesAt: Prisma.FieldRef<"Tournament", 'DateTime'>
   readonly capacity: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly maxTables: Prisma.FieldRef<"Tournament", 'Int'>
+  readonly seatsPerTable: Prisma.FieldRef<"Tournament", 'Int'>
   readonly paidPlaces: Prisma.FieldRef<"Tournament", 'Int'>
   readonly startingStack: Prisma.FieldRef<"Tournament", 'Int'>
   readonly addonChips: Prisma.FieldRef<"Tournament", 'Int'>
@@ -3430,6 +4007,49 @@ export type Tournament$registrationsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.RegistrationScalarFieldEnum | Prisma.RegistrationScalarFieldEnum[]
+}
+
+/**
+ * Tournament.live
+ */
+export type Tournament$liveArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LiveTournament
+   */
+  select?: Prisma.LiveTournamentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LiveTournament
+   */
+  omit?: Prisma.LiveTournamentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LiveTournamentInclude<ExtArgs> | null
+  where?: Prisma.LiveTournamentWhereInput
+}
+
+/**
+ * Tournament.cashReceipts
+ */
+export type Tournament$cashReceiptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CashReceipt
+   */
+  select?: Prisma.CashReceiptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CashReceipt
+   */
+  omit?: Prisma.CashReceiptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CashReceiptInclude<ExtArgs> | null
+  where?: Prisma.CashReceiptWhereInput
+  orderBy?: Prisma.CashReceiptOrderByWithRelationInput | Prisma.CashReceiptOrderByWithRelationInput[]
+  cursor?: Prisma.CashReceiptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CashReceiptScalarFieldEnum | Prisma.CashReceiptScalarFieldEnum[]
 }
 
 /**

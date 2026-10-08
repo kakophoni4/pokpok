@@ -10,7 +10,11 @@
 import { config as loadEnv } from "dotenv";
 import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { CLUB_TIMEZONE, DEFAULT_RATING_CONFIG, RatingConfig } from "@poker/contracts";
+import {
+  CLUB_TIMEZONE,
+  DEFAULT_RATING_CONFIG,
+  RatingConfig,
+} from "@poker/contracts";
 import { scoreTournament, summarizeLedger } from "@poker/rating";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -36,26 +40,78 @@ const CLUB_UTC_OFFSET_HOURS = 4;
 
 const PLAYERS = [
   { nickname: "Ferz", displayName: "Артём Фёдоров", role: "admin" as const },
-  { nickname: "Kate_AA", displayName: "Екатерина Лапина", role: "admin" as const },
-  { nickname: "Sanya_River", displayName: "Александр Крылов", role: "player" as const },
-  { nickname: "Nikita_NL", displayName: "Никита Орлов", role: "player" as const },
-  { nickname: "MashaBluff", displayName: "Мария Гущина", role: "player" as const },
-  { nickname: "DenisPro", displayName: "Денис Ковалёв", role: "player" as const },
-  { nickname: "OlegFold", displayName: "Олег Ситников", role: "player" as const },
-  { nickname: "Ira_Chips", displayName: "Ирина Белова", role: "player" as const },
-  { nickname: "PavelShark", displayName: "Павел Дроздов", role: "player" as const },
-  { nickname: "Timur_TT", displayName: "Тимур Аскаров", role: "player" as const },
-  { nickname: "LenaFlush", displayName: "Елена Кириллова", role: "player" as const },
-  { nickname: "Grisha_UTG", displayName: "Григорий Ланин", role: "player" as const },
-  { nickname: "Vika_Nuts", displayName: "Виктория Панова", role: "hostess" as const },
-  { nickname: "Roma_Allin", displayName: "Роман Ефимов", role: "player" as const },
+  {
+    nickname: "Kate_AA",
+    displayName: "Екатерина Лапина",
+    role: "admin" as const,
+  },
+  {
+    nickname: "Sanya_River",
+    displayName: "Александр Крылов",
+    role: "player" as const,
+  },
+  {
+    nickname: "Nikita_NL",
+    displayName: "Никита Орлов",
+    role: "player" as const,
+  },
+  {
+    nickname: "MashaBluff",
+    displayName: "Мария Гущина",
+    role: "player" as const,
+  },
+  {
+    nickname: "DenisPro",
+    displayName: "Денис Ковалёв",
+    role: "player" as const,
+  },
+  {
+    nickname: "OlegFold",
+    displayName: "Олег Ситников",
+    role: "player" as const,
+  },
+  {
+    nickname: "Ira_Chips",
+    displayName: "Ирина Белова",
+    role: "player" as const,
+  },
+  {
+    nickname: "PavelShark",
+    displayName: "Павел Дроздов",
+    role: "player" as const,
+  },
+  {
+    nickname: "Timur_TT",
+    displayName: "Тимур Аскаров",
+    role: "player" as const,
+  },
+  {
+    nickname: "LenaFlush",
+    displayName: "Елена Кириллова",
+    role: "player" as const,
+  },
+  {
+    nickname: "Grisha_UTG",
+    displayName: "Григорий Ланин",
+    role: "player" as const,
+  },
+  {
+    nickname: "Vika_Nuts",
+    displayName: "Виктория Панова",
+    role: "hostess" as const,
+  },
+  {
+    nickname: "Roma_Allin",
+    displayName: "Роман Ефимов",
+    role: "player" as const,
+  },
 ];
 
 const ACHIEVEMENTS = [
   {
     code: "hand_of_the_day",
     title: "Рука дня",
-    description: "Собрал руку дня — ту, что выиграла финал прошлого турнира",
+    description: "Собрал руку дня - ту, что выиграла финал прошлого турнира",
     icon: "🃏",
     ratingPoints: 100,
     isRepeatable: true,
@@ -154,19 +210,79 @@ const ACHIEVEMENTS = [
 ];
 
 const PAST_TOURNAMENTS = [
-  { title: "Вечерний турнир #12", daysAgo: 42, multiplier: 1, field: 14, paidPlaces: 9 },
-  { title: "Вечерний турнир #13", daysAgo: 35, multiplier: 1, field: 12, paidPlaces: 9 },
-  { title: "Дипстек по воскресеньям", daysAgo: 28, multiplier: 1.5, field: 13, paidPlaces: 9 },
-  { title: "Вечерний турнир #14", daysAgo: 21, multiplier: 1, field: 11, paidPlaces: 9 },
-  { title: "Клубный мейджор «Осень»", daysAgo: 14, multiplier: 2, field: 14, paidPlaces: 18 },
-  { title: "Вечерний турнир #15", daysAgo: 7, multiplier: 1, field: 12, paidPlaces: 9 },
+  {
+    title: "Вечерний турнир #12",
+    daysAgo: 42,
+    multiplier: 1,
+    field: 14,
+    paidPlaces: 9,
+  },
+  {
+    title: "Вечерний турнир #13",
+    daysAgo: 35,
+    multiplier: 1,
+    field: 12,
+    paidPlaces: 9,
+  },
+  {
+    title: "Дипстек по воскресеньям",
+    daysAgo: 28,
+    multiplier: 1.5,
+    field: 13,
+    paidPlaces: 9,
+  },
+  {
+    title: "Вечерний турнир #14",
+    daysAgo: 21,
+    multiplier: 1,
+    field: 11,
+    paidPlaces: 9,
+  },
+  {
+    title: "Клубный мейджор «Осень»",
+    daysAgo: 14,
+    multiplier: 2,
+    field: 14,
+    paidPlaces: 18,
+  },
+  {
+    title: "Вечерний турнир #15",
+    daysAgo: 7,
+    multiplier: 1,
+    field: 12,
+    paidPlaces: 9,
+  },
 ];
 
 const UPCOMING_TOURNAMENTS = [
-  { title: "Вечерний турнир #16", inDays: 2, capacity: 12, multiplier: 1, signUps: 9 },
-  { title: "Дипстек по воскресеньям", inDays: 5, capacity: 8, multiplier: 1, signUps: 10 },
-  { title: "Вечерний турнир #17", inDays: 9, capacity: 16, multiplier: 1, signUps: 5 },
-  { title: "Клубный мейджор «Зима»", inDays: 23, capacity: 24, multiplier: 2, signUps: 3 },
+  {
+    title: "Вечерний турнир #16",
+    inDays: 2,
+    capacity: 12,
+    multiplier: 1,
+    signUps: 9,
+  },
+  {
+    title: "Дипстек по воскресеньям",
+    inDays: 5,
+    capacity: 8,
+    multiplier: 1,
+    signUps: 10,
+  },
+  {
+    title: "Вечерний турнир #17",
+    inDays: 9,
+    capacity: 16,
+    multiplier: 1,
+    signUps: 5,
+  },
+  {
+    title: "Клубный мейджор «Зима»",
+    inDays: 23,
+    capacity: 24,
+    multiplier: 2,
+    signUps: 3,
+  },
 ];
 
 const ENTRY_PRICE = 500;
@@ -209,10 +325,10 @@ async function main(): Promise<void> {
       addonPriceRub: ADDON_PRICE,
       drinkPriceRub: DRINK_PRICE,
       infoText: [
-        "Самара, ул. Молодогвардейская, 204, второй этаж, вход со двора.",
+        "Ульяновск, ул. Гагарина, 25.",
         "",
         "Играем по вторникам и воскресеньям, сбор в 18:30, старт в 19:00 по Самаре.",
-        "Вход 500 ₽, адон 500 ₽. Ставки не денежные — играем на рейтинг клуба.",
+        "Вход 500 ₽, адон 500 ₽. Ставки не денежные - играем на рейтинг клуба.",
         "",
         "Вопросы: @poker_samara_admin",
       ].join("\n"),
@@ -233,7 +349,7 @@ async function main(): Promise<void> {
   const venue = await prisma.venue.create({
     data: {
       title: "Покер-клуб «Роял»",
-      address: "Самара, ул. Молодогвардейская, 204",
+      address: "Ульяновск, ул. Гагарина, 25",
       geoLat: 53.201,
       geoLon: 50.117,
     },
@@ -405,7 +521,8 @@ async function main(): Promise<void> {
   const gamesByUser = new Map<string, number>();
   for (const row of finishes) {
     gamesByUser.set(row.userId, (gamesByUser.get(row.userId) ?? 0) + 1);
-    if (row.place === 1) winsByUser.set(row.userId, (winsByUser.get(row.userId) ?? 0) + 1);
+    if (row.place === 1)
+      winsByUser.set(row.userId, (winsByUser.get(row.userId) ?? 0) + 1);
   }
 
   const firstWin = achievements.find((a) => a.code === "first_win")!;
@@ -450,7 +567,10 @@ async function main(): Promise<void> {
         userId: holder.id,
         achievementId: achievement.id,
         grantedById: admin.id,
-        comment: achievement.code === "club_helper" ? "Помогает вести расписание" : "Ac-Ac",
+        comment:
+          achievement.code === "club_helper"
+            ? "Помогает вести расписание"
+            : "Ac-Ac",
         dedupeKey: `manual_${achievement.code}_${index}`,
       },
     });
@@ -487,7 +607,10 @@ async function main(): Promise<void> {
     });
 
     // Deliberately oversubscribe one evening so the waiting list is visible.
-    const signUps = pickPlayers(users, Math.min(template.signUps, users.length));
+    const signUps = pickPlayers(
+      users,
+      Math.min(template.signUps, users.length),
+    );
     let waitlistPosition = 0;
 
     for (const [index, user] of signUps.entries()) {
@@ -509,7 +632,13 @@ async function main(): Promise<void> {
   console.log("Recomputing season standings…");
   const events = await prisma.ratingEvent.findMany({
     where: { seasonId: season.id },
-    select: { userId: true, sourceType: true, points: true, place: true, fieldSize: true },
+    select: {
+      userId: true,
+      sourceType: true,
+      points: true,
+      place: true,
+      fieldSize: true,
+    },
   });
 
   const byUser = new Map<string, typeof events>();
@@ -542,7 +671,9 @@ async function main(): Promise<void> {
         `  (игр: ${row.gamesPlayed}, побед: ${row.wins})`,
     );
   }
-  console.log(`\nАдмины для входа: ${PLAYERS[0]!.nickname}, ${PLAYERS[1]!.nickname}`);
+  console.log(
+    `\nАдмины для входа: ${PLAYERS[0]!.nickname}, ${PLAYERS[1]!.nickname}`,
+  );
   console.log("Вход в дев-режиме: POST /api/auth/dev/login { nickname }\n");
 }
 

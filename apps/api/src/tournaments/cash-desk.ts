@@ -1,10 +1,14 @@
 import { ConflictException } from "@nestjs/common";
-import { ADDON_MAX_STACKS, stacksOf, type TournamentPlayer } from "@poker/contracts";
+import {
+  ADDON_MAX_STACKS,
+  stacksOf,
+  type TournamentPlayer,
+} from "@poker/contracts";
 import { toPublicUser } from "../users/user.mapper";
 import type { Prisma } from "../generated/prisma/client";
 
 /**
- * Rules the desk enforces however a line arrives — paid for in cash, included
+ * Rules the desk enforces however a line arrives - paid for in cash, included
  * in a promo, or covered by a prize the player won last week.
  *
  * They live apart from PaymentsService because a prize redemption is the same
@@ -60,7 +64,11 @@ export async function assertAddonRoom(
  * A walk-in who never signed up still belongs on the roster: paying the entry
  * fee is what makes somebody a participant.
  */
-export async function seatPlayer(db: DeskDb, tournamentId: string, userId: string): Promise<void> {
+export async function seatPlayer(
+  db: DeskDb,
+  tournamentId: string,
+  userId: string,
+): Promise<void> {
   await db.registration.upsert({
     where: { tournamentId_userId: { tournamentId, userId } },
     create: { tournamentId, userId, status: "registered", source: "admin" },
@@ -69,7 +77,11 @@ export async function seatPlayer(db: DeskDb, tournamentId: string, userId: strin
 }
 
 /** A rebuy puts a busted player back at the table, so their place is no longer. */
-export async function returnToPlay(db: DeskDb, tournamentId: string, userId: string): Promise<void> {
+export async function returnToPlay(
+  db: DeskDb,
+  tournamentId: string,
+  userId: string,
+): Promise<void> {
   await db.result.deleteMany({ where: { tournamentId, userId } });
 }
 

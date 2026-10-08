@@ -9,3 +9,4 @@ export * from "./game.js";
 export * from "./rating.js";
 export * from "./achievement.js";
 export * from "./auth.js";
+export * from "./live.js";

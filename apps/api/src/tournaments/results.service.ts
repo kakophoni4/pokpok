@@ -53,7 +53,10 @@ export class ResultsService {
       },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
     if (tournament.status === "finished") {
       throw new ConflictException({
@@ -68,7 +71,7 @@ export class ResultsService {
       if (place > paidPlaces) {
         throw new BadRequestException({
           code: "NOT_A_PRIZE_PLACE",
-          message: `Отмечаются только призовые места (1–${paidPlaces})`,
+          message: `Отмечаются только призовые места (1-${paidPlaces})`,
         });
       }
     }
@@ -117,11 +120,17 @@ export class ResultsService {
       where: { id: tournamentId },
       include: {
         results: { select: { userId: true, place: true } },
-        payments: { where: { voidedAt: null }, select: { userId: true, chips: true, kind: true } },
+        payments: {
+          where: { voidedAt: null },
+          select: { userId: true, chips: true, kind: true },
+        },
       },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
     if (tournament.results.length === 0) {
       throw new BadRequestException({
@@ -133,11 +142,19 @@ export class ResultsService {
     const season = await this.seasons.ratingConfig(tournament.seasonId);
     const config = effectiveConfig(tournament, season);
 
-    const chipsInPlay = tournament.payments.reduce((sum, payment) => sum + payment.chips, 0);
-    const participants = new Set(tournament.payments.map((payment) => payment.userId));
+    const chipsInPlay = tournament.payments.reduce(
+      (sum, payment) => sum + payment.chips,
+      0,
+    );
+    const participants = new Set(
+      tournament.payments.map((payment) => payment.userId),
+    );
 
     const scored = scoreTournament({
-      standings: tournament.results.map((row) => ({ userId: row.userId, place: row.place })),
+      standings: tournament.results.map((row) => ({
+        userId: row.userId,
+        place: row.place,
+      })),
       chipsInPlay,
       paidPlaces: config.paidPlaces,
       multiplier: tournament.ratingMultiplier,
@@ -146,10 +163,14 @@ export class ResultsService {
     });
 
     const entered = new Set(
-      tournament.payments.filter((payment) => payment.kind === "entry").map((payment) => payment.userId),
+      tournament.payments
+        .filter((payment) => payment.kind === "entry")
+        .map((payment) => payment.userId),
     );
     const placed = new Set(scored.map((row) => row.userId));
-    const participantsOnly = [...entered].filter((userId) => !placed.has(userId));
+    const participantsOnly = [...entered].filter(
+      (userId) => !placed.has(userId),
+    );
 
     const previous = await this.prisma.ratingEvent.findMany({
       where: { tournamentId, sourceType: "tournament_result" },
@@ -162,7 +183,9 @@ export class ResultsService {
     ]);
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.ratingEvent.deleteMany({ where: { tournamentId, sourceType: "tournament_result" } });
+      await tx.ratingEvent.deleteMany({
+        where: { tournamentId, sourceType: "tournament_result" },
+      });
 
       await tx.ratingEvent.createMany({
         data: [
@@ -189,7 +212,28 @@ export class ResultsService {
         ],
       });
 
-      await tx.tournament.update({ where: { id: tournamentId }, data: { status: "finished" } });
+      await tx.tournament.update({
+        where: { id: tournamentId },
+        data: { status: "finished" },
+      });
+      const live = await tx.liveTournament.findUnique({
+        where: { tournamentId },
+      });
+      if (live) {
+        const state =
+          live.state as unknown as import("@poker/contracts").LiveState;
+        if (state.clock.running && state.clock.startedAt)
+          state.clock.elapsedSeconds += Math.max(
+            0,
+            Math.floor((Date.now() - Date.parse(state.clock.startedAt)) / 1000),
+          );
+        state.clock.running = false;
+        state.clock.startedAt = null;
+        await tx.liveTournament.update({
+          where: { tournamentId },
+          data: { state: state as never },
+        });
+      }
     });
 
     await this.rating.recomputeStats([...affected], tournament.seasonId);
@@ -199,19 +243,27 @@ export class ResultsService {
       action: "tournament.finish",
       entity: "Tournament",
       entityId: tournamentId,
-      after: { players: participants.size, chipsInPlay, paidPlaces: config.paidPlaces },
+      after: {
+        players: participants.size,
+        chipsInPlay,
+        paidPlaces: config.paidPlaces,
+      },
     });
 
     return {
       players: participants.size,
       chipsInPlay,
       paidPlaces: config.paidPlaces,
-      awarded: scored.map((row) => ({ userId: row.userId, place: row.place, points: row.points })),
+      awarded: scored.map((row) => ({
+        userId: row.userId,
+        place: row.place,
+        points: row.points,
+      })),
     };
   }
 
   /**
-   * Undoes a payout. Places and the cash desk stay exactly as they were — only
+   * Undoes a payout. Places and the cash desk stay exactly as they were - only
    * the rating is withdrawn, so a wrong finish costs one tap instead of an
    * evening of manual repair.
    */
@@ -221,7 +273,10 @@ export class ResultsService {
       select: { seasonId: true },
     });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
 
     const previous = await this.prisma.ratingEvent.findMany({
@@ -230,8 +285,13 @@ export class ResultsService {
     });
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.ratingEvent.deleteMany({ where: { tournamentId, sourceType: "tournament_result" } });
-      await tx.tournament.update({ where: { id: tournamentId }, data: { status: "running" } });
+      await tx.ratingEvent.deleteMany({
+        where: { tournamentId, sourceType: "tournament_result" },
+      });
+      await tx.tournament.update({
+        where: { id: tournamentId },
+        data: { status: "running" },
+      });
     });
 
     await this.rating.recomputeStats(
@@ -252,14 +312,20 @@ export class ResultsService {
    * The whole standings table in one go, for entering an evening from the
    * website rather than tapping through the bot.
    */
-  async submit(tournamentId: string, input: SubmitResultsInput, actorId: string): Promise<void> {
+  async submit(
+    tournamentId: string,
+    input: SubmitResultsInput,
+    actorId: string,
+  ): Promise<void> {
     const userIds = input.entries.map((entry) => entry.userId);
     const known = await this.prisma.user.findMany({
       where: { id: { in: userIds } },
       select: { id: true },
     });
     if (known.length !== userIds.length) {
-      const missing = userIds.filter((id) => !known.some((user) => user.id === id));
+      const missing = userIds.filter(
+        (id) => !known.some((user) => user.id === id),
+      );
       throw new BadRequestException({
         code: "UNKNOWN_PLAYERS",
         message: "Некоторые игроки не найдены",

@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { Id, IsoDateTime, patchShape } from "./common.js";
-import { PaymentKind, RegistrationSource, RegistrationStatus, TournamentStatus } from "./enums.js";
+import {
+  PaymentKind,
+  RegistrationSource,
+  RegistrationStatus,
+  TournamentStatus,
+} from "./enums.js";
 import { PlayerPrize } from "./prize.js";
 import { PublicUser } from "./user.js";
 
@@ -27,6 +32,8 @@ export const TournamentSummary = z.object({
   regOpensAt: IsoDateTime.nullable(),
   regClosesAt: IsoDateTime.nullable(),
   capacity: z.number().int().positive().nullable(),
+  maxTables: z.number().int().positive().nullish(),
+  seatsPerTable: z.number().int().positive().optional(),
   ratingMultiplier: z.number().positive(),
   /** How many places earn rating. Editable while the game is running. */
   paidPlaces: z.number().int().positive(),
@@ -122,7 +129,9 @@ export const TournamentDetail = TournamentSummary.extend({
   totalRub: z.number().int().nonnegative().nullish(),
   adminScreens: AdminScreens.nullish(),
   /** Combo awards handed out this evening. Staff-only. */
-  eveningGrants: z.array(z.object({ id: Id, userId: Id, achievementId: Id })).nullish(),
+  eveningGrants: z
+    .array(z.object({ id: Id, userId: Id, achievementId: Id }))
+    .nullish(),
   /** Unspent prizes of everyone at this table, so the desk can write them off. */
   prizes: z.array(PlayerPrize).nullish(),
 });
@@ -147,6 +156,8 @@ const TournamentInputShape = z.object({
   regOpensAt: IsoDateTime.nullish(),
   regClosesAt: IsoDateTime.nullish(),
   capacity: z.number().int().min(2).max(1000).nullish(),
+  maxTables: z.number().int().min(1).max(30).optional(),
+  seatsPerTable: z.number().int().min(2).max(10).optional(),
   /** Null falls back to the season's default. */
   paidPlaces: z.number().int().min(1).max(500).nullish(),
   startingStack: z.number().int().positive().nullish(),
@@ -168,10 +179,13 @@ type TournamentWindow = {
  */
 function withScheduleChecks<T extends z.ZodType<TournamentWindow>>(schema: T) {
   return schema
-    .refine((v) => !v.regClosesAt || !v.regOpensAt || v.regOpensAt <= v.regClosesAt, {
-      message: "Регистрация не может закрываться раньше, чем открывается",
-      path: ["regClosesAt"],
-    })
+    .refine(
+      (v) => !v.regClosesAt || !v.regOpensAt || v.regOpensAt <= v.regClosesAt,
+      {
+        message: "Регистрация не может закрываться раньше, чем открывается",
+        path: ["regClosesAt"],
+      },
+    )
     .refine((v) => !v.regOpensAt || !v.startsAt || v.regOpensAt <= v.startsAt, {
       message: "Регистрация должна открываться до старта турнира",
       path: ["regOpensAt"],
@@ -237,11 +251,19 @@ export const SubmitResultsInput = z
   })
   .superRefine(({ entries }, ctx) => {
     if (new Set(entries.map((e) => e.userId)).size !== entries.length) {
-      ctx.addIssue({ code: "custom", message: "Игрок встречается дважды", path: ["entries"] });
+      ctx.addIssue({
+        code: "custom",
+        message: "Игрок встречается дважды",
+        path: ["entries"],
+      });
     }
 
     if (new Set(entries.map((e) => e.place)).size !== entries.length) {
-      ctx.addIssue({ code: "custom", message: "Место занято дважды", path: ["entries"] });
+      ctx.addIssue({
+        code: "custom",
+        message: "Место занято дважды",
+        path: ["entries"],
+      });
     }
   });
 export type SubmitResultsInput = z.infer<typeof SubmitResultsInput>;

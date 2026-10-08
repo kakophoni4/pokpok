@@ -70,7 +70,12 @@ export const ModelName = {
   RatingEvent: 'RatingEvent',
   UserSeasonStats: 'UserSeasonStats',
   AuditLog: 'AuditLog',
-  Outbox: 'Outbox'
+  Outbox: 'Outbox',
+  LiveTournament: 'LiveTournament',
+  CashReceipt: 'CashReceipt',
+  DealerCredential: 'DealerCredential',
+  DealerTablet: 'DealerTablet',
+  DealerShift: 'DealerShift'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -197,6 +202,8 @@ export const TournamentScalarFieldEnum = {
   regOpensAt: 'regOpensAt',
   regClosesAt: 'regClosesAt',
   capacity: 'capacity',
+  maxTables: 'maxTables',
+  seatsPerTable: 'seatsPerTable',
   paidPlaces: 'paidPlaces',
   startingStack: 'startingStack',
   addonChips: 'addonChips',
@@ -244,6 +251,7 @@ export const PaymentScalarFieldEnum = {
   userId: 'userId',
   kind: 'kind',
   amountRub: 'amountRub',
+  deferred: 'deferred',
   chips: 'chips',
   note: 'note',
   createdById: 'createdById',
@@ -279,6 +287,9 @@ export type PlayerPrizeScalarFieldEnum = (typeof PlayerPrizeScalarFieldEnum)[key
 export const ClubSettingsScalarFieldEnum = {
   id: 'id',
   infoText: 'infoText',
+  blindTemplates: 'blindTemplates',
+  handOfDay: 'handOfDay',
+  dealerPayroll: 'dealerPayroll',
   entryPriceRub: 'entryPriceRub',
   rebuyPriceRub: 'rebuyPriceRub',
   addonPriceRub: 'addonPriceRub',
@@ -310,6 +321,7 @@ export type ClubMenuItemScalarFieldEnum = (typeof ClubMenuItemScalarFieldEnum)[k
 
 
 export const AchievementScalarFieldEnum = {
+  category: 'category',
   id: 'id',
   code: 'code',
   title: 'title',
@@ -405,6 +417,68 @@ export const OutboxScalarFieldEnum = {
 } as const
 
 export type OutboxScalarFieldEnum = (typeof OutboxScalarFieldEnum)[keyof typeof OutboxScalarFieldEnum]
+
+
+export const LiveTournamentScalarFieldEnum = {
+  tournamentId: 'tournamentId',
+  state: 'state',
+  displayToken: 'displayToken',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LiveTournamentScalarFieldEnum = (typeof LiveTournamentScalarFieldEnum)[keyof typeof LiveTournamentScalarFieldEnum]
+
+
+export const CashReceiptScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  userId: 'userId',
+  amountRub: 'amountRub',
+  method: 'method',
+  requestId: 'requestId',
+  actorId: 'actorId',
+  voidedAt: 'voidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CashReceiptScalarFieldEnum = (typeof CashReceiptScalarFieldEnum)[keyof typeof CashReceiptScalarFieldEnum]
+
+
+export const DealerCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DealerCredentialScalarFieldEnum = (typeof DealerCredentialScalarFieldEnum)[keyof typeof DealerCredentialScalarFieldEnum]
+
+
+export const DealerTabletScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  tableNumber: 'tableNumber',
+  tokenHash: 'tokenHash',
+  createdAt: 'createdAt'
+} as const
+
+export type DealerTabletScalarFieldEnum = (typeof DealerTabletScalarFieldEnum)[keyof typeof DealerTabletScalarFieldEnum]
+
+
+export const DealerShiftScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tabletId: 'tabletId',
+  tournamentId: 'tournamentId',
+  tableNumber: 'tableNumber',
+  endElapsed: 'endElapsed',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  lastSeenAt: 'lastSeenAt',
+  roundingMinutes: 'roundingMinutes',
+  roundingMode: 'roundingMode'
+} as const
+
+export type DealerShiftScalarFieldEnum = (typeof DealerShiftScalarFieldEnum)[keyof typeof DealerShiftScalarFieldEnum]
 
 
 export const SortOrder = {

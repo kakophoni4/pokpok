@@ -7,15 +7,31 @@ import { PublicUser } from "./user.js";
  * leave `rule` null and are handed out by staff.
  */
 export const AchievementRule = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("wins_count"), threshold: z.number().int().positive() }),
-  z.object({ kind: z.literal("games_played"), threshold: z.number().int().positive() }),
-  z.object({ kind: z.literal("top3_count"), threshold: z.number().int().positive() }),
-  z.object({ kind: z.literal("attendance_streak"), threshold: z.number().int().positive() }),
-  z.object({ kind: z.literal("season_rank"), maxRank: z.number().int().positive() }),
+  z.object({
+    kind: z.literal("wins_count"),
+    threshold: z.number().int().positive(),
+  }),
+  z.object({
+    kind: z.literal("games_played"),
+    threshold: z.number().int().positive(),
+  }),
+  z.object({
+    kind: z.literal("top3_count"),
+    threshold: z.number().int().positive(),
+  }),
+  z.object({
+    kind: z.literal("attendance_streak"),
+    threshold: z.number().int().positive(),
+  }),
+  z.object({
+    kind: z.literal("season_rank"),
+    maxRank: z.number().int().positive(),
+  }),
 ]);
 export type AchievementRule = z.infer<typeof AchievementRule>;
 
 export const Achievement = z.object({
+  category: z.enum(["game", "club"]).default("club"),
   id: Id,
   code: z.string(),
   title: z.string(),
@@ -31,13 +47,17 @@ export const Achievement = z.object({
 export type Achievement = z.infer<typeof Achievement>;
 
 export const CreateAchievementInput = z.object({
+  category: z.enum(["game", "club"]).default("club"),
   /** Optional: the server mints a unique code from the title if omitted. */
   code: z
     .string()
     .trim()
     .min(2)
     .max(48)
-    .regex(/^[a-z0-9_]+$/, "Только латиница в нижнем регистре, цифры и подчёркивание")
+    .regex(
+      /^[a-z0-9_]+$/,
+      "Только латиница в нижнем регистре, цифры и подчёркивание",
+    )
     .optional(),
   title: z.string().trim().min(2).max(80),
   description: z.string().trim().max(500).nullish(),
@@ -75,10 +95,15 @@ export const GrantAchievementInput = z.object({
 
 /** Hands awarded at the table this evening — каре, стрит-флеш, рука дня. */
 export function isEveningHand(achievement: {
+  category?: string;
   isActive: boolean;
   isRepeatable: boolean;
   rule: unknown;
 }): boolean {
-  return achievement.isActive && achievement.isRepeatable && achievement.rule == null;
+  return (
+    achievement.category === "game" &&
+    achievement.isActive &&
+    achievement.rule == null
+  );
 }
 export type GrantAchievementInput = z.infer<typeof GrantAchievementInput>;

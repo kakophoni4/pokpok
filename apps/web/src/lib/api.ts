@@ -22,7 +22,9 @@ export function setAccessToken(token: string | null): void {
   for (const listener of listeners) listener(token);
 }
 
-export function onTokenChange(listener: (token: string | null) => void): () => void {
+export function onTokenChange(
+  listener: (token: string | null) => void,
+): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
@@ -46,22 +48,31 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-async function send<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
+async function send<T>(
+  method: string,
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const response = await fetch(`${BASE}${path}`, {
     method,
     // Needed so the refresh cookie travels with same-origin requests.
     credentials: "include",
     headers: {
-      ...(options.body === undefined ? {} : { "content-type": "application/json" }),
+      ...(options.body === undefined
+        ? {}
+        : { "content-type": "application/json" }),
       ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
     },
-    ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+    ...(options.body === undefined
+      ? {}
+      : { body: JSON.stringify(options.body) }),
     ...(options.signal ? { signal: options.signal } : {}),
   });
 
   if (response.status === 401 && !options.skipRefresh) {
     const refreshed = await refreshSession();
-    if (refreshed) return send<T>(method, path, { ...options, skipRefresh: true });
+    if (refreshed)
+      return send<T>(method, path, { ...options, skipRefresh: true });
   }
 
   if (!response.ok) throw await toRequestError(response);
@@ -91,7 +102,11 @@ async function toRequestError(response: Response): Promise<RequestError> {
 export function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
     try {
-      const session = await send<SessionResponse>("POST", "/auth/refresh", { skipRefresh: true });
+      const session = await send<SessionResponse>(
+        "POST",
+        location.pathname === "/dealer" ? "/dealer/refresh" : "/auth/refresh",
+        { skipRefresh: true },
+      );
       setAccessToken(session.accessToken);
       return true;
     } catch {
@@ -106,14 +121,17 @@ export function refreshSession(): Promise<boolean> {
 }
 
 export const api = {
-  get: <T>(path: string, signal?: AbortSignal) => send<T>("GET", path, signal ? { signal } : {}),
+  get: <T>(path: string, signal?: AbortSignal) =>
+    send<T>("GET", path, signal ? { signal } : {}),
   post: <T>(path: string, body?: unknown) => send<T>("POST", path, { body }),
   patch: <T>(path: string, body?: unknown) => send<T>("PATCH", path, { body }),
   delete: <T>(path: string) => send<T>("DELETE", path),
 };
 
 /** Builds a query string, dropping empty values so URLs stay readable. */
-export function query(params: Record<string, string | number | boolean | undefined | null>): string {
+export function query(
+  params: Record<string, string | number | boolean | undefined | null>,
+): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === "") continue;

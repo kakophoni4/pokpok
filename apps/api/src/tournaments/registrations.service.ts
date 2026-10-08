@@ -16,6 +16,9 @@ import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
 import type { TxClient } from "../common/prisma/tx-client";
 import { toPublicUser } from "../users/user.mapper";
+import { assertNoPastDebt } from "../live/accounts";
+import { clockView } from "../live/live-engine";
+import type { LiveState } from "@poker/contracts";
 
 export type RegisterResult = {
   status: RegistrationStatus;
@@ -44,7 +47,11 @@ export class RegistrationsService {
   ): Promise<RegisterResult> {
     const result = await this.prisma.$transaction(
       async (tx) => {
-        const tournament = await tx.tournament.findUnique({ where: { id: tournamentId } });
+        await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id=${tournamentId} FOR UPDATE`;
+        await assertNoPastDebt(tx, userId, tournamentId);
+        const tournament = await tx.tournament.findUnique({
+          where: { id: tournamentId },
+        });
         if (!tournament) {
           throw new NotFoundException({
             code: "TOURNAMENT_NOT_FOUND",
@@ -59,17 +66,35 @@ export class RegistrationsService {
         }
 
         const isStaffAction = source === "admin";
-        if (!isStaffAction) this.assertRegistrationOpen(tournament);
+        const live = await tx.liveTournament.findUnique({
+          where: { tournamentId },
+        });
+        if (live) {
+          const s = live.state as unknown as LiveState;
+          const c = clockView(s);
+          if (c.complete || c.index + 1 > s.config.registrationClosesLevel)
+            throw new BadRequestException("Регистрация закрыта");
+        }
+        if (!isStaffAction)
+          this.assertRegistrationOpen(
+            live ? { ...tournament, regClosesAt: null } : tournament,
+          );
 
         const user = await tx.user.findUnique({
           where: { id: userId },
           select: { status: true },
         });
         if (!user) {
-          throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+          throw new NotFoundException({
+            code: "USER_NOT_FOUND",
+            message: "Игрок не найден",
+          });
         }
         if (user.status === "blocked") {
-          throw new ForbiddenException({ code: "USER_BLOCKED", message: "Аккаунт заблокирован" });
+          throw new ForbiddenException({
+            code: "USER_BLOCKED",
+            message: "Аккаунт заблокирован",
+          });
         }
 
         const existing = await tx.registration.findUnique({
@@ -78,6 +103,13 @@ export class RegistrationsService {
         if (existing && existing.status !== "cancelled") {
           // A walk-in who was only on the waiting list is now physically here.
           if (isStaffAction && existing.status === "waitlist") {
+            if (
+              tournament.capacity != null &&
+              (await tx.registration.count({
+                where: { tournamentId, status: "registered" },
+              })) >= tournament.capacity
+            )
+              throw new ConflictException("Все места заняты");
             await tx.registration.update({
               where: { id: existing.id },
               data: { status: "registered", waitlistPosition: null, source },
@@ -97,7 +129,12 @@ export class RegistrationsService {
         const occupied = await tx.registration.count({
           where: { tournamentId, status: { in: OCCUPYING_STATUSES } },
         });
-        const seatsLeft = tournament.capacity == null ? Number.POSITIVE_INFINITY : tournament.capacity - occupied;
+        const seatsLeft =
+          tournament.capacity == null
+            ? Number.POSITIVE_INFINITY
+            : tournament.capacity - occupied;
+        if (seatsLeft <= 0 && isStaffAction)
+          throw new ConflictException("Все места заняты");
 
         let status: RegistrationStatus = "registered";
         let waitlistPosition: number | null = null;
@@ -213,7 +250,11 @@ export class RegistrationsService {
     const rows = await this.prisma.registration.findMany({
       where: { tournamentId, status: { not: "cancelled" } },
       include: { user: true },
-      orderBy: [{ status: "asc" }, { waitlistPosition: "asc" }, { createdAt: "asc" }],
+      orderBy: [
+        { status: "asc" },
+        { waitlistPosition: "asc" },
+        { createdAt: "asc" },
+      ],
     });
 
     return rows.map((row) => ({
@@ -254,7 +295,10 @@ export class RegistrationsService {
   }
 
   /** Keeps waiting-list positions as 1..N with no gaps after any change. */
-  private async renumberWaitlist(tx: TxClient, tournamentId: string): Promise<void> {
+  private async renumberWaitlist(
+    tx: TxClient,
+    tournamentId: string,
+  ): Promise<void> {
     const waiting = await tx.registration.findMany({
       where: { tournamentId, status: "waitlist" },
       orderBy: [{ waitlistPosition: "asc" }, { createdAt: "asc" }],
@@ -264,7 +308,10 @@ export class RegistrationsService {
     for (const [index, row] of waiting.entries()) {
       const position = index + 1;
       if (row.waitlistPosition === position) continue;
-      await tx.registration.update({ where: { id: row.id }, data: { waitlistPosition: position } });
+      await tx.registration.update({
+        where: { id: row.id },
+        data: { waitlistPosition: position },
+      });
     }
   }
 }

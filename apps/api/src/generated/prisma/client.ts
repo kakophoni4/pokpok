@@ -162,3 +162,28 @@ export type AuditLog = Prisma.AuditLogModel
  * triggers them, delivered later by the worker, so nothing is lost on restart.
  */
 export type Outbox = Prisma.OutboxModel
+/**
+ * Model LiveTournament
+ * Operational state is serialized under the tournament row lock.
+ */
+export type LiveTournament = Prisma.LiveTournamentModel
+/**
+ * Model CashReceipt
+ * Money received, separate from purchases. Reversals preserve the original.
+ */
+export type CashReceipt = Prisma.CashReceiptModel
+/**
+ * Model DealerCredential
+ * 
+ */
+export type DealerCredential = Prisma.DealerCredentialModel
+/**
+ * Model DealerTablet
+ * 
+ */
+export type DealerTablet = Prisma.DealerTabletModel
+/**
+ * Model DealerShift
+ * 
+ */
+export type DealerShift = Prisma.DealerShiftModel

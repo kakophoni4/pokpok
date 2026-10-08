@@ -13,7 +13,13 @@ export type AuthProvider = z.infer<typeof AuthProvider>;
  * hostess — runs the evening: till, places, combo awards, player nicks.
  * admin — everything, including schedule, seasons, club settings and the books.
  */
-export const UserRole = z.enum(["player", "hostess", "admin"]);
+export const UserRole = z.enum([
+  "player",
+  "dealer",
+  "floor",
+  "hostess",
+  "admin",
+]);
 export type UserRole = z.infer<typeof UserRole>;
 
 export const UserStatus = z.enum(["active", "blocked"]);
@@ -35,7 +41,11 @@ export type TournamentStatus = z.infer<typeof TournamentStatus>;
  * "arrived" or "no-show": whoever paid the entry fee played, and that is
  * recorded as a payment, not as an attendance flag.
  */
-export const RegistrationStatus = z.enum(["registered", "waitlist", "cancelled"]);
+export const RegistrationStatus = z.enum([
+  "registered",
+  "waitlist",
+  "cancelled",
+]);
 export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
 
 /**
@@ -46,7 +56,13 @@ export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
  * Double and triple stacks are the same kind with `multiplier` 2 or 3, not
  * extra kinds — one tap, one line on the tab.
  */
-export const PaymentKind = z.enum(["entry", "rebuy", "addon", "drink", "other"]);
+export const PaymentKind = z.enum([
+  "entry",
+  "rebuy",
+  "addon",
+  "drink",
+  "other",
+]);
 export type PaymentKind = z.infer<typeof PaymentKind>;
 
 /**
@@ -57,7 +73,13 @@ export const LoginTicketState = z.enum(["pending", "confirmed", "declined"]);
 export type LoginTicketState = z.infer<typeof LoginTicketState>;
 
 /** Which client created the registration; used for analytics and audit. */
-export const RegistrationSource = z.enum(["web", "miniapp", "tg_bot", "vk_bot", "admin"]);
+export const RegistrationSource = z.enum([
+  "web",
+  "miniapp",
+  "tg_bot",
+  "vk_bot",
+  "admin",
+]);
 export type RegistrationSource = z.infer<typeof RegistrationSource>;
 
 export const RatingSourceType = z.enum([
@@ -70,8 +92,10 @@ export type RatingSourceType = z.infer<typeof RatingSourceType>;
 
 export const ROLE_LEVEL: Record<UserRole, number> = {
   player: 0,
-  hostess: 1,
-  admin: 2,
+  dealer: 1,
+  floor: 1.5,
+  hostess: 2,
+  admin: 3,
 };
 
 export function hasRole(actual: UserRole, required: UserRole): boolean {
@@ -85,6 +109,8 @@ export function isStaff(role: UserRole): boolean {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   player: "Игрок",
+  dealer: "Дилер",
+  floor: "Флор",
   hostess: "Хостес",
   admin: "Администратор",
 };
@@ -93,4 +119,8 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 export const OCCUPYING_STATUSES: RegistrationStatus[] = ["registered"];
 
 /** Statuses in which a tournament accepts new sign-ups. */
-export const REGISTRABLE_STATUSES: TournamentStatus[] = ["announced", "reg_open"];
+export const REGISTRABLE_STATUSES: TournamentStatus[] = [
+  "announced",
+  "reg_open",
+  "running",
+];

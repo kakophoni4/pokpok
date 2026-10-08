@@ -45,7 +45,11 @@ async function edit(ctx: Context, screen: Screen): Promise<void> {
       link_preview_options: { is_disabled: true },
     });
   } catch (error) {
-    if (error instanceof GrammyError && error.description.includes("not modified")) return;
+    if (
+      error instanceof GrammyError &&
+      error.description.includes("not modified")
+    )
+      return;
     throw error;
   }
 }
@@ -63,8 +67,15 @@ async function editById(
       });
       return;
     } catch (error) {
-      if (error instanceof GrammyError && error.description.includes("not modified")) return;
-      if (error instanceof GrammyError && error.description.includes("message to edit not found")) {
+      if (
+        error instanceof GrammyError &&
+        error.description.includes("not modified")
+      )
+        return;
+      if (
+        error instanceof GrammyError &&
+        error.description.includes("message to edit not found")
+      ) {
         return;
       }
       if (error instanceof GrammyError && error.error_code === 429) {
@@ -84,7 +95,11 @@ function delay(ms: number): Promise<void> {
 
 // ─── Player: one screen, rewritten in place ───────────────────────────────────
 
-async function sendScreen(ctx: Context, profile: TelegramProfile, route: string): Promise<void> {
+async function sendScreen(
+  ctx: Context,
+  profile: TelegramProfile,
+  route: string,
+): Promise<void> {
   const screen = await player.render(route, profile);
   await ctx.reply(screen.text, {
     parse_mode: "HTML",
@@ -105,7 +120,10 @@ bot.chatType("private").command(["start", "menu"], async (ctx) => {
   const payload = (typeof ctx.match === "string" ? ctx.match : "").trim();
   if (payload.startsWith("login_")) {
     const screen = await login.ask(payload.slice("login_".length));
-    await ctx.reply(screen.text, { parse_mode: "HTML", reply_markup: screen.keyboard });
+    await ctx.reply(screen.text, {
+      parse_mode: "HTML",
+      reply_markup: screen.keyboard,
+    });
     return;
   }
 
@@ -119,16 +137,15 @@ const SHORTCUTS: Record<string, string> = {
   me: "me",
   who: "who",
   club: "info",
+  balance: "account",
 };
 
-bot
-  .chatType("private")
-  .command(Object.keys(SHORTCUTS), async (ctx) => {
-    const profile = profileOf(ctx);
-    const verb = ctx.message?.text?.slice(1).split(/[\s@]/)[0]?.toLowerCase();
-    if (!profile || !verb) return;
-    await sendScreen(ctx, profile, SHORTCUTS[verb] ?? "home");
-  });
+bot.chatType("private").command(Object.keys(SHORTCUTS), async (ctx) => {
+  const profile = profileOf(ctx);
+  const verb = ctx.message?.text?.slice(1).split(/[\s@]/)[0]?.toLowerCase();
+  if (!profile || !verb) return;
+  await sendScreen(ctx, profile, SHORTCUTS[verb] ?? "home");
+});
 
 bot.chatType("private").callbackQuery(LOGIN_CALLBACK, async (ctx) => {
   const profile = profileOf(ctx);
@@ -137,7 +154,9 @@ bot.chatType("private").callbackQuery(LOGIN_CALLBACK, async (ctx) => {
 
   const approve = ctx.match?.[1] === "y";
   await login.settle(code, profile, approve);
-  await ctx.answerCallbackQuery({ text: approve ? "Вход подтверждён" : "Вход отклонён" });
+  await ctx.answerCallbackQuery({
+    text: approve ? "Вход подтверждён" : "Вход отклонён",
+  });
   await edit(ctx, login.answered(approve));
 });
 
@@ -164,7 +183,10 @@ bot.chatType("private").callbackQuery(/^plr:(.+)$/, async (ctx) => {
   const userId = ctx.match?.[1];
   if (!userId) return;
 
-  await ctx.answerCallbackQuery({ text: await player.playerToast(userId), show_alert: true });
+  await ctx.answerCallbackQuery({
+    text: await player.playerToast(userId),
+    show_alert: true,
+  });
 });
 
 // Anything else typed in a private chat simply reopens the menu.
@@ -191,7 +213,7 @@ async function openGame(ctx: Context, profile: TelegramProfile): Promise<void> {
   await requireStaff(profile);
   await ctx.reply(
     [
-      "Вечер ведётся на сайте — топики в Telegram больше не открываем.",
+      "Вечер ведётся на сайте - топики в Telegram больше не открываем.",
       "",
       `Хостес: ${config.webUrl}/admin`,
     ].join("\n"),
@@ -206,7 +228,9 @@ async function postMissingCards(
   topicId: number | null,
 ): Promise<number> {
   const { prices, achievements } = await admin.till(profile);
-  const known = new Set((detail.adminScreens?.cards ?? []).map((card) => card.userId));
+  const known = new Set(
+    (detail.adminScreens?.cards ?? []).map((card) => card.userId),
+  );
   const fresh: { userId: string; msgId: number }[] = [];
 
   for (const seat of seats(detail)) {
@@ -221,11 +245,12 @@ async function postMissingCards(
     fresh.push({ userId: seat.user.id, msgId: posted.message_id });
   }
 
-  if (fresh.length > 0) await admin.saveScreens(profile, detail.id, { cards: fresh });
+  if (fresh.length > 0)
+    await admin.saveScreens(profile, detail.id, { cards: fresh });
   return fresh.length;
 }
 
-/** Redraws the board and, optionally, every card — the "Обновить" escape hatch. */
+/** Redraws the board and, optionally, every card - the "Обновить" escape hatch. */
 async function refresh(
   chatId: number,
   profile: TelegramProfile,
@@ -233,14 +258,20 @@ async function refresh(
   cardsToo: boolean,
 ): Promise<void> {
   const boardMsgId = detail.adminScreens?.boardMsgId;
-  if (boardMsgId != null) await editById(chatId, boardMsgId, admin.board(detail));
+  if (boardMsgId != null)
+    await editById(chatId, boardMsgId, admin.board(detail));
 
   if (!cardsToo) return;
 
   const { prices, achievements } = await admin.till(profile);
   for (const card of detail.adminScreens?.cards ?? []) {
     const seat = seatFor(detail, card.userId);
-    if (seat) await editById(chatId, card.msgId, admin.card(seat, detail, prices, achievements));
+    if (seat)
+      await editById(
+        chatId,
+        card.msgId,
+        admin.card(seat, detail, prices, achievements),
+      );
     await delay(50);
   }
 }
@@ -255,15 +286,21 @@ type Target =
  * the action itself, well inside Telegram's 64-byte budget, and keeps working
  * after a restart because both live in the database.
  */
-async function resolve(ctx: Context, profile: TelegramProfile): Promise<Target | null> {
+async function resolve(
+  ctx: Context,
+  profile: TelegramProfile,
+): Promise<Target | null> {
   const message = ctx.callbackQuery?.message;
   const topicId = message?.message_thread_id;
   if (!message || topicId == null) return null;
 
   const detail = await admin.byTopic(profile, topicId);
-  if (message.message_id === detail.adminScreens?.boardMsgId) return { kind: "board", detail };
+  if (message.message_id === detail.adminScreens?.boardMsgId)
+    return { kind: "board", detail };
 
-  const card = detail.adminScreens?.cards.find((row) => row.msgId === message.message_id);
+  const card = detail.adminScreens?.cards.find(
+    (row) => row.msgId === message.message_id,
+  );
   if (!card) return null;
   return { kind: "card", detail, userId: card.userId, msgId: card.msgId };
 }
@@ -316,8 +353,18 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     if (data === "sync") {
       const fresh = await admin.detail(profile, detail.id);
       await ctx.answerCallbackQuery({ text: "Обновлено" });
-      await postMissingCards(chatId, profile, fresh, fresh.adminScreens?.topicId ?? null);
-      await refresh(chatId, profile, await admin.detail(profile, detail.id), true);
+      await postMissingCards(
+        chatId,
+        profile,
+        fresh,
+        fresh.adminScreens?.topicId ?? null,
+      );
+      await refresh(
+        chatId,
+        profile,
+        await admin.detail(profile, detail.id),
+        true,
+      );
       return;
     }
 
@@ -343,19 +390,34 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
 
     if (data === "finyes") {
       const summary = await admin.finish(profile, detail.id);
-      const top = summary.awarded.reduce((best, row) => Math.max(best, row.points), 0);
+      const top = summary.awarded.reduce(
+        (best, row) => Math.max(best, row.points),
+        0,
+      );
       await ctx.answerCallbackQuery({
         text: `Турнир завершён. Игроков: ${summary.players}, первое место: ${points(top)}`,
         show_alert: true,
       });
-      await refresh(chatId, profile, await admin.detail(profile, detail.id), true);
+      await refresh(
+        chatId,
+        profile,
+        await admin.detail(profile, detail.id),
+        true,
+      );
       return;
     }
 
     if (data === "reopen") {
       await admin.reopen(profile, detail.id);
-      await ctx.answerCallbackQuery({ text: "Рейтинг снят, турнир снова в игре" });
-      await refresh(chatId, profile, await admin.detail(profile, detail.id), true);
+      await ctx.answerCallbackQuery({
+        text: "Рейтинг снят, турнир снова в игре",
+      });
+      await refresh(
+        chatId,
+        profile,
+        await admin.detail(profile, detail.id),
+        true,
+      );
       return;
     }
 
@@ -379,7 +441,9 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
 
     await admin.charge(profile, detail.id, userId, kind, amount, multiplier);
     const toast =
-      multiplier > 1 ? `${KIND_LABEL[kind]} ×${multiplier}: ${rub(amount)}` : `${KIND_LABEL[kind]}: ${rub(amount)}`;
+      multiplier > 1
+        ? `${KIND_LABEL[kind]} ×${multiplier}: ${rub(amount)}`
+        : `${KIND_LABEL[kind]}: ${rub(amount)}`;
     await ctx.answerCallbackQuery({ text: toast });
     await redrawEvening(chatId, profile, detail.id);
     return;
@@ -393,8 +457,18 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
       await ctx.answerCallbackQuery({ text: "Позиция больше не в меню" });
       return;
     }
-    await admin.charge(profile, detail.id, userId, item.kind, item.priceRub, 1, item.id);
-    await ctx.answerCallbackQuery({ text: `${item.title}: ${rub(item.priceRub)}` });
+    await admin.charge(
+      profile,
+      detail.id,
+      userId,
+      item.kind,
+      item.priceRub,
+      1,
+      item.id,
+    );
+    await ctx.answerCallbackQuery({
+      text: `${item.title}: ${rub(item.priceRub)}`,
+    });
     await redrawEvening(chatId, profile, detail.id);
     return;
   }
@@ -447,14 +521,24 @@ bot.chatType(GROUP).on("callback_query:data", async (ctx) => {
     const seat = seatFor(detail, userId);
     if (!seat) return;
     await ctx.answerCallbackQuery();
-    await edit(ctx, admin.achievementChooser(seat, await admin.achievements(profile)));
+    await edit(
+      ctx,
+      admin.achievementChooser(seat, await admin.achievements(profile)),
+    );
     return;
   }
 
   if (data.startsWith("ar:")) {
     const achievementId = data.slice(3);
-    const removed = await admin.revokeLast(profile, detail.id, userId, achievementId);
-    await ctx.answerCallbackQuery({ text: removed ? "Ачивка снята" : "Снимать нечего" });
+    const removed = await admin.revokeLast(
+      profile,
+      detail.id,
+      userId,
+      achievementId,
+    );
+    await ctx.answerCallbackQuery({
+      text: removed ? "Ачивка снята" : "Снимать нечего",
+    });
     await redrawEvening(chatId, profile, detail.id);
     return;
   }
@@ -493,7 +577,12 @@ async function redrawEvening(
   profile: TelegramProfile,
   tournamentId: string,
 ): Promise<void> {
-  await refresh(chatId, profile, await admin.detail(profile, tournamentId), true);
+  await refresh(
+    chatId,
+    profile,
+    await admin.detail(profile, tournamentId),
+    true,
+  );
 }
 
 /**
@@ -502,7 +591,8 @@ async function redrawEvening(
  * Parsed by hand rather than through grammY's command router: Telegram only marks
  * Latin words after a slash as commands, and the club's admins write in Russian.
  */
-const COMMAND = /^\/(вход|адон|ребай|напиток|место|ачивка|игрок|игра|обновить|entry|addon|rebuy|drink|place|ach|player|game|sync)(?:@\S+)?\s*(.*)$/is;
+const COMMAND =
+  /^\/(вход|адон|ребай|напиток|место|ачивка|игрок|игра|обновить|entry|addon|rebuy|drink|place|ach|player|game|sync)(?:@\S+)?\s*(.*)$/is;
 
 bot.chatType(GROUP).on("message:text", async (ctx) => {
   const profile = profileOf(ctx);
@@ -530,7 +620,12 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
 
   if (verb === "обновить" || verb === "sync") {
     await postMissingCards(ctx.chat.id, profile, detail, topicId);
-    await refresh(ctx.chat.id, profile, await admin.detail(profile, detail.id), true);
+    await refresh(
+      ctx.chat.id,
+      profile,
+      await admin.detail(profile, detail.id),
+      true,
+    );
     await ctx.reply("Обновил доску и карточки.");
     return;
   }
@@ -538,13 +633,17 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
   if (verb === "игрок" || verb === "player") {
     const found = await admin.findPlayer(profile, rest.replace(/^@/, ""));
     if (!found) {
-      await ctx.reply(`Не нашёл игрока «${rest}». Он должен хотя бы раз открыть бота.`);
+      await ctx.reply(
+        `Не нашёл игрока «${rest}». Он должен хотя бы раз открыть бота.`,
+      );
       return;
     }
-    await api.asUser(profile, "POST", `/tournaments/${detail.id}/register`, {
-      userId: found.id,
-      source: "admin",
-    }).catch(() => undefined);
+    await api
+      .asUser(profile, "POST", `/tournaments/${detail.id}/register`, {
+        userId: found.id,
+        source: "admin",
+      })
+      .catch(() => undefined);
 
     const fresh = await admin.detail(profile, detail.id);
     const added = await postMissingCards(ctx.chat.id, profile, fresh, topicId);
@@ -553,7 +652,12 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
         ? `Добавил ${playerLabel(found)} - карточка ниже.`
         : `${playerLabel(found)} уже в теме турнира.`,
     );
-    await refresh(ctx.chat.id, profile, await admin.detail(profile, detail.id), false);
+    await refresh(
+      ctx.chat.id,
+      profile,
+      await admin.detail(profile, detail.id),
+      false,
+    );
     return;
   }
 
@@ -569,7 +673,9 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
   }
 
   if (userId == null) {
-    await ctx.reply("Ответьте этой командой на карточку игрока или укажите его через @ник.");
+    await ctx.reply(
+      "Ответьте этой командой на карточку игрока или укажите его через @ник.",
+    );
     return;
   }
 
@@ -584,9 +690,14 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     await admin.setPlace(profile, detail.id, userId, place);
     await ctx.reply(`Записал ${place} место.`);
   } else if (verb === "ачивка" || verb === "ach") {
-    const wanted = rest.replace(/@[\w\d_]+/g, "").trim().toLowerCase();
+    const wanted = rest
+      .replace(/@[\w\d_]+/g, "")
+      .trim()
+      .toLowerCase();
     const list = await admin.achievements(profile);
-    const found = list.find((row) => row.title.toLowerCase().includes(wanted) && wanted.length > 0);
+    const found = list.find(
+      (row) => row.title.toLowerCase().includes(wanted) && wanted.length > 0,
+    );
     if (!found) {
       await ctx.reply(
         `Не нашёл ачивку «${wanted}». Доступны: ${list.map((row) => row.title).join(", ")}`,
@@ -608,7 +719,9 @@ bot.chatType(GROUP).on("message:text", async (ctx) => {
     const prices = await admin.settings(profile);
     const times = Number((rest.match(/[x×]\s*([1-9]|10)/i) ?? [])[1] ?? 1);
     const value =
-      Number.isFinite(amount) && amount >= 0 ? amount : PRICE_OF[kind](prices) * times;
+      Number.isFinite(amount) && amount >= 0
+        ? amount
+        : PRICE_OF[kind](prices) * times;
     await admin.charge(profile, detail.id, userId, kind, value, times);
     await ctx.reply(
       times > 1
@@ -629,7 +742,8 @@ bot.catch(async ({ ctx, error }) => {
   console.error("[bot] handler failed:", error);
 
   try {
-    if (ctx.callbackQuery) await ctx.answerCallbackQuery({ text: message, show_alert: true });
+    if (ctx.callbackQuery)
+      await ctx.answerCallbackQuery({ text: message, show_alert: true });
     else await ctx.reply(escapeHtml(message));
   } catch {
     // The user may have blocked the bot; swallow to keep the process alive.
@@ -643,32 +757,41 @@ await bot.api.setMyCommands([
   { command: "me", description: "Мой профиль" },
   { command: "who", description: "Кто записан" },
   { command: "club", description: "О клубе" },
+  { command: "balance", description: "Мой счёт" },
 ]);
 await bot.api.setMyCommands([], { scope: { type: "all_group_chats" } });
 
 /**
- * The bot's own profile text. It is the first thing a new player sees — before
- * any button exists to press — so it is worth setting from code rather than
+ * The bot's own profile text. It is the first thing a new player sees - before
+ * any button exists to press - so it is worth setting from code rather than
  * leaving whatever was typed into BotFather once.
  */
 const PROFILE_TEXTS = {
-  short: "Клуб спортивного покера: расписание, запись за стол и рейтинг сезона.",
+  short:
+    "Клуб спортивного покера: расписание, запись за стол и рейтинг сезона.",
   full: [
     "Клуб спортивного покера.",
     "",
     "Здесь вы записываетесь на турниры, смотрите состав вечера и следите за рейтингом сезона.",
-    "Нажмите «Начать» — меню откроется само.",
+    "Нажмите «Начать» - меню откроется само.",
   ].join("\n"),
 };
 
 for (const [what, set] of [
-  ["short description", () => bot.api.setMyShortDescription(PROFILE_TEXTS.short)],
+  [
+    "short description",
+    () => bot.api.setMyShortDescription(PROFILE_TEXTS.short),
+  ],
   ["description", () => bot.api.setMyDescription(PROFILE_TEXTS.full)],
   [
     "Mini App menu button",
     () =>
       bot.api.setChatMenuButton({
-        menu_button: { type: "web_app", text: "Клуб", web_app: { url: config.miniAppUrl } },
+        menu_button: {
+          type: "web_app",
+          text: "Клуб",
+          web_app: { url: config.miniAppUrl },
+        },
       }),
   ],
 ] as const) {

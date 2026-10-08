@@ -28,6 +28,8 @@ enum AuthProvider {
 
 enum UserRole {
   player
+  dealer
+  floor
   hostess
   admin
 }
@@ -112,6 +114,8 @@ model User {
   grantedAchievements UserAchievement[] @relation("achievementGranter")
   auditEntries        AuditLog[]
   notifications       Outbox[]
+  cashReceipts        CashReceipt[] @relation("receiptHolder")
+  recordedReceipts    CashReceipt[] @relation("receiptAuthor")
   prizes              PlayerPrize[]     @relation("prizeHolder")
   grantedPrizes       PlayerPrize[]     @relation("prizeGranter")
   redeemedPrizes      PlayerPrize[]     @relation("prizeRedeemer")
@@ -236,6 +240,8 @@ model Tournament {
   regOpensAt       DateTime?
   regClosesAt      DateTime?
   capacity         Int?
+  maxTables        Int?
+  seatsPerTable    Int @default(9)
   /// Null on all three means "use the season's rating config". Kept per
   /// tournament because the paid-place count changes while the game is running.
   paidPlaces       Int?
@@ -254,6 +260,8 @@ model Tournament {
   updatedAt        DateTime         @updatedAt
 
   registrations Registration[]
+  live          LiveTournament?
+  cashReceipts  CashReceipt[]
   results       Result[]
   payments      Payment[]
   ratingEvents  RatingEvent[]
@@ -317,6 +325,8 @@ model Payment {
   user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   kind         PaymentKind
   amountRub    Int
+  /// Existing records remain paid. New deferred purchases create a debt.
+  deferred     Boolean @default(false)
   /// Chips this line handed out, copied in at the time: later changes to the
   /// stack size must not silently rewrite a finished evening.
   chips        Int         @default(0)
@@ -384,6 +394,9 @@ model PlayerPrize {
 model ClubSettings {
   id            String   @id @default("club")
   infoText      String   @default("")
+  blindTemplates Json?
+  handOfDay String?
+  dealerPayroll Json?
   entryPriceRub Int      @default(500)
   rebuyPriceRub Int      @default(500)
   addonPriceRub Int      @default(500)
@@ -418,6 +431,7 @@ model ClubMenuItem {
 }
 
 model Achievement {
+  category String @default("club")
   id           String   @id @default(cuid(2))
   code         String   @unique
   title        String
@@ -542,4 +556,59 @@ model Outbox {
 
   @@unique([userId, kind, dedupeKey])
   @@index([sentAt, scheduledAt])
+}
+
+/// Operational state is serialized under the tournament row lock.
+model LiveTournament {
+  tournamentId String @id
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  state Json
+  displayToken String @unique @default(uuid())
+  updatedAt DateTime @updatedAt
+}
+
+/// Money received, separate from purchases. Reversals preserve the original.
+model CashReceipt {
+  id String @id @default(cuid(2))
+  tournamentId String
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId String
+  user User @relation("receiptHolder", fields: [userId], references: [id], onDelete: Restrict)
+  amountRub Int
+  method String
+  requestId String @unique
+  actorId String
+  actor User @relation("receiptAuthor", fields: [actorId], references: [id], onDelete: Restrict)
+  voidedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([userId, tournamentId])
+}
+
+model DealerCredential {
+  userId String @id
+  passwordHash String
+  updatedAt DateTime @updatedAt
+}
+model DealerTablet {
+  id String @id @default(uuid())
+  tournamentId String
+  tableNumber Int
+  tokenHash String @unique
+  createdAt DateTime @default(now())
+  @@index([tournamentId, tableNumber])
+}
+model DealerShift {
+  id String @id @default(uuid())
+  userId String
+  tabletId String
+  tournamentId String
+  tableNumber Int
+  endElapsed Int?
+  startedAt DateTime @default(now())
+  endedAt DateTime?
+  lastSeenAt DateTime @default(now())
+  roundingMinutes Int @default(30)
+  roundingMode String @default("nearest")
+  @@index([userId, startedAt])
+  @@index([tabletId, endedAt])
 }

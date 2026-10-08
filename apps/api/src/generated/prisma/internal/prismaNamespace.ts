@@ -416,7 +416,12 @@ export const ModelName = {
   RatingEvent: 'RatingEvent',
   UserSeasonStats: 'UserSeasonStats',
   AuditLog: 'AuditLog',
-  Outbox: 'Outbox'
+  Outbox: 'Outbox',
+  LiveTournament: 'LiveTournament',
+  CashReceipt: 'CashReceipt',
+  DealerCredential: 'DealerCredential',
+  DealerTablet: 'DealerTablet',
+  DealerShift: 'DealerShift'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -432,7 +437,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "playerPrize" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox"
+    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "playerPrize" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox" | "liveTournament" | "cashReceipt" | "dealerCredential" | "dealerTablet" | "dealerShift"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1916,6 +1921,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LiveTournament: {
+      payload: Prisma.$LiveTournamentPayload<ExtArgs>
+      fields: Prisma.LiveTournamentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LiveTournamentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LiveTournamentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        findFirst: {
+          args: Prisma.LiveTournamentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LiveTournamentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        findMany: {
+          args: Prisma.LiveTournamentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>[]
+        }
+        create: {
+          args: Prisma.LiveTournamentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        createMany: {
+          args: Prisma.LiveTournamentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LiveTournamentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>[]
+        }
+        delete: {
+          args: Prisma.LiveTournamentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        update: {
+          args: Prisma.LiveTournamentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        deleteMany: {
+          args: Prisma.LiveTournamentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LiveTournamentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LiveTournamentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>[]
+        }
+        upsert: {
+          args: Prisma.LiveTournamentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LiveTournamentPayload>
+        }
+        aggregate: {
+          args: Prisma.LiveTournamentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLiveTournament>
+        }
+        groupBy: {
+          args: Prisma.LiveTournamentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LiveTournamentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LiveTournamentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LiveTournamentCountAggregateOutputType> | number
+        }
+      }
+    }
+    CashReceipt: {
+      payload: Prisma.$CashReceiptPayload<ExtArgs>
+      fields: Prisma.CashReceiptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CashReceiptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CashReceiptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        findFirst: {
+          args: Prisma.CashReceiptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CashReceiptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        findMany: {
+          args: Prisma.CashReceiptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>[]
+        }
+        create: {
+          args: Prisma.CashReceiptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        createMany: {
+          args: Prisma.CashReceiptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CashReceiptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>[]
+        }
+        delete: {
+          args: Prisma.CashReceiptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        update: {
+          args: Prisma.CashReceiptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        deleteMany: {
+          args: Prisma.CashReceiptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CashReceiptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CashReceiptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>[]
+        }
+        upsert: {
+          args: Prisma.CashReceiptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashReceiptPayload>
+        }
+        aggregate: {
+          args: Prisma.CashReceiptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCashReceipt>
+        }
+        groupBy: {
+          args: Prisma.CashReceiptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CashReceiptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CashReceiptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CashReceiptCountAggregateOutputType> | number
+        }
+      }
+    }
+    DealerCredential: {
+      payload: Prisma.$DealerCredentialPayload<ExtArgs>
+      fields: Prisma.DealerCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DealerCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DealerCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.DealerCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DealerCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.DealerCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.DealerCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.DealerCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DealerCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.DealerCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        update: {
+          args: Prisma.DealerCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.DealerCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DealerCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DealerCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.DealerCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.DealerCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDealerCredential>
+        }
+        groupBy: {
+          args: Prisma.DealerCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DealerCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    DealerTablet: {
+      payload: Prisma.$DealerTabletPayload<ExtArgs>
+      fields: Prisma.DealerTabletFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DealerTabletFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DealerTabletFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        findFirst: {
+          args: Prisma.DealerTabletFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DealerTabletFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        findMany: {
+          args: Prisma.DealerTabletFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>[]
+        }
+        create: {
+          args: Prisma.DealerTabletCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        createMany: {
+          args: Prisma.DealerTabletCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DealerTabletCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>[]
+        }
+        delete: {
+          args: Prisma.DealerTabletDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        update: {
+          args: Prisma.DealerTabletUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        deleteMany: {
+          args: Prisma.DealerTabletDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DealerTabletUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DealerTabletUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>[]
+        }
+        upsert: {
+          args: Prisma.DealerTabletUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerTabletPayload>
+        }
+        aggregate: {
+          args: Prisma.DealerTabletAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDealerTablet>
+        }
+        groupBy: {
+          args: Prisma.DealerTabletGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerTabletGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DealerTabletCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerTabletCountAggregateOutputType> | number
+        }
+      }
+    }
+    DealerShift: {
+      payload: Prisma.$DealerShiftPayload<ExtArgs>
+      fields: Prisma.DealerShiftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DealerShiftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DealerShiftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        findFirst: {
+          args: Prisma.DealerShiftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DealerShiftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        findMany: {
+          args: Prisma.DealerShiftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>[]
+        }
+        create: {
+          args: Prisma.DealerShiftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        createMany: {
+          args: Prisma.DealerShiftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DealerShiftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>[]
+        }
+        delete: {
+          args: Prisma.DealerShiftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        update: {
+          args: Prisma.DealerShiftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        deleteMany: {
+          args: Prisma.DealerShiftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DealerShiftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DealerShiftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>[]
+        }
+        upsert: {
+          args: Prisma.DealerShiftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DealerShiftPayload>
+        }
+        aggregate: {
+          args: Prisma.DealerShiftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDealerShift>
+        }
+        groupBy: {
+          args: Prisma.DealerShiftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerShiftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DealerShiftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DealerShiftCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2063,6 +2438,8 @@ export const TournamentScalarFieldEnum = {
   regOpensAt: 'regOpensAt',
   regClosesAt: 'regClosesAt',
   capacity: 'capacity',
+  maxTables: 'maxTables',
+  seatsPerTable: 'seatsPerTable',
   paidPlaces: 'paidPlaces',
   startingStack: 'startingStack',
   addonChips: 'addonChips',
@@ -2110,6 +2487,7 @@ export const PaymentScalarFieldEnum = {
   userId: 'userId',
   kind: 'kind',
   amountRub: 'amountRub',
+  deferred: 'deferred',
   chips: 'chips',
   note: 'note',
   createdById: 'createdById',
@@ -2145,6 +2523,9 @@ export type PlayerPrizeScalarFieldEnum = (typeof PlayerPrizeScalarFieldEnum)[key
 export const ClubSettingsScalarFieldEnum = {
   id: 'id',
   infoText: 'infoText',
+  blindTemplates: 'blindTemplates',
+  handOfDay: 'handOfDay',
+  dealerPayroll: 'dealerPayroll',
   entryPriceRub: 'entryPriceRub',
   rebuyPriceRub: 'rebuyPriceRub',
   addonPriceRub: 'addonPriceRub',
@@ -2176,6 +2557,7 @@ export type ClubMenuItemScalarFieldEnum = (typeof ClubMenuItemScalarFieldEnum)[k
 
 
 export const AchievementScalarFieldEnum = {
+  category: 'category',
   id: 'id',
   code: 'code',
   title: 'title',
@@ -2271,6 +2653,68 @@ export const OutboxScalarFieldEnum = {
 } as const
 
 export type OutboxScalarFieldEnum = (typeof OutboxScalarFieldEnum)[keyof typeof OutboxScalarFieldEnum]
+
+
+export const LiveTournamentScalarFieldEnum = {
+  tournamentId: 'tournamentId',
+  state: 'state',
+  displayToken: 'displayToken',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LiveTournamentScalarFieldEnum = (typeof LiveTournamentScalarFieldEnum)[keyof typeof LiveTournamentScalarFieldEnum]
+
+
+export const CashReceiptScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  userId: 'userId',
+  amountRub: 'amountRub',
+  method: 'method',
+  requestId: 'requestId',
+  actorId: 'actorId',
+  voidedAt: 'voidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CashReceiptScalarFieldEnum = (typeof CashReceiptScalarFieldEnum)[keyof typeof CashReceiptScalarFieldEnum]
+
+
+export const DealerCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DealerCredentialScalarFieldEnum = (typeof DealerCredentialScalarFieldEnum)[keyof typeof DealerCredentialScalarFieldEnum]
+
+
+export const DealerTabletScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  tableNumber: 'tableNumber',
+  tokenHash: 'tokenHash',
+  createdAt: 'createdAt'
+} as const
+
+export type DealerTabletScalarFieldEnum = (typeof DealerTabletScalarFieldEnum)[keyof typeof DealerTabletScalarFieldEnum]
+
+
+export const DealerShiftScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tabletId: 'tabletId',
+  tournamentId: 'tournamentId',
+  tableNumber: 'tableNumber',
+  endElapsed: 'endElapsed',
+  startedAt: 'startedAt',
+  endedAt: 'endedAt',
+  lastSeenAt: 'lastSeenAt',
+  roundingMinutes: 'roundingMinutes',
+  roundingMode: 'roundingMode'
+} as const
+
+export type DealerShiftScalarFieldEnum = (typeof DealerShiftScalarFieldEnum)[keyof typeof DealerShiftScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2700,6 +3144,11 @@ export type GlobalOmitConfig = {
   userSeasonStats?: Prisma.UserSeasonStatsOmit
   auditLog?: Prisma.AuditLogOmit
   outbox?: Prisma.OutboxOmit
+  liveTournament?: Prisma.LiveTournamentOmit
+  cashReceipt?: Prisma.CashReceiptOmit
+  dealerCredential?: Prisma.DealerCredentialOmit
+  dealerTablet?: Prisma.DealerTabletOmit
+  dealerShift?: Prisma.DealerShiftOmit
 }
 
 /* Types for Logging */

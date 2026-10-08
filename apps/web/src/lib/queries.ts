@@ -44,26 +44,34 @@ export const keys = {
   tournaments: (scope: string) => ["tournaments", scope] as const,
   tournament: (id: string) => ["tournament", id] as const,
   registrations: (id: string) => ["registrations", id] as const,
-  leaderboard: (seasonId: string, search: string) => ["leaderboard", seasonId, search] as const,
+  leaderboard: (seasonId: string, search: string) =>
+    ["leaderboard", seasonId, search] as const,
   myStats: () => ["rating", "me"] as const,
   playerStats: (userId: string) => ["rating", "player", userId] as const,
-  achievements: (includeInactive: boolean) => ["achievements", includeInactive] as const,
-  userAchievements: (userId: string) => ["achievements", "user", userId] as const,
+  achievements: (includeInactive: boolean) =>
+    ["achievements", includeInactive] as const,
+  userAchievements: (userId: string) =>
+    ["achievements", "user", userId] as const,
   seasons: () => ["seasons"] as const,
   activeSeason: () => ["seasons", "active"] as const,
   players: (search: string) => ["players", search] as const,
   clubInfo: () => ["club", "info"] as const,
   clubSettings: () => ["club", "settings"] as const,
-  sales: (period: string, seasonId: string) => ["club", "sales", period, seasonId] as const,
+  sales: (period: string, seasonId: string) =>
+    ["club", "sales", period, seasonId] as const,
   journal: (tournamentId: string) => ["club", "journal", tournamentId] as const,
   myPrizes: () => ["prizes", "me"] as const,
   playerPrizes: (userId: string) => ["prizes", "user", userId] as const,
 };
 
-export function useTournaments(scope: "upcoming" | "past" | "all", enabled = true) {
+export function useTournaments(
+  scope: "upcoming" | "past" | "all",
+  enabled = true,
+) {
   return useQuery({
     queryKey: keys.tournaments(scope),
-    queryFn: () => api.get<TournamentSummary[]>(`/tournaments${query({ scope })}`),
+    queryFn: () =>
+      api.get<TournamentSummary[]>(`/tournaments${query({ scope })}`),
     enabled,
   });
 }
@@ -79,7 +87,8 @@ export function useTournament(id: string | undefined) {
 export function useRegistrations(id: string | undefined) {
   return useQuery({
     queryKey: keys.registrations(id ?? ""),
-    queryFn: () => api.get<RegistrationView[]>(`/tournaments/${id}/registrations`),
+    queryFn: () =>
+      api.get<RegistrationView[]>(`/tournaments/${id}/registrations`),
     enabled: Boolean(id),
   });
 }
@@ -88,7 +97,9 @@ export function useLeaderboard(seasonId: string | undefined, search = "") {
   return useQuery({
     queryKey: keys.leaderboard(seasonId ?? "", search),
     queryFn: () =>
-      api.get<LeaderboardRow[]>(`/rating/leaderboard${query({ seasonId, search })}`),
+      api.get<LeaderboardRow[]>(
+        `/rating/leaderboard${query({ seasonId, search })}`,
+      ),
     enabled: Boolean(seasonId),
   });
 }
@@ -112,14 +123,16 @@ export function usePlayerStats(userId: string | undefined) {
 export function useAchievements(includeInactive = false) {
   return useQuery({
     queryKey: keys.achievements(includeInactive),
-    queryFn: () => api.get<Achievement[]>(`/achievements${query({ includeInactive })}`),
+    queryFn: () =>
+      api.get<Achievement[]>(`/achievements${query({ includeInactive })}`),
   });
 }
 
 export function useUserAchievements(userId: string | undefined) {
   return useQuery({
     queryKey: keys.userAchievements(userId ?? ""),
-    queryFn: () => api.get<UserAchievementView[]>(`/achievements/user/${userId}`),
+    queryFn: () =>
+      api.get<UserAchievementView[]>(`/achievements/user/${userId}`),
     enabled: Boolean(userId),
   });
 }
@@ -127,7 +140,7 @@ export function useUserAchievements(userId: string | undefined) {
 export function useActiveSeason() {
   return useQuery({
     queryKey: keys.activeSeason(),
-    queryFn: () => api.get<Season | null>("/seasons/active"),
+    queryFn: async () => (await api.get<Season | null>("/seasons/active")) ?? null,
   });
 }
 
@@ -141,7 +154,8 @@ export function useSeasons() {
 export function useCreateSeason() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateSeasonInput) => api.post<Season>("/seasons", input),
+    mutationFn: (input: CreateSeasonInput) =>
+      api.post<Season>("/seasons", input),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["seasons"] });
       void client.invalidateQueries({ queryKey: ["leaderboard"] });
@@ -174,7 +188,8 @@ export function usePlayers(search: string, enabled: boolean) {
 export function useClubInfo() {
   return useQuery({
     queryKey: keys.clubInfo(),
-    queryFn: () => api.get<{ infoText: string; timezone: string }>("/club/info"),
+    queryFn: () =>
+      api.get<{ infoText: string; timezone: string }>("/club/info"),
     // The club does not move; refetching this on every mount is pointless.
     staleTime: 5 * 60_000,
   });
@@ -191,14 +206,16 @@ export function useClubSettings(enabled: boolean) {
 export function useSales(period: SalesPeriod, seasonId?: string) {
   return useQuery({
     queryKey: keys.sales(period, seasonId ?? ""),
-    queryFn: () => api.get<SalesReport>(`/club/sales${query({ period, seasonId })}`),
+    queryFn: () =>
+      api.get<SalesReport>(`/club/sales${query({ period, seasonId })}`),
   });
 }
 
 export function useJournal(tournamentId: string | undefined) {
   return useQuery({
     queryKey: keys.journal(tournamentId ?? ""),
-    queryFn: () => api.get<EveningJournal>(`/club/journal${query({ tournamentId })}`),
+    queryFn: () =>
+      api.get<EveningJournal>(`/club/journal${query({ tournamentId })}`),
     enabled: Boolean(tournamentId),
   });
 }
@@ -268,7 +285,8 @@ export function useCreateTournament() {
   return useMutation({
     mutationFn: (input: CreateTournamentInput) =>
       api.post<TournamentSummary>("/tournaments", input),
-    onSuccess: () => void client.invalidateQueries({ queryKey: ["tournaments"] }),
+    onSuccess: () =>
+      void client.invalidateQueries({ queryKey: ["tournaments"] }),
   });
 }
 
@@ -285,7 +303,8 @@ export function useDeleteTournament() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/tournaments/${id}`),
-    onSuccess: () => void client.invalidateQueries({ queryKey: ["tournaments"] }),
+    onSuccess: () =>
+      void client.invalidateQueries({ queryKey: ["tournaments"] }),
   });
 }
 
@@ -307,7 +326,10 @@ export function useAddPayment(tournamentId: string) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (input: AddPaymentInput) =>
-      api.post<TournamentPlayer>(`/tournaments/${tournamentId}/payments`, input),
+      api.post<TournamentPlayer>(
+        `/tournaments/${tournamentId}/payments`,
+        input,
+      ),
     onSuccess: () => invalidateSchedule(client, tournamentId),
   });
 }
@@ -324,7 +346,8 @@ export function useVoidPayment(tournamentId: string) {
 export function useGrantPrize(tournamentId?: string) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: GrantPrizeInput) => api.post<PrizeWallet>("/prizes", input),
+    mutationFn: (input: GrantPrizeInput) =>
+      api.post<PrizeWallet>("/prizes", input),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["prizes"] });
       if (tournamentId) invalidateSchedule(client, tournamentId);
@@ -349,7 +372,8 @@ export function useRedeemPrize(tournamentId: string) {
 export function useRevokePrize() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (prizeId: string) => api.delete<PrizeWallet>(`/prizes/${prizeId}`),
+    mutationFn: (prizeId: string) =>
+      api.delete<PrizeWallet>(`/prizes/${prizeId}`),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["prizes"] });
       void client.invalidateQueries({ queryKey: ["tournament"] });
@@ -362,12 +386,15 @@ export function useSetPlace(tournamentId: string) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ userId, place }: { userId: string; place: number | null }) =>
-      api.post<TournamentPlayer>(`/tournaments/${tournamentId}/place`, { userId, place }),
+      api.post<TournamentPlayer>(`/tournaments/${tournamentId}/place`, {
+        userId,
+        place,
+      }),
     onSuccess: () => invalidateSchedule(client, tournamentId),
   });
 }
 
-/** Awarding the rating, and taking it back — both are ordinary operations. */
+/** Awarding the rating, and taking it back - both are ordinary operations. */
 export function useFinishTournament(tournamentId: string) {
   const client = useQueryClient();
   return useMutation({
@@ -393,7 +420,8 @@ export function useUpdateClubSettings() {
 export function useCreateMenuItem() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateClubMenuItemInput) => api.post<ClubMenuItem>("/club/menu", input),
+    mutationFn: (input: CreateClubMenuItemInput) =>
+      api.post<ClubMenuItem>("/club/menu", input),
     onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
   });
 }
@@ -401,8 +429,13 @@ export function useCreateMenuItem() {
 export function useUpdateMenuItem() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateClubMenuItemInput }) =>
-      api.patch<ClubMenuItem>(`/club/menu/${id}`, input),
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateClubMenuItemInput;
+    }) => api.patch<ClubMenuItem>(`/club/menu/${id}`, input),
     onSuccess: () => void client.invalidateQueries({ queryKey: ["club"] }),
   });
 }
@@ -418,7 +451,8 @@ export function useDeleteMenuItem() {
 export function useCreateVenue() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: ClubVenueInput) => api.post<ClubVenue>("/club/venues", input),
+    mutationFn: (input: ClubVenueInput) =>
+      api.post<ClubVenue>("/club/venues", input),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["club"] });
       void client.invalidateQueries({ queryKey: ["tournaments"] });
@@ -452,24 +486,33 @@ export function useDeleteVenue() {
 export function useCreateAchievement() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateAchievementInput) => api.post<Achievement>("/achievements", input),
-    onSuccess: () => void client.invalidateQueries({ queryKey: ["achievements"] }),
+    mutationFn: (input: CreateAchievementInput) =>
+      api.post<Achievement>("/achievements", input),
+    onSuccess: () =>
+      void client.invalidateQueries({ queryKey: ["achievements"] }),
   });
 }
 
 export function useUpdateAchievement() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateAchievementInput }) =>
-      api.patch<Achievement>(`/achievements/${id}`, input),
-    onSuccess: () => void client.invalidateQueries({ queryKey: ["achievements"] }),
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateAchievementInput;
+    }) => api.patch<Achievement>(`/achievements/${id}`, input),
+    onSuccess: () =>
+      void client.invalidateQueries({ queryKey: ["achievements"] }),
   });
 }
 
 export function useGrantAchievement() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: GrantAchievementInput) => api.post("/achievements/grant", input),
+    mutationFn: (input: GrantAchievementInput) =>
+      api.post("/achievements/grant", input),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["achievements"] });
       void client.invalidateQueries({ queryKey: ["leaderboard"] });
@@ -482,7 +525,8 @@ export function useGrantAchievement() {
 export function useRevokeAchievement() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (grantId: string) => api.delete(`/achievements/grant/${grantId}`),
+    mutationFn: (grantId: string) =>
+      api.delete(`/achievements/grant/${grantId}`),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ["achievements"] });
       void client.invalidateQueries({ queryKey: ["leaderboard"] });

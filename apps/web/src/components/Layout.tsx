@@ -5,14 +5,24 @@ import { InstallHint } from "./InstallHint";
 import { LegalNotice } from "./LegalNotice";
 import { Avatar, Button, cx } from "./ui";
 import { playerLabel } from "../lib/format";
+import { ClubBrand } from "./ClubBrand";
 
-type NavItem = { to: string; label: string; staffOnly?: boolean };
+type NavItem = {
+  to: string;
+  label: string;
+  staffOnly?: boolean;
+  dealerOnly?: boolean;
+  floorOnly?: boolean;
+};
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Расписание" },
   { to: "/rating", label: "Рейтинг" },
   { to: "/achievements", label: "Ачивки" },
   { to: "/me", label: "Кабинет" },
+  { to: "/account", label: "Мой счёт" },
+  { to: "/dealer", label: "Стол", dealerOnly: true },
+  { to: "/staff", label: "Вечер", floorOnly: true },
   { to: "/admin", label: "Админ", staffOnly: true },
 ];
 
@@ -20,49 +30,71 @@ export function Layout() {
   const { user, status, signingIn, can } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const items = NAV_ITEMS.filter((item) => !item.staffOnly || can("hostess"));
-  const shell = pathname.startsWith("/admin") ? "max-w-5xl" : "max-w-3xl";
+  const items = NAV_ITEMS.filter(
+    (item) =>
+      !item.staffOnly &&
+      !item.floorOnly &&
+      !item.dealerOnly &&
+      (!item.staffOnly || can("hostess")) &&
+      (!item.dealerOnly || user?.role === "dealer" || can("hostess")) &&
+      (!item.floorOnly || can("floor")),
+  );
+  const shell = pathname.startsWith("/staff") ? "max-w-7xl" : "max-w-5xl";
 
   return (
     <div className="flex min-h-dvh flex-col">
       <LegalNotice />
       <header
-        className="sticky top-0 z-20 border-b border-gold-500/20 bg-felt-950"
+        className="club-header sticky top-0 z-20 border-b border-gold-500/20"
         style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
       >
-        <div className={cx("mx-auto flex items-center justify-between gap-3 px-4 pb-3", shell)}>
+        <div
+          className={cx(
+            "mx-auto flex items-center justify-between gap-3 px-4 pb-3",
+            shell,
+          )}
+        >
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2.5 text-left"
             aria-label="На главную"
           >
-            <img
-              src="/favicon.svg"
-              alt=""
-              width={40}
-              height={40}
-              className="size-10 rounded-[10px] ring-1 ring-gold-500/40"
-            />
-            <span className="font-display text-lg leading-tight font-semibold text-gold-400 sm:text-xl">
-              Клуб спортивного покера
-            </span>
+            <ClubBrand />
           </button>
 
-          {user ? (
-            <button
-              onClick={() => navigate("/me")}
-              className="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 transition hover:bg-felt-800"
-            >
-              <Avatar nickname={playerLabel(user)} url={user.avatarUrl} size={28} />
-              <span className="hidden text-sm sm:inline">{playerLabel(user)}</span>
-            </button>
-          ) : status === "loading" || signingIn ? (
-            <span className="size-7" aria-hidden />
-          ) : (
-            <Button size="sm" onClick={() => navigate("/login")}>
-              Войти
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {can("floor") && (
+              <NavLink to="/staff" className="text-sm text-stone-300">
+                Вечер
+              </NavLink>
+            )}
+            {can("hostess") && (
+              <NavLink to="/admin" className="text-sm text-stone-300">
+                Админ
+              </NavLink>
+            )}
+            {user ? (
+              <button
+                onClick={() => navigate("/me")}
+                className="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 transition hover:bg-felt-800"
+              >
+                <Avatar
+                  nickname={playerLabel(user)}
+                  url={user.avatarUrl}
+                  size={28}
+                />
+                <span className="hidden text-sm sm:inline">
+                  {playerLabel(user)}
+                </span>
+              </button>
+            ) : status === "loading" || signingIn ? (
+              <span className="size-7" aria-hidden />
+            ) : (
+              <Button size="sm" onClick={() => navigate("/login")}>
+                Войти
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -71,35 +103,71 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className={cx("mx-auto w-full px-4 pb-24 text-center text-sm text-stone-400", shell)}>
+      <footer
+        className={cx(
+          "mx-auto w-full px-4 pb-24 text-center text-sm text-stone-400",
+          shell,
+        )}
+      >
         <NavLink to="/rules" className="hover:text-gold-400">
           Правила клуба
         </NavLink>
       </footer>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-gold-500/20 bg-felt-950/95 backdrop-blur-md"
+        className="fixed inset-x-0 bottom-0 z-20"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className={cx("mx-auto flex", shell)}>
+        <div className={cx("club-bottom-nav flex", shell)}>
           {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
+              aria-label={item.label}
               end={item.to === "/"}
               onClick={() => platform.haptic("tap")}
               className={({ isActive }: { isActive: boolean }) =>
                 cx(
-                  "flex flex-1 flex-col items-center gap-0.5 py-3 text-sm font-medium transition",
-                  isActive ? "text-gold-400" : "text-stone-400 hover:text-stone-200",
+                  "club-nav-item min-w-0",
+                  isActive
+                    ? "nav-active"
+                    : "text-stone-400 hover:text-stone-200",
                 )
               }
             >
-              {item.label}
+              <NavIcon to={item.to} />
+              <span className="club-nav-label">{item.label}</span>
             </NavLink>
           ))}
         </div>
       </nav>
     </div>
+  );
+}
+
+function NavIcon({ to }: { to: string }) {
+  const paths: Record<string, string> = {
+    "/": "M5 3v4m14-4v4M3 10h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z",
+    "/rating":
+      "M8 3h8v5a4 4 0 0 1-8 0V3Zm0 2H4v3a4 4 0 0 0 4 4m8-7h4v3a4 4 0 0 1-4 4m-4 0v6m-4 3h8m-7-3h6",
+    "/achievements":
+      "M12 14a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm-4-1-1 9 5-3 5 3-1-9",
+    "/me": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9v-2a8 8 0 0 1 16 0v2",
+    "/account": "M3 6h17v15H3V6Zm0 0V3h15v3m-3 6h6v5h-6v-5Z",
+  };
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={paths[to] ?? paths["/me"]} />
+    </svg>
   );
 }

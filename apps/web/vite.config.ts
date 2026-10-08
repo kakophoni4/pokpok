@@ -20,8 +20,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Клуб спортивного покера",
-        short_name: "Покер клуб",
+        name: "CONCEPT - покерный клуб",
+        short_name: "CONCEPT",
         description:
           "Расписание игр, запись на турниры, личный рейтинг и достижения клуба спортивного покера",
         lang: "ru",
@@ -30,8 +30,8 @@ export default defineConfig({
         // standalone is what makes the iOS home-screen icon open without Safari chrome.
         display: "standalone",
         orientation: "portrait",
-        background_color: "#0b1210",
-        theme_color: "#0b1210",
+        background_color: "#06132c",
+        theme_color: "#06132c",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },

@@ -1,3 +1,4 @@
+import { DealerSetupPage } from "./pages/DealerSetupPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -7,10 +8,14 @@ import { EmptyState, Loading } from "./components/ui";
 
 // Only staff ever open this, so players should not download it.
 const AdminPage = lazy(() =>
-  import("./pages/admin/AdminPage").then((module) => ({ default: module.AdminPage })),
+  import("./pages/admin/AdminPage").then((module) => ({
+    default: module.AdminPage,
+  })),
 );
 const EveningLayoutPreview = lazy(() =>
-  import("./pages/admin/AdminGame").then((module) => ({ default: module.EveningLayoutPreview })),
+  import("./pages/admin/AdminGame").then((module) => ({
+    default: module.EveningLayoutPreview,
+  })),
 );
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
@@ -20,6 +25,26 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { RulesPage } from "./pages/RulesPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { TournamentPage } from "./pages/TournamentPage";
+const DealerTabletPage = lazy(() =>
+  import("./pages/DealerTabletPage").then((module) => ({
+    default: module.DealerTabletPage,
+  })),
+);
+const HallDisplayPage = lazy(() =>
+  import("./pages/LivePages").then((module) => ({
+    default: module.HallDisplayPage,
+  })),
+);
+const LiveStaffPage = lazy(() =>
+  import("./pages/LivePages").then((module) => ({
+    default: module.LiveStaffPage,
+  })),
+);
+const PlayerAccountPage = lazy(() =>
+  import("./pages/LivePages").then((module) => ({
+    default: module.PlayerAccountPage,
+  })),
+);
 
 function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -45,7 +70,12 @@ export function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="dealer" element={<DealerTabletPage />} />
+            <Route path="display/:id" element={<HallDisplayPage />} />
             <Route element={<Layout />}>
+              <Route path="dealer/setup" element={<DealerSetupPage />} />
+              <Route path="staff" element={<LiveStaffPage />} />
+              <Route path="account" element={<PlayerAccountPage />} />
               <Route index element={<SchedulePage />} />
               <Route path="t/:id" element={<TournamentPage />} />
               <Route path="rating" element={<LeaderboardPage />} />
@@ -75,7 +105,10 @@ export function App() {
               <Route
                 path="*"
                 element={
-                  <EmptyState title="Страница не найдена" description="Проверьте адрес." />
+                  <EmptyState
+                    title="Страница не найдена"
+                    description="Проверьте адрес."
+                  />
                 }
               />
             </Route>

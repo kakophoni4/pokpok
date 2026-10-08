@@ -5,6 +5,7 @@ import type {
   RegistrationView,
   TournamentSummary,
   UserAchievementView,
+  AccountView,
 } from "@poker/contracts";
 import { formatPlayerName, walletLabel } from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
@@ -39,8 +40,8 @@ const HISTORY_LINES = 4;
  * things never leaves a trail of messages in the chat.
  *
  * Each screen is built the same way: a title line, then quote blocks that each
- * answer one question. Telegram gives a bot almost no layout — bold, a quote bar
- * and monospace — so the structure has to come from what is on each line.
+ * answer one question. Telegram gives a bot almost no layout - bold, a quote bar
+ * and monospace - so the structure has to come from what is on each line.
  */
 export class PlayerScreens {
   constructor(
@@ -65,6 +66,8 @@ export class PlayerScreens {
         return this.rating(profile, "all_time");
       case "me":
         return this.profile(profile);
+      case "account":
+        return this.account(profile);
       case "info":
         return this.info();
       case "who":
@@ -82,7 +85,9 @@ export class PlayerScreens {
       this.api.session(profile),
       this.club.get(),
       this.upcoming(profile).catch(() => [] as TournamentSummary[]),
-      this.api.asUser<PlayerStats>(profile, "GET", "/rating/me").catch(() => null),
+      this.api
+        .asUser<PlayerStats>(profile, "GET", "/rating/me")
+        .catch(() => null),
       this.wallet(profile),
     ]);
 
@@ -93,14 +98,17 @@ export class PlayerScreens {
     const next = tournaments[0];
 
     const blocks = [
-      `${SUIT} <b>Клуб спортивного покера</b>`,
+      `${SUIT} <b>CONCEPT</b>`,
       "",
       clubGreeting(name, String(profile.id)),
       "",
       quote(
         next
           ? ["<b>Ближайшая игра</b>", ...eventLines(next)]
-          : ["<b>Ближайшая игра</b>", "Расписание пока пустое — заглядывайте позже."],
+          : [
+              "<b>Ближайшая игра</b>",
+              "Расписание пока пустое - заглядывайте позже.",
+            ],
       ),
     ];
 
@@ -127,18 +135,47 @@ export class PlayerScreens {
       .text("Кто записан", "nav:who")
       .row()
       .text("О клубе", "nav:info");
+    keyboard.row().text("Мой счёт", "nav:account");
 
     return { text: blocks.join("\n"), keyboard };
   }
 
   // ─── Schedule ───────────────────────────────────────────────────────────────
+  private async account(profile: TelegramProfile): Promise<Screen> {
+    const a = await this.api.asUser<AccountView>(
+      profile,
+      "GET",
+      "/live/account/me",
+    );
+    const lines = ["<b>Мой счёт</b>", `К оплате: <b>${num(a.debtRub)} ₽</b>`];
+    for (const bill of a.accounts.filter((a) => a.dueRub > 0).slice(0, 8)) {
+      lines.push(
+        "",
+        `<b>${escapeHtml(bill.title)}</b> - ${num(bill.dueRub)} ₽`,
+      );
+      for (const p of bill.purchases.filter((p) => !p.voided).slice(0, 6))
+        lines.push(`${escapeHtml(p.title)} - ${num(p.amountRub)} ₽`);
+    }
+    if (a.debtRub === 0) lines.push("Задолженности нет.");
+    return {
+      text: lines.join("\n"),
+      keyboard: new InlineKeyboard()
+        .webApp("Открыть счёт", new URL("/account", this.webUrl).toString())
+        .row()
+        .text(BACK, "nav:home"),
+    };
+  }
 
   private async schedule(profile: TelegramProfile): Promise<Screen> {
     const tournaments = await this.upcoming(profile);
 
     if (tournaments.length === 0) {
       return {
-        text: [`${SUIT} <b>Расписание</b>`, "", "Пока ничего не назначено."].join("\n"),
+        text: [
+          `${SUIT} <b>Расписание</b>`,
+          "",
+          "Пока ничего не назначено.",
+        ].join("\n"),
         keyboard: new InlineKeyboard().text(BACK, "nav:home"),
       };
     }
@@ -151,7 +188,10 @@ export class PlayerScreens {
     const keyboard = new InlineKeyboard();
     for (const tournament of shown) {
       keyboard
-        .text(fit(`${signUpLabel(tournament)} · ${clubWhen(tournament.startsAt)}`), `tog:${tournament.id}`)
+        .text(
+          fit(`${signUpLabel(tournament)} · ${clubWhen(tournament.startsAt)}`),
+          `tog:${tournament.id}`,
+        )
         .row();
     }
     keyboard.text(BACK, "nav:home");
@@ -177,10 +217,14 @@ export class PlayerScreens {
       this.api.public<LeaderboardRow[]>(`/rating/leaderboard?scope=${scope}`),
     ]);
 
-    const title = scope === "season" ? "Рейтинг сезона" : "Рейтинг за всё время";
+    const title =
+      scope === "season" ? "Рейтинг сезона" : "Рейтинг за всё время";
     const keyboard = new InlineKeyboard()
       .text(scope === "season" ? "· Сезон ·" : "Сезон", "nav:rate")
-      .text(scope === "all_time" ? "· За всё время ·" : "За всё время", "nav:rate:all")
+      .text(
+        scope === "all_time" ? "· За всё время ·" : "За всё время",
+        "nav:rate:all",
+      )
       .row()
       .text("Мой профиль", "nav:me")
       .row()
@@ -188,19 +232,23 @@ export class PlayerScreens {
 
     if (rows.length === 0) {
       return {
-        text: [`${SUIT} <b>${title}</b>`, "", "Сезон только начинается."].join("\n"),
+        text: [`${SUIT} <b>${title}</b>`, "", "Сезон только начинается."].join(
+          "\n",
+        ),
         keyboard,
       };
     }
 
     const table = rows.slice(0, TOP_SIZE).map((row) => {
       const name = escapeHtml(playerLabel(row.user));
-      const line = `${rankMark(row.rank)} ${name} — ${num(row.points)}`;
+      const line = `${rankMark(row.rank)} ${name} - ${num(row.points)}`;
       return row.user.id === session.userId ? `<b>▸ ${line}</b>` : line;
     });
 
     const me = rows.find((row) => row.user.id === session.userId);
-    const footer = me ? chaseLines(rows, me) : [escapeHtml(await this.myPlaceLine(profile))];
+    const footer = me
+      ? chaseLines(rows, me)
+      : [escapeHtml(await this.myPlaceLine(profile))];
 
     return {
       text: [
@@ -221,14 +269,21 @@ export class PlayerScreens {
    * the screen, not the whole screen.
    */
   private async wallet(profile: TelegramProfile): Promise<PrizeWallet | null> {
-    return this.api.asUser<PrizeWallet>(profile, "GET", "/prizes/me").catch(() => null);
+    return this.api
+      .asUser<PrizeWallet>(profile, "GET", "/prizes/me")
+      .catch(() => null);
   }
 
   /** For a player who is outside the visible top: their own line, fetched separately. */
   private async myPlaceLine(profile: TelegramProfile): Promise<string> {
-    const stats = await this.api.asUser<PlayerStats>(profile, "GET", "/rating/me");
-    if (stats.rank == null) return "Вы ещё не в рейтинге — сыграйте первый турнир";
-    return `Вы — ${stats.rank}-е место, ${points(stats.points)}`;
+    const stats = await this.api.asUser<PlayerStats>(
+      profile,
+      "GET",
+      "/rating/me",
+    );
+    if (stats.rank == null)
+      return "Вы ещё не в рейтинге - сыграйте первый турнир";
+    return `Вы - ${stats.rank}-е место, ${points(stats.points)}`;
   }
 
   // ─── Personal profile ───────────────────────────────────────────────────────
@@ -258,8 +313,12 @@ export class PlayerScreens {
       quote([
         `Турниров сыграно: <b>${stats.gamesPlayed}</b>`,
         `Побед: <b>${stats.wins}</b> · Топ-3: <b>${stats.top3}</b> · В призах: <b>${stats.itm}</b>`,
-        stats.bestPlace != null ? `Лучший финиш: <b>${stats.bestPlace} место</b>` : null,
-        stats.avgPlace != null ? `Средний финиш: <b>${stats.avgPlace.toFixed(1)}</b>` : null,
+        stats.bestPlace != null
+          ? `Лучший финиш: <b>${stats.bestPlace} место</b>`
+          : null,
+        stats.avgPlace != null
+          ? `Средний финиш: <b>${stats.avgPlace.toFixed(1)}</b>`
+          : null,
       ]),
     ];
 
@@ -268,7 +327,7 @@ export class PlayerScreens {
         quote([
           "<b>Ваши призы</b>",
           escapeHtml(walletLabel(wallet.lines)),
-          "<i>Спишем на кассе — просто скажите</i>",
+          "<i>Спишем на кассе - просто скажите</i>",
         ]),
       );
     }
@@ -282,7 +341,9 @@ export class PlayerScreens {
       blocks.push(quote(["<b>Ачивки</b>", `${names}${more}`]));
     }
 
-    const recent = stats.history.filter((row) => row.tournament != null).slice(0, HISTORY_LINES);
+    const recent = stats.history
+      .filter((row) => row.tournament != null)
+      .slice(0, HISTORY_LINES);
     if (recent.length > 0) {
       blocks.push(
         quote([
@@ -290,7 +351,7 @@ export class PlayerScreens {
           ...recent.map((row) => {
             const where = row.place != null ? `${row.place} место` : "участие";
             const sign = row.points >= 0 ? "+" : "−";
-            return `${escapeHtml(row.tournament!.title)} — ${where}, ${sign}${num(Math.abs(row.points))}`;
+            return `${escapeHtml(row.tournament!.title)} - ${where}, ${sign}${num(Math.abs(row.points))}`;
           }),
         ]),
       );
@@ -322,7 +383,11 @@ export class PlayerScreens {
 
     if (tournaments.length === 0) {
       return {
-        text: [`${SUIT} <b>Кто записан</b>`, "", "Пока нет назначенных событий."].join("\n"),
+        text: [
+          `${SUIT} <b>Кто записан</b>`,
+          "",
+          "Пока нет назначенных событий.",
+        ].join("\n"),
         keyboard: new InlineKeyboard().text(BACK, "nav:home"),
       };
     }
@@ -343,7 +408,7 @@ export class PlayerScreens {
     return {
       text: [
         `${SUIT} <b>Кто записан</b>`,
-        "<i>Выберите игру — покажем состав</i>",
+        "<i>Выберите игру - покажем состав</i>",
       ].join("\n"),
       keyboard,
     };
@@ -356,36 +421,56 @@ export class PlayerScreens {
   ): Promise<Screen> {
     const [tournaments, registrations] = await Promise.all([
       this.upcoming(profile),
-      this.api.public<RegistrationView[]>(`/tournaments/${tournamentId}/registrations`),
+      this.api.public<RegistrationView[]>(
+        `/tournaments/${tournamentId}/registrations`,
+      ),
     ]);
-    const tournament = tournaments.find((candidate) => candidate.id === tournamentId);
+    const tournament = tournaments.find(
+      (candidate) => candidate.id === tournamentId,
+    );
 
     const playing = registrations.filter((row) => row.status === "registered");
     const waiting = registrations.filter((row) => row.status === "waitlist");
 
     const totalPages = Math.max(1, Math.ceil(playing.length / ROSTER_PAGE));
     const safePage = Math.min(Math.max(0, page), totalPages - 1);
-    const slice = playing.slice(safePage * ROSTER_PAGE, (safePage + 1) * ROSTER_PAGE);
+    const slice = playing.slice(
+      safePage * ROSTER_PAGE,
+      (safePage + 1) * ROSTER_PAGE,
+    );
 
     const keyboard = new InlineKeyboard();
     slice.forEach((row, index) => {
       const seat = safePage * ROSTER_PAGE + index + 1;
-      keyboard.text(fit(`${seat}. ${playerLabel(row.user)}`, 40), `plr:${row.user.id}`).row();
+      keyboard
+        .text(
+          fit(`${seat}. ${playerLabel(row.user)}`, 40),
+          `plr:${row.user.id}`,
+        )
+        .row();
     });
     if (totalPages > 1) {
-      if (safePage > 0) keyboard.text("‹ Раньше", `nav:who:${tournamentId}:${safePage - 1}`);
-      if (safePage < totalPages - 1) keyboard.text("Дальше ›", `nav:who:${tournamentId}:${safePage + 1}`);
+      if (safePage > 0)
+        keyboard.text("‹ Раньше", `nav:who:${tournamentId}:${safePage - 1}`);
+      if (safePage < totalPages - 1)
+        keyboard.text("Дальше ›", `nav:who:${tournamentId}:${safePage + 1}`);
       keyboard.row();
     }
     keyboard.text(BACK, "nav:who");
 
     const header = tournament
-      ? [`${SUIT} <b>${escapeHtml(tournament.title)}</b>`, `<i>${clubMoment(tournament.startsAt)}</i>`]
+      ? [
+          `${SUIT} <b>${escapeHtml(tournament.title)}</b>`,
+          `<i>${clubMoment(tournament.startsAt)}</i>`,
+        ]
       : [`${SUIT} <b>Кто записан</b>`];
 
     const body =
       playing.length === 0
-        ? quote(["Пока никто не записался.", "Будьте первым — это всегда заметно."])
+        ? quote([
+            "Пока никто не записался.",
+            "Будьте первым - это всегда заметно.",
+          ])
         : quote([
             tournament?.capacity != null
               ? `${gauge(playing.length, tournament.capacity)}  <b>${playing.length}</b> / ${tournament.capacity}`
@@ -398,18 +483,25 @@ export class PlayerScreens {
           ]);
 
     return {
-      text: [...header, "", body, "", "<i>Нажмите на игрока, чтобы увидеть его статистику.</i>"].join(
-        "\n",
-      ),
+      text: [
+        ...header,
+        "",
+        body,
+        "",
+        "<i>Нажмите на игрока, чтобы увидеть его статистику.</i>",
+      ].join("\n"),
       keyboard,
     };
   }
 
   /** One-line summary of a player, shown as a toast over the roster. */
   async playerToast(userId: string): Promise<string> {
-    const stats = await this.api.public<PlayerStats>(`/rating/player/${userId}`);
+    const stats = await this.api.public<PlayerStats>(
+      `/rating/player/${userId}`,
+    );
     const name = playerLabel(stats.user);
-    if (stats.rank == null) return `${name}\n\nЕщё не в рейтинге — всё впереди.`;
+    if (stats.rank == null)
+      return `${name}\n\nЕщё не в рейтинге - всё впереди.`;
 
     const games = `${stats.gamesPlayed} ${plural(stats.gamesPlayed, "турнир", "турнира", "турниров")}`;
     return [
@@ -427,31 +519,44 @@ export class PlayerScreens {
    * Signs the player up, or cancels an existing sign-up. Returns the toast to
    * show; the caller redraws the schedule so the checkmark matches.
    */
-  async toggleRegistration(tournamentId: string, profile: TelegramProfile): Promise<string> {
+  async toggleRegistration(
+    tournamentId: string,
+    profile: TelegramProfile,
+  ): Promise<string> {
     const tournaments = await this.upcoming(profile);
-    const tournament = tournaments.find((candidate) => candidate.id === tournamentId);
+    const tournament = tournaments.find(
+      (candidate) => candidate.id === tournamentId,
+    );
 
     if (!tournament) return "Это событие больше не в расписании";
 
     if (isSignedUp(tournament)) {
-      await this.api.asUser(profile, "DELETE", `/tournaments/${tournamentId}/register`);
+      await this.api.asUser(
+        profile,
+        "DELETE",
+        `/tournaments/${tournamentId}/register`,
+      );
       return `Запись отменена · ${tournament.title}`;
     }
 
-    const result = await this.api.asUser<{ status: string; waitlistPosition: number | null }>(
-      profile,
-      "POST",
-      `/tournaments/${tournamentId}/register`,
-      { source: "tg_bot" },
-    );
+    const result = await this.api.asUser<{
+      status: string;
+      waitlistPosition: number | null;
+    }>(profile, "POST", `/tournaments/${tournamentId}/register`, {
+      source: "tg_bot",
+    });
 
     return result.status === "waitlist"
-      ? `Мест нет — вы в листе ожидания №${result.waitlistPosition}`
+      ? `Мест нет - вы в листе ожидания №${result.waitlistPosition}`
       : `Вы в игре · ${tournament.title}\n${clubMoment(tournament.startsAt)}`;
   }
 
   private upcoming(profile: TelegramProfile): Promise<TournamentSummary[]> {
-    return this.api.asUser<TournamentSummary[]>(profile, "GET", "/tournaments?scope=upcoming");
+    return this.api.asUser<TournamentSummary[]>(
+      profile,
+      "GET",
+      "/tournaments?scope=upcoming",
+    );
   }
 }
 
@@ -464,9 +569,13 @@ function eventLines(tournament: TournamentSummary): string[] {
       : `Записано: <b>${tournament.registeredCount}</b>`;
 
   const extras = [
-    tournament.ratingMultiplier !== 1 ? `×${tournament.ratingMultiplier} рейтинг` : null,
+    tournament.ratingMultiplier !== 1
+      ? `×${tournament.ratingMultiplier} рейтинг`
+      : null,
     `${tournament.paidPlaces} ${plural(tournament.paidPlaces, "призовое", "призовых", "призовых")}`,
-    tournament.waitlistCount > 0 ? `+${tournament.waitlistCount} в ожидании` : null,
+    tournament.waitlistCount > 0
+      ? `+${tournament.waitlistCount} в ожидании`
+      : null,
   ].filter(Boolean);
 
   return [
@@ -481,7 +590,10 @@ function eventLines(tournament: TournamentSummary): string[] {
 
 function standingLines(stats: PlayerStats): string[] {
   if (stats.rank == null) {
-    return ["<b>Вы ещё не в рейтинге</b>", "Первый сыгранный турнир откроет счёт."];
+    return [
+      "<b>Вы ещё не в рейтинге</b>",
+      "Первый сыгранный турнир откроет счёт.",
+    ];
   }
   return [
     `<b>${stats.rank}-е место</b> в клубе`,
@@ -489,9 +601,9 @@ function standingLines(stats: PlayerStats): string[] {
   ];
 }
 
-/** How far the player is from the rung above — the reason to come back. */
+/** How far the player is from the rung above - the reason to come back. */
 function chaseLines(rows: LeaderboardRow[], me: LeaderboardRow): string[] {
-  const lines = [`<b>Вы — ${me.rank}-е место</b>`, `${points(me.points)}`];
+  const lines = [`<b>Вы - ${me.rank}-е место</b>`, `${points(me.points)}`];
   const ahead = rows.find((row) => row.rank === me.rank - 1);
   if (ahead) {
     const gap = ahead.points - me.points;
@@ -506,7 +618,10 @@ function chaseLines(rows: LeaderboardRow[], me: LeaderboardRow): string[] {
 
 function signUpLabel(tournament: TournamentSummary): string {
   if (isSignedUp(tournament)) return "✓ Отменить запись";
-  if (tournament.capacity != null && tournament.registeredCount >= tournament.capacity) {
+  if (
+    tournament.capacity != null &&
+    tournament.registeredCount >= tournament.capacity
+  ) {
     return "→ В лист ожидания";
   }
   return "+ Записаться";

@@ -113,6 +113,7 @@ export const ClubVenueInput = z.object({
 export type ClubVenueInput = z.infer<typeof ClubVenueInput>;
 
 export const ClubSettings = z.object({
+  handOfDay: z.string().nullable().optional(),
   infoText: z.string(),
   entryPriceRub: z.number().int().nonnegative(),
   rebuyPriceRub: z.number().int().nonnegative(),
@@ -211,6 +212,8 @@ export const SalesReport = z.object({
   tournamentCount: z.number().int().nonnegative(),
   paymentCount: z.number().int().nonnegative(),
   totalRub: z.number().int().nonnegative(),
+  receivedRub: z.number().int().nonnegative().optional(),
+  deferredRub: z.number().int().nonnegative().optional(),
   totalChips: z.number().int().nonnegative(),
   lines: z.array(SalesLine),
 });

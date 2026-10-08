@@ -47,6 +47,7 @@ export type PaymentMinAggregateOutputType = {
   userId: string | null
   kind: $Enums.PaymentKind | null
   amountRub: number | null
+  deferred: boolean | null
   chips: number | null
   note: string | null
   createdById: string | null
@@ -61,6 +62,7 @@ export type PaymentMaxAggregateOutputType = {
   userId: string | null
   kind: $Enums.PaymentKind | null
   amountRub: number | null
+  deferred: boolean | null
   chips: number | null
   note: string | null
   createdById: string | null
@@ -75,6 +77,7 @@ export type PaymentCountAggregateOutputType = {
   userId: number
   kind: number
   amountRub: number
+  deferred: number
   chips: number
   note: number
   createdById: number
@@ -101,6 +104,7 @@ export type PaymentMinAggregateInputType = {
   userId?: true
   kind?: true
   amountRub?: true
+  deferred?: true
   chips?: true
   note?: true
   createdById?: true
@@ -115,6 +119,7 @@ export type PaymentMaxAggregateInputType = {
   userId?: true
   kind?: true
   amountRub?: true
+  deferred?: true
   chips?: true
   note?: true
   createdById?: true
@@ -129,6 +134,7 @@ export type PaymentCountAggregateInputType = {
   userId?: true
   kind?: true
   amountRub?: true
+  deferred?: true
   chips?: true
   note?: true
   createdById?: true
@@ -230,6 +236,7 @@ export type PaymentGroupByOutputType = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred: boolean
   chips: number
   note: string | null
   createdById: string | null
@@ -267,6 +274,7 @@ export type PaymentWhereInput = {
   userId?: Prisma.StringFilter<"Payment"> | string
   kind?: Prisma.EnumPaymentKindFilter<"Payment"> | $Enums.PaymentKind
   amountRub?: Prisma.IntFilter<"Payment"> | number
+  deferred?: Prisma.BoolFilter<"Payment"> | boolean
   chips?: Prisma.IntFilter<"Payment"> | number
   note?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
@@ -286,6 +294,7 @@ export type PaymentOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   amountRub?: Prisma.SortOrder
+  deferred?: Prisma.SortOrder
   chips?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -308,6 +317,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Payment"> | string
   kind?: Prisma.EnumPaymentKindFilter<"Payment"> | $Enums.PaymentKind
   amountRub?: Prisma.IntFilter<"Payment"> | number
+  deferred?: Prisma.BoolFilter<"Payment"> | boolean
   chips?: Prisma.IntFilter<"Payment"> | number
   note?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
@@ -327,6 +337,7 @@ export type PaymentOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   amountRub?: Prisma.SortOrder
+  deferred?: Prisma.SortOrder
   chips?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -349,6 +360,7 @@ export type PaymentScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Payment"> | string
   kind?: Prisma.EnumPaymentKindWithAggregatesFilter<"Payment"> | $Enums.PaymentKind
   amountRub?: Prisma.IntWithAggregatesFilter<"Payment"> | number
+  deferred?: Prisma.BoolWithAggregatesFilter<"Payment"> | boolean
   chips?: Prisma.IntWithAggregatesFilter<"Payment"> | number
   note?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
@@ -361,6 +373,7 @@ export type PaymentCreateInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -378,6 +391,7 @@ export type PaymentUncheckedCreateInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -391,6 +405,7 @@ export type PaymentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -408,6 +423,7 @@ export type PaymentUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -423,6 +439,7 @@ export type PaymentCreateManyInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -435,6 +452,7 @@ export type PaymentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -447,6 +465,7 @@ export type PaymentUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -471,6 +490,7 @@ export type PaymentCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   amountRub?: Prisma.SortOrder
+  deferred?: Prisma.SortOrder
   chips?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -490,6 +510,7 @@ export type PaymentMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   amountRub?: Prisma.SortOrder
+  deferred?: Prisma.SortOrder
   chips?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -504,6 +525,7 @@ export type PaymentMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   amountRub?: Prisma.SortOrder
+  deferred?: Prisma.SortOrder
   chips?: Prisma.SortOrder
   note?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -714,6 +736,7 @@ export type PaymentCreateWithoutUserInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -729,6 +752,7 @@ export type PaymentUncheckedCreateWithoutUserInput = {
   tournamentId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -752,6 +776,7 @@ export type PaymentCreateWithoutCreatedByInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -768,6 +793,7 @@ export type PaymentUncheckedCreateWithoutCreatedByInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -790,6 +816,7 @@ export type PaymentCreateWithoutVoidedByInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -806,6 +833,7 @@ export type PaymentUncheckedCreateWithoutVoidedByInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -849,6 +877,7 @@ export type PaymentScalarWhereInput = {
   userId?: Prisma.StringFilter<"Payment"> | string
   kind?: Prisma.EnumPaymentKindFilter<"Payment"> | $Enums.PaymentKind
   amountRub?: Prisma.IntFilter<"Payment"> | number
+  deferred?: Prisma.BoolFilter<"Payment"> | boolean
   chips?: Prisma.IntFilter<"Payment"> | number
   note?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
@@ -893,6 +922,7 @@ export type PaymentCreateWithoutTournamentInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -908,6 +938,7 @@ export type PaymentUncheckedCreateWithoutTournamentInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -947,6 +978,7 @@ export type PaymentCreateWithoutPrizeInput = {
   id?: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -963,6 +995,7 @@ export type PaymentUncheckedCreateWithoutPrizeInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -991,6 +1024,7 @@ export type PaymentUpdateWithoutPrizeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1007,6 +1041,7 @@ export type PaymentUncheckedUpdateWithoutPrizeInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1020,6 +1055,7 @@ export type PaymentCreateManyUserInput = {
   tournamentId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -1034,6 +1070,7 @@ export type PaymentCreateManyCreatedByInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   voidedAt?: Date | string | null
@@ -1047,6 +1084,7 @@ export type PaymentCreateManyVoidedByInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -1058,6 +1096,7 @@ export type PaymentUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1073,6 +1112,7 @@ export type PaymentUncheckedUpdateWithoutUserInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1087,6 +1127,7 @@ export type PaymentUncheckedUpdateManyWithoutUserInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1099,6 +1140,7 @@ export type PaymentUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1115,6 +1157,7 @@ export type PaymentUncheckedUpdateWithoutCreatedByInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1129,6 +1172,7 @@ export type PaymentUncheckedUpdateManyWithoutCreatedByInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1140,6 +1184,7 @@ export type PaymentUpdateWithoutVoidedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1156,6 +1201,7 @@ export type PaymentUncheckedUpdateWithoutVoidedByInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1170,6 +1216,7 @@ export type PaymentUncheckedUpdateManyWithoutVoidedByInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1182,6 +1229,7 @@ export type PaymentCreateManyTournamentInput = {
   userId: string
   kind: $Enums.PaymentKind
   amountRub: number
+  deferred?: boolean
   chips?: number
   note?: string | null
   createdById?: string | null
@@ -1194,6 +1242,7 @@ export type PaymentUpdateWithoutTournamentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1209,6 +1258,7 @@ export type PaymentUncheckedUpdateWithoutTournamentInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1223,6 +1273,7 @@ export type PaymentUncheckedUpdateManyWithoutTournamentInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumPaymentKindFieldUpdateOperationsInput | $Enums.PaymentKind
   amountRub?: Prisma.IntFieldUpdateOperationsInput | number
+  deferred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   chips?: Prisma.IntFieldUpdateOperationsInput | number
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1239,6 +1290,7 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   userId?: boolean
   kind?: boolean
   amountRub?: boolean
+  deferred?: boolean
   chips?: boolean
   note?: boolean
   createdById?: boolean
@@ -1258,6 +1310,7 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   userId?: boolean
   kind?: boolean
   amountRub?: boolean
+  deferred?: boolean
   chips?: boolean
   note?: boolean
   createdById?: boolean
@@ -1276,6 +1329,7 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   userId?: boolean
   kind?: boolean
   amountRub?: boolean
+  deferred?: boolean
   chips?: boolean
   note?: boolean
   createdById?: boolean
@@ -1294,6 +1348,7 @@ export type PaymentSelectScalar = {
   userId?: boolean
   kind?: boolean
   amountRub?: boolean
+  deferred?: boolean
   chips?: boolean
   note?: boolean
   createdById?: boolean
@@ -1302,7 +1357,7 @@ export type PaymentSelectScalar = {
   createdAt?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "kind" | "amountRub" | "chips" | "note" | "createdById" | "voidedAt" | "voidedById" | "createdAt", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tournamentId" | "userId" | "kind" | "amountRub" | "deferred" | "chips" | "note" | "createdById" | "voidedAt" | "voidedById" | "createdAt", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1341,6 +1396,10 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     userId: string
     kind: $Enums.PaymentKind
     amountRub: number
+    /**
+     * Existing records remain paid. New deferred purchases create a debt.
+     */
+    deferred: boolean
     /**
      * Chips this line handed out, copied in at the time: later changes to the
      * stack size must not silently rewrite a finished evening.
@@ -1784,6 +1843,7 @@ export interface PaymentFieldRefs {
   readonly userId: Prisma.FieldRef<"Payment", 'String'>
   readonly kind: Prisma.FieldRef<"Payment", 'PaymentKind'>
   readonly amountRub: Prisma.FieldRef<"Payment", 'Int'>
+  readonly deferred: Prisma.FieldRef<"Payment", 'Boolean'>
   readonly chips: Prisma.FieldRef<"Payment", 'Int'>
   readonly note: Prisma.FieldRef<"Payment", 'String'>
   readonly createdById: Prisma.FieldRef<"Payment", 'String'>

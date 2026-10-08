@@ -14,7 +14,9 @@ export function LoginPage() {
   const [nickname, setNickname] = useState("Ferz");
   const [busy, setBusy] = useState(platform.isEmbedded);
   const [agreed, setAgreed] = useState(platform.isEmbedded);
-  const telegram = useTelegramLogin(status === "anonymous" && !platform.isEmbedded);
+  const telegram = useTelegramLogin(
+    status === "anonymous" && !platform.isEmbedded,
+  );
 
   useEffect(() => {
     if (status !== "anonymous") return;
@@ -37,10 +39,23 @@ export function LoginPage() {
     };
   }, [status, loginWithMiniApp, navigate]);
 
-  if (status === "loading" || (status === "anonymous" && signingIn && busy && !error)) {
+  if (
+    status === "loading" ||
+    (status === "anonymous" && signingIn && busy && !error)
+  ) {
     return <Loading label="Входим через Telegram…" />;
   }
-  if (status === "authenticated") return <Navigate to="/" replace />;
+  if (status === "authenticated")
+    return (
+      <Navigate
+        to={
+          new URLSearchParams(location.search).get("next") === "/dealer/setup"
+            ? "/dealer/setup"
+            : "/"
+        }
+        replace
+      />
+    );
 
   // Inside Telegram there is no widget to fall back to, so a failed hand-off
   // needs a button of its own rather than a spinner that says "trying" forever.
@@ -50,7 +65,8 @@ export function LoginPage() {
         <Card className="space-y-3 p-5 text-center">
           <h1 className="text-xl font-semibold">Вход из Telegram</h1>
           <p className="text-sm text-stone-400">
-            Telegram не передал данные входа. Закройте клуб полностью и откройте его из меню бота.
+            Telegram не передал данные входа. Закройте клуб полностью и откройте
+            его из меню бота.
           </p>
           {error && <p className="text-sm text-chip-red">{error}</p>}
           <Button
@@ -78,7 +94,7 @@ export function LoginPage() {
         {/* The photo's own aspect ratio, so the four aces are never cropped. */}
         <div
           className="aspect-[16/9] bg-cover bg-center"
-          style={{ backgroundImage: "url(/images/login-hero.jpg)" }}
+          style={{ backgroundImage: "url(/images/club-blue.png)" }}
           aria-hidden
         />
         <div className="p-5">
@@ -177,7 +193,9 @@ function Waiting({ login }: { login: ReturnType<typeof useTelegramLogin> }) {
     <div>
       <p className="text-sm text-stone-300">Подтвердите вход в Telegram</p>
       <p className="mt-3 text-sm text-stone-400">Кодовая фраза</p>
-      <p className="text-lg font-semibold text-gold-400">{login.ticket?.phrase}</p>
+      <p className="text-lg font-semibold text-gold-400">
+        {login.ticket?.phrase}
+      </p>
       <div className="mt-4 flex flex-col gap-2">
         <a
           href={login.ticket?.url ?? "#"}

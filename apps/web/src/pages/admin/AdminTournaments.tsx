@@ -5,7 +5,15 @@ import type {
 } from "@poker/contracts";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Card, ErrorState, Loading, Tabs, cx } from "../../components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  ErrorState,
+  Loading,
+  Tabs,
+  cx,
+} from "../../components/ui";
 import {
   formatFullDate,
   formatTime,
@@ -34,7 +42,9 @@ export function AdminTournaments({ canDelete }: { canDelete: boolean }) {
   const [scope, setScope] = useState<"upcoming" | "past">("upcoming");
   const tournaments = useTournaments("all");
   const rows = (tournaments.data ?? []).filter((tournament) =>
-    scope === "upcoming" ? LIVE.includes(tournament.status) : !LIVE.includes(tournament.status),
+    scope === "upcoming"
+      ? LIVE.includes(tournament.status)
+      : !LIVE.includes(tournament.status),
   );
 
   return (
@@ -60,13 +70,19 @@ export function AdminTournaments({ canDelete }: { canDelete: boolean }) {
 
       {tournaments.data && rows.length === 0 && (
         <p className="text-sm text-stone-500">
-          {scope === "upcoming" ? "Нет текущих турниров." : "Нет завершённых турниров."}
+          {scope === "upcoming"
+            ? "Нет текущих турниров."
+            : "Нет завершённых турниров."}
         </p>
       )}
 
       <ul className="space-y-2">
         {rows.map((tournament) => (
-          <TournamentRow key={tournament.id} tournament={tournament} canDelete={canDelete} />
+          <TournamentRow
+            key={tournament.id}
+            tournament={tournament}
+            canDelete={canDelete}
+          />
         ))}
       </ul>
     </>
@@ -91,20 +107,26 @@ function TournamentRow({
     <li className="card p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <Link to={`/t/${tournament.id}`} className="font-medium hover:text-gold-400">
+          <Link
+            to={`/t/${tournament.id}`}
+            className="font-medium hover:text-gold-400"
+          >
             {tournament.title}
           </Link>
           <p className="nums mt-0.5 text-xs text-stone-400">
-            {formatFullDate(tournament.startsAt)} · {formatTime(tournament.startsAt)} ·{" "}
-            {tournament.paidPlaces} призовых · ×{tournament.ratingMultiplier}
+            {formatFullDate(tournament.startsAt)} ·{" "}
+            {formatTime(tournament.startsAt)} · {tournament.paidPlaces} призовых
+            · ×{tournament.ratingMultiplier}
             {tournament.minRating != null && tournament.minRating > 0
               ? ` · мин. ${tournament.minRating} очков`
               : ""}
           </p>
           <p className="nums mt-0.5 text-xs text-stone-500">
             {tournament.registeredCount}
-            {tournament.capacity != null && `/${tournament.capacity}`} записались
-            {tournament.waitlistCount > 0 && `, ${tournament.waitlistCount} в ожидании`}
+            {tournament.capacity != null && `/${tournament.capacity}`}{" "}
+            записались
+            {tournament.waitlistCount > 0 &&
+              `, ${tournament.waitlistCount} в ожидании`}
           </p>
         </div>
 
@@ -122,7 +144,11 @@ function TournamentRow({
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button size="sm" variant="secondary" onClick={() => setEditing((value) => !value)}>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => setEditing((value) => !value)}
+        >
           {editing ? "Свернуть" : "Изменить дату и детали"}
         </Button>
 
@@ -181,7 +207,10 @@ function TournamentRow({
 
       {editing && (
         <div className="mt-3 border-t border-felt-800 pt-3">
-          <TournamentForm tournament={tournament} onDone={() => setEditing(false)} />
+          <TournamentForm
+            tournament={tournament}
+            onDone={() => setEditing(false)}
+          />
         </div>
       )}
     </li>
@@ -213,7 +242,9 @@ function TournamentForm({
         title: "",
         date: defaultDate(),
         time: "19:00",
-        capacity: "16",
+        capacity: "27",
+        maxTables: "3",
+        seatsPerTable: "9",
         ratingMultiplier: "1",
         paidPlaces: "9",
         minRating: "",
@@ -228,9 +259,12 @@ function TournamentForm({
       date: parts.date,
       time: parts.time,
       capacity: tournament.capacity == null ? "" : String(tournament.capacity),
+      maxTables: String(tournament.maxTables ?? 3),
+      seatsPerTable: String(tournament.seatsPerTable ?? 9),
       ratingMultiplier: String(tournament.ratingMultiplier),
       paidPlaces: String(tournament.paidPlaces),
-      minRating: tournament.minRating == null ? "" : String(tournament.minRating),
+      minRating:
+        tournament.minRating == null ? "" : String(tournament.minRating),
       description: "",
       venueId: tournament.venue?.id ?? "",
     };
@@ -244,7 +278,7 @@ function TournamentForm({
     }
     const startsAt = fromClubParts(form.date, form.time);
     if (Number.isNaN(startsAt.getTime())) {
-      setFormError("Не получилось прочитать дату — проверьте поля");
+      setFormError("Не получилось прочитать дату - проверьте поля");
       return;
     }
 
@@ -255,7 +289,17 @@ function TournamentForm({
       startsAt: startsAt.toISOString(),
       // Registration closes when the cards go in the air.
       regClosesAt: startsAt.toISOString(),
-      capacity: form.capacity ? Number(form.capacity) : null,
+      capacity: isEdit
+        ? form.capacity
+          ? Number(form.capacity)
+          : null
+        : Number(form.maxTables) * Number(form.seatsPerTable),
+      ...(!isEdit
+        ? {
+            maxTables: Number(form.maxTables),
+            seatsPerTable: Number(form.seatsPerTable),
+          }
+        : {}),
       ratingMultiplier: Number(form.ratingMultiplier),
       paidPlaces: form.paidPlaces ? Number(form.paidPlaces) : null,
       minRating: form.minRating ? Number(form.minRating) : null,
@@ -267,17 +311,53 @@ function TournamentForm({
     };
 
     if (isEdit) {
-      update.mutate(shared as unknown as UpdateTournamentInput, { onSuccess: onDone });
+      update.mutate(shared as unknown as UpdateTournamentInput, {
+        onSuccess: onDone,
+      });
       return;
     }
 
-    create.mutate({ ...shared, status: "reg_open" } as unknown as CreateTournamentInput, {
-      onSuccess: onDone,
-    });
+    create.mutate(
+      { ...shared, status: "reg_open" } as unknown as CreateTournamentInput,
+      {
+        onSuccess: onDone,
+      },
+    );
   }
 
   return (
     <Card className="mb-4 space-y-3">
+      {!isEdit && (
+        <div className="grid grid-cols-2 gap-3">
+          <label className="label">
+            Максимум столов
+            <input
+              className="field"
+              type="number"
+              min={1}
+              max={30}
+              value={form.maxTables}
+              onChange={(e) => setForm({ ...form, maxTables: e.target.value })}
+            />
+          </label>
+          <label className="label">
+            Мест за столом
+            <input
+              className="field"
+              type="number"
+              min={2}
+              max={10}
+              value={form.seatsPerTable}
+              onChange={(e) =>
+                setForm({ ...form, seatsPerTable: e.target.value })
+              }
+            />
+          </label>
+          <p>
+            Вместимость: {Number(form.maxTables) * Number(form.seatsPerTable)}
+          </p>
+        </div>
+      )}
       <div>
         <label className="label" htmlFor="t-title">
           Название
@@ -297,18 +377,23 @@ function TournamentForm({
         </label>
         {venues.length === 0 ? (
           <p className="text-sm text-stone-500">
-            Сначала добавьте адрес в настройках клуба — тогда его можно будет выбрать здесь.
+            Сначала добавьте адрес в настройках клуба - тогда его можно будет
+            выбрать здесь.
           </p>
         ) : (
           <select
             id="t-venue"
             className="field"
             value={form.venueId || venues[0]?.id || ""}
-            onChange={(event) => setForm({ ...form, venueId: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, venueId: event.target.value })
+            }
           >
             {venues.map((venue) => (
               <option key={venue.id} value={venue.id}>
-                {venue.address ? `${venue.title} — ${venue.address}` : venue.title}
+                {venue.address
+                  ? `${venue.title} - ${venue.address}`
+                  : venue.title}
               </option>
             ))}
           </select>
@@ -349,11 +434,14 @@ function TournamentForm({
           </label>
           <input
             id="t-capacity"
+            disabled={!isEdit || !!tournament?.maxTables}
             type="number"
             min={2}
             className="field"
             value={form.capacity}
-            onChange={(event) => setForm({ ...form, capacity: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, capacity: event.target.value })
+            }
           />
         </div>
         <div>
@@ -367,7 +455,9 @@ function TournamentForm({
             min="0.5"
             className="field"
             value={form.ratingMultiplier}
-            onChange={(event) => setForm({ ...form, ratingMultiplier: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, ratingMultiplier: event.target.value })
+            }
           />
         </div>
         <div>
@@ -380,7 +470,9 @@ function TournamentForm({
             min={1}
             className="field nums"
             value={form.paidPlaces}
-            onChange={(event) => setForm({ ...form, paidPlaces: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, paidPlaces: event.target.value })
+            }
           />
         </div>
       </div>
@@ -396,10 +488,13 @@ function TournamentForm({
           className="field nums max-w-40"
           value={form.minRating}
           placeholder="как по фишкам"
-          onChange={(event) => setForm({ ...form, minRating: event.target.value })}
+          onChange={(event) =>
+            setForm({ ...form, minRating: event.target.value })
+          }
         />
         <p className="mt-1 text-xs text-stone-500">
-          Если придёт мало людей и фишек будет мало, первое место всё равно получит не меньше этого.
+          Если придёт мало людей и фишек будет мало, первое место всё равно
+          получит не меньше этого.
         </p>
       </div>
 
@@ -413,7 +508,9 @@ function TournamentForm({
           className={cx("field", "resize-y")}
           value={form.description}
           placeholder="Формат, стек, особенности турнира"
-          onChange={(event) => setForm({ ...form, description: event.target.value })}
+          onChange={(event) =>
+            setForm({ ...form, description: event.target.value })
+          }
         />
       </div>
 

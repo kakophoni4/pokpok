@@ -7,10 +7,26 @@ import type {
   TournamentPlayer,
   TournamentSummary,
 } from "@poker/contracts";
-import { ADDON_MAX_STACKS, fieldSize, freePlaces, isEveningHand, nextPlace, stacksOf } from "@poker/contracts";
+import {
+  ADDON_MAX_STACKS,
+  fieldSize,
+  freePlaces,
+  isEveningHand,
+  nextPlace,
+  stacksOf,
+} from "@poker/contracts";
 import { InlineKeyboard } from "grammy";
 import type { Api, TelegramProfile } from "./api.js";
-import { clubDate, clubClock, escapeHtml, fit, num, playerLabel, points, rub } from "./format.js";
+import {
+  clubDate,
+  clubClock,
+  escapeHtml,
+  fit,
+  num,
+  playerLabel,
+  points,
+  rub,
+} from "./format.js";
 
 export type Screen = { text: string; keyboard: InlineKeyboard };
 
@@ -30,7 +46,7 @@ type Seat = {
  * inside it, and a board pinned on top.
  *
  * Everything is a button. Amounts come from the club's price list, places are
- * worked out from who is left, and achievements are picked from a list — so the
+ * worked out from who is left, and achievements are picked from a list - so the
  * cash desk cannot be operated wrongly by typing the wrong thing. Text commands
  * still work for the odd non-standard amount.
  */
@@ -39,20 +55,39 @@ export class AdminScreens {
 
   // ─── Data ───────────────────────────────────────────────────────────────────
 
-  detail(profile: TelegramProfile, tournamentId: string): Promise<TournamentDetail> {
-    return this.api.asUser<TournamentDetail>(profile, "GET", `/tournaments/${tournamentId}`);
+  detail(
+    profile: TelegramProfile,
+    tournamentId: string,
+  ): Promise<TournamentDetail> {
+    return this.api.asUser<TournamentDetail>(
+      profile,
+      "GET",
+      `/tournaments/${tournamentId}`,
+    );
   }
 
-  byTopic(profile: TelegramProfile, topicId: number): Promise<TournamentDetail> {
-    return this.api.asUser<TournamentDetail>(profile, "GET", `/tournaments/by-topic/${topicId}`);
+  byTopic(
+    profile: TelegramProfile,
+    topicId: number,
+  ): Promise<TournamentDetail> {
+    return this.api.asUser<TournamentDetail>(
+      profile,
+      "GET",
+      `/tournaments/by-topic/${topicId}`,
+    );
   }
 
   settings(profile: TelegramProfile): Promise<ClubSettings> {
     return this.api.asUser<ClubSettings>(profile, "GET", "/club/settings");
   }
 
-  async till(profile: TelegramProfile): Promise<{ prices: ClubSettings; achievements: Achievement[] }> {
-    const [prices, achievements] = await Promise.all([this.settings(profile), this.achievements(profile)]);
+  async till(
+    profile: TelegramProfile,
+  ): Promise<{ prices: ClubSettings; achievements: Achievement[] }> {
+    const [prices, achievements] = await Promise.all([
+      this.settings(profile),
+      this.achievements(profile),
+    ]);
     return { prices, achievements };
   }
 
@@ -61,7 +96,9 @@ export class AdminScreens {
   }
 
   /** The evening to run: today's game if there is one, otherwise the next one. */
-  async pickTournament(profile: TelegramProfile): Promise<TournamentSummary | null> {
+  async pickTournament(
+    profile: TelegramProfile,
+  ): Promise<TournamentSummary | null> {
     const upcoming = await this.api.asUser<TournamentSummary[]>(
       profile,
       "GET",
@@ -85,7 +122,13 @@ export class AdminScreens {
       profile,
       "POST",
       `/tournaments/${tournamentId}/payments`,
-      { userId, kind, amountRub, multiplier, ...(menuItemId ? { menuItemId } : {}) },
+      {
+        userId,
+        kind,
+        amountRub,
+        multiplier,
+        ...(menuItemId ? { menuItemId } : {}),
+      },
     );
   }
 
@@ -107,10 +150,15 @@ export class AdminScreens {
     userId: string,
     place: number | null,
   ): Promise<TournamentPlayer> {
-    return this.api.asUser<TournamentPlayer>(profile, "POST", `/tournaments/${tournamentId}/place`, {
-      userId,
-      place,
-    });
+    return this.api.asUser<TournamentPlayer>(
+      profile,
+      "POST",
+      `/tournaments/${tournamentId}/place`,
+      {
+        userId,
+        place,
+      },
+    );
   }
 
   async grant(
@@ -134,7 +182,9 @@ export class AdminScreens {
   ): Promise<boolean> {
     const detail = await this.detail(profile, tournamentId);
     const last = (detail.eveningGrants ?? [])
-      .filter((row) => row.userId === userId && row.achievementId === achievementId)
+      .filter(
+        (row) => row.userId === userId && row.achievementId === achievementId,
+      )
       .at(-1);
     if (!last?.id) return false;
     await this.api.asUser(profile, "DELETE", `/achievements/grant/${last.id}`);
@@ -146,18 +196,28 @@ export class AdminScreens {
     tournamentId: string,
     paidPlaces: number,
   ): Promise<void> {
-    await this.api.asUser(profile, "PATCH", `/tournaments/${tournamentId}`, { paidPlaces });
+    await this.api.asUser(profile, "PATCH", `/tournaments/${tournamentId}`, {
+      paidPlaces,
+    });
   }
 
   async finish(
     profile: TelegramProfile,
     tournamentId: string,
   ): Promise<{ players: number; awarded: { points: number }[] }> {
-    return this.api.asUser(profile, "POST", `/tournaments/${tournamentId}/finish`);
+    return this.api.asUser(
+      profile,
+      "POST",
+      `/tournaments/${tournamentId}/finish`,
+    );
   }
 
   async reopen(profile: TelegramProfile, tournamentId: string): Promise<void> {
-    await this.api.asUser(profile, "POST", `/tournaments/${tournamentId}/reopen`);
+    await this.api.asUser(
+      profile,
+      "POST",
+      `/tournaments/${tournamentId}/reopen`,
+    );
   }
 
   async saveScreens(
@@ -177,7 +237,10 @@ export class AdminScreens {
     );
   }
 
-  async findPlayer(profile: TelegramProfile, query: string): Promise<PublicUser | null> {
+  async findPlayer(
+    profile: TelegramProfile,
+    query: string,
+  ): Promise<PublicUser | null> {
     const page = await this.api.asUser<{ items: PublicUser[] }>(
       profile,
       "GET",
@@ -253,7 +316,12 @@ export class AdminScreens {
     };
   }
 
-  card(seat: Seat, detail: TournamentDetail, prices: ClubSettings, achievements: Achievement[] = []): Screen {
+  card(
+    seat: Seat,
+    detail: TournamentDetail,
+    prices: ClubSettings,
+    achievements: Achievement[] = [],
+  ): Screen {
     const lines: string[] = [`<b>${escapeHtml(playerLabel(seat.user))}</b>`];
 
     const tab: string[] = [];
@@ -269,22 +337,33 @@ export class AdminScreens {
     );
     if (seat.chips > 0) lines.push(`Фишек: <b>${num(seat.chips)}</b>`);
     if (seat.place != null && seat.place <= detail.paidPlaces) {
-      const earned = seat.ratingPoints != null ? ` · ${points(seat.ratingPoints)}` : "";
+      const earned =
+        seat.ratingPoints != null ? ` · ${points(seat.ratingPoints)}` : "";
       lines.push(`Место: <b>${seat.place}</b>${earned}`);
     } else if (seat.place != null) {
       lines.push("<i>-</i>");
     } else {
       const upcoming = nextPlace(detail);
-      lines.push(upcoming != null ? `<i>в игре · следующий: ${upcoming} место</i>` : "<i>в игре</i>");
+      lines.push(
+        upcoming != null
+          ? `<i>в игре · следующий: ${upcoming} место</i>`
+          : "<i>в игре</i>",
+      );
     }
 
     const keyboard = new InlineKeyboard();
 
     if (detail.status !== "finished") {
-      const extras = (prices.menuItems ?? []).filter((item) => item.isActive && !item.isFixed);
-      const entry = prices.menuItems?.find((item) => item.isFixed && item.kind === "entry");
+      const extras = (prices.menuItems ?? []).filter(
+        (item) => item.isActive && !item.isFixed,
+      );
+      const entry = prices.menuItems?.find(
+        (item) => item.isFixed && item.kind === "entry",
+      );
 
-      keyboard.text(`Вход ${entry?.priceRub ?? prices.entryPriceRub}`, "p:entry:1").row();
+      keyboard
+        .text(`Вход ${entry?.priceRub ?? prices.entryPriceRub}`, "p:entry:1")
+        .row();
       keyboard
         .text("Ребай ×1", "p:rebuy:1")
         .text("×2", "p:rebuy:2")
@@ -312,19 +391,28 @@ export class AdminScreens {
       } else if (seat.place == null) {
         keyboard.text("Место", "place");
       } else {
-        keyboard.text("Изменить место", "place").text("Вернуть в игру", "unbust");
+        keyboard
+          .text("Изменить место", "place")
+          .text("Вернуть в игру", "unbust");
       }
 
       keyboard.row();
-      const grants = (detail.eveningGrants ?? []).filter((row) => row.userId === seat.user.id);
+      const grants = (detail.eveningGrants ?? []).filter(
+        (row) => row.userId === seat.user.id,
+      );
       const hands = achievements
         .filter(isEveningHand)
         .sort((a, b) => b.ratingPoints - a.ratingPoints)
         .slice(0, 6);
       hands.forEach((hand) => {
-        const count = grants.filter((row) => row.achievementId === hand.id).length;
+        const count = grants.filter(
+          (row) => row.achievementId === hand.id,
+        ).length;
         const mark = count > 0 ? `×${count} ` : "";
-        keyboard.text(fit(`${mark}${hand.icon ? `${hand.icon} ` : ""}${hand.title}`, 22), `a:${hand.id}`);
+        keyboard.text(
+          fit(`${mark}${hand.icon ? `${hand.icon} ` : ""}${hand.title}`, 22),
+          `a:${hand.id}`,
+        );
         if (count > 0) keyboard.text("−", `ar:${hand.id}`);
         keyboard.row();
       });
@@ -337,12 +425,13 @@ export class AdminScreens {
 
   /**
    * Every place still free, deepest first, so a correction is a tap rather than
-   * a retyped number. The player's current place is offered too — reselecting it
+   * a retyped number. The player's current place is offered too - reselecting it
    * is harmless, and leaving it out would make the grid jump around.
    */
   placeChooser(seat: Seat, detail: TournamentDetail): Screen {
     const open = freePlaces(detail);
-    const offered = seat.place == null ? open : [seat.place, ...open].sort((a, b) => b - a);
+    const offered =
+      seat.place == null ? open : [seat.place, ...open].sort((a, b) => b - a);
 
     const keyboard = new InlineKeyboard();
     offered.forEach((place, index) => {
@@ -353,7 +442,11 @@ export class AdminScreens {
     keyboard.row().text("← Назад", "card");
 
     return {
-      text: [`<b>${escapeHtml(playerLabel(seat.user))}</b>`, "", "Призовое место."].join("\n"),
+      text: [
+        `<b>${escapeHtml(playerLabel(seat.user))}</b>`,
+        "",
+        "Призовое место.",
+      ].join("\n"),
       keyboard,
     };
   }
@@ -363,7 +456,10 @@ export class AdminScreens {
     for (const achievement of list.filter((row) => row.isActive).slice(0, 20)) {
       keyboard
         .text(
-          fit(`${achievement.icon ? `${achievement.icon} ` : ""}${achievement.title} (+${achievement.ratingPoints})`, 55),
+          fit(
+            `${achievement.icon ? `${achievement.icon} ` : ""}${achievement.title} (+${achievement.ratingPoints})`,
+            55,
+          ),
           `a:${achievement.id}`,
         )
         .row();
@@ -382,8 +478,12 @@ export class AdminScreens {
  * who walked in without signing up appears as soon as their entry is charged.
  */
 export function seats(detail: TournamentDetail): Seat[] {
-  const placeByUser = new Map(detail.results.map((row) => [row.user.id, row.place]));
-  const pointsByUser = new Map(detail.results.map((row) => [row.user.id, row.ratingPoints]));
+  const placeByUser = new Map(
+    detail.results.map((row) => [row.user.id, row.place]),
+  );
+  const pointsByUser = new Map(
+    detail.results.map((row) => [row.user.id, row.ratingPoints]),
+  );
   const byId = new Map<string, Seat>();
 
   for (const registration of detail.registrations) {
@@ -410,7 +510,8 @@ export function seats(detail: TournamentDetail): Seat[] {
         entry: player.payments.some((payment) => payment.kind === "entry"),
         rebuys: stacksOf(player.payments, "rebuy", detail.startingStack),
         addons: stacksOf(player.payments, "addon", detail.addonChips),
-        drinks: player.payments.filter((payment) => payment.kind === "drink").length,
+        drinks: player.payments.filter((payment) => payment.kind === "drink")
+          .length,
       },
       lastPaymentId: player.payments.at(-1)?.id ?? null,
     });

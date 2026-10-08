@@ -1,6 +1,13 @@
 import { useAuth } from "../auth/auth-context";
-import { Badge, EmptyState, ErrorState, Loading, PageHeader, cx } from "../components/ui";
-import { formatPoints, plural } from "../lib/format";
+import { AwardArtwork } from "../components/AwardArtwork";
+import {
+  EmptyState,
+  ErrorState,
+  Loading,
+  PageHeader,
+  cx,
+} from "../components/ui";
+import { formatPoints } from "../lib/format";
 import { useAchievements, useUserAchievements } from "../lib/queries";
 
 export function AchievementsPage() {
@@ -8,7 +15,9 @@ export function AchievementsPage() {
   const catalogue = useAchievements();
   const mine = useUserAchievements(user?.id);
 
-  const ownedCodes = new Set(mine.data?.map((granted) => granted.achievement.code) ?? []);
+  const ownedCodes = new Set(
+    mine.data?.map((granted) => granted.achievement.code) ?? [],
+  );
 
   return (
     <>
@@ -17,61 +26,65 @@ export function AchievementsPage() {
         subtitle={
           user
             ? `У вас ${ownedCodes.size} из ${catalogue.data?.length ?? 0}`
-            : "За что клуб начисляет дополнительный рейтинг"
+            : ""
         }
       />
 
       {catalogue.isPending && <Loading />}
       {catalogue.isError && (
-        <ErrorState error={catalogue.error} onRetry={() => void catalogue.refetch()} />
+        <ErrorState
+          error={catalogue.error}
+          onRetry={() => void catalogue.refetch()}
+        />
       )}
       {catalogue.data?.length === 0 && (
-        <EmptyState
-          title="Ачивок пока нет"
-          description="Администратор может создать их в разделе «Админ» - название, описание и сколько рейтинга они дают."
-        />
+        <EmptyState title="Ачивок пока нет" description="" />
       )}
 
       {catalogue.data && catalogue.data.length > 0 && (
-        <ul className="grid grid-cols-1 gap-2">
-          {catalogue.data.map((achievement) => {
-            const owned = ownedCodes.has(achievement.code);
-            return (
-              <li
-                key={achievement.id}
-                className={cx(
-                  "card grid min-h-[7.5rem] grid-cols-[auto_1fr_auto] items-center gap-3 p-4",
-                  owned ? "border-gold-500/35 bg-gold-500/5" : "opacity-90",
-                )}
-              >
-                <span aria-hidden className={cx("w-10 text-center text-3xl leading-none", !owned && "grayscale")}>
-                  {achievement.icon ?? "🏅"}
-                </span>
-
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="truncate font-medium">{achievement.title}</h3>
-                    {owned && <Badge tone="gold">получено</Badge>}
-                  </div>
-
-                  <p className="mt-1 line-clamp-2 min-h-10 text-sm leading-5 text-stone-300">
-                    {achievement.description || "\u00a0"}
-                  </p>
-
-                  <p className="mt-1 min-h-5 text-sm text-stone-400">
-                    {achievement.holdersCount != null && achievement.holdersCount > 0
-                      ? `${achievement.holdersCount} ${plural(achievement.holdersCount, "игрок", "игрока", "игроков")} уже получили`
-                      : "\u00a0"}
-                  </p>
-                </div>
-
-                <span className="nums shrink-0 self-center font-semibold text-gold-400">
-                  {formatPoints(achievement.ratingPoints)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="space-y-10">
+          {(["club", "game"] as const).map((category) => (
+            <section key={category}>
+              <h2 className="text-xl font-semibold border-b border-white/10 pb-4 mb-5">
+                {category === "club" ? "Клубные награды" : "Игровые комбинации"}
+              </h2>
+              <ul className="grid grid-cols-3 gap-x-3 gap-y-8 sm:grid-cols-4 py-3">
+                {catalogue.data
+                  .filter((a) => a.category === category)
+                  .map((achievement) => {
+                    const owned = ownedCodes.has(achievement.code);
+                    const count =
+                      mine.data?.filter(
+                        (a) => a.achievement.code === achievement.code,
+                      ).length ?? 0;
+                    return (
+                      <li
+                        key={achievement.id}
+                        className={cx(
+                          "flex flex-col items-center text-center min-w-0",
+                          !owned && "achievement-locked",
+                        )}
+                      >
+                        <AwardArtwork achievement={achievement} />
+                        <h3 className="mt-3 text-sm font-medium leading-5 min-h-10">
+                          {achievement.title}
+                        </h3>
+                        <p className="mt-1 text-xs text-stone-400 leading-5 line-clamp-3 min-h-[3.75rem]">
+                          {achievement.description}
+                        </p>
+                        <span className="mt-2 text-sm tabular-nums text-gold-400 border-t border-white/10 pt-2 w-16">
+                          {formatPoints(achievement.ratingPoints)}
+                        </span>
+                        <span className="text-xs text-stone-400 mt-1">
+                          {owned ? `Получено ${count}` : "Не получено"}
+                        </span>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
     </>
   );

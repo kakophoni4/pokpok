@@ -26,10 +26,18 @@ import {
   UpdateTournamentInput,
 } from "@poker/contracts";
 import type { RequestUser } from "../common/auth/auth.types";
-import { CurrentUser, OptionalAuth, Public, Roles } from "../common/auth/decorators";
+import {
+  CurrentUser,
+  OptionalAuth,
+  Public,
+  Roles,
+} from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
 import { PaymentsService } from "./payments.service";
-import { RegistrationsService, type RegisterResult } from "./registrations.service";
+import {
+  RegistrationsService,
+  type RegisterResult,
+} from "./registrations.service";
 import { type FinishSummary, ResultsService } from "./results.service";
 import { TournamentsService } from "./tournaments.service";
 
@@ -45,7 +53,9 @@ export class TournamentsController {
 
   @OptionalAuth()
   @Get()
-  @ApiOperation({ summary: "Schedule. Includes your own registration when signed in" })
+  @ApiOperation({
+    summary: "Schedule. Includes your own registration when signed in",
+  })
   list(
     @Query(zodPipe(TournamentListQuery)) query: TournamentListQuery,
     @CurrentUser() viewer?: RequestUser,
@@ -56,7 +66,9 @@ export class TournamentsController {
   // Declared before ":id" so the literal segment wins the match.
   @Roles("hostess")
   @Get("by-topic/:topicId")
-  @ApiOperation({ summary: "Tournament bound to a forum topic in the admin group (admin)" })
+  @ApiOperation({
+    summary: "Tournament bound to a forum topic in the admin group (admin)",
+  })
   byTopic(
     @Param("topicId") topicId: string,
     @CurrentUser() viewer: RequestUser,
@@ -66,7 +78,9 @@ export class TournamentsController {
 
   @OptionalAuth()
   @Get(":id")
-  @ApiOperation({ summary: "Tournament card. The cash desk is included for admins only" })
+  @ApiOperation({
+    summary: "Tournament card. The cash desk is included for admins only",
+  })
   detail(
     @Param("id") id: string,
     @CurrentUser() viewer?: RequestUser,
@@ -86,7 +100,9 @@ export class TournamentsController {
 
   @Roles("hostess")
   @Patch(":id")
-  @ApiOperation({ summary: "Edit a tournament, including the paid-place count (staff)" })
+  @ApiOperation({
+    summary: "Edit a tournament, including the paid-place count (staff)",
+  })
   update(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -98,21 +114,30 @@ export class TournamentsController {
   @Roles("admin")
   @Delete(":id")
   @ApiOperation({ summary: "Delete a tournament with no history (admin)" })
-  remove(@CurrentUser() actor: RequestUser, @Param("id") id: string): Promise<{ ok: true }> {
+  remove(
+    @CurrentUser() actor: RequestUser,
+    @Param("id") id: string,
+  ): Promise<{ ok: true }> {
     return this.tournaments.remove(actor.id, id);
   }
 
   // ─── Registration ───────────────────────────────────────────────────────────
 
   @Post(":id/register")
-  @ApiOperation({ summary: "Sign up, or join the waiting list when the table is full" })
+  @ApiOperation({
+    summary: "Sign up, or join the waiting list when the table is full",
+  })
   register(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
     @Body(zodPipe(RegisterInput)) body: RegisterInput,
   ): Promise<RegisterResult> {
     // Signing somebody else up is an admin action.
-    if (body.userId && body.userId !== actor.id && !hasRole(actor.role, "hostess")) {
+    if (
+      body.userId &&
+      body.userId !== actor.id &&
+      !hasRole(actor.role, "hostess")
+    ) {
       throw new ForbiddenException({
         code: "FORBIDDEN",
         message: "Записать другого игрока может только персонал клуба",
@@ -120,33 +145,41 @@ export class TournamentsController {
     }
 
     const targetUserId = body.userId ?? actor.id;
-    const source = body.userId && body.userId !== actor.id ? "admin" : body.source;
+    const source =
+      body.userId && body.userId !== actor.id ? "admin" : body.source;
     return this.registrations.register(id, targetUserId, source, actor.id);
   }
 
   @Delete(":id/register")
-  @ApiOperation({ summary: "Cancel your registration; promotes the first player waiting" })
+  @ApiOperation({
+    summary: "Cancel your registration; promotes the first player waiting",
+  })
   cancel(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
     @Query("userId") userId?: string,
   ): Promise<{ promotedUserId: string | null }> {
     if (userId && userId !== actor.id && !hasRole(actor.role, "hostess")) {
-      throw new ForbiddenException({ code: "FORBIDDEN", message: "Недостаточно прав" });
+      throw new ForbiddenException({
+        code: "FORBIDDEN",
+        message: "Недостаточно прав",
+      });
     }
     return this.registrations.cancel(id, userId ?? actor.id, actor.id);
   }
 
   @Public()
   @Get(":id/registrations")
-  @ApiOperation({ summary: "Who is signed up — used by the site and the bot" })
+  @ApiOperation({ summary: "Who is signed up - used by the site and the bot" })
   listRegistrations(@Param("id") id: string): Promise<RegistrationView[]> {
     return this.registrations.listForTournament(id);
   }
 
   @Roles("hostess")
   @Post(":id/admin-screens")
-  @ApiOperation({ summary: "Remember where the bot posted its live screens (admin)" })
+  @ApiOperation({
+    summary: "Remember where the bot posted its live screens (admin)",
+  })
   saveAdminScreens(
     @Param("id") id: string,
     @Body(zodPipe(SaveAdminScreensInput)) body: SaveAdminScreensInput,
@@ -181,7 +214,9 @@ export class TournamentsController {
 
   @Roles("hostess")
   @Post(":id/place")
-  @ApiOperation({ summary: "Record where one player finished as they bust out (admin)" })
+  @ApiOperation({
+    summary: "Record where one player finished as they bust out (admin)",
+  })
   setPlace(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -192,7 +227,9 @@ export class TournamentsController {
 
   @Roles("hostess")
   @Post(":id/finish")
-  @ApiOperation({ summary: "Award rating for the evening; repeatable and reversible (admin)" })
+  @ApiOperation({
+    summary: "Award rating for the evening; repeatable and reversible (admin)",
+  })
   finish(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -202,7 +239,9 @@ export class TournamentsController {
 
   @Roles("hostess")
   @Post(":id/reopen")
-  @ApiOperation({ summary: "Withdraw the rating and put the tournament back in play (admin)" })
+  @ApiOperation({
+    summary: "Withdraw the rating and put the tournament back in play (admin)",
+  })
   async reopen(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -225,7 +264,9 @@ export class TournamentsController {
 
   @Roles("hostess")
   @Delete(":id/results")
-  @ApiOperation({ summary: "Wipe standings and the rating they produced (admin)" })
+  @ApiOperation({
+    summary: "Wipe standings and the rating they produced (admin)",
+  })
   async clearResults(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,

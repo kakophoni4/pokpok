@@ -1,6 +1,9 @@
 import type { UserRole } from "@poker/contracts";
 
 export type RequestUser = {
+  dealerShiftId?: string;
+  dealerTable?: number;
+  dealerTournamentId?: string;
   id: string;
   role: UserRole;
   nickname: string;

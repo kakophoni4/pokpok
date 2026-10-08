@@ -1,5 +1,14 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import type { AddPaymentInput, PromoGrant, TournamentPlayer } from "@poker/contracts";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import type {
+  AddPaymentInput,
+  PromoGrant,
+  TournamentPlayer,
+  LiveState,
+} from "@poker/contracts";
 import { parsePromoBundle } from "@poker/contracts";
 import { AuditService } from "../common/audit/audit.service";
 import { PrismaService } from "../common/prisma/prisma.service";
@@ -12,12 +21,23 @@ import {
   returnToPlay,
   seatPlayer,
 } from "./cash-desk";
-import { chipsForKind, effectiveConfig, type EffectiveConfig } from "./tournament-config";
-import type { ClubMenuItem as MenuRow, PaymentKind } from "../generated/prisma/client";
+import {
+  chipsForKind,
+  effectiveConfig,
+  type EffectiveConfig,
+} from "./tournament-config";
+import type {
+  ClubMenuItem as MenuRow,
+  PaymentKind,
+} from "../generated/prisma/client";
+import { LiveService } from "../live/live.service";
+import { assertNoPastDebt } from "../live/accounts";
+import { randomUUID } from "node:crypto";
+import { clockView } from "../live/live-engine";
 
 /**
  * The cash desk. Every line is appended and never edited, so an evening can be
- * reconstructed exactly as it happened — including the mistakes and the moment
+ * reconstructed exactly as it happened - including the mistakes and the moment
  * they were voided.
  */
 @Injectable()
@@ -26,6 +46,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly seasons: SeasonsService,
     private readonly audit: AuditService,
+    private readonly live: LiveService,
   ) {}
 
   async add(
@@ -33,9 +54,14 @@ export class PaymentsService {
     input: AddPaymentInput,
     actorId: string,
   ): Promise<TournamentPlayer> {
-    const tournament = await this.prisma.tournament.findUnique({ where: { id: tournamentId } });
+    const tournament = await this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+    });
     if (!tournament) {
-      throw new NotFoundException({ code: "TOURNAMENT_NOT_FOUND", message: "Турнир не найден" });
+      throw new NotFoundException({
+        code: "TOURNAMENT_NOT_FOUND",
+        message: "Турнир не найден",
+      });
     }
     // Chips decide the rating, so changing them after the payout would leave the
     // awarded points describing a table that no longer exists.
@@ -46,16 +72,26 @@ export class PaymentsService {
       });
     }
 
-    const user = await this.prisma.user.findUnique({ where: { id: input.userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: input.userId },
+    });
     if (!user) {
-      throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
+      throw new NotFoundException({
+        code: "USER_NOT_FOUND",
+        message: "Игрок не найден",
+      });
     }
 
     const menuItem = input.menuItemId
-      ? await this.prisma.clubMenuItem.findUnique({ where: { id: input.menuItemId } })
+      ? await this.prisma.clubMenuItem.findUnique({
+          where: { id: input.menuItemId },
+        })
       : null;
     if (input.menuItemId && !menuItem) {
-      throw new NotFoundException({ code: "MENU_ITEM_NOT_FOUND", message: "Позиция меню не найдена" });
+      throw new NotFoundException({
+        code: "MENU_ITEM_NOT_FOUND",
+        message: "Позиция меню не найдена",
+      });
     }
 
     const season = await this.seasons.ratingConfig(tournament.seasonId);
@@ -64,7 +100,15 @@ export class PaymentsService {
 
     const bundle = menuItem?.isPromo ? parsePromoBundle(menuItem.bundle) : [];
     if (menuItem && bundle.length > 0) {
-      await this.addBundle(tournamentId, input.userId, actorId, menuItem, bundle, config, units);
+      await this.addBundle(
+        tournamentId,
+        input.userId,
+        actorId,
+        menuItem,
+        bundle,
+        config,
+        units,
+      );
       await this.audit.record({
         actorId,
         action: "payment.add",
@@ -91,27 +135,56 @@ export class PaymentsService {
         : chipsForKind(kind, config) * units);
 
     if (kind === "entry") {
-      await assertEntryUnpaid(this.prisma, tournamentId, input.userId, user.nickname);
+      await assertEntryUnpaid(
+        this.prisma,
+        tournamentId,
+        input.userId,
+        user.nickname,
+      );
     }
 
     const split = kind === "rebuy" || kind === "addon";
     const copies = split ? units : 1;
-    const perAmount = split ? Math.round(amountRub / copies) : amountRub;
-    const perChips = split ? Math.round(chips / copies) : chips;
+    const perAmount = split ? Math.floor(amountRub / copies) : amountRub;
+    const perChips = split ? Math.floor(chips / copies) : chips;
 
     if (kind === "addon") {
-      await assertAddonRoom(this.prisma, tournamentId, input.userId, copies, config.addonChips);
+      await assertAddonRoom(
+        this.prisma,
+        tournamentId,
+        input.userId,
+        copies,
+        config.addonChips,
+      );
     }
 
     await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id=${tournamentId} FOR UPDATE`;
+      if (kind === "entry") {
+        await assertNoPastDebt(tx, input.userId, tournamentId);
+        await assertEntryUnpaid(tx, tournamentId, input.userId, user.nickname);
+      }
+      if (kind === "addon")
+        await assertAddonRoom(
+          tx,
+          tournamentId,
+          input.userId,
+          copies,
+          config.addonChips,
+        );
+      const live = await tx.liveTournament.findUnique({
+        where: { tournamentId },
+      });
       for (let i = 0; i < copies; i += 1) {
         await tx.payment.create({
           data: {
             tournamentId,
             userId: input.userId,
             kind,
-            amountRub: perAmount,
-            chips: perChips,
+            amountRub:
+              perAmount + (i === 0 ? amountRub - perAmount * copies : 0),
+            deferred: !!live && kind !== "entry",
+            chips: perChips + (i === 0 ? chips - perChips * copies : 0),
             note: input.note ?? menuItem?.title ?? null,
             createdById: actorId,
           },
@@ -120,6 +193,16 @@ export class PaymentsService {
 
       await seatPlayer(tx, tournamentId, input.userId);
       if (kind === "rebuy") await returnToPlay(tx, tournamentId, input.userId);
+      await this.live.recordPurchase(
+        tx,
+        tournamentId,
+        input.userId,
+        actorId,
+        kind,
+        chips,
+        amountRub,
+        randomUUID(),
+      );
     });
 
     await this.audit.record({
@@ -178,10 +261,15 @@ export class PaymentsService {
     }
 
     if (lines.length === 0) {
-      throw new ConflictException({ code: "EMPTY_PROMO", message: "В акции нет позиций" });
+      throw new ConflictException({
+        code: "EMPTY_PROMO",
+        message: "В акции нет позиций",
+      });
     }
 
-    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
 
     if (lines.some((line) => line.kind === "entry")) {
       await assertEntryUnpaid(this.prisma, tournamentId, userId, user.nickname);
@@ -189,12 +277,40 @@ export class PaymentsService {
 
     const addonCopies = lines.filter((line) => line.kind === "addon").length;
     if (addonCopies > 0) {
-      await assertAddonRoom(this.prisma, tournamentId, userId, addonCopies, config.addonChips);
+      await assertAddonRoom(
+        this.prisma,
+        tournamentId,
+        userId,
+        addonCopies,
+        config.addonChips,
+      );
     }
 
     const price = promo.priceRub * units;
 
     await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id=${tournamentId} FOR UPDATE`;
+      const live = await tx.liveTournament.findUnique({
+        where: { tournamentId },
+      });
+      if (live && lines.some((l) => l.kind === "entry"))
+        throw new ConflictException("Вход оплачивается отдельно от комплекта");
+      if (live && addonCopies > 0) {
+        const state = live.state as unknown as LiveState;
+        if (
+          clockView(state).complete ||
+          clockView(state).index + 1 !== state.config.addonLevel
+        )
+          throw new ConflictException("Сейчас адон недоступен");
+      }
+      if (addonCopies > 0)
+        await assertAddonRoom(
+          tx,
+          tournamentId,
+          userId,
+          addonCopies,
+          config.addonChips,
+        );
       for (const [index, line] of lines.entries()) {
         await tx.payment.create({
           data: {
@@ -202,6 +318,7 @@ export class PaymentsService {
             userId,
             kind: line.kind,
             amountRub: index === 0 ? price : 0,
+            deferred: !!live,
             chips: line.chips,
             note: line.note,
             createdById: actorId,
@@ -210,21 +327,45 @@ export class PaymentsService {
       }
 
       await seatPlayer(tx, tournamentId, userId);
-      if (lines.some((line) => line.kind === "rebuy")) await returnToPlay(tx, tournamentId, userId);
+      if (lines.some((line) => line.kind === "rebuy"))
+        await returnToPlay(tx, tournamentId, userId);
+      await this.live.recordPurchase(
+        tx,
+        tournamentId,
+        userId,
+        actorId,
+        lines.some((l) => l.kind === "rebuy")
+          ? "rebuy"
+          : lines.some((l) => l.kind === "addon")
+            ? "addon"
+            : "other",
+        lines.reduce((n, l) => n + l.chips, 0),
+        price,
+        randomUUID(),
+      );
     });
   }
 
   /** Reverses a line without erasing it. */
-  async voidPayment(paymentId: string, actorId: string): Promise<TournamentPlayer> {
+  async voidPayment(
+    paymentId: string,
+    actorId: string,
+  ): Promise<TournamentPlayer> {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: { tournament: { select: { status: true } } },
     });
     if (!payment) {
-      throw new NotFoundException({ code: "PAYMENT_NOT_FOUND", message: "Оплата не найдена" });
+      throw new NotFoundException({
+        code: "PAYMENT_NOT_FOUND",
+        message: "Оплата не найдена",
+      });
     }
     if (payment.voidedAt != null) {
-      throw new ConflictException({ code: "ALREADY_VOIDED", message: "Оплата уже отменена" });
+      throw new ConflictException({
+        code: "ALREADY_VOIDED",
+        message: "Оплата уже отменена",
+      });
     }
     if (payment.tournament.status === "finished") {
       throw new ConflictException({
@@ -233,9 +374,32 @@ export class PaymentsService {
       });
     }
 
-    await this.prisma.payment.update({
-      where: { id: paymentId },
-      data: { voidedAt: new Date(), voidedById: actorId },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id=${payment.tournamentId} FOR UPDATE`;
+      const changed = await tx.payment.updateMany({
+        where: { id: paymentId, voidedAt: null },
+        data: { voidedAt: new Date(), voidedById: actorId },
+      });
+      if (!changed.count) throw new ConflictException("Покупка уже отменена");
+      await tx.playerPrize.updateMany({
+        where: { paymentId },
+        data: {
+          redeemedAt: null,
+          redeemedById: null,
+          spentAtId: null,
+          paymentId: null,
+        },
+      });
+      await this.live.voidPurchase(
+        tx,
+        payment.tournamentId,
+        payment.userId,
+        actorId,
+        payment.kind,
+        payment.chips,
+        payment.amountRub,
+        payment.id,
+      );
     });
 
     await this.audit.record({

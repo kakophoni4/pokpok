@@ -20,7 +20,7 @@ const TIMEOUT_MS = 5000;
  * Telegram hosts them on t.me, which Russian ISPs block: players without a VPN
  * saw broken images all over the site. The server has no such problem, so it
  * fetches each photo once and hands out its own copy. Keeping the bytes in
- * memory rather than on disk means there is nothing to migrate or clean up —
+ * memory rather than on disk means there is nothing to migrate or clean up -
  * a restart just refetches.
  */
 @Injectable()
@@ -39,7 +39,9 @@ export class AvatarService {
     const running = this.inFlight.get(userId);
     if (running) return running;
 
-    const pending = this.load(userId).finally(() => this.inFlight.delete(userId));
+    const pending = this.load(userId).finally(() =>
+      this.inFlight.delete(userId),
+    );
     this.inFlight.set(userId, pending);
     return pending;
   }
@@ -57,7 +59,9 @@ export class AvatarService {
 
   private async download(url: string): Promise<AvatarImage | null> {
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
       if (!response.ok) return null;
 
       const contentType = response.headers.get("content-type") ?? "";
@@ -69,7 +73,9 @@ export class AvatarService {
 
       return { body, contentType };
     } catch (error) {
-      this.logger.warn(`Could not fetch avatar from ${new URL(url).host}: ${String(error)}`);
+      this.logger.warn(
+        `Could not fetch avatar from ${new URL(url).host}: ${String(error)}`,
+      );
       return null;
     }
   }

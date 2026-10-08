@@ -2,7 +2,11 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ME, player, renderApp, SEASON, stubApi, tournament } from "./harness";
 
-const ANONYMOUS = { match: "POST /auth/refresh", status: 401, body: { code: "UNAUTHORIZED" } };
+const ANONYMOUS = {
+  match: "POST /auth/refresh",
+  status: 401,
+  body: { code: "UNAUTHORIZED" },
+};
 const SIGNED_IN = {
   match: "POST /auth/refresh",
   body: { accessToken: "token", expiresIn: 900, user: ME },
@@ -49,7 +53,9 @@ describe("schedule", () => {
 
     renderApp("/");
 
-    expect(await screen.findByText("Войти, чтобы записаться")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Войти, чтобы записаться"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Записаться")).not.toBeInTheDocument();
   });
 
@@ -114,9 +120,13 @@ describe("registration", () => {
     fireEvent.click(button);
 
     expect(await screen.findByText("Вы записаны")).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "Отменить запись" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Отменить запись" }),
+    ).toBeInTheDocument();
 
-    const call = log.find((entry) => entry.path.startsWith("/tournaments/t1/register"));
+    const call = log.find((entry) =>
+      entry.path.startsWith("/tournaments/t1/register"),
+    );
     expect(call?.method).toBe("POST");
     expect(call?.body).toEqual({ source: "web" });
   });
@@ -130,18 +140,29 @@ describe("registration", () => {
       {
         match: "POST /tournaments/t1/register",
         status: 409,
-        body: { code: "ALREADY_REGISTERED", message: "Вы уже записаны на этот турнир" },
+        body: {
+          code: "ALREADY_REGISTERED",
+          message: "Вы уже записаны на этот турнир",
+        },
       },
     ]);
 
     renderApp("/");
 
     fireEvent.click(await screen.findByRole("button", { name: "Записаться" }));
-    expect(await screen.findByText("Вы уже записаны на этот турнир")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Вы уже записаны на этот турнир"),
+    ).toBeInTheDocument();
   });
 });
 
 describe("leaderboard", () => {
+  it("shows an empty state rather than loading forever when no season exists", async () => {
+    stubApi([ANONYMOUS, { match: "GET /seasons", body: [] }]);
+    renderApp("/rating");
+    expect(await screen.findByText("Сезоны пока не созданы")).toBeInTheDocument();
+    expect(screen.queryByText("Считаем рейтинг…")).not.toBeInTheDocument();
+  });
   it("ranks players and marks the signed-in one", async () => {
     stubApi([
       SIGNED_IN,
@@ -179,10 +200,12 @@ describe("leaderboard", () => {
 
     renderApp("/rating");
 
-    expect(await screen.findByText("Ira_Chips")).toBeInTheDocument();
-    expect(screen.getByText("261")).toBeInTheDocument();
+    expect(await screen.findAllByText("Ira_Chips")).toHaveLength(2);
+    expect(screen.getAllByText("261")).toHaveLength(2);
     expect(screen.getByText("вы")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Сезон" })).toHaveTextContent("Сезон 2026 · сейчас");
+    expect(screen.getByRole("button", { name: "Сезон" })).toHaveTextContent(
+      "Сезон 2026 · сейчас",
+    );
   });
 });
 
@@ -248,6 +271,7 @@ describe("personal cabinet", () => {
               id: "a1",
               code: "first_win",
               title: "Первая победа",
+              category: "club",
               description: null,
               icon: "🥇",
               ratingPoints: 50,
@@ -266,13 +290,17 @@ describe("personal cabinet", () => {
 
     renderApp("/me");
 
-    await waitFor(() => expect(screen.getByText(/2 место/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/2 место/)).toBeInTheDocument(),
+    );
     expect(screen.getByText("Клубный мейджор «Осень»")).toBeInTheDocument();
     expect(screen.getByText("+120")).toBeInTheDocument();
     // Penalties must read as a loss, not as a mysterious neutral row.
     expect(screen.getByText("-5")).toBeInTheDocument();
     expect(screen.getByText("Не явился на турнир")).toBeInTheDocument();
     expect(screen.getByText("Первая победа")).toBeInTheDocument();
-    expect(screen.getByText("14 участников", { exact: false })).toBeInTheDocument();
+    expect(
+      screen.getByText("14 участников", { exact: false }),
+    ).toBeInTheDocument();
   });
 });

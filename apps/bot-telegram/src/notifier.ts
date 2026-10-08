@@ -11,7 +11,7 @@ const GAP_MS = 120;
  * Delivers what the API queued.
  *
  * The API decides what to say and to whom; this only carries it. That split is
- * what lets a prize granted while the bot was restarting still arrive — the
+ * what lets a prize granted while the bot was restarting still arrive - the
  * message was written to the database in the same transaction as the prize, and
  * it waits there until somebody picks it up.
  */
@@ -62,7 +62,10 @@ export class Notifier {
     try {
       await this.bot.api.sendMessage(message.telegramId, message.text, {
         parse_mode: "HTML",
-        reply_markup: new InlineKeyboard().webApp("♠ Открыть клуб", this.webUrl),
+        reply_markup: new InlineKeyboard().webApp(
+          "♠ Открыть клуб",
+          this.webUrl,
+        ),
         link_preview_options: { is_disabled: true },
       });
       await this.settle(message.id, true);
@@ -76,7 +79,11 @@ export class Notifier {
 
   private async settle(id: string, ok: boolean, error?: string): Promise<void> {
     try {
-      await this.api.internal("/notifications/internal/settle", { id, ok, error: error ?? null });
+      await this.api.internal("/notifications/internal/settle", {
+        id,
+        ok,
+        error: error ?? null,
+      });
     } catch (settleError) {
       // The attempt was already counted server-side, so a lost acknowledgement
       // costs one retry rather than a duplicate message.

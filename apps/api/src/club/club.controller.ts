@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   type ClubMenuItem,
@@ -17,6 +26,12 @@ import type { RequestUser } from "../common/auth/auth.types";
 import { CurrentUser, Public, Roles } from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
 import { ClubService } from "./club.service";
+import { z } from "zod";
+
+const HandOfDayInput = z.object({
+  hand: z.string().trim().min(2).max(120).nullable(),
+  expected: z.string().nullable(),
+});
 
 /** What anyone may see: the club's own description. */
 export type PublicClubInfo = Pick<ClubSettings, "infoText" | "timezone">;
@@ -25,10 +40,28 @@ export type PublicClubInfo = Pick<ClubSettings, "infoText" | "timezone">;
 @Controller("club")
 export class ClubController {
   constructor(private readonly club: ClubService) {}
+  @Public()
+  @Get("hand-of-day")
+  handOfDay() {
+    return this.club.handOfDay();
+  }
+
+  @Roles("floor")
+  @Patch("hand-of-day")
+  setHandOfDay(
+    @CurrentUser() actor: RequestUser,
+    @Body(zodPipe(HandOfDayInput)) body: z.infer<typeof HandOfDayInput>,
+  ) {
+    return this.club.setHandOfDay(actor.id, body.hand, body.expected);
+  }
+  @Get("menu-public")
+  async menu() {
+    return (await this.club.get()).menuItems.filter((m) => m.isActive);
+  }
 
   @Public()
   @Get("info")
-  @ApiOperation({ summary: "Club description — the bot's «как нас найти»" })
+  @ApiOperation({ summary: "Club description - the bot's «как нас найти»" })
   async info(): Promise<PublicClubInfo> {
     const settings = await this.club.get();
     return { infoText: settings.infoText, timezone: settings.timezone };
@@ -36,22 +69,31 @@ export class ClubController {
 
   @Roles("hostess")
   @Get("settings")
-  @ApiOperation({ summary: "All club settings, prices and menu included (staff)" })
+  @ApiOperation({
+    summary: "All club settings, prices and menu included (staff)",
+  })
   settings(): Promise<ClubSettings> {
     return this.club.get();
   }
 
   @Roles("admin")
   @Get("sales")
-  @ApiOperation({ summary: "What the till took: by week, month or season (admin)" })
+  @ApiOperation({
+    summary: "What the till took: by week, month or season (admin)",
+  })
   sales(@Query(zodPipe(SalesQuery)) query: SalesQuery): Promise<SalesReport> {
     return this.club.sales(query);
   }
 
   @Roles("admin")
   @Get("journal")
-  @ApiOperation({ summary: "Everything that happened at one evening's desk, and who did it (admin)" })
-  journal(@Query(zodPipe(JournalQuery)) query: JournalQuery): Promise<EveningJournal> {
+  @ApiOperation({
+    summary:
+      "Everything that happened at one evening's desk, and who did it (admin)",
+  })
+  journal(
+    @Query(zodPipe(JournalQuery)) query: JournalQuery,
+  ): Promise<EveningJournal> {
     return this.club.journal(query.tournamentId);
   }
 
@@ -88,7 +130,9 @@ export class ClubController {
 
   @Roles("admin")
   @Delete("menu/:id")
-  @ApiOperation({ summary: "Remove a till item (admin). Fixed fees cannot be deleted." })
+  @ApiOperation({
+    summary: "Remove a till item (admin). Fixed fees cannot be deleted.",
+  })
   deleteMenu(
     @CurrentUser() actor: RequestUser,
     @Param("id") id: string,
@@ -98,7 +142,9 @@ export class ClubController {
 
   @Roles("admin")
   @Post("venues")
-  @ApiOperation({ summary: "Add a playing address the schedule can pick (admin)" })
+  @ApiOperation({
+    summary: "Add a playing address the schedule can pick (admin)",
+  })
   createVenue(
     @CurrentUser() actor: RequestUser,
     @Body(zodPipe(ClubVenueInput)) body: ClubVenueInput,

@@ -1,5 +1,10 @@
 import { randomBytes, randomInt } from "node:crypto";
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type {
   AuthProvider,
@@ -44,10 +49,38 @@ const LOGIN_TICKET_TTL_MS = 5 * 60 * 1000;
  * of pairs that look alike on a phone screen.
  */
 const PHRASE_WORDS = [
-  "туз", "король", "дама", "валет", "джокер", "флеш", "стрит", "каре",
-  "банк", "дилер", "стол", "кубок", "финал", "чип", "рейз", "колл",
-  "флоп", "терн", "ривер", "борд", "блайнд", "сплит", "пика", "бубна",
-  "черва", "крест", "куш", "фишка", "жетон", "азарт", "фарт", "рука",
+  "туз",
+  "король",
+  "дама",
+  "валет",
+  "джокер",
+  "флеш",
+  "стрит",
+  "каре",
+  "банк",
+  "дилер",
+  "стол",
+  "кубок",
+  "финал",
+  "чип",
+  "рейз",
+  "колл",
+  "флоп",
+  "терн",
+  "ривер",
+  "борд",
+  "блайнд",
+  "сплит",
+  "пика",
+  "бубна",
+  "черва",
+  "крест",
+  "куш",
+  "фишка",
+  "жетон",
+  "азарт",
+  "фарт",
+  "рука",
 ] as const;
 
 @Injectable()
@@ -106,13 +139,20 @@ export class AuthService {
 
     if (existing) {
       if (existing.user.status === "blocked") {
-        throw new ForbiddenException({ code: "USER_BLOCKED", message: "Аккаунт заблокирован" });
+        throw new ForbiddenException({
+          code: "USER_BLOCKED",
+          message: "Аккаунт заблокирован",
+        });
       }
 
       // Provider usernames and avatars change; keep our copy fresh but never
       // touch the nickname, which staff may have set deliberately.
       return {
-        user: await this.refreshIdentity(existing.id, existing.user.id, profile),
+        user: await this.refreshIdentity(
+          existing.id,
+          existing.user.id,
+          profile,
+        ),
         isNewUser: false,
       };
     }
@@ -167,22 +207,29 @@ export class AuthService {
       where: { id: userId },
       // Keep the Telegram name current so the desk never shows a stale handle.
       data: {
-        displayName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || undefined,
+        displayName:
+          [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+          undefined,
         ...(profile.photoUrl ? { avatarUrl: profile.photoUrl } : {}),
       },
       include: { identities: true },
     }) as Promise<UserWithIdentities>;
   }
 
-  private async createUserWithIdentity(profile: ProviderProfile): Promise<UserWithIdentities> {
+  private async createUserWithIdentity(
+    profile: ProviderProfile,
+  ): Promise<UserWithIdentities> {
     const nickname = await this.users.suggestNickname(
-      profile.username ?? [profile.firstName, profile.lastName].filter(Boolean).join("_"),
+      profile.username ??
+        [profile.firstName, profile.lastName].filter(Boolean).join("_"),
     );
 
     return this.prisma.user.create({
       data: {
         nickname,
-        displayName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || null,
+        displayName:
+          [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+          null,
         avatarUrl: profile.photoUrl,
         identities: {
           create: {
@@ -229,8 +276,13 @@ export class AuthService {
    * Step one of attaching a second provider: the signed-in user gets a one-time
    * token to carry into the bot as a deep-link payload.
    */
-  async startLink(userId: string, provider: AuthProvider): Promise<StartLinkResponse> {
-    const already = await this.prisma.identity.findFirst({ where: { userId, provider } });
+  async startLink(
+    userId: string,
+    provider: AuthProvider,
+  ): Promise<StartLinkResponse> {
+    const already = await this.prisma.identity.findFirst({
+      where: { userId, provider },
+    });
     if (already) {
       throw new ConflictException({
         code: "ALREADY_LINKED",
@@ -240,9 +292,13 @@ export class AuthService {
 
     const token = randomBytes(24).toString("hex");
     const expiresAt = new Date(Date.now() + LINK_TOKEN_TTL_MS);
-    await this.prisma.linkToken.create({ data: { token, userId, provider, expiresAt } });
+    await this.prisma.linkToken.create({
+      data: { token, userId, provider, expiresAt },
+    });
 
-    const botUsername = this.config.get("TELEGRAM_BOT_USERNAME", { infer: true });
+    const botUsername = this.config.get("TELEGRAM_BOT_USERNAME", {
+      infer: true,
+    });
     const deepLink =
       provider === "telegram" && botUsername
         ? `https://t.me/${botUsername}?start=link_${token}`
@@ -254,7 +310,7 @@ export class AuthService {
   /**
    * Step two, called by the bot once it knows which provider account arrived
    * with the token. Refuses to steal an identity that already belongs to
-   * somebody else — that case needs a human decision.
+   * somebody else - that case needs a human decision.
    */
   async confirmLink(token: string, profile: ProviderProfile): Promise<void> {
     const record = await this.prisma.linkToken.findUnique({ where: { token } });
@@ -266,7 +322,10 @@ export class AuthService {
       });
     }
     if (record.provider !== profile.provider) {
-      throw new ConflictException({ code: "PROVIDER_MISMATCH", message: "Не та платформа" });
+      throw new ConflictException({
+        code: "PROVIDER_MISMATCH",
+        message: "Не та платформа",
+      });
     }
 
     const taken = await this.prisma.identity.findUnique({
@@ -280,7 +339,8 @@ export class AuthService {
     if (taken && taken.userId !== record.userId) {
       throw new ConflictException({
         code: "IDENTITY_TAKEN",
-        message: "Этот аккаунт уже привязан к другому игроку, обратитесь к администратору",
+        message:
+          "Этот аккаунт уже привязан к другому игроку, обратитесь к администратору",
       });
     }
 
@@ -296,7 +356,10 @@ export class AuthService {
           },
         });
       }
-      await tx.linkToken.update({ where: { id: record.id }, data: { usedAt: new Date() } });
+      await tx.linkToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      });
     });
 
     await this.audit.record({
@@ -315,7 +378,9 @@ export class AuthService {
    * deep link and then know nothing until the bot reports a tap.
    */
   async startLoginTicket(meta: SessionMeta = {}): Promise<StartLoginResponse> {
-    const botUsername = this.config.get("TELEGRAM_BOT_USERNAME", { infer: true });
+    const botUsername = this.config.get("TELEGRAM_BOT_USERNAME", {
+      infer: true,
+    });
     if (!botUsername) {
       throw new NotFoundException({
         code: "TELEGRAM_LOGIN_UNAVAILABLE",
@@ -347,8 +412,15 @@ export class AuthService {
 
   /** What the bot shows before asking for the tap. */
   async loginTicketPrompt(code: string): Promise<LoginTicketPrompt> {
-    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
-    if (!ticket || ticket.usedAt || ticket.state !== "pending" || ticket.expiresAt < new Date()) {
+    const ticket = await this.prisma.loginTicket.findUnique({
+      where: { code },
+    });
+    if (
+      !ticket ||
+      ticket.usedAt ||
+      ticket.state !== "pending" ||
+      ticket.expiresAt < new Date()
+    ) {
       throw new NotFoundException({
         code: "LOGIN_TICKET_INVALID",
         message: "Ссылка для входа устарела. Откройте сайт и начните заново",
@@ -358,7 +430,7 @@ export class AuthService {
   }
 
   /**
-   * The tap itself, relayed by the bot. Confirming only records who it was —
+   * The tap itself, relayed by the bot. Confirming only records who it was -
    * tokens are minted later, for the browser that comes asking.
    */
   async settleLoginTicket(
@@ -366,8 +438,15 @@ export class AuthService {
     profile: ProviderProfile,
     approve: boolean,
   ): Promise<LoginTicketPrompt> {
-    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
-    if (!ticket || ticket.usedAt || ticket.state !== "pending" || ticket.expiresAt < new Date()) {
+    const ticket = await this.prisma.loginTicket.findUnique({
+      where: { code },
+    });
+    if (
+      !ticket ||
+      ticket.usedAt ||
+      ticket.state !== "pending" ||
+      ticket.expiresAt < new Date()
+    ) {
       throw new NotFoundException({
         code: "LOGIN_TICKET_INVALID",
         message: "Ссылка для входа устарела. Откройте сайт и начните заново",
@@ -379,7 +458,10 @@ export class AuthService {
         where: { id: ticket.id },
         data: { state: "declined" },
       });
-      return { phrase: ticket.phrase, expiresAt: ticket.expiresAt.toISOString() };
+      return {
+        phrase: ticket.phrase,
+        expiresAt: ticket.expiresAt.toISOString(),
+      };
     }
 
     const { user } = await this.resolveProviderUser(profile);
@@ -404,19 +486,26 @@ export class AuthService {
    * claim is a conditional update, so two tabs racing cannot both walk away with
    * a session.
    */
-  async loginTicketStatus(code: string, meta: SessionMeta = {}): Promise<LoginTicketOutcome> {
-    const ticket = await this.prisma.loginTicket.findUnique({ where: { code } });
+  async loginTicketStatus(
+    code: string,
+    meta: SessionMeta = {},
+  ): Promise<LoginTicketOutcome> {
+    const ticket = await this.prisma.loginTicket.findUnique({
+      where: { code },
+    });
     if (!ticket || ticket.usedAt || ticket.expiresAt < new Date()) {
       return { state: "expired", session: null };
     }
-    if (ticket.state === "declined") return { state: "declined", session: null };
+    if (ticket.state === "declined")
+      return { state: "declined", session: null };
     if (ticket.state === "pending") return { state: "pending", session: null };
 
     const claimed = await this.prisma.loginTicket.updateMany({
       where: { id: ticket.id, usedAt: null },
       data: { usedAt: new Date() },
     });
-    if (claimed.count !== 1 || !ticket.userId) return { state: "expired", session: null };
+    if (claimed.count !== 1 || !ticket.userId)
+      return { state: "expired", session: null };
 
     const user = (await this.prisma.user.findUnique({
       where: { id: ticket.userId },

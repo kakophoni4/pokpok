@@ -44,6 +44,7 @@ export type ClubSettingsSumAggregateOutputType = {
 export type ClubSettingsMinAggregateOutputType = {
   id: string | null
   infoText: string | null
+  handOfDay: string | null
   entryPriceRub: number | null
   rebuyPriceRub: number | null
   addonPriceRub: number | null
@@ -56,6 +57,7 @@ export type ClubSettingsMinAggregateOutputType = {
 export type ClubSettingsMaxAggregateOutputType = {
   id: string | null
   infoText: string | null
+  handOfDay: string | null
   entryPriceRub: number | null
   rebuyPriceRub: number | null
   addonPriceRub: number | null
@@ -68,6 +70,9 @@ export type ClubSettingsMaxAggregateOutputType = {
 export type ClubSettingsCountAggregateOutputType = {
   id: number
   infoText: number
+  blindTemplates: number
+  handOfDay: number
+  dealerPayroll: number
   entryPriceRub: number
   rebuyPriceRub: number
   addonPriceRub: number
@@ -96,6 +101,7 @@ export type ClubSettingsSumAggregateInputType = {
 export type ClubSettingsMinAggregateInputType = {
   id?: true
   infoText?: true
+  handOfDay?: true
   entryPriceRub?: true
   rebuyPriceRub?: true
   addonPriceRub?: true
@@ -108,6 +114,7 @@ export type ClubSettingsMinAggregateInputType = {
 export type ClubSettingsMaxAggregateInputType = {
   id?: true
   infoText?: true
+  handOfDay?: true
   entryPriceRub?: true
   rebuyPriceRub?: true
   addonPriceRub?: true
@@ -120,6 +127,9 @@ export type ClubSettingsMaxAggregateInputType = {
 export type ClubSettingsCountAggregateInputType = {
   id?: true
   infoText?: true
+  blindTemplates?: true
+  handOfDay?: true
+  dealerPayroll?: true
   entryPriceRub?: true
   rebuyPriceRub?: true
   addonPriceRub?: true
@@ -219,6 +229,9 @@ export type ClubSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type ClubSettingsGroupByOutputType = {
   id: string
   infoText: string
+  blindTemplates: runtime.JsonValue | null
+  handOfDay: string | null
+  dealerPayroll: runtime.JsonValue | null
   entryPriceRub: number
   rebuyPriceRub: number
   addonPriceRub: number
@@ -254,6 +267,9 @@ export type ClubSettingsWhereInput = {
   NOT?: Prisma.ClubSettingsWhereInput | Prisma.ClubSettingsWhereInput[]
   id?: Prisma.StringFilter<"ClubSettings"> | string
   infoText?: Prisma.StringFilter<"ClubSettings"> | string
+  blindTemplates?: Prisma.JsonNullableFilter<"ClubSettings">
+  handOfDay?: Prisma.StringNullableFilter<"ClubSettings"> | string | null
+  dealerPayroll?: Prisma.JsonNullableFilter<"ClubSettings">
   entryPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   rebuyPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
@@ -266,6 +282,9 @@ export type ClubSettingsWhereInput = {
 export type ClubSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
+  blindTemplates?: Prisma.SortOrderInput | Prisma.SortOrder
+  handOfDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  dealerPayroll?: Prisma.SortOrderInput | Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
   rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
@@ -281,6 +300,9 @@ export type ClubSettingsWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ClubSettingsWhereInput[]
   NOT?: Prisma.ClubSettingsWhereInput | Prisma.ClubSettingsWhereInput[]
   infoText?: Prisma.StringFilter<"ClubSettings"> | string
+  blindTemplates?: Prisma.JsonNullableFilter<"ClubSettings">
+  handOfDay?: Prisma.StringNullableFilter<"ClubSettings"> | string | null
+  dealerPayroll?: Prisma.JsonNullableFilter<"ClubSettings">
   entryPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   rebuyPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntFilter<"ClubSettings"> | number
@@ -293,6 +315,9 @@ export type ClubSettingsWhereUniqueInput = Prisma.AtLeast<{
 export type ClubSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
+  blindTemplates?: Prisma.SortOrderInput | Prisma.SortOrder
+  handOfDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  dealerPayroll?: Prisma.SortOrderInput | Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
   rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
@@ -313,6 +338,9 @@ export type ClubSettingsScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ClubSettingsScalarWhereWithAggregatesInput | Prisma.ClubSettingsScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ClubSettings"> | string
   infoText?: Prisma.StringWithAggregatesFilter<"ClubSettings"> | string
+  blindTemplates?: Prisma.JsonNullableWithAggregatesFilter<"ClubSettings">
+  handOfDay?: Prisma.StringNullableWithAggregatesFilter<"ClubSettings"> | string | null
+  dealerPayroll?: Prisma.JsonNullableWithAggregatesFilter<"ClubSettings">
   entryPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
   rebuyPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
   addonPriceRub?: Prisma.IntWithAggregatesFilter<"ClubSettings"> | number
@@ -325,6 +353,9 @@ export type ClubSettingsScalarWhereWithAggregatesInput = {
 export type ClubSettingsCreateInput = {
   id?: string
   infoText?: string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: number
   rebuyPriceRub?: number
   addonPriceRub?: number
@@ -337,6 +368,9 @@ export type ClubSettingsCreateInput = {
 export type ClubSettingsUncheckedCreateInput = {
   id?: string
   infoText?: string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: number
   rebuyPriceRub?: number
   addonPriceRub?: number
@@ -349,6 +383,9 @@ export type ClubSettingsUncheckedCreateInput = {
 export type ClubSettingsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
@@ -361,6 +398,9 @@ export type ClubSettingsUpdateInput = {
 export type ClubSettingsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
@@ -373,6 +413,9 @@ export type ClubSettingsUncheckedUpdateInput = {
 export type ClubSettingsCreateManyInput = {
   id?: string
   infoText?: string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: number
   rebuyPriceRub?: number
   addonPriceRub?: number
@@ -385,6 +428,9 @@ export type ClubSettingsCreateManyInput = {
 export type ClubSettingsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
@@ -397,6 +443,9 @@ export type ClubSettingsUpdateManyMutationInput = {
 export type ClubSettingsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   infoText?: Prisma.StringFieldUpdateOperationsInput | string
+  blindTemplates?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  handOfDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dealerPayroll?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   entryPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   rebuyPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
   addonPriceRub?: Prisma.IntFieldUpdateOperationsInput | number
@@ -409,6 +458,9 @@ export type ClubSettingsUncheckedUpdateManyInput = {
 export type ClubSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
+  blindTemplates?: Prisma.SortOrder
+  handOfDay?: Prisma.SortOrder
+  dealerPayroll?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
   rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
@@ -428,6 +480,7 @@ export type ClubSettingsAvgOrderByAggregateInput = {
 export type ClubSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
+  handOfDay?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
   rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
@@ -440,6 +493,7 @@ export type ClubSettingsMaxOrderByAggregateInput = {
 export type ClubSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   infoText?: Prisma.SortOrder
+  handOfDay?: Prisma.SortOrder
   entryPriceRub?: Prisma.SortOrder
   rebuyPriceRub?: Prisma.SortOrder
   addonPriceRub?: Prisma.SortOrder
@@ -461,6 +515,9 @@ export type ClubSettingsSumOrderByAggregateInput = {
 export type ClubSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   infoText?: boolean
+  blindTemplates?: boolean
+  handOfDay?: boolean
+  dealerPayroll?: boolean
   entryPriceRub?: boolean
   rebuyPriceRub?: boolean
   addonPriceRub?: boolean
@@ -473,6 +530,9 @@ export type ClubSettingsSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type ClubSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   infoText?: boolean
+  blindTemplates?: boolean
+  handOfDay?: boolean
+  dealerPayroll?: boolean
   entryPriceRub?: boolean
   rebuyPriceRub?: boolean
   addonPriceRub?: boolean
@@ -485,6 +545,9 @@ export type ClubSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type ClubSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   infoText?: boolean
+  blindTemplates?: boolean
+  handOfDay?: boolean
+  dealerPayroll?: boolean
   entryPriceRub?: boolean
   rebuyPriceRub?: boolean
   addonPriceRub?: boolean
@@ -497,6 +560,9 @@ export type ClubSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type ClubSettingsSelectScalar = {
   id?: boolean
   infoText?: boolean
+  blindTemplates?: boolean
+  handOfDay?: boolean
+  dealerPayroll?: boolean
   entryPriceRub?: boolean
   rebuyPriceRub?: boolean
   addonPriceRub?: boolean
@@ -506,7 +572,7 @@ export type ClubSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ClubSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "infoText" | "entryPriceRub" | "rebuyPriceRub" | "addonPriceRub" | "drinkPriceRub" | "adminChatId" | "timezone" | "updatedAt", ExtArgs["result"]["clubSettings"]>
+export type ClubSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "infoText" | "blindTemplates" | "handOfDay" | "dealerPayroll" | "entryPriceRub" | "rebuyPriceRub" | "addonPriceRub" | "drinkPriceRub" | "adminChatId" | "timezone" | "updatedAt", ExtArgs["result"]["clubSettings"]>
 
 export type $ClubSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClubSettings"
@@ -514,6 +580,9 @@ export type $ClubSettingsPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     infoText: string
+    blindTemplates: runtime.JsonValue | null
+    handOfDay: string | null
+    dealerPayroll: runtime.JsonValue | null
     entryPriceRub: number
     rebuyPriceRub: number
     addonPriceRub: number
@@ -949,6 +1018,9 @@ export interface Prisma__ClubSettingsClient<T, Null = never, ExtArgs extends run
 export interface ClubSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"ClubSettings", 'String'>
   readonly infoText: Prisma.FieldRef<"ClubSettings", 'String'>
+  readonly blindTemplates: Prisma.FieldRef<"ClubSettings", 'Json'>
+  readonly handOfDay: Prisma.FieldRef<"ClubSettings", 'String'>
+  readonly dealerPayroll: Prisma.FieldRef<"ClubSettings", 'Json'>
   readonly entryPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
   readonly rebuyPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
   readonly addonPriceRub: Prisma.FieldRef<"ClubSettings", 'Int'>
