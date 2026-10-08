@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "tournaments",
+      "file": "/images/club-overview/tournaments-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create a separate landscape editorial photographic background for the tournaments information card on CONCEPT poker club website. Candid editorial photograph of an adult group playing a live poker tournament, three-quarter low side view from table rail, faces mostly outside frame, hands interacting naturally with chips, midnight blue felt, refined contemporary poker lounge. Action and human atmosphere, not a product still life. Color palette: deep navy, warm muted brass, ivory. Authentic real-world photography, subtle film grain, natural materials and believable lighting, not a glossy CGI render. Frame the principal subject in the right half; left half should be dark, quieter negative space for readable overlaid text. 1536x1024 landscape. No text, logos, watermark, typography, neon, glitter or surreal effects. Unique narrative and composition, no generic identical poker chip product shots."
+    },
+    {
+      "id": "venue",
+      "file": "/images/club-overview/venue-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create a separate landscape editorial photographic background for the venue information card on CONCEPT poker club website. Architectural photograph of an imagined premium poker lounge: midnight blue upholstered seating, walnut and brass details, several elegant poker tables receding into a softly lit interior, warm wall sconces. No people. Not a photograph of a specific existing venue, no exterior or address signage. Color palette: deep navy, warm muted brass, ivory. Authentic real-world photography, subtle film grain, natural materials and believable lighting, not a glossy CGI render. Frame the principal subject in the right half; left half should be dark, quieter negative space for readable overlaid text. 1536x1024 landscape. No text, logos, watermark, typography, neon, glitter or surreal effects. Unique narrative and composition, no generic identical poker chip product shots."
+    },
+    {
+      "id": "holdem",
+      "file": "/images/club-overview/holdem-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create a separate landscape editorial photographic background for the holdem information card on CONCEPT poker club website. Editorial close-up of an adult dealer's hands sliding ivory playing cards across midnight blue felt, natural motion, shallow depth of field, focus on skilled dealing gesture and crisp card edges. No stacks of chips or drink glasses. Different from still-life arrangements. Color palette: deep navy, warm muted brass, ivory. Authentic real-world photography, subtle film grain, natural materials and believable lighting, not a glossy CGI render. Frame the principal subject in the right half; left half should be dark, quieter negative space for readable overlaid text. 1536x1024 landscape. No text, logos, watermark, typography, neon, glitter or surreal effects. Unique narrative and composition, no generic identical poker chip product shots."
+    },
+    {
+      "id": "adults",
+      "file": "/images/club-overview/adults-v1.webp",
+      "prompt": "Use case: photorealistic-natural. Create a separate landscape editorial photographic background for the adults information card on CONCEPT poker club website. Quiet editorial detail of a sophisticated poker lounge: tailored navy jacket draped on a leather chair, warm brass wall light, a poker table softly out of focus beyond. Mature understated atmosphere. No identification documents, alcohol, cards in foreground, chip stacks or portraits. Color palette: deep navy, warm muted brass, ivory. Authentic real-world photography, subtle film grain, natural materials and believable lighting, not a glossy CGI render. Frame the principal subject in the right half; left half should be dark, quieter negative space for readable overlaid text. 1536x1024 landscape. No text, logos, watermark, typography, neon, glitter or surreal effects. Unique narrative and composition, no generic identical poker chip product shots."
+    }
+  ]
+}

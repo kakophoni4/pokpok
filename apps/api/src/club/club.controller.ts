@@ -34,7 +34,7 @@ const HandOfDayInput = z.object({
 });
 
 /** What anyone may see: the club's own description. */
-export type PublicClubInfo = Pick<ClubSettings, "infoText" | "timezone">;
+export type PublicClubInfo = Pick<ClubSettings, "infoText" | "timezone" | "venues">;
 
 @ApiTags("club")
 @Controller("club")
@@ -64,7 +64,7 @@ export class ClubController {
   @ApiOperation({ summary: "Club description - the bot's «как нас найти»" })
   async info(): Promise<PublicClubInfo> {
     const settings = await this.club.get();
-    return { infoText: settings.infoText, timezone: settings.timezone };
+    return { infoText: settings.infoText, timezone: settings.timezone, venues: settings.venues };
   }
 
   @Roles("hostess")

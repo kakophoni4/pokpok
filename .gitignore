@@ -21,3 +21,4 @@ infra/pgdata/
 infra/bypass-vpn.ps1
 *.sqlite
 *.sqlite-journal
+.local-preview/

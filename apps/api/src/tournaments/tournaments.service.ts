@@ -27,6 +27,8 @@ import { toPublicUser } from "../users/user.mapper";
 import { effectiveConfig } from "./tournament-config";
 import { DEFAULT_LIVE_CONFIG, LiveConfig } from "@poker/contracts";
 import { initialState } from "../live/live-engine";
+import { randomInt } from "node:crypto";
+import { availableTournamentCovers } from "@poker/contracts";
 
 type TournamentWithVenue = Tournament & { venue: Venue | null };
 
@@ -259,41 +261,49 @@ export class TournamentsService {
     const parsed = LiveConfig.safeParse(templates[0]?.config);
     const structure = parsed.success ? parsed.data : DEFAULT_LIVE_CONFIG;
 
-    const tournament = await this.prisma.tournament.create({
-      data: {
-        title: input.title,
-        description: input.description ?? null,
-        seasonId,
-        venueId: input.venueId ?? null,
-        startsAt: new Date(input.startsAt),
-        regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null,
-        regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null,
-        capacity: input.maxTables
-          ? input.maxTables * (input.seatsPerTable ?? 9)
-          : (input.capacity ?? null),
-        maxTables: input.maxTables ?? null,
-        seatsPerTable: input.seatsPerTable ?? 9,
-        ...(input.maxTables
-          ? {
-              live: {
-                create: {
-                  state: initialState({
-                    ...structure,
-                    maxTables: input.maxTables,
-                    seatsPerTable: input.seatsPerTable ?? 9,
-                  }) as never,
+    const tournament = await this.prisma.$transaction(async tx => {
+      // Serialize cover allocation even when two staff create events together.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(72410321)::text`;
+      const previous = await tx.tournament.findMany({ select: { coverId: true } });
+      const choices = availableTournamentCovers(previous.map(row => row.coverId));
+      const coverId = choices[randomInt(choices.length)]!;
+      return tx.tournament.create({
+        data: {
+          coverId,
+          title: input.title,
+          description: input.description ?? null,
+          seasonId,
+          venueId: input.venueId ?? null,
+          startsAt: new Date(input.startsAt),
+          regOpensAt: input.regOpensAt ? new Date(input.regOpensAt) : null,
+          regClosesAt: input.regClosesAt ? new Date(input.regClosesAt) : null,
+          capacity: input.maxTables
+            ? input.maxTables * (input.seatsPerTable ?? 9)
+            : (input.capacity ?? null),
+          maxTables: input.maxTables ?? null,
+          seatsPerTable: input.seatsPerTable ?? 9,
+          ...(input.maxTables
+            ? {
+                live: {
+                  create: {
+                    state: initialState({
+                      ...structure,
+                      maxTables: input.maxTables,
+                      seatsPerTable: input.seatsPerTable ?? 9,
+                    }) as never,
+                  },
                 },
-              },
-            }
-          : {}),
-        paidPlaces: input.paidPlaces ?? null,
-        startingStack: input.startingStack ?? null,
-        addonChips: input.addonChips ?? null,
-        ratingMultiplier: input.ratingMultiplier,
-        minRating: input.minRating ?? null,
-        status: input.status,
-      },
-      include: { venue: true },
+              }
+            : {}),
+          paidPlaces: input.paidPlaces ?? null,
+          startingStack: input.startingStack ?? null,
+          addonChips: input.addonChips ?? null,
+          ratingMultiplier: input.ratingMultiplier,
+          minRating: input.minRating ?? null,
+          status: input.status,
+        },
+        include: { venue: true },
+      });
     });
 
     await this.audit.record({
@@ -629,6 +639,7 @@ function toSummary(
 
   return {
     id: tournament.id,
+    coverId: tournament.coverId,
     title: tournament.title,
     status: tournament.status,
     startsAt: tournament.startsAt.toISOString(),

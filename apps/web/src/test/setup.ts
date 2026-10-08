@@ -3,7 +3,7 @@ import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
 beforeEach(() => {
-  localStorage.setItem("poker-club-rules-ok", "1");
+  localStorage.setItem("poker-club-rules-accepted", "1");
 });
 
 afterEach(() => {

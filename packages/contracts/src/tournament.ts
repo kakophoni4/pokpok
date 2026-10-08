@@ -26,6 +26,7 @@ export type MyRegistration = z.infer<typeof MyRegistration>;
 
 export const TournamentSummary = z.object({
   id: Id,
+  coverId: z.number().int().min(1).max(20).nullish(),
   title: z.string(),
   status: TournamentStatus,
   startsAt: IsoDateTime,

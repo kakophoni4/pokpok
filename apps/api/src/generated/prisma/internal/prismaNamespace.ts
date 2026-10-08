@@ -2430,6 +2430,7 @@ export type VenueScalarFieldEnum = (typeof VenueScalarFieldEnum)[keyof typeof Ve
 
 export const TournamentScalarFieldEnum = {
   id: 'id',
+  coverId: 'coverId',
   seasonId: 'seasonId',
   venueId: 'venueId',
   title: 'title',

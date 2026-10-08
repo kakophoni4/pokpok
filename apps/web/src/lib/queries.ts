@@ -189,8 +189,8 @@ export function useClubInfo() {
   return useQuery({
     queryKey: keys.clubInfo(),
     queryFn: () =>
-      api.get<{ infoText: string; timezone: string }>("/club/info"),
-    // The club does not move; refetching this on every mount is pointless.
+      api.get<{ infoText: string; timezone: string; venues?: ClubVenue[] }>("/club/info"),
+    // Includes the public addresses maintained in club settings.
     staleTime: 5 * 60_000,
   });
 }

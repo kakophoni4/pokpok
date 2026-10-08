@@ -410,7 +410,7 @@ export class AdminScreens {
         ).length;
         const mark = count > 0 ? `×${count} ` : "";
         keyboard.text(
-          fit(`${mark}${hand.icon ? `${hand.icon} ` : ""}${hand.title}`, 22),
+          fit(`${mark}${hand.icon && !hand.icon.startsWith("/") && !hand.icon.startsWith("https://") ? `${hand.icon} ` : ""}${hand.title}`, 22),
           `a:${hand.id}`,
         );
         if (count > 0) keyboard.text("−", `ar:${hand.id}`);
@@ -457,7 +457,7 @@ export class AdminScreens {
       keyboard
         .text(
           fit(
-            `${achievement.icon ? `${achievement.icon} ` : ""}${achievement.title} (+${achievement.ratingPoints})`,
+            `${achievement.icon && !achievement.icon.startsWith("/") && !achievement.icon.startsWith("https://") ? `${achievement.icon} ` : ""}${achievement.title} (+${achievement.ratingPoints})`,
             55,
           ),
           `a:${achievement.id}`,

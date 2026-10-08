@@ -100,12 +100,12 @@
   color: var(--hall-gold);
   text-transform: uppercase;
   font-size: clamp(18px, 2vw, 38px);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-ui);
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 .hall-level > span:last-child {
-  font-family: Inter, sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(11px, 0.9vw, 18px);
   letter-spacing: 0.13em;
   color: #a6b1c2;
@@ -208,10 +208,10 @@
   text-transform: uppercase;
   font-size: clamp(12px, 1vw, 22px);
   letter-spacing: 0.02em;
-  font-family: Inter, sans-serif;
+  font-family: var(--font-ui);
 }
 .hall-section-title > span:last-child {
-  font-family: Inter, sans-serif;
+  font-family: var(--font-ui);
   color: #97a6bc;
   font-size: clamp(11px, 0.8vw, 16px);
 }
@@ -324,7 +324,7 @@
   font-variant-numeric: tabular-nums;
 }
 .hall-stats small {
-  font-family: Inter, sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.4em;
   color: #758ba8;
   font-weight: 400;

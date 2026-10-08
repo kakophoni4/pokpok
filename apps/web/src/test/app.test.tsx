@@ -14,6 +14,46 @@ const SIGNED_IN = {
 const ACTIVE_SEASON = { match: "GET /seasons/active", body: SEASON };
 
 describe("schedule", () => {
+  it("loads tournament parameters only when its card is expanded", async () => {
+    const calls = stubApi([
+      ANONYMOUS, ACTIVE_SEASON,
+      { match: "GET /tournaments?scope=upcoming", body: [tournament()] },
+      { match: "GET /tournaments/t1", body: { ...tournament(), startingStack: 40000, addonChips: 80000, description: null } },
+    ]);
+    renderApp("/");
+    expect(await screen.findByText("Weekly Freezeout #16")).toBeInTheDocument();
+    expect(calls.some(c => c.path === "/tournaments/t1")).toBe(false);
+    fireEvent.click(screen.getByText("Подробнее"));
+    expect(await screen.findByText("Стартовый стек")).toBeInTheDocument();
+    expect(screen.getByText(/40\s000/)).toBeInTheDocument();
+    expect(screen.queryByText(/9 призовых мест/)).not.toBeInTheDocument();
+  });
+  it("filters schedule cards by their actual venue", async () => {
+    stubApi([
+      ANONYMOUS, ACTIVE_SEASON,
+      { match: "GET /tournaments?scope=upcoming", body: [
+        tournament(),
+        tournament({ id: "t2", title: "Игра на набережной", venue: { id: "v2", title: "Вторая площадка", address: "Набережная, 7" } }),
+      ] },
+    ]);
+    renderApp("/");
+    fireEvent.click(await screen.findByRole("button", { name: "Набережная, 7" }));
+    expect(screen.getByText("Игра на набережной")).toBeInTheDocument();
+    expect(screen.queryByText("Weekly Freezeout #16")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Все адреса" }));
+    expect(screen.getByText("Weekly Freezeout #16")).toBeInTheDocument();
+  });
+  it("keeps private account links out of guest navigation", async () => {
+    stubApi([
+      ANONYMOUS, ACTIVE_SEASON,
+      { match: "GET /tournaments?scope=upcoming", body: [] },
+    ]);
+    renderApp("/");
+    expect(await screen.findByText("Игр пока не назначено")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Мой счёт$/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Профиль$/ })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /^Рейтинг$/ }).length).toBeGreaterThan(0);
+  });
   it("reveals the rest of a long schedule and resets the page when switching scope", async () => {
     stubApi([
       ANONYMOUS,
@@ -238,7 +278,7 @@ describe("leaderboard", () => {
     });
     expect(screen.queryByText("Ira_Chips")).not.toBeInTheDocument();
     expect(
-      screen.getByText("вы").closest("li")?.firstElementChild,
+      screen.getByText("вы").closest("tr")?.firstElementChild,
     ).toHaveTextContent("2");
   });
 });

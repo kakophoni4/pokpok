@@ -13,14 +13,15 @@ type NavItem = {
   staffOnly?: boolean;
   dealerOnly?: boolean;
   floorOnly?: boolean;
+  authenticatedOnly?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Расписание" },
   { to: "/rating", label: "Рейтинг" },
   { to: "/achievements", label: "Награды" },
-  { to: "/me", label: "Профиль" },
-  { to: "/account", label: "Мой счёт" },
+  { to: "/me", label: "Профиль", authenticatedOnly: true },
+  { to: "/account", label: "Мой счёт", authenticatedOnly: true },
   { to: "/dealer", label: "Стол", dealerOnly: true },
   { to: "/staff", label: "Вечер", floorOnly: true },
   { to: "/admin", label: "Админ", staffOnly: true },
@@ -35,6 +36,7 @@ export function Layout() {
       !item.staffOnly &&
       !item.floorOnly &&
       !item.dealerOnly &&
+      (!item.authenticatedOnly || status === "authenticated") &&
       (!item.staffOnly || can("hostess")) &&
       (!item.dealerOnly || user?.role === "dealer" || can("hostess")) &&
       (!item.floorOnly || can("floor")),
@@ -133,7 +135,7 @@ export function Layout() {
           shell,
         )}
       >
-        <NavLink to="/rules" className="hover:text-gold-400">
+        <NavLink to="/rules">
           Правила клуба
         </NavLink>
       </footer>

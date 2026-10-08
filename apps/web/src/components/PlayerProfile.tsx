@@ -7,6 +7,7 @@ import { walletLabel } from "@poker/contracts";
 import { Link } from "react-router-dom";
 import { lazy, Suspense, useState } from "react";
 import { AwardArtwork } from "./AwardArtwork";
+import { AchievementIcon } from "./AchievementIcon";
 import {
   formatFullDate,
   formatPoints,
@@ -174,7 +175,7 @@ export function PlayerProfile({
                     )
                   ) : (
                     <span aria-hidden className="text-lg">
-                      {event.achievement?.icon ?? "·"}
+                      <AchievementIcon icon={event.achievement?.icon ?? "·"} />
                     </span>
                   )}
                 </span>

@@ -11,6 +11,7 @@ import type { ClubSettings } from "@poker/contracts";
 import { ADDON_MAX_STACKS, freePlaces, isEveningHand, isPrizePlace, nextPlace, stacksOf } from "@poker/contracts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { AchievementIcon } from "../../components/AchievementIcon";
 import { Avatar, Badge, Button, Card, ErrorState, Loading, Select, cx } from "../../components/ui";
 import {
   formatFullDate,
@@ -646,7 +647,7 @@ function PlayerCard({
                     "disabled:opacity-40",
                   )}
                 >
-                  {hand.icon ? <span aria-hidden>{hand.icon}</span> : null}
+                  <AchievementIcon icon={hand.icon} />
                   {hand.title}
                   {count > 0 ? <span className="nums">×{count}</span> : null}
                 </button>

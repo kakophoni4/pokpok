@@ -94,7 +94,6 @@ export function LoginPage() {
         <section className="login-art" aria-label="CONCEPT poker club">
           <img src="/images/club-champion.webp" alt="" fetchPriority="high" />
           <div className="login-art-copy">
-            <p className="eyebrow">CONCEPT · Ульяновск</p>
             <h2>
               Место встречи.
               <br />

@@ -1,5 +1,7 @@
 import type { Achievement, CreateAchievementInput } from "@poker/contracts";
 import { useEffect, useState } from "react";
+import { AwardArtwork } from "../../components/AwardArtwork";
+import { AwardArtworkPicker } from "../../components/AwardArtworkPicker";
 import {
   Avatar,
   Badge,
@@ -60,6 +62,7 @@ function AchievementRow({
   const [title, setTitle] = useState(achievement.title);
   const [description, setDescription] = useState(achievement.description ?? "");
   const [points, setPoints] = useState(String(achievement.ratingPoints));
+  const [icon, setIcon] = useState(achievement.icon ?? "");
   const [category, setCategory] = useState<"game" | "club">(
     achievement.category,
   );
@@ -69,9 +72,12 @@ function AchievementRow({
     setTitle(achievement.title);
     setDescription(achievement.description ?? "");
     setPoints(String(achievement.ratingPoints));
-  }, [achievement.title, achievement.description, achievement.ratingPoints]);
+    setIcon(achievement.icon ?? "");
+    setCategory(achievement.category);
+  }, [achievement.title, achievement.description, achievement.ratingPoints, achievement.icon, achievement.category]);
 
   const dirty =
+    icon !== (achievement.icon ?? "") ||
     category !== achievement.category ||
     title.trim() !== achievement.title ||
     description.trim() !== (achievement.description ?? "") ||
@@ -80,9 +86,7 @@ function AchievementRow({
   return (
     <li className="card p-3">
       <div className="flex items-start gap-3">
-        <span aria-hidden className="text-2xl leading-none">
-          {achievement.icon ?? "🏅"}
-        </span>
+        <div className="admin-award-preview"><AwardArtwork achievement={{ ...achievement, icon: icon || null }} /></div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -106,6 +110,8 @@ function AchievementRow({
           {formatPoints(achievement.ratingPoints)}
         </span>
       </div>
+
+      {canEdit && <AwardArtworkPicker value={icon} onChange={setIcon} />}
 
       <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-felt-800 pt-3">
         <Button
@@ -177,6 +183,7 @@ function AchievementRow({
                     title: title.trim(),
                     description: description.trim() || null,
                     ratingPoints: Number(points),
+                    icon: icon || null,
                   },
                 })
               }
@@ -267,7 +274,7 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
     category: "club" as "game" | "club",
     title: "",
     description: "",
-    icon: "🏅",
+    icon: "",
     ratingPoints: "50",
     isRepeatable: false,
   });
@@ -291,18 +298,8 @@ function AchievementForm({ onDone }: { onDone: () => void }) {
           <option value="game">Игровая комбинация</option>
         </select>
       </label>
-      <div className="grid grid-cols-[4rem_1fr] gap-3">
-        <div>
-          <label className="label" htmlFor="a-icon">
-            Иконка
-          </label>
-          <input
-            id="a-icon"
-            className="field text-center"
-            value={form.icon}
-            onChange={(event) => setForm({ ...form, icon: event.target.value })}
-          />
-        </div>
+      <AwardArtworkPicker value={form.icon} onChange={(icon) => setForm({ ...form, icon })} />
+      <div>
         <div>
           <label className="label" htmlFor="a-title">
             Название

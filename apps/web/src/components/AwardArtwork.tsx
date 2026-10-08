@@ -1,8 +1,7 @@
-import { useId } from "react";
 import type { Achievement } from "@poker/contracts";
+import { defaultAwardArt } from "../lib/award-art";
 
 export function AwardArtwork({ achievement }: { achievement: Achievement }) {
-  const id = useId().replace(/:/g, "");
   if (
     achievement.icon?.startsWith("https://") ||
     achievement.icon?.startsWith("/")
@@ -17,94 +16,63 @@ export function AwardArtwork({ achievement }: { achievement: Achievement }) {
     );
   }
   if (achievement.category === "game") {
-    const values =
-      achievement.code === "quads"
-        ? ["A", "A", "A", "A"]
-        : achievement.code === "royal_flush"
-          ? ["10", "J", "Q", "K", "A"]
-          : achievement.code === "straight_flush"
-            ? ["5", "6", "7", "8", "9"]
-            : ["A", "K"];
+    const cards = achievement.code === "quads"
+      ? ["A", "A", "A", "A"]
+      : achievement.code === "royal_flush"
+        ? ["10", "J", "Q", "K", "A"]
+        : achievement.code === "straight_flush"
+          ? ["5", "6", "7", "8", "9"]
+          : [null, null];
+    const start = (336 - (cards.length * 56 + (cards.length - 1) * 10)) / 2;
     return (
-      <svg className="award-artwork" viewBox="0 0 180 160" aria-hidden="true">
-        <defs>
-          <linearGradient id={`${id}card`} x2="0.7" y2="1">
-            <stop stopColor="#fff8e8" />
-            <stop offset="1" stopColor="#bcae8d" />
-          </linearGradient>
-        </defs>
-        {values.map((value, i) => (
-          <g
-            key={i}
-            transform={`translate(${90 + (i - (values.length - 1) / 2) * 23} 86) rotate(${(i - (values.length - 1) / 2) * 9})`}
-          >
-            <rect
-              x="-27"
-              y="-51"
-              width="54"
-              height="88"
-              rx="5"
-              fill="#030711"
-              transform="translate(3 5)"
-              opacity=".6"
-            />
-            <rect
-              x="-27"
-              y="-51"
-              width="54"
-              height="88"
-              rx="5"
-              fill={`url(#${id}card)`}
-              stroke="#e9d1a0"
-            />
-            <text
-              x="-20"
-              y="-29"
-              fontSize="16"
-              fontFamily="Georgia"
-              fill={
-                achievement.code === "quads" && (i === 1 || i === 2)
-                  ? "#9e4149"
-                  : "#101b30"
-              }
-            >
-              {value}
-            </text>
-            <text
-              x="0"
-              y="15"
-              textAnchor="middle"
-              fontSize="32"
-              fontFamily="Georgia"
-              fill={
-                achievement.code === "quads" && (i === 1 || i === 2)
-                  ? "#9e4149"
-                  : "#101b30"
-              }
-            >
-              {achievement.code === "quads"
-                ? ["♠", "♥", "♦", "♣"][i]
-                : "♠"}
-            </text>
-          </g>
-        ))}
+      <svg className="award-artwork combination-artwork" viewBox="0 0 336 126" aria-hidden="true">
+        {cards.map((rank, index) => {
+          const suit = achievement.code === "quads" ? index : 0;
+          const color = suit === 1 || suit === 2 ? "#a63343" : "#122039";
+          return (
+            <g key={index} transform={`translate(${start + index * 66} 12)`}>
+              <rect x="1" y="4" width="56" height="94" rx="5" fill="#030811" opacity=".5" />
+              <rect width="56" height="94" rx="5" fill={rank ? "#f3f0e7" : "#162c49"} stroke={rank ? "#cec7b7" : "#b9a275"} />
+              {rank ? (
+                <>
+                  <text x="7" y="21" fontFamily="Manrope, sans-serif" fontSize="16" fontWeight="700" fill={color}>{rank}</text>
+                  <g transform="translate(6 25) scale(.43)"><CardSuit suit={suit} color={color} /></g>
+                  <g transform="translate(16 38)"><CardSuit suit={suit} color={color} /></g>
+                  <g transform="translate(49 74) rotate(180)">
+                    <text x="0" y="0" fontFamily="Manrope, sans-serif" fontSize="16" fontWeight="700" fill={color}>{rank}</text>
+                  </g>
+                </>
+              ) : (
+                <>
+                  <rect x="5" y="5" width="46" height="84" rx="2" fill="none" stroke="#b9a275" opacity=".65" />
+                  <path d="M28 13 48 47 28 81 8 47Z" fill="none" stroke="#b9a275" opacity=".45" />
+                  <g transform="translate(16 35)"><CardSuit suit={0} color="#cfb680" /></g>
+                </>
+              )}
+            </g>
+          );
+        })}
       </svg>
     );
   }
-  const key = `${achievement.code} ${achievement.title}`.toLowerCase();
-  const art = /win|victory|побед|чемпион/.test(key)
-    ? "trophy"
-    : /final|legend|финал|легенд|корол/.test(key)
-      ? "crown"
-      : "medallion";
   return (
     <img
       className="award-artwork"
-      src={`/images/award-${art}-v3.webp`}
+      src={defaultAwardArt(achievement)}
       alt=""
       loading="lazy"
       width="180"
       height="180"
     />
   );
+}
+
+function CardSuit({ suit, color }: { suit: number; color: string }) {
+  const paths = [
+    "M12 0C9 5 0 10 0 16a7 7 0 0 0 10 6c0 3-1 5-4 7h12c-3-2-4-4-4-7a7 7 0 0 0 10-6C24 10 15 5 12 0Z",
+    "M12 27 2 15C-5 6 6-3 12 5c6-8 17 1 10 10Z",
+    "M12 0 24 14 12 28 0 14Z",
+    "M12 0a6 6 0 0 0-5 10 7 7 0 1 0 3 12c0 3-1 5-4 7h12c-3-2-4-4-4-7a7 7 0 1 0 3-12A6 6 0 0 0 12 0Z",
+  ];
+  return <path d={paths[suit]} fill={color} />;
 }

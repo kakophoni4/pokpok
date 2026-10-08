@@ -6,7 +6,6 @@ import {
   EmptyState,
   ErrorState,
   Loading,
-  PageHeader,
   Select,
   cx,
 } from "../components/ui";
@@ -38,8 +37,18 @@ export function LeaderboardPage() {
   const selected = seasons.data?.find((row) => row.id === seasonId);
 
   return (
-    <>
-      <PageHeader title="Рейтинг" subtitle={selected?.title} />
+    <section className="leaderboard-page">
+      <header className="ranking-heading">
+        <div>
+          <p className="ranking-eyebrow">{selected?.title ?? "CONCEPT"}</p>
+          <h1>Рейтинг</h1>
+        </div>
+        {standings.data && (
+          <span className="ranking-total">
+            Игроков <strong>{standings.data.length}</strong>
+          </span>
+        )}
+      </header>
 
       <div className="ranking-tools mb-4 flex flex-wrap items-center gap-3">
         <Select
@@ -86,7 +95,7 @@ export function LeaderboardPage() {
 
       {board.data && board.data.length > 0 && (
         <>
-          {!search && (
+          {!needle && (
             <div className="season-podium mb-7">
               {board.data
                 .filter((row) => row.rank <= 3)
@@ -96,7 +105,7 @@ export function LeaderboardPage() {
                     key={row.user.id}
                     to={`/player/${row.user.id}`}
                   >
-                    <span className="podium-rank" aria-label="Место">
+                    <span className="podium-rank" aria-label={`Место ${row.rank}`}>
                       {String(row.rank).padStart(2, "0")}
                     </span>
                     <Avatar
@@ -104,84 +113,91 @@ export function LeaderboardPage() {
                       url={row.user.avatarUrl}
                       size={56}
                     />
-                    <strong className="truncate max-w-full text-sm sm:text-base mt-3">
+                    <strong className="podium-name">
                       {playerLabel(row.user)}
                     </strong>
-                    <span className="text-xl sm:text-3xl nums text-gold-400 mt-2 font-semibold">
+                    <span className="podium-score nums">
                       {row.points.toLocaleString("ru-RU")}
                     </span>
-                    <span className="text-xs text-stone-400 mt-1">очков</span>
+                    <span className="podium-unit">очков</span>
                   </Link>
                 ))}
             </div>
           )}
-          <div className="ranking-table overflow-hidden border-t border-white/15">
-            <div className="grid grid-cols-[2.5rem_1fr_4rem_3.25rem] gap-2 border-b border-gold-500/20 px-3 py-3 text-sm text-stone-300 sm:grid-cols-[2.5rem_1fr_4rem_3.25rem_3.5rem_4.5rem]">
-              <span className="text-center">#</span>
-              <span>Игрок</span>
-              <span className="text-right">Очки</span>
-              <span className="text-right">Игр</span>
-              <span className="hidden text-right sm:block">Побед</span>
-              <span className="hidden text-right sm:block">Ср. место</span>
-            </div>
-
-            <ul className="divide-y divide-felt-800">
+          <div className="standings-frame">
+            <table
+              className="standings-table"
+              aria-label={`Рейтинг - ${selected?.title ?? "сезон"}`}
+            >
+              <colgroup>
+                <col className="rank-column" />
+                <col />
+                <col className="score-column" />
+                <col className="games-column" />
+                <col className="extra-stat wins-column" />
+                <col className="extra-stat average-column" />
+              </colgroup>
+              <thead><tr>
+                <th scope="col" className="rank-cell">
+                  <span className="sr-only">Место</span>#
+                </th>
+                <th scope="col">Игрок</th>
+                <th scope="col" className="numeric-cell">Очки</th>
+                <th scope="col" className="numeric-cell">Игр</th>
+                <th scope="col" className="numeric-cell extra-stat">Побед</th>
+                <th scope="col" className="numeric-cell extra-stat">Ср. место</th>
+              </tr></thead>
+            <tbody>
               {board.data.map((row) => {
                 const isMe = row.user.id === user?.id;
                 return (
-                  <li
+                  <tr
                     key={row.user.id}
-                    className={cx(
-                      "grid grid-cols-[2.5rem_1fr_4rem_3.25rem] items-center gap-2 px-3 py-3 sm:grid-cols-[2.5rem_1fr_4rem_3.25rem_3.5rem_4.5rem]",
-                      isMe && "bg-gold-500/5",
-                    )}
+                    className={cx(isMe && "standing-self")}
                   >
-                    <span
-                      className={cx(
-                        "nums text-center font-semibold",
-                        row.rank === 1 && "text-gold-400",
-                        row.rank > 3 && "text-stone-500",
-                      )}
-                    >
-                      {row.rank}
-                    </span>
-
+                    <td className="rank-cell">
+                      <span className={cx("standing-rank nums", row.rank <= 3 && `standing-rank-${row.rank}`)}>
+                        {String(row.rank).padStart(2, "0")}
+                      </span>
+                    </td>
+                    <td className="player-cell">
                     <Link
                       to={`/player/${row.user.id}`}
-                      className="flex min-w-0 items-center gap-2 hover:text-gold-400"
+                      className="standing-player"
                     >
                       <Avatar
                         nickname={playerLabel(row.user)}
                         url={row.user.avatarUrl}
                         size={36}
                       />
-                      <span className="truncate">{playerLabel(row.user)}</span>
+                      <span className="standing-name">{playerLabel(row.user)}</span>
                       {isMe && (
-                        <span className="shrink-0 text-sm text-gold-500">
+                        <span className="standing-you">
                           вы
                         </span>
                       )}
                     </Link>
-
-                    <span className="nums text-right font-semibold text-gold-400">
+                    </td>
+                    <td className="standing-score numeric-cell nums">
                       {row.points.toLocaleString("ru-RU")}
-                    </span>
-                    <span className="nums text-right text-stone-400">
+                    </td>
+                    <td className="numeric-cell nums">
                       {row.gamesPlayed}
-                    </span>
-                    <span className="nums hidden text-right text-stone-400 sm:block">
+                    </td>
+                    <td className="numeric-cell nums extra-stat">
                       {row.wins}
-                    </span>
-                    <span className="nums hidden text-right text-stone-400 sm:block">
+                    </td>
+                    <td className="numeric-cell nums extra-stat">
                       {row.avgPlace == null ? "-" : row.avgPlace.toFixed(1)}
-                    </span>
-                  </li>
+                    </td>
+                  </tr>
                 );
               })}
-            </ul>
+            </tbody>
+            </table>
           </div>
         </>
       )}
-    </>
+    </section>
   );
 }
