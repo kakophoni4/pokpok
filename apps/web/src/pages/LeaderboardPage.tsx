@@ -18,7 +18,16 @@ export function LeaderboardPage() {
   const [search, setSearch] = useState("");
   const { user } = useAuth();
   const seasons = useSeasons();
-  const board = useLeaderboard(seasonId || undefined, search);
+  const standings = useLeaderboard(seasonId || undefined);
+  const needle = search.trim().toLocaleLowerCase("ru-RU");
+  const board = {
+    ...standings,
+    data: standings.data?.filter(
+      (row) =>
+        !needle ||
+        playerLabel(row.user).toLocaleLowerCase("ru-RU").includes(needle),
+    ),
+  };
 
   useEffect(() => {
     if (seasonId || !seasons.data?.length) return;
@@ -48,20 +57,30 @@ export function LeaderboardPage() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Поиск по имени"
+          aria-label="Поиск игрока"
           className="field w-full sm:max-w-52"
         />
       </div>
 
-      {seasons.isError && <ErrorState error={seasons.error} onRetry={() => void seasons.refetch()} />}
-      {seasons.data?.length === 0 && <EmptyState title="Сезоны пока не созданы" description="" />}
-      {(seasons.isPending || (Boolean(seasonId) && board.isPending)) && <Loading label="Считаем рейтинг…" />}
+      {seasons.isError && (
+        <ErrorState
+          error={seasons.error}
+          onRetry={() => void seasons.refetch()}
+        />
+      )}
+      {seasons.data?.length === 0 && (
+        <EmptyState title="Сезоны пока не созданы" description="" />
+      )}
+      {(seasons.isPending || (Boolean(seasonId) && board.isPending)) && (
+        <Loading label="Считаем рейтинг…" />
+      )}
       {board.isError && (
         <ErrorState error={board.error} onRetry={() => void board.refetch()} />
       )}
       {board.data?.length === 0 && (
         <EmptyState
-          title="Рейтинг пока пуст"
-          description="Очки появятся после первого турнира с внесёнными результатами."
+          title={needle ? "Игрок не найден" : "Рейтинг пока пуст"}
+          description={needle ? "" : "Результатов в этом сезоне пока нет."}
         />
       )}
 

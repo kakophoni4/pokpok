@@ -48,7 +48,7 @@ export function PlayerProfile({
   canRevoke?: boolean;
 }) {
   return (
-    <>
+    <div className="player-profile">
       <Card className="profile-identity mb-4">
         <div className="flex items-center gap-3">
           <Avatar
@@ -214,7 +214,7 @@ export function PlayerProfile({
           </ul>
         )}
       </section>
-    </>
+    </div>
   );
 }
 

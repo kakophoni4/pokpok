@@ -25,9 +25,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, #081222e8 30%, #081222e0),
-    url("/images/concept-felt-v3.webp") 100% 45% / cover;
+  background: linear-gradient(115deg, #0d1d34, #080f1b 72%);
   z-index: -1;
 }
 .hall-header {
@@ -102,13 +100,13 @@
   color: var(--hall-gold);
   text-transform: uppercase;
   font-size: clamp(18px, 2vw, 38px);
-  font-family: Oswald;
-  letter-spacing: 0.035em;
+  font-family: Inter, sans-serif;
+  letter-spacing: -0.02em;
   line-height: 1.2;
 }
 .hall-level > span:last-child {
   font-family: Inter, sans-serif;
-  font-size: clamp(9px, 0.75vw, 16px);
+  font-size: clamp(11px, 0.9vw, 18px);
   letter-spacing: 0.13em;
   color: #a6b1c2;
 }
@@ -209,13 +207,13 @@
   color: var(--hall-gold);
   text-transform: uppercase;
   font-size: clamp(12px, 1vw, 22px);
-  letter-spacing: 0.09em;
-  font-family: Oswald, sans-serif;
+  letter-spacing: 0.02em;
+  font-family: Inter, sans-serif;
 }
 .hall-section-title > span:last-child {
   font-family: Inter, sans-serif;
   color: #97a6bc;
-  font-size: clamp(8px, 0.6vw, 14px);
+  font-size: clamp(11px, 0.8vw, 16px);
 }
 .hall-ranking ol {
   margin-top: 1.4vh;
@@ -350,7 +348,7 @@
   right: 3vw;
   font-size: 10px;
   color: #94a2b8;
-  opacity: 0.55;
+  opacity: 0.85;
 }
 .hall-control-toggle:hover,
 .hall-control-toggle:focus-within {

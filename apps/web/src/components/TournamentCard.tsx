@@ -1,6 +1,6 @@
 import type { TournamentSummary } from "@poker/contracts";
 import { Link } from "react-router-dom";
-import { formatRelativeDay, formatTime, formatWeekday } from "../lib/format";
+import { formatTime } from "../lib/format";
 import { RegisterButton } from "./RegisterButton";
 
 export function TournamentCard({
@@ -13,16 +13,14 @@ export function TournamentCard({
     t.myRegistration && t.myRegistration.status !== "cancelled";
   const waiting = t.myRegistration?.status === "waitlist";
   return (
-    <li className="tournament-card">
+    <li
+      className={`tournament-card ${registered ? "tournament-is-registered" : ""}`}
+    >
       <Link to={`/t/${t.id}`}>
-        <div className="tournament-topline">
-          <time dateTime={t.startsAt}>
-            {formatWeekday(t.startsAt)} · {formatRelativeDay(t.startsAt)}
-          </time>
-          <span>{finished ? "Завершён" : "Турнир"}</span>
-        </div>
         <div className="tournament-main">
-          <span className="tournament-time">{formatTime(t.startsAt)}</span>
+          <time dateTime={t.startsAt} className="tournament-time">
+            {formatTime(t.startsAt)}
+          </time>
           <div className="min-w-0">
             <h3>{t.title}</h3>
             {t.venue && <p>{t.venue.address ?? t.venue.title}</p>}

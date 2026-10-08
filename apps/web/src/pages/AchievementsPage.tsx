@@ -22,12 +22,8 @@ export function AchievementsPage() {
   return (
     <>
       <PageHeader
-        title="Награды клуба"
-        subtitle={
-          user
-            ? `У вас ${ownedCodes.size} из ${catalogue.data?.length ?? 0}`
-            : ""
-        }
+        title="Награды"
+        subtitle="Коллекция клуба и игровые комбинации"
       />
 
       {catalogue.isPending && <Loading />}
@@ -49,7 +45,26 @@ export function AchievementsPage() {
               className={`award-section award-section-${category}`}
             >
               <h2 className="section-heading award-section-heading">
-                {category === "club" ? "Клубные награды" : "Игровые комбинации"}
+                <span>
+                  {category === "club"
+                    ? "Клубные награды"
+                    : "Игровые комбинации"}
+                </span>
+                {user && (
+                  <small>
+                    {
+                      catalogue.data.filter(
+                        (a) =>
+                          a.category === category && ownedCodes.has(a.code),
+                      ).length
+                    }{" "}
+                    /{" "}
+                    {
+                      catalogue.data.filter((a) => a.category === category)
+                        .length
+                    }
+                  </small>
+                )}
               </h2>
               <ul className="award-gallery">
                 {catalogue.data

@@ -13,7 +13,7 @@ import type {
 } from "@poker/contracts";
 import { useAuth } from "../auth/auth-context";
 import { api } from "../lib/api";
-import { Button, Card, ErrorState, Loading } from "../components/ui";
+import { Button, Card, ErrorState, Loading, Tabs } from "../components/ui";
 import { HostAdmission, HostPlayerControls } from "./LiveHostControls";
 
 const money = (n: number) => `${n.toLocaleString("ru-RU")} ₽`;
@@ -73,7 +73,7 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
   );
   const selected = rows.some((r) => r.id === id) ? id : (rows[0]?.id ?? "");
   return (
-    <div className="space-y-5">
+    <div className="live-workspace space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">
           {dealer ? "Стол дилера" : "Управление вечером"}
@@ -84,36 +84,37 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
           </Link>
         )}
       </div>
-      {!dealer && (
-        <div className="flex gap-2">
-          <Button
-            variant={completed ? "secondary" : "primary"}
-            onClick={() => setCompleted(false)}
-          >
-            Текущие
-          </Button>
-          <Button
-            variant={completed ? "primary" : "secondary"}
-            onClick={() => setCompleted(true)}
-          >
-            Завершённые
-          </Button>
-        </div>
+      <div className="event-pickerbar">
+        {!dealer && (
+          <Tabs
+            value={completed ? "past" : "current"}
+            onChange={(value) => setCompleted(value === "past")}
+            options={[
+              { value: "current", label: "Текущие" },
+              { value: "past", label: "Завершённые" },
+            ]}
+          />
+        )}
+        <select
+          className="field w-full"
+          value={selected}
+          onChange={(e) => setId(e.target.value)}
+          aria-label="Турнир"
+        >
+          <option value="">Выберите турнир</option>
+          {rows.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.title}
+            </option>
+          ))}
+        </select>
+      </div>
+      {!dealer && can("floor") && (
+        <details className="hand-day-settings">
+          <summary>Рука дня</summary>
+          <HandOfDayEditor />
+        </details>
       )}
-      <select
-        className="field w-full"
-        value={selected}
-        onChange={(e) => setId(e.target.value)}
-        aria-label="Турнир"
-      >
-        <option value="">Выберите турнир</option>
-        {rows.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.title}
-          </option>
-        ))}
-      </select>
-      {!dealer && can("floor") && <Card><HandOfDayEditor /></Card>}
       {selected ? (
         <>
           {completed && can("hostess") && (
@@ -254,7 +255,10 @@ export function LiveDesk({
     : (tables[0]?.number ?? 0);
   const seats = s.seats.filter(
     (p) =>
-      (!dealer || (p.state !== "playing" && p.lastTable === table)) &&
+      (dealer
+        ? p.state !== "playing" && p.lastTable === table
+        : !activeTable ||
+          (p.state === "playing" ? p.table : p.lastTable) === activeTable) &&
       name(p.userId).toLowerCase().includes(search.toLowerCase()),
   );
   const people = s.seats.filter(
@@ -270,8 +274,7 @@ export function LiveDesk({
       occupied(t.number) < s.config.seatsPerTable,
   );
   return (
-    <div className="space-y-5">
-      {!dealer && <ClockPanel view={v} compact />}
+    <div className="live-workspace space-y-5">
       {!dealer && can("admin") && s.seats.length === 0 && (
         <Button onClick={() => setSetup(true)}>
           Настроить уровни и формат
@@ -286,511 +289,551 @@ export function LiveDesk({
         </div>
       )}
       {!dealer && can("floor") && (
-        <Card>
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                ["start", "Запустить"],
-                ["pause", "Пауза"],
-                ["next", "Следующий уровень"],
-                ["previous", "Предыдущий уровень"],
+        <div className="clock-workbench">
+          <ClockPanel view={v} compact />
+          <Card className="clock-actions">
+            <div className="flex flex-wrap gap-2">
+              {(
                 [
-                  "skipBreak",
-                  v.clock?.level.break
-                    ? "Закончить перерыв"
-                    : "Пропустить перерыв",
-                ],
-              ] as const
-            ).map(([command, label]) => (
+                  ["start", "Запустить"],
+                  ["pause", "Пауза"],
+                  ["next", "Следующий уровень"],
+                  ["previous", "Предыдущий уровень"],
+                  [
+                    "skipBreak",
+                    v.clock?.level.break
+                      ? "Закончить перерыв"
+                      : "Пропустить перерыв",
+                  ],
+                ] as const
+              ).map(([command, label]) => (
+                <Button
+                  key={command}
+                  variant={command === "start" ? "primary" : "secondary"}
+                  disabled={action.isPending}
+                  onClick={() => {
+                    if (
+                      (command === "previous" || command === "skipBreak") &&
+                      !confirm(`${label}?`)
+                    )
+                      return;
+                    action.mutate({ type: "clock", command });
+                  }}
+                >
+                  {label}
+                </Button>
+              ))}
+              <LevelEditor
+                view={v}
+                pending={action.isPending}
+                save={(index, level) =>
+                  action.mutate({ type: "editLevel", index, level })
+                }
+              />
+              {can("admin") && !dealer && v.displayToken && (
+                <details className="w-full text-sm text-stone-300">
+                  <summary className="cursor-pointer">
+                    Подключение телевизора
+                  </summary>
+                  <a
+                    className="text-gold-400 p-2"
+                    href={`/display/${id}?token=${encodeURIComponent(v.displayToken)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Открыть экран зала
+                  </a>
+                </details>
+              )}
+            </div>
+          </Card>
+        </div>
+      )}
+      <div className="desk-overview">
+        {!dealer && (
+          <Card className="table-control-panel">
+            <h2 className="font-semibold mb-3">Столы</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {s.tables.map((t) => (
+                <div
+                  key={t.number}
+                  className="table-control-item flex flex-wrap items-center gap-2"
+                >
+                  <span>
+                    Стол {t.number} · {occupied(t.number)} /{" "}
+                    {s.config.seatsPerTable}
+                  </span>
+                  <span className="text-white/70">
+                    {staff.data?.find((p) => p.id === t.dealerId)?.name ??
+                      "Без дилера"}
+                  </span>
+                  <Link
+                    className="btn"
+                    to={`/dealer/setup?event=${id}&table=${t.number}`}
+                  >
+                    Настроить планшет
+                  </Link>
+                  {occupied(t.number) === 0 && (
+                    <Button
+                      variant="secondary"
+                      disabled={action.isPending}
+                      onClick={() =>
+                        action.mutate({
+                          type: "openTable",
+                          table: t.number,
+                          open: !t.open,
+                        })
+                      }
+                    >
+                      {t.open ? "В резерв" : "Открыть"}
+                    </Button>
+                  )}
+                  {(t.breakRequested ||
+                    (isFloor && t.open && occupied(t.number) > 0)) && (
+                    <Button
+                      variant="secondary"
+                      disabled={action.isPending}
+                      onClick={() => {
+                        if (
+                          confirm(
+                            `Расформировать стол ${t.number}? Все игроки будут пересажены. Подтвердите, что текущая раздача закончена.`,
+                          )
+                        )
+                          action.mutate({
+                            type: "breakApprove",
+                            table: t.number,
+                            confirm: true,
+                          });
+                      }}
+                    >
+                      Расформировать
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+        {!dealer &&
+          can("hostess") &&
+          s.alerts.some((a) => !a.acknowledgedBy) && (
+            <Card className="desk-alerts">
+              <h2 className="font-semibold mb-3">Требуют внимания</h2>
+              <div className="max-h-64 overflow-y-auto">
+                {s.alerts
+                  .filter((a) => !a.acknowledgedBy)
+                  .map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex flex-wrap justify-between gap-2 border-b border-white/10 py-3"
+                    >
+                      <span>
+                        {name(a.userId)} - {a.text}
+                      </span>
+                      <Button
+                        disabled={action.isPending}
+                        onClick={() =>
+                          action.mutate({ type: "ack", alertId: a.id })
+                        }
+                      >
+                        Принято
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </Card>
+          )}
+        {!dealer && can("hostess") && (
+          <HostAdmission
+            id={id}
+            arrivedIds={s.seats.map((p) => p.userId)}
+            menu={menu.data ?? []}
+          />
+        )}
+      </div>
+      <div className={!dealer && p ? "desk-body has-selection" : "desk-body"}>
+        <div className="desk-roster space-y-3">
+          <div className="table-filter flex flex-wrap gap-2">
+            {!dealer && (
               <Button
-                key={command}
-                variant={command === "start" ? "primary" : "secondary"}
-                disabled={action.isPending}
-                onClick={() => {
-                  if (
-                    (command === "previous" || command === "skipBreak") &&
-                    !confirm(`${label}?`)
-                  )
-                    return;
-                  action.mutate({ type: "clock", command });
-                }}
+                variant={activeTable === 0 ? "primary" : "secondary"}
+                onClick={() => setTable(0)}
               >
-                {label}
+                Все игроки
+              </Button>
+            )}
+            {tables.map((t) => (
+              <Button
+                variant={
+                  (dealer ? table : activeTable) === t.number
+                    ? "primary"
+                    : "secondary"
+                }
+                key={t.number}
+                onClick={() => setTable(t.number)}
+              >
+                {dealer ? "Стол" : `Стол ${t.number}`} ({occupied(t.number)})
               </Button>
             ))}
-            <LevelEditor
-              view={v}
-              pending={action.isPending}
-              save={(index, level) =>
-                action.mutate({ type: "editLevel", index, level })
-              }
-            />
-            {can("admin") && !dealer && v.displayToken && (
-              <details className="w-full text-sm text-stone-300">
-                <summary className="cursor-pointer">
-                  Подключение телевизора
-                </summary>
-                <a
-                  className="text-gold-400 p-2"
-                  href={`/display/${id}?token=${encodeURIComponent(v.displayToken)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Открыть экран зала
-                </a>
-              </details>
-            )}
           </div>
-        </Card>
-      )}
-      {!dealer && (
-        <Card>
-          <h2 className="font-semibold mb-3">Столы</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {s.tables.map((t) => (
-              <div key={t.number} className="flex flex-wrap items-center gap-2">
+          {dealer && table > 0 && (
+            <Card>
+              <DealerSeatMap
+                view={v}
+                players={people}
+                count={s.config.seatsPerTable}
+                name={name}
+                pending={action.isPending}
+                selected={selected}
+                onSelect={setSelected}
+                onMove={(userId, seat, expectedSeat, expectedOccupant) =>
+                  action.mutate({
+                    type: "rebox",
+                    userId,
+                    seat,
+                    expectedSeat,
+                    expectedOccupant,
+                  })
+                }
+              />
+              <Button
+                className="mt-4"
+                disabled={action.isPending}
+                onClick={() => action.mutate({ type: "breakRequest", table })}
+              >
+                Запросить расформирование
+              </Button>
+            </Card>
+          )}
+          {!dealer && (
+            <input
+              className="field w-full"
+              placeholder="Поиск игрока"
+              aria-label="Поиск игрока"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          )}
+          <div className="live-player-list space-y-2 max-h-72 overflow-y-auto">
+            {seats.map((p) => (
+              <button
+                key={p.userId}
+                aria-pressed={selected === p.userId}
+                className="flex w-full flex-wrap justify-between gap-2 rounded-xl border border-white/10 p-4 text-left"
+                onClick={() => setSelected(p.userId)}
+              >
                 <span>
-                  Стол {t.number}: {occupied(t.number)} /{" "}
-                  {s.config.seatsPerTable}
+                  {name(p.userId)} {p.wantsMove ? "· хочет пересесть" : ""}
                 </span>
-                <span className="text-white/70">
-                  {staff.data?.find((p) => p.id === t.dealerId)?.name ??
-                    "Без дилера"}
+                <span>
+                  {p.state === "playing"
+                    ? p.table
+                      ? `Стол ${p.table}, место ${p.seat}`
+                      : "Ожидает посадку"
+                    : p.state === "busted"
+                      ? "Без стека"
+                      : "Завершил игру"}
+                  {!dealer &&
+                    v.players.find((player) => player.id === p.userId)?.place &&
+                    ` · ${v.players.find((player) => player.id === p.userId)?.place} место`}
+                  {!dealer &&
+                    can("hostess") &&
+                    ` · ${money(v.balances.find((b) => b.userId === p.userId)?.dueRub ?? 0)}`}
                 </span>
-                <Link
-                  className="btn"
-                  to={`/dealer/setup?event=${id}&table=${t.number}`}
+              </button>
+            ))}
+          </div>
+          {dealer &&
+            Date.parse(
+              s.tables.find((t) => t.number === table)?.balanceDeferredUntil ??
+                "1970-01-01",
+            ) <= Date.now() &&
+            targets.some((t) => occupied(table) - occupied(t.number) >= 2) && (
+              <Card>
+                <h2>Предложение балансировки</h2>
+
+                <div className="flex flex-wrap gap-2 my-3">
+                  {people.map((person) => (
+                    <Button
+                      key={person.userId}
+                      variant="secondary"
+                      onClick={() => setSelected(person.userId)}
+                    >
+                      {name(person.userId)}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => action.mutate({ type: "deferBalance", table })}
                 >
-                  Настроить планшет
-                </Link>
-                {occupied(t.number) === 0 && (
+                  Не пересаживать сейчас
+                </Button>
+              </Card>
+            )}
+        </div>
+        {p && (
+          <Card
+            className={dealer ? "dealer-player-panel" : "desk-player-detail"}
+          >
+            <div className="flex justify-between gap-2">
+              <h2 className="text-xl font-semibold">{name(p.userId)}</h2>
+              <Button onClick={() => setSelected("")}>Закрыть</Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-4">
+              {gameOperator && (
+                <>
+                  {(menu.data ?? [])
+                    .filter((i) => i.kind === "rebuy" && i.isFixed)
+                    .slice(0, 1)
+                    .flatMap((item) =>
+                      [1, 2, 3].map((quantity) => (
+                        <Button
+                          key={quantity}
+                          disabled={order.isPending}
+                          onClick={() =>
+                            order.mutate({ userId: p.userId, item, quantity })
+                          }
+                        >
+                          Ребай x{quantity}
+                        </Button>
+                      )),
+                    )}
+                  <Button
+                    disabled={action.isPending || p.state !== "playing"}
+                    onClick={() =>
+                      action.mutate({ type: "bust", userId: p.userId })
+                    }
+                  >
+                    Без стека
+                  </Button>
                   <Button
                     variant="secondary"
+                    disabled={action.isPending || p.state === "eliminated"}
+                    onClick={() => {
+                      if (
+                        confirm(
+                          `${name(p.userId)} завершил игру и не будет делать ребай?`,
+                        )
+                      )
+                        action.mutate({
+                          type: "bust",
+                          userId: p.userId,
+                          final: true,
+                        });
+                    }}
+                  >
+                    Завершил игру
+                  </Button>
+                </>
+              )}
+              {!dealer && p.state !== "playing" && (
+                <Button
+                  onClick={() => {
+                    const n = prompt("Стек для исправления ошибочного вылета");
+                    if (
+                      n &&
+                      Number(n) > 0 &&
+                      confirm(
+                        `Вернуть ${name(p.userId)} в игру со стеком ${Number(n)}? Призовое место будет снято.`,
+                      )
+                    )
+                      action.mutate({
+                        type: "restore",
+                        userId: p.userId,
+                        stack: Number(n),
+                      });
+                  }}
+                >
+                  Исправить вылет
+                </Button>
+              )}
+              {gameOperator && (
+                <>
+                  <StackEditor
+                    key={p.userId}
+                    stack={p.stack}
+                    busy={action.isPending}
+                    onSave={(stack) =>
+                      action.mutate({ type: "stack", userId: p.userId, stack })
+                    }
+                  />
+                  <Button
                     disabled={action.isPending}
                     onClick={() =>
                       action.mutate({
-                        type: "openTable",
-                        table: t.number,
-                        open: !t.open,
+                        type: "wantMove",
+                        userId: p.userId,
+                        wanted: !p.wantsMove,
                       })
                     }
                   >
-                    {t.open ? "В резерв" : "Открыть"}
+                    {p.wantsMove
+                      ? "Отменить желание пересесть"
+                      : "Хочет пересесть"}
                   </Button>
-                )}
-                {(t.breakRequested ||
-                  (isFloor && t.open && occupied(t.number) > 0)) && (
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {s.tables
+                .filter(
+                  (t) =>
+                    t.open &&
+                    t.number !== p.table &&
+                    occupied(t.number) < s.config.seatsPerTable,
+                )
+                .map((t) => (
                   <Button
+                    key={t.number}
                     disabled={action.isPending}
                     onClick={() => {
                       if (
                         confirm(
-                          `Расформировать стол ${t.number}? Все игроки будут пересажены. Подтвердите, что текущая раздача закончена.`,
+                          `Пересадить ${name(p.userId)} на стол ${t.number} между раздачами?${
+                            isFloor
+                              ? `\nПосле пересадки: ${s.tables
+                                  .filter(
+                                    (table) => table.open && table.dealerId,
+                                  )
+                                  .map(
+                                    (table) =>
+                                      `${table.number}: ${occupied(table.number) + (table.number === t.number ? 1 : 0) - (table.number === p.table ? 1 : 0)}`,
+                                  )
+                                  .join(" · ")}`
+                              : ""
+                          }`,
                         )
                       )
                         action.mutate({
-                          type: "breakApprove",
-                          table: t.number,
-                          confirm: true,
-                        });
-                    }}
-                  >
-                    Подтвердить расформирование
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-      {!dealer && can("hostess") && s.alerts.some((a) => !a.acknowledgedBy) && (
-        <Card>
-          <h2 className="font-semibold mb-3">Требуют внимания</h2>
-          <div className="max-h-64 overflow-y-auto">
-            {s.alerts
-              .filter((a) => !a.acknowledgedBy)
-              .map((a) => (
-                <div
-                  key={a.id}
-                  className="flex flex-wrap justify-between gap-2 border-b border-white/10 py-3"
-                >
-                  <span>
-                    {name(a.userId)} - {a.text}
-                  </span>
-                  <Button
-                    disabled={action.isPending}
-                    onClick={() =>
-                      action.mutate({ type: "ack", alertId: a.id })
-                    }
-                  >
-                    Принято
-                  </Button>
-                </div>
-              ))}
-          </div>
-        </Card>
-      )}
-      {!dealer && can("hostess") && (
-        <HostAdmission
-          id={id}
-          arrivedIds={s.seats.map((p) => p.userId)}
-          menu={menu.data ?? []}
-        />
-      )}
-      <div className="flex flex-wrap gap-2">
-        {tables.map((t) => (
-          <Button key={t.number} onClick={() => setTable(t.number)}>
-            {dealer ? "Стол" : `Стол ${t.number}`} ({occupied(t.number)})
-          </Button>
-        ))}
-      </div>
-      {dealer && table > 0 && (
-        <Card>
-          <DealerSeatMap
-            view={v}
-            players={people}
-            count={s.config.seatsPerTable}
-            name={name}
-            pending={action.isPending}
-            selected={selected}
-            onSelect={setSelected}
-            onMove={(userId, seat, expectedSeat, expectedOccupant) =>
-              action.mutate({
-                type: "rebox",
-                userId,
-                seat,
-                expectedSeat,
-                expectedOccupant,
-              })
-            }
-          />
-          <Button
-            className="mt-4"
-            disabled={action.isPending}
-            onClick={() => action.mutate({ type: "breakRequest", table })}
-          >
-            Запросить расформирование
-          </Button>
-        </Card>
-      )}
-      {!dealer && (
-        <input
-          className="field w-full"
-          placeholder="Поиск игрока"
-          aria-label="Поиск игрока"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      )}
-      <div className="space-y-2 max-h-72 overflow-y-auto">
-        {seats.map((p) => (
-          <button
-            key={p.userId}
-            className="flex w-full flex-wrap justify-between gap-2 rounded-xl border border-white/10 p-4 text-left"
-            onClick={() => setSelected(p.userId)}
-          >
-            <span>
-              {name(p.userId)} {p.wantsMove ? "· хочет пересесть" : ""}
-            </span>
-            <span>
-              {p.state === "playing"
-                ? p.table
-                  ? `Стол ${p.table}, место ${p.seat}`
-                  : "Ожидает посадку"
-                : p.state === "busted"
-                  ? "Без стека"
-                  : "Завершил игру"}
-              {!dealer &&
-                v.players.find((player) => player.id === p.userId)?.place &&
-                ` · ${v.players.find((player) => player.id === p.userId)?.place} место`}
-              {!dealer &&
-                can("hostess") &&
-                ` · ${money(v.balances.find((b) => b.userId === p.userId)?.dueRub ?? 0)}`}
-            </span>
-          </button>
-        ))}
-      </div>
-      {dealer &&
-        Date.parse(
-          s.tables.find((t) => t.number === table)?.balanceDeferredUntil ??
-            "1970-01-01",
-        ) <= Date.now() &&
-        targets.some((t) => occupied(table) - occupied(t.number) >= 2) && (
-          <Card>
-            <h2>Предложение балансировки</h2>
-
-            <div className="flex flex-wrap gap-2 my-3">
-              {people.map((person) => (
-                <Button
-                  key={person.userId}
-                  variant="secondary"
-                  onClick={() => setSelected(person.userId)}
-                >
-                  {name(person.userId)}
-                </Button>
-              ))}
-            </div>
-            <Button
-              onClick={() => action.mutate({ type: "deferBalance", table })}
-            >
-              Не пересаживать сейчас
-            </Button>
-          </Card>
-        )}
-      {p && (
-        <Card className={dealer ? "dealer-player-panel" : undefined}>
-          <div className="flex justify-between gap-2">
-            <h2 className="text-xl font-semibold">{name(p.userId)}</h2>
-            <Button onClick={() => setSelected("")}>Закрыть</Button>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {gameOperator && (
-              <>
-                {(menu.data ?? [])
-                  .filter((i) => i.kind === "rebuy" && i.isFixed)
-                  .slice(0, 1)
-                  .flatMap((item) =>
-                    [1, 2, 3].map((quantity) => (
-                      <Button
-                        key={quantity}
-                        disabled={order.isPending}
-                        onClick={() =>
-                          order.mutate({ userId: p.userId, item, quantity })
-                        }
-                      >
-                        Ребай x{quantity}
-                      </Button>
-                    )),
-                  )}
-                <Button
-                  disabled={action.isPending || p.state !== "playing"}
-                  onClick={() =>
-                    action.mutate({ type: "bust", userId: p.userId })
-                  }
-                >
-                  Без стека
-                </Button>
-                <Button
-                  variant="secondary"
-                  disabled={action.isPending || p.state === "eliminated"}
-                  onClick={() => {
-                    if (
-                      confirm(
-                        `${name(p.userId)} завершил игру и не будет делать ребай?`,
-                      )
-                    )
-                      action.mutate({
-                        type: "bust",
-                        userId: p.userId,
-                        final: true,
-                      });
-                  }}
-                >
-                  Завершил игру
-                </Button>
-              </>
-            )}
-            {!dealer && p.state !== "playing" && (
-              <Button
-                onClick={() => {
-                  const n = prompt("Стек для исправления ошибочного вылета");
-                  if (
-                    n &&
-                    Number(n) > 0 &&
-                    confirm(
-                      `Вернуть ${name(p.userId)} в игру со стеком ${Number(n)}? Призовое место будет снято.`,
-                    )
-                  )
-                    action.mutate({
-                      type: "restore",
-                      userId: p.userId,
-                      stack: Number(n),
-                    });
-                }}
-              >
-                Исправить вылет
-              </Button>
-            )}
-            {gameOperator && (
-              <>
-                <StackEditor
-                  key={p.userId}
-                  stack={p.stack}
-                  busy={action.isPending}
-                  onSave={(stack) =>
-                    action.mutate({ type: "stack", userId: p.userId, stack })
-                  }
-                />
-                <Button
-                  disabled={action.isPending}
-                  onClick={() =>
-                    action.mutate({
-                      type: "wantMove",
-                      userId: p.userId,
-                      wanted: !p.wantsMove,
-                    })
-                  }
-                >
-                  {p.wantsMove
-                    ? "Отменить желание пересесть"
-                    : "Хочет пересесть"}
-                </Button>
-              </>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {s.tables
-              .filter(
-                (t) =>
-                  t.open &&
-                  t.number !== p.table &&
-                  occupied(t.number) < s.config.seatsPerTable,
-              )
-              .map((t) => (
-                <Button
-                  key={t.number}
-                  disabled={action.isPending}
-                  onClick={() => {
-                    if (
-                      confirm(
-                        `Пересадить ${name(p.userId)} на стол ${t.number} между раздачами?${
-                          isFloor
-                            ? `\nПосле пересадки: ${s.tables
-                                .filter((table) => table.open && table.dealerId)
-                                .map(
-                                  (table) =>
-                                    `${table.number}: ${occupied(table.number) + (table.number === t.number ? 1 : 0) - (table.number === p.table ? 1 : 0)}`,
-                                )
-                                .join(" · ")}`
-                            : ""
-                        }`,
-                      )
-                    )
-                      action.mutate({
-                        type: "move",
-                        userId: p.userId,
-                        targetTable: t.number,
-                      });
-                  }}
-                >
-                  На стол {t.number}
-                </Button>
-              ))}
-            {(p.wantsMove || isFloor) &&
-              s.seats
-                .filter(
-                  (q) =>
-                    (q.wantsMove || isFloor) &&
-                    q.table !== p.table &&
-                    q.table != null &&
-                    q.state === "playing",
-                )
-                .map((q) => (
-                  <Button
-                    key={q.userId}
-                    disabled={action.isPending}
-                    onClick={() => {
-                      if (confirm("Подтвердить обмен местами между раздачами?"))
-                        action.mutate({
                           type: "move",
                           userId: p.userId,
-                          targetTable: q.table!,
-                          swapUserId: q.userId,
+                          targetTable: t.number,
                         });
                     }}
                   >
-                    Обмен с {name(q.userId)}
+                    На стол {t.number}
                   </Button>
                 ))}
-          </div>
-          <HandAwards id={id} userId={p.userId} />
-          {isFloor && (
-            <label className="label mt-4">
-              Призовое место
-              <select
-                className="field w-full"
-                value={
-                  v.players.find((player) => player.id === p.userId)?.place ??
-                  ""
-                }
-                onChange={(e) => {
-                  const expected =
-                    v.players.find((player) => player.id === p.userId)?.place ??
-                    null;
-                  const next = e.target.value ? Number(e.target.value) : null;
-                  const other = next
-                    ? v.players.find(
-                        (player) =>
-                          player.place === next && player.id !== p.userId,
-                      )
-                    : null;
-                  if (
-                    confirm(
-                      `${name(p.userId)}: ${expected ?? "без места"} -> ${next ?? "без места"}${other ? `\nОбмен с ${other.name}: ${next} -> ${expected ?? "без места"}` : ""}?`,
-                    )
+              {(p.wantsMove || isFloor) &&
+                s.seats
+                  .filter(
+                    (q) =>
+                      (q.wantsMove || isFloor) &&
+                      q.table !== p.table &&
+                      q.table != null &&
+                      q.state === "playing",
                   )
-                    action.mutate({
-                      type: "correctPlace",
-                      userId: p.userId,
-                      place: next,
-                      expected,
-                      swapUserId: other?.id,
-                      confirm: true,
-                    });
-                }}
-              >
-                <option value="">Без места</option>
-                {Array.from(
-                  { length: v.paidPlaces ?? 9 },
-                  (_, index) => index + 1,
-                ).map((place) => (
-                  <option value={place} key={place}>
-                    {place}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          {!dealer && can("hostess") && (
-            <HostPlayerControls
-              key={p.userId}
-              id={id}
-              userId={p.userId}
-              menu={menu.data ?? []}
-            />
-          )}
-          {s.config.bountyMode !== "none" && (
-            <div className="mt-4">
-              <label className="label">Баунти за игрока</label>
-              <select
-                className="field w-full"
-                value=""
-                onChange={(e) => {
-                  if (e.target.value)
-                    action.mutate({
-                      type: "bounty",
-                      userId: p.userId,
-                      victimId: e.target.value,
-                    });
-                }}
-              >
-                <option value="">Выбрать выбывшего</option>
-                {s.seats
-                  .filter((q) => q.state !== "playing" && q.userId !== p.userId)
                   .map((q) => (
-                    <option key={q.userId} value={q.userId}>
-                      {name(q.userId)}
+                    <Button
+                      key={q.userId}
+                      disabled={action.isPending}
+                      onClick={() => {
+                        if (
+                          confirm("Подтвердить обмен местами между раздачами?")
+                        )
+                          action.mutate({
+                            type: "move",
+                            userId: p.userId,
+                            targetTable: q.table!,
+                            swapUserId: q.userId,
+                          });
+                      }}
+                    >
+                      Обмен с {name(q.userId)}
+                    </Button>
+                  ))}
+            </div>
+            <HandAwards id={id} userId={p.userId} />
+            {isFloor && (
+              <label className="label mt-4">
+                Призовое место
+                <select
+                  className="field w-full"
+                  value={
+                    v.players.find((player) => player.id === p.userId)?.place ??
+                    ""
+                  }
+                  onChange={(e) => {
+                    const expected =
+                      v.players.find((player) => player.id === p.userId)
+                        ?.place ?? null;
+                    const next = e.target.value ? Number(e.target.value) : null;
+                    const other = next
+                      ? v.players.find(
+                          (player) =>
+                            player.place === next && player.id !== p.userId,
+                        )
+                      : null;
+                    if (
+                      confirm(
+                        `${name(p.userId)}: ${expected ?? "без места"} -> ${next ?? "без места"}${other ? `\nОбмен с ${other.name}: ${next} -> ${expected ?? "без места"}` : ""}?`,
+                      )
+                    )
+                      action.mutate({
+                        type: "correctPlace",
+                        userId: p.userId,
+                        place: next,
+                        expected,
+                        swapUserId: other?.id,
+                        confirm: true,
+                      });
+                  }}
+                >
+                  <option value="">Без места</option>
+                  {Array.from(
+                    { length: v.paidPlaces ?? 9 },
+                    (_, index) => index + 1,
+                  ).map((place) => (
+                    <option value={place} key={place}>
+                      {place}
                     </option>
                   ))}
-              </select>
-            </div>
-          )}
-          {!dealer && can("hostess") && (
-            <AccountPanel userId={p.userId} tournamentId={id} />
-          )}
-        </Card>
-      )}
+                </select>
+              </label>
+            )}
+
+            {!dealer && can("hostess") && (
+              <HostPlayerControls
+                key={p.userId}
+                id={id}
+                userId={p.userId}
+                menu={menu.data ?? []}
+              />
+            )}
+            {s.config.bountyMode !== "none" && (
+              <div className="mt-4">
+                <label className="label">Баунти за игрока</label>
+                <select
+                  className="field w-full"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value)
+                      action.mutate({
+                        type: "bounty",
+                        userId: p.userId,
+                        victimId: e.target.value,
+                      });
+                  }}
+                >
+                  <option value="">Выбрать выбывшего</option>
+                  {s.seats
+                    .filter(
+                      (q) => q.state !== "playing" && q.userId !== p.userId,
+                    )
+                    .map((q) => (
+                      <option key={q.userId} value={q.userId}>
+                        {name(q.userId)}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+            {!dealer && can("hostess") && (
+              <AccountPanel userId={p.userId} tournamentId={id} />
+            )}
+          </Card>
+        )}
+      </div>
       <PendingOrders
         id={id}
         orders={s.orders.filter((o) => o.state === "pending")}
@@ -1469,7 +1512,7 @@ export function AccountPanel({
   if (account.isError) return <ErrorState error={account.error} />;
   const a = account.data!;
   return (
-    <section className="space-y-3 mt-4">
+    <section className="account-ledger space-y-3 mt-4">
       <h2 className="text-xl font-semibold">Счёт · {money(a.debtRub)}</h2>
       {a.creditRub > 0 && <p>Переплата: {money(a.creditRub)}</p>}
       {a.accounts
@@ -1803,8 +1846,8 @@ export function PlayerAccountPage() {
   if (status === "loading") return <Loading />;
   if (status !== "authenticated") return <Navigate to="/login" replace />;
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">Мой счёт</h1>
+    <div className="account-page space-y-5">
+      <h1>Мой счёт</h1>
       <AccountPanel />
       <PlayerOrders />
     </div>

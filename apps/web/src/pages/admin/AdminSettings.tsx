@@ -260,15 +260,9 @@ function VenuesCard({ venues }: { venues: ClubVenue[] }) {
   return (
     <Card className="space-y-3">
       <h2 className="font-semibold">Адреса клуба</h2>
-      <p className="text-sm text-stone-400">
-        Здесь хранятся места проведения. В расписании у каждого турнира
-        выбирается один адрес - можно переехать и добавить новый, не трогая
-        старые игры.
-      </p>
-
       {venues.length === 0 && (
         <p className="text-sm text-stone-500">
-          Пока ни одного адреса - добавьте, куда приходить.
+          Адреса пока не добавлены.
         </p>
       )}
 

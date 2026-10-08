@@ -258,12 +258,32 @@ export function Tabs<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="tablist" className="mb-5 flex flex-wrap gap-2">
+    <div role="tablist" className="segment-tabs mb-5 flex flex-wrap gap-2">
       {options.map((option) => (
         <button
           key={option.value}
           role="tab"
           aria-selected={option.value === value}
+          tabIndex={option.value === value ? 0 : -1}
+          onKeyDown={(event) => {
+            if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key))
+              return;
+            event.preventDefault();
+            const index = options.findIndex((o) => o.value === option.value);
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? options.length - 1
+                  : (index +
+                      (event.key === "ArrowRight" ? 1 : -1) +
+                      options.length) %
+                    options.length;
+            if (options[next]) onChange(options[next].value);
+            event.currentTarget.parentElement
+              ?.querySelectorAll<HTMLButtonElement>("[role=tab]")
+              [next]?.focus();
+          }}
           onClick={() => onChange(option.value)}
           className={cx(
             "rounded-xl border px-3.5 py-2 text-sm font-medium transition",

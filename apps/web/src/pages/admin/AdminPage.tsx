@@ -47,20 +47,29 @@ export function AdminPage() {
   ];
 
   return (
-    <>
+    <div className="admin-page">
       <PageHeader title="Управление клубом" />
 
-      <Tabs value={tab} onChange={setTab} options={options} />
-
-      {tab === "game" && <LiveStaffPage />}
-      {tab === "tournaments" && isAdmin && <AdminTournaments canDelete />}
-      {tab === "players" && <AdminPlayers canEdit canChangeRole={isAdmin} />}
-      {tab === "achievements" && <AdminAchievements canEdit />}
-      {tab === "seasons" && isAdmin && <AdminSeasons />}
-      {tab === "settings" && isAdmin && <AdminSettings />}
-      {tab === "structures" && isAdmin && <LiveSetup id="" saved={() => {}} />}
-      {tab === "dealers" && isAdmin && <AdminDealers />}
-      {tab === "sales" && isAdmin && <AdminSales />}
-    </>
+      <div className="admin-layout">
+        <aside className="admin-sidebar">
+          <Tabs value={tab} onChange={setTab} options={options} />
+        </aside>
+        <div className="admin-content">
+          {tab === "game" && <LiveStaffPage />}
+          {tab === "tournaments" && isAdmin && <AdminTournaments canDelete />}
+          {tab === "players" && (
+            <AdminPlayers canEdit canChangeRole={isAdmin} />
+          )}
+          {tab === "achievements" && <AdminAchievements canEdit />}
+          {tab === "seasons" && isAdmin && <AdminSeasons />}
+          {tab === "settings" && isAdmin && <AdminSettings />}
+          {tab === "structures" && isAdmin && (
+            <LiveSetup id="" saved={() => {}} />
+          )}
+          {tab === "dealers" && isAdmin && <AdminDealers />}
+          {tab === "sales" && isAdmin && <AdminSales />}
+        </div>
+      </div>
+    </div>
   );
 }

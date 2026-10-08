@@ -13,7 +13,7 @@ export function ClubBrand() {
         <filter id={`brand${id}`} colorInterpolationFilters="sRGB">
           <feColorMatrix
             type="matrix"
-            values="0 0 0 0 .76 0 0 0 0 .65 0 0 0 0 .40 20 0 0 0 -.3"
+            values="0 0 0 0 .80 0 0 0 0 .70 0 0 0 0 .47 1.55 0 0 0 -.047"
           />
         </filter>
       </defs>

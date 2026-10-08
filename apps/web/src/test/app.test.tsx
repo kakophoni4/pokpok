@@ -14,6 +14,31 @@ const SIGNED_IN = {
 const ACTIVE_SEASON = { match: "GET /seasons/active", body: SEASON };
 
 describe("schedule", () => {
+  it("reveals the rest of a long schedule and resets the page when switching scope", async () => {
+    stubApi([
+      ANONYMOUS,
+      ACTIVE_SEASON,
+      {
+        match: "GET /tournaments?scope=upcoming",
+        body: Array.from({ length: 10 }, (_, n) =>
+          tournament({ id: `page-${n}`, title: `Вечер ${n + 1}` }),
+        ),
+      },
+      { match: "GET /tournaments?scope=past", body: [] },
+    ]);
+    renderApp("/");
+    expect(await screen.findByText("Вечер 8")).toBeInTheDocument();
+    expect(screen.queryByText("Вечер 9")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Показать ещё" }));
+    expect(await screen.findByText("Вечер 10")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Завершённые" }));
+    expect(await screen.findByText("Завершённых игр нет")).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole("tab", { name: "Завершённые" }), {
+      key: "ArrowLeft",
+    });
+    expect(await screen.findByText("Вечер 8")).toBeInTheDocument();
+    expect(screen.queryByText("Вечер 9")).not.toBeInTheDocument();
+  });
   it("shows upcoming tournaments with seats and the waiting list", async () => {
     stubApi([
       ANONYMOUS,
@@ -160,7 +185,9 @@ describe("leaderboard", () => {
   it("shows an empty state rather than loading forever when no season exists", async () => {
     stubApi([ANONYMOUS, { match: "GET /seasons", body: [] }]);
     renderApp("/rating");
-    expect(await screen.findByText("Сезоны пока не созданы")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Сезоны пока не созданы"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Считаем рейтинг…")).not.toBeInTheDocument();
   });
   it("ranks players and marks the signed-in one", async () => {
@@ -206,6 +233,13 @@ describe("leaderboard", () => {
     expect(screen.getByRole("button", { name: "Сезон" })).toHaveTextContent(
       "Сезон 2026 · сейчас",
     );
+    fireEvent.change(screen.getByPlaceholderText("Поиск по имени"), {
+      target: { value: "Ferz" },
+    });
+    expect(screen.queryByText("Ira_Chips")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("вы").closest("li")?.firstElementChild,
+    ).toHaveTextContent("2");
   });
 });
 

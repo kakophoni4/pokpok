@@ -30,7 +30,7 @@ export function Layout() {
   const { user, status, signingIn, can } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const items = NAV_ITEMS.filter(
+  const publicItems = NAV_ITEMS.filter(
     (item) =>
       !item.staffOnly &&
       !item.floorOnly &&
@@ -41,6 +41,13 @@ export function Layout() {
   );
   const workspace = /^\/(staff|admin|dealer)/.test(pathname);
   const shell = workspace ? "workspace-shell" : "public-shell";
+  const items = workspace
+    ? [
+        { to: "/", label: "Клуб" },
+        ...(can("floor") ? [{ to: "/staff", label: "Вечер" }] : []),
+        ...(can("hostess") ? [{ to: "/admin", label: "Управление" }] : []),
+      ]
+    : publicItems;
 
   return (
     <div
@@ -77,12 +84,12 @@ export function Layout() {
             ))}
           </nav>
           <div className="header-account flex items-center gap-3">
-            {can("floor") && (
+            {!workspace && can("floor") && (
               <NavLink to="/staff" className="text-sm text-stone-300">
                 Вечер
               </NavLink>
             )}
-            {can("hostess") && (
+            {!workspace && can("hostess") && (
               <NavLink to="/admin" className="text-sm text-stone-300">
                 Админ
               </NavLink>
@@ -171,6 +178,8 @@ function NavIcon({ to }: { to: string }) {
       "M12 14a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm-4-1-1 9 5-3 5 3-1-9",
     "/me": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9v-2a8 8 0 0 1 16 0v2",
     "/account": "M3 6h17v15H3V6Zm0 0V3h15v3m-3 6h6v5h-6v-5Z",
+    "/staff": "M3 5h18v14H3V5Zm5 0v14m8-14v14M3 12h18",
+    "/admin": "M4 7h16M4 17h16M8 4v6m8 4v6",
   };
   return (
     <svg

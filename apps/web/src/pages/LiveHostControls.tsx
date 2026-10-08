@@ -75,7 +75,7 @@ export function HostAdmission({
           .filter((r) => r.status === "registered")
           .map((r) => ({ id: r.user.id, name: playerLabel(r.user) }));
   return (
-    <Card>
+    <Card className="host-admission">
       <div className="flex flex-wrap justify-between gap-3 mb-3">
         <h2 className="text-xl font-semibold">Приём игроков</h2>
         <Button
