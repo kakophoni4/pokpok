@@ -1982,7 +1982,7 @@ a {
 .schedule-event-grid:has(.schedule-event-finished) { align-items:stretch; }
 .schedule-event-finished { display:flex; }
 .schedule-event-finished .event-content { display:flex; flex-direction:column; width:100%; }
-.schedule-event-finished .event-action { margin-top:auto; padding-top:16px; }
+.schedule-event.schedule-event-finished .event-action { margin-top:auto; padding-top:16px; }
 .schedule-event { min-width:0; padding:26px; border:1px solid #b7c7e326; border-radius:12px; background:#101b2bf2; }
 .schedule-event:hover { border-color:#cfb68055; }
 .schedule-event-registered { border-color:#cfb68077; }
