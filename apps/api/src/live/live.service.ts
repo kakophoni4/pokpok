@@ -674,6 +674,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
             break;
           }
           case "stack":
+            floor(actor);
             this.access(s, actor, input.userId);
             Object.assign(this.player(s, input.userId), {
               stack: input.stack,

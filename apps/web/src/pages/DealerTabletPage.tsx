@@ -4,6 +4,7 @@ import { api, setAccessToken } from "../lib/api";
 import { Button, Card } from "../components/ui";
 import { ClubBrand } from "../components/ClubBrand";
 import { LiveDesk } from "./LivePages";
+import "./dealer-tablet.css";
 type Shift = {
   accessToken: string;
   userId: string;
@@ -90,16 +91,16 @@ export function DealerTabletPage() {
   return (
     <main className="dealer-shell mx-auto max-w-7xl p-4 sm:p-6 space-y-5">
       <header className="flex items-center justify-between">
-        <div>
+        <div className="dealer-brand-line">
           <ClubBrand />
           <h1 className="text-2xl font-semibold">
             Стол{shift ? ` ${shift.table}` : ""}
           </h1>
         </div>
         {shift && (
-          <div className="flex gap-3 items-center">
-            <span>{shift.nickname}</span>
-            <Button disabled={busy} onClick={() => void logout()}>
+          <div className="dealer-shift-actions flex gap-3 items-center">
+            <span><small>Дилер</small>{shift.nickname}</span>
+            <Button variant="secondary" disabled={busy} onClick={() => void logout()}>
               Завершить смену
             </Button>
           </div>

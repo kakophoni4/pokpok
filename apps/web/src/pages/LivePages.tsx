@@ -274,7 +274,7 @@ export function LiveDesk({
       occupied(t.number) < s.config.seatsPerTable,
   );
   return (
-    <div className="live-workspace space-y-5">
+    <div className={`live-workspace space-y-5 ${dealer ? "dealer-workspace" : ""}`}>
       {!dealer && can("admin") && s.seats.length === 0 && (
         <Button onClick={() => setSetup(true)}>
           Настроить уровни и формат
@@ -456,7 +456,7 @@ export function LiveDesk({
           />
         )}
       </div>
-      <div className={!dealer && p ? "desk-body has-selection" : "desk-body"}>
+      <div className={dealer ? "desk-body dealer-desk-body" : p ? "desk-body has-selection" : "desk-body"}>
         <div className="desk-roster space-y-3">
           <div className="table-filter flex flex-wrap gap-2">
             {!dealer && (
@@ -477,12 +477,12 @@ export function LiveDesk({
                 key={t.number}
                 onClick={() => setTable(t.number)}
               >
-                {dealer ? "Стол" : `Стол ${t.number}`} ({occupied(t.number)})
+                {`Стол ${t.number}`} ({occupied(t.number)})
               </Button>
             ))}
           </div>
           {dealer && table > 0 && (
-            <Card>
+            <Card className="dealer-map-card">
               <DealerSeatMap
                 view={v}
                 players={people}
@@ -501,13 +501,15 @@ export function LiveDesk({
                   })
                 }
               />
-              <Button
+              <div className="dealer-map-footer"><span>{people.length} / {s.config.seatsPerTable} за столом</span><Button
                 className="mt-4"
+                variant="ghost"
                 disabled={action.isPending}
                 onClick={() => action.mutate({ type: "breakRequest", table })}
               >
                 Запросить расформирование
               </Button>
+              </div>
             </Card>
           )}
           {!dealer && (
@@ -519,6 +521,7 @@ export function LiveDesk({
               onChange={(e) => setSearch(e.target.value)}
             />
           )}
+          {dealer && seats.length > 0 && <h3 className="dealer-return-heading">Без стека и выбывшие</h3>}
           <div className="live-player-list space-y-2 max-h-72 overflow-y-auto">
             {seats.map((p) => (
               <button
@@ -576,15 +579,19 @@ export function LiveDesk({
               </Card>
             )}
         </div>
+        {dealer && !p && <Card className="dealer-player-empty"><span className="dealer-empty-symbol" aria-hidden>♠</span><h2>Выберите игрока</h2><p>Нажмите на его место за столом.</p></Card>}
         {p && (
           <Card
             className={dealer ? "dealer-player-panel" : "desk-player-detail"}
           >
+            <div className={dealer ? "dealer-player-heading" : ""}>
             <div className="flex justify-between gap-2">
               <h2 className="text-xl font-semibold">{name(p.userId)}</h2>
-              <Button onClick={() => setSelected("")}>Закрыть</Button>
+              <Button variant="ghost" onClick={() => setSelected("")}>Закрыть</Button>
             </div>
-            <div className="flex flex-wrap gap-2 mt-4">
+            {dealer && <p className="dealer-selected-meta">{p.state === "playing" ? `Место ${p.seat ?? "—"}` : p.state === "busted" ? "Без стека" : "Завершил игру"}</p>}
+            </div>
+            <div className={`flex flex-wrap gap-2 mt-4 ${dealer ? "dealer-player-actions" : ""}`}>
               {gameOperator && (
                 <>
                   {(menu.data ?? [])
@@ -604,6 +611,7 @@ export function LiveDesk({
                       )),
                     )}
                   <Button
+                    variant={dealer ? "secondary" : "primary"}
                     disabled={action.isPending || p.state !== "playing"}
                     onClick={() =>
                       action.mutate({ type: "bust", userId: p.userId })
@@ -612,7 +620,7 @@ export function LiveDesk({
                     Без стека
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant={dealer ? "danger" : "secondary"}
                     disabled={action.isPending || p.state === "eliminated"}
                     onClick={() => {
                       if (
@@ -654,14 +662,14 @@ export function LiveDesk({
               )}
               {gameOperator && (
                 <>
-                  <StackEditor
+                  {!dealer && <StackEditor
                     key={p.userId}
                     stack={p.stack}
                     busy={action.isPending}
                     onSave={(stack) =>
                       action.mutate({ type: "stack", userId: p.userId, stack })
                     }
-                  />
+                  />}
                   <Button
                     disabled={action.isPending}
                     onClick={() =>
@@ -748,7 +756,7 @@ export function LiveDesk({
                     </Button>
                   ))}
             </div>
-            <HandAwards id={id} userId={p.userId} />
+            {dealer ? <details className="dealer-awards"><summary>Игровые комбинации</summary><HandAwards id={id} userId={p.userId} /></details> : <HandAwards id={id} userId={p.userId} />}
             {isFloor && (
               <label className="label mt-4">
                 Призовое место
@@ -2098,12 +2106,13 @@ function DealerSeatMap({
           <button
             key={n}
             data-box={n}
+            aria-pressed={selected === p?.userId}
             aria-label={`Бокс ${n}${p ? `, ${name(p.userId)}` : ", свободно"}`}
             style={{
               left: `${50 + 36 * Math.cos(angle)}%`,
               top: `${50 + 39 * Math.sin(angle)}%`,
             }}
-            className={`dealer-seat ${target === n && drag?.from !== n ? "dealer-seat-target" : ""} ${selected === p?.userId ? "dealer-seat-selected" : ""} ${drag?.id === p?.userId ? "dealer-seat-dragging" : ""}`}
+            className={`dealer-seat ${!p ? "dealer-seat-empty" : ""} ${target === n && drag?.from !== n ? "dealer-seat-target" : ""} ${selected === p?.userId ? "dealer-seat-selected" : ""} ${drag?.id === p?.userId ? "dealer-seat-dragging" : ""}`}
             disabled={pending}
             onPointerDown={(e) => {
               if (!p || pending || e.button !== 0) return;
@@ -2121,15 +2130,10 @@ function DealerSeatMap({
               if (e.detail === 0 && p) onSelect(p.userId);
             }}
           >
-            <span className="text-stone-400 text-xs">{n}</span>
+            <span className="dealer-seat-number">{n}</span>
             <strong className="block truncate">
               {p ? name(p.userId) : "Свободно"}
             </strong>
-            {p && (
-              <span className="tabular-nums text-gold-300">
-                {p.stack.toLocaleString("ru-RU")}
-              </span>
-            )}
           </button>
         );
       })}
