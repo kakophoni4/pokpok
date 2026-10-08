@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
+import { tournamentCoverUrl } from "@poker/contracts";
 import { RegisterButton } from "../components/RegisterButton";
 import { Avatar, Badge, Card, ErrorState, Loading, cx } from "../components/ui";
 import {
@@ -32,7 +33,7 @@ export function TournamentPage() {
     return <ErrorState error={error} onRetry={() => void refetch()} />;
   if (!data) return null;
 
-  const seated = data.registrations.filter((row) => row.status !== "waitlist");
+  const seated = data.registrations.filter((row) => row.status !== "waitlist" && row.status !== "cancelled");
   const waiting = data.registrations.filter((row) => row.status === "waitlist");
   const hasResults = data.results.length > 0;
 
@@ -40,39 +41,35 @@ export function TournamentPage() {
     <div className="tournament-detail">
       <Link
         to="/"
-        className="mb-3 inline-block text-sm text-stone-400 hover:text-stone-200"
+        className="tournament-back"
       >
         ← К расписанию
       </Link>
 
-      <Card className="event-summary mb-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold">{data.title}</h1>
-            <p className="mt-1 text-sm text-stone-400">
-              {formatWeekday(data.startsAt)}, {formatFullDate(data.startsAt)} в{" "}
-              <span className="nums text-stone-300">
-                {formatTime(data.startsAt)}
-              </span>
-            </p>
+      <Card className="event-summary tournament-summary mb-4">
+        <div className="tournament-intro">
+          <img className="tournament-cover" src={tournamentCoverUrl(data.coverId ?? 1)} alt="" />
+          <div className="tournament-intro-content">
+          <div className="tournament-date">
+            <span>{formatFullDate(data.startsAt)}</span>
+            <span>{formatWeekday(data.startsAt)}</span>
+            <Badge tone={data.status === "finished" ? "neutral" : "gold"}>
+              {TOURNAMENT_STATUS_LABELS[data.status] ?? data.status}
+            </Badge>
           </div>
-          <Badge tone={data.status === "finished" ? "neutral" : "green"}>
-            {TOURNAMENT_STATUS_LABELS[data.status] ?? data.status}
-          </Badge>
-        </div>
-
+          <div>
+            <h1>{data.title}</h1>
+            <p className="tournament-time nums">{formatTime(data.startsAt)}</p>
+          </div>
         {data.venue && (
-          <p className="mt-3 text-sm text-stone-300">
+          <p className="tournament-address">
             {data.venue.address ?? data.venue.title}
-            {data.venue.address &&
-              data.venue.title &&
-              data.venue.address !== data.venue.title && (
-                <span className="text-stone-500"> · {data.venue.title}</span>
-              )}
           </p>
         )}
-
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+          </div>
+        </div>
+        <div className="tournament-information">
+        <dl className="tournament-stats">
           <Detail
             label="Участники"
             value={`${data.registeredCount}${data.capacity != null ? ` / ${data.capacity}` : ""}`}
@@ -93,7 +90,7 @@ export function TournamentPage() {
         </dl>
 
         {data.chipsInPlay > 0 && (
-          <p className="mt-3 text-sm text-stone-400">
+          <p className="tournament-pool">
             Фишек в игре:{" "}
             <span className="nums text-stone-200">
               {formatNumber(data.chipsInPlay)}
@@ -107,16 +104,17 @@ export function TournamentPage() {
         )}
 
         {data.description && !isBoilerplateDescription(data.description) && (
-          <p className="mt-4 border-t border-felt-800 pt-3 text-sm whitespace-pre-line text-stone-300">
+          <p className="tournament-description">
             {data.description}
           </p>
         )}
 
         {data.status !== "finished" && (
-          <div className="mt-4">
+          <div className="tournament-action">
             <RegisterButton tournament={data} />
           </div>
         )}
+        </div>
       </Card>
 
       {hasResults && (
@@ -172,16 +170,17 @@ export function TournamentPage() {
               Пока никто не записался - будьте первым.
             </Card>
           ) : (
-            <ul className="card divide-y divide-felt-800">
-              {seated.map((row) => (
+            <ul className="tournament-roster">
+              {seated.map((row, index) => (
                 <li
                   key={row.id}
-                  className="flex items-center gap-3 px-4 py-2.5"
+                  className="tournament-roster-player"
                 >
+                  <span className="tournament-player-number nums">{String(index + 1).padStart(2, "0")}</span>
                   <Avatar
                     nickname={playerLabel(row.user)}
                     url={row.user.avatarUrl}
-                    size={32}
+                    size={40}
                   />
                   <Link
                     to={`/player/${row.user.id}`}

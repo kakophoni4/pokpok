@@ -13,6 +13,23 @@ const SIGNED_IN = {
 };
 const ACTIVE_SEASON = { match: "GET /seasons/active", body: SEASON };
 
+describe("tournament roster", () => {
+  it("excludes cancelled registrations and keeps the waiting list separate", async () => {
+    stubApi([ANONYMOUS, { match: "GET /tournaments/t1", body: {
+      ...tournament(), startingStack:40000, addonChips:80000, chipsInPlay:0, results:[],
+      registrations:[
+        {id:"r1",status:"registered",user:player("p1","Участник")},
+        {id:"r2",status:"cancelled",user:player("p2","Отменил запись")},
+        {id:"r3",status:"waitlist",waitlistPosition:1,user:player("p3","В ожидании")},
+      ],
+    }}]);
+    renderApp("/t/t1");
+    expect(await screen.findByRole("heading",{name:"Записались (1)"})).toBeInTheDocument();
+    expect(screen.queryByText("Отменил запись")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading",{name:"Лист ожидания (1)"})).toBeInTheDocument();
+  });
+});
+
 describe("schedule", () => {
   it("loads tournament parameters only when its card is expanded", async () => {
     const calls = stubApi([
