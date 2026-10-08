@@ -95,6 +95,7 @@ model User {
   avatarUrl              String?
   role                   UserRole   @default(player)
   status                 UserStatus @default(active)
+  creditLimitRub         Int?
   notifyBeforeTournament Boolean    @default(true)
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
@@ -400,6 +401,7 @@ model PlayerPrize {
 /// what every date shown to a human is rendered in, on the site and in the bot.
 model ClubSettings {
   id            String   @id @default("club")
+  defaultCreditLimitRub Int @default(3000)
   infoText      String   @default("")
   blindTemplates Json?
   handOfDay String?

@@ -11,3 +11,5 @@ export * from "./rating.js";
 export * from "./achievement.js";
 export * from "./auth.js";
 export * from "./live.js";
+
+export type { ClubOverview } from "./admin.js";

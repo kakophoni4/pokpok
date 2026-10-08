@@ -39,6 +39,7 @@ import {
   chipsForKind,
   effectiveConfig,
 } from "../tournaments/tournament-config";
+import { assertCreditRoom, creditStatus } from "./credit";
 import { assertNoPastDebt, dueFor } from "./accounts";
 import { cashDayReport, clubDay } from "./host-cash";
 import {
@@ -1338,6 +1339,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       accounts,
     };
   }
+  async credit(userId: string) { return this.db.$transaction(tx => creditStatus(tx,userId), { isolationLevel: "RepeatableRead" }); }
   async hostCash(actor: RequestUser) {
     staff(actor);
     const day = clubDay();
@@ -1379,6 +1381,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       where: { id: receiptId },
     });
     await this.locked(r.tournamentId, async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id=${r.userId} FOR UPDATE`;
       const result = await tx.cashReceipt.updateMany({
         where: { id: r.id, voidedAt: null },
         data: { voidedAt: new Date() },
@@ -1456,6 +1459,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
     orderId: string,
     actor: RequestUser,
     fulfil: boolean,
+    method?: "cash" | "terminal",
   ) {
     if (fulfil) staff(actor);
     await this.locked(id, async (tx, s) => {
@@ -1521,6 +1525,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
           0,
         );
         const totalCost = item.priceRub * o.quantity;
+        if (!method) await assertCreditRoom(tx, o.userId, totalCost);
         const unitCost = Math.floor(totalCost / unitCount);
         for (const g of grants) {
           const source = catalogue.find((c) => c.id === g.menuItemId);
@@ -1532,7 +1537,8 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
                 kind: g.kind,
                 amountRub:
                   unitCost + (ids.length === 0 ? totalCost % unitCount : 0),
-                deferred: true,
+                deferred: !method,
+                method: method ?? null,
                 chips: source?.chips || chipsForKind(g.kind, config),
                 note: g.title ?? source?.title ?? item.title,
                 createdById: actor.id,

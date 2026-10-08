@@ -68,7 +68,7 @@ function HostDesk({ id }: { id: string }) {
   const [error, setError] = useState("");
   const view = useQuery({ queryKey: ["live", id], queryFn: () => api.get<LiveView>(`/live/${id}`), refetchInterval: 2000 });
   const menu = useQuery({ queryKey: ["live-menu"], queryFn: () => api.get<ClubMenuItem[]>("/club/menu-public") });
-  const refresh = () => { for (const key of ["live", "account", "host-detail", "prizes"]) void qc.invalidateQueries({ queryKey: [key] }); };
+  const refresh = () => { for (const key of ["live", "account", "host-detail", "prizes", "host-cash", "credit", "club-overview"]) void qc.invalidateQueries({ queryKey: [key] }); };
   if (view.isPending || menu.isPending) return <Loading />;
   if (view.isError || menu.isError) return <ErrorState error={view.error ?? menu.error} />;
   const data = view.data;

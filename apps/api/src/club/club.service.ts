@@ -114,6 +114,7 @@ export class ClubService {
     });
 
     return {
+      defaultCreditLimitRub: row.defaultCreditLimitRub,
       handOfDay: row.handOfDay,
       infoText: row.infoText,
       entryPriceRub: row.entryPriceRub,
@@ -136,6 +137,7 @@ export class ClubService {
     await this.prisma.clubSettings.update({
       where: { id: ROW_ID },
       data: {
+        ...(input.defaultCreditLimitRub === undefined ? {} : { defaultCreditLimitRub: input.defaultCreditLimitRub }),
         ...(input.infoText === undefined ? {} : { infoText: input.infoText }),
         ...(input.entryPriceRub === undefined
           ? {}

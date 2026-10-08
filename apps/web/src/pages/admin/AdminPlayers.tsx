@@ -14,14 +14,15 @@ export function AdminPlayers({
   canChangeRole?: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const players = usePlayers(search, true);
+  const [page,setPage] = useState(1);
+  const players = usePlayers(search, true, page, "player");
 
   return (
     <>
       <input
         type="search"
         value={search}
-        onChange={(event) => setSearch(event.target.value)}
+        onChange={(event) => { setSearch(event.target.value); setPage(1); }}
         placeholder="Поиск по нику или имени"
         className="field mb-3"
       />
@@ -39,6 +40,7 @@ export function AdminPlayers({
           />
         ))}
       </ul>
+      {players.data && <div className="admin-pagination"><Button variant="ghost" disabled={page === 1} onClick={()=>setPage(page-1)}>Назад</Button><span>Игроков: {players.data.total} · страница {page}</span><Button variant="ghost" disabled={!players.data.hasNext} onClick={()=>setPage(page+1)}>Далее</Button></div>}
     </>
   );
 }
@@ -48,13 +50,14 @@ function PlayerRow({
   canEdit,
   canChangeRole,
 }: {
-  player: PublicUser & { status?: string };
+  player: PublicUser & { status?: string; creditLimitRub?: number | null };
   canEdit: boolean;
   canChangeRole: boolean;
 }) {
   const update = useUpdatePlayer();
   const [nickname, setNickname] = useState(player.nickname);
   const [editing, setEditing] = useState(false);
+  const [creditLimit, setCreditLimit] = useState(player.creditLimitRub == null ? "" : String(player.creditLimitRub));
   const settings = useClubSettings(editing);
   const wallet = usePlayerPrizes(editing ? player.id : undefined);
   const grantPrize = useGrantPrize();
@@ -186,6 +189,11 @@ function PlayerRow({
             </div>
           )}
 
+          {canChangeRole && <form className="credit-player-form" onSubmit={e => { e.preventDefault(); update.mutate({ id: player.id, input: { creditLimitRub: creditLimit === "" ? null : Number(creditLimit) } }); }}>
+            <label className="label" htmlFor={`credit-${player.id}`}>Лимит долга, ₽</label>
+            <div className="flex gap-2"><input id={`credit-${player.id}`} type="number" min="0" max="1000000" step="1" className="field" placeholder={`Общий: ${settings.data?.defaultCreditLimitRub ?? 3000} ₽`} value={creditLimit} onChange={e=>setCreditLimit(e.target.value)} /><Button type="submit" loading={update.isPending}>Сохранить</Button></div>
+            <p className="mt-2 text-sm text-stone-400">Пустое поле — общий лимит клуба. 0 — только с оплатой.</p>
+          </form>}
           {update.isError && (
             <p className="text-xs text-chip-red">{(update.error as Error).message}</p>
           )}

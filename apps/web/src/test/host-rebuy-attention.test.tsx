@@ -20,7 +20,7 @@ describe("hostess rebuy request", () => {
     confirm.mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: "Выдано" }));
     await screen.findByText("Нет связи");
-    expect(post).toHaveBeenCalledWith("/live/event/orders/request/fulfil");
+    expect(post).toHaveBeenCalledWith("/live/event/orders/request/fulfil", { method: undefined });
     expect(screen.getByRole("alert")).toHaveTextContent("Ожидает ребай ×2");
     post.mockResolvedValue({ ok: true });
     fireEvent.click(screen.getByRole("button", { name: "Отменить" }));

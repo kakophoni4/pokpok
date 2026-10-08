@@ -63,6 +63,7 @@ export class LiveController {
   @Roles("hostess") @Get("cash/today") hostCash(@CurrentUser() actor: RequestUser) {
     return this.live.hostCash(actor);
   }
+  @Roles("hostess") @Get("credit/:userId") credit(@Param("userId") id: string) { return this.live.credit(id); }
   @Roles("hostess") @Get("account/:userId") playerAccount(
     @Param("userId") id: string,
   ) {
@@ -150,10 +151,11 @@ export class LiveController {
     return this.live.orderAction(id, orderId, actor, false);
   }
   @Roles("hostess") @Post(":id/orders/:orderId/fulfil") fulfil(
+    @Body(zodPipe(z.object({ method: z.enum(["cash", "terminal"]).optional() }).default({}))) body: { method?: "cash" | "terminal" },
     @Param("id") id: string,
     @Param("orderId") orderId: string,
     @CurrentUser() actor: RequestUser,
   ) {
-    return this.live.orderAction(id, orderId, actor, true);
+    return this.live.orderAction(id, orderId, actor, true, body.method);
   }
 }

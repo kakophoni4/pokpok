@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/auth-context";
-import { Button, Loading, PageHeader, Tabs } from "../../components/ui";
+import { Button, Loading, Tabs } from "../../components/ui";
 import { AdminAchievements } from "./AdminAchievements";
 import { AdminDealers } from "./AdminDealers";
 import { LiveStaffPage, LiveSetup } from "../LivePages";
@@ -13,11 +13,13 @@ import { AdminTournaments } from "./AdminTournaments";
 
 import { ClubBrand } from "../../components/ClubBrand";
 import { HostAccess } from "./HostAccess";
+import { AdminOverview } from "./AdminOverview";
 import { AdminStaff } from "./AdminStaff";
 import "../host-workspace.css";
 import "./admin-workspace.css";
 
 type Tab =
+  | "overview"
   | "staff"
   | "structures"
   | "dealers"
@@ -35,7 +37,7 @@ export function AdminPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<Tab>("game");
+  const [tab, setTab] = useState<Tab>("overview");
   const isAdmin = can("admin");
 
   if (status === "loading") return <Loading />;
@@ -51,16 +53,17 @@ export function AdminPage() {
   </form></main>;
 
   const options: { value: Tab; label: string }[] = [
-    { value: "game", label: "Вечер" },
+    { value: "overview", label: "Обзор" },
+    { value: "game", label: "Текущий турнир" },
     { value: "players", label: "Игроки" },
     { value: "staff", label: "Персонал" },
-    { value: "achievements", label: "Ачивки" },
+    { value: "achievements", label: "Достижения" },
     ...(isAdmin
       ? ([
           { value: "tournaments", label: "Расписание" },
           { value: "seasons", label: "Сезоны" },
-          { value: "settings", label: "Клуб" },
-          { value: "sales", label: "Учёт" },
+          { value: "settings", label: "Настройки клуба" },
+          { value: "sales", label: "Продажи и журнал" },
           { value: "dealers", label: "Дилеры" },
           { value: "structures", label: "Структуры" },
         ] as const)
@@ -71,15 +74,18 @@ export function AdminPage() {
     <div className="admin-workspace workspace-app">
       <header className="host-workspace-header"><ClubBrand /><strong>Администратор</strong><span>{user?.nickname}</span><Link to="/">На сайт</Link><Button variant="ghost" onClick={() => void logout()}>Выйти</Button></header>
       <main className="admin-page workspace-shell">
-      <PageHeader title="Управление клубом" />
 
-      <details className="admin-own-access"><summary>Пароль администратора</summary><HostAccess userId={user!.id} nickname={user!.nickname} role="admin" /></details>
+
+
       <div className="admin-layout">
         <aside className="admin-sidebar">
+          <select className="field admin-mobile-navigation" aria-label="Раздел управления клубом" value={tab} onChange={e=>setTab(e.target.value as Tab)}>{options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select>
           <Tabs value={tab} onChange={setTab} options={options} />
         </aside>
         <div className="admin-content">
-          {tab === "staff" && <AdminStaff />}
+          <div className="admin-section-heading"><span>Управление клубом</span><h1>{options.find(o=>o.value===tab)?.label}</h1></div>
+          {tab === "overview" && <AdminOverview navigate={setTab} />}
+          {tab === "staff" && <><details className="admin-own-access"><summary>Мой пароль администратора</summary><HostAccess userId={user!.id} nickname={user!.nickname} role="admin" /></details><AdminStaff /></>}
           {tab === "game" && <LiveStaffPage />}
           {tab === "tournaments" && isAdmin && <AdminTournaments canDelete />}
           {tab === "players" && (

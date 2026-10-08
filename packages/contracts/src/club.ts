@@ -113,6 +113,7 @@ export const ClubVenueInput = z.object({
 export type ClubVenueInput = z.infer<typeof ClubVenueInput>;
 
 export const ClubSettings = z.object({
+  defaultCreditLimitRub: z.number().int().nonnegative().optional(),
   handOfDay: z.string().nullable().optional(),
   infoText: z.string(),
   entryPriceRub: z.number().int().nonnegative(),
@@ -127,6 +128,7 @@ export const ClubSettings = z.object({
 export type ClubSettings = z.infer<typeof ClubSettings>;
 
 export const UpdateClubSettingsInput = z.object({
+  defaultCreditLimitRub: z.number().int().min(0).max(1_000_000).optional(),
   infoText: z.string().trim().max(4000).optional(),
   entryPriceRub: z.number().int().min(0).max(1_000_000).optional(),
   rebuyPriceRub: z.number().int().min(0).max(1_000_000).optional(),

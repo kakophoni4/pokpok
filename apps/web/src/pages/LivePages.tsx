@@ -1,3 +1,4 @@
+import { IssuePayment } from "./IssuePayment";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate } from "react-router-dom";
@@ -1612,6 +1613,10 @@ export function AccountPanel({
   );
 }
 
+function PendingIssue({ action }: { action: (method: "" | "cash" | "terminal")=>void }) {
+  const [method,setMethod] = useState<"" | "cash" | "terminal">("");
+  return <><IssuePayment value={method} onChange={setMethod}/><Button onClick={()=>{if(confirm("Покупка выдана" + (method ? " и оплата получена?" : " в долг?"))) action(method);}}>Выдано</Button></>;
+}
 export function PendingOrders({
   id,
   orders,
@@ -1626,8 +1631,8 @@ export function PendingOrders({
   onError: (e: string) => void;
 }) {
   const action = useMutation({
-    mutationFn: ({ orderId, verb }: { orderId: string; verb: string }) =>
-      api.post(`/live/${id}/orders/${orderId}/${verb}`),
+    mutationFn: ({ orderId, verb, method }: { orderId: string; verb: string; method?: "" | "cash" | "terminal" }) =>
+      api.post(`/live/${id}/orders/${orderId}/${verb}`, { method: method || undefined }),
     onSuccess: refresh,
     onError: (e) => onError(e.message),
   });
@@ -1643,12 +1648,7 @@ export function PendingOrders({
             {name(o.userId)} · {o.title} x{o.quantity}
           </span>
           <div className="flex gap-2">
-            <Button
-              disabled={action.isPending}
-              onClick={() => action.mutate({ orderId: o.id, verb: "fulfil" })}
-            >
-              Выдано
-            </Button>
+<PendingIssue action={method=>{ if(!action.isPending) action.mutate({orderId:o.id, verb:"fulfil", method}); }} />
             <Button
               disabled={action.isPending}
               variant="ghost"

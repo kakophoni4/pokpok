@@ -1,3 +1,4 @@
+import { IssuePayment, PlayerCredit, useIssueMethod } from "./IssuePayment";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
@@ -159,6 +160,7 @@ export function HostPlayerControls({
   const [search, setSearch] = useState("");
   const [itemId, setItem] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [issueMethod, setIssueMethod] = useIssueMethod();
   const [purpose, setPurpose] = useState<"purchase" | "prize">("purchase");
   const detail = useQuery({
     queryKey: ["host-detail", id],
@@ -187,7 +189,7 @@ export function HostPlayerControls({
         tournamentId: id,
         requestId,
       });
-      return api.post(`/live/${id}/orders/${requestId}/fulfil`, {});
+      return api.post(`/live/${id}/orders/${requestId}/fulfil`, { method: issueMethod || undefined });
     },
     onSuccess: refresh,
   });
@@ -265,9 +267,11 @@ export function HostPlayerControls({
           </button>
         ))}
       </div>
+      <PlayerCredit userId={userId}/>
       {chosen && (
         <div className="flex flex-wrap items-center gap-2">
           <strong className="w-full">{chosen.title}</strong>
+          {purpose === "purchase" && <IssuePayment value={issueMethod} onChange={setIssueMethod} />}
           {[1, 2, 3].map((n) => (
             <Button
               key={n}

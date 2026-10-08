@@ -31,6 +31,7 @@ import type {
   PaymentKind,
 } from "../generated/prisma/client";
 import { LiveService } from "../live/live.service";
+import { assertCreditRoom } from "../live/credit";
 import { assertNoPastDebt } from "../live/accounts";
 import { randomUUID } from "node:crypto";
 import { clockView } from "../live/live-engine";
@@ -176,6 +177,7 @@ export class PaymentsService {
       const live = await tx.liveTournament.findUnique({
         where: { tournamentId },
       });
+      if (live && kind !== "entry" && !input.method) await assertCreditRoom(tx, input.userId, amountRub);
       for (let i = 0; i < copies; i += 1) {
         await tx.payment.create({
           data: {
@@ -184,8 +186,8 @@ export class PaymentsService {
             kind,
             amountRub:
               perAmount + (i === 0 ? amountRub - perAmount * copies : 0),
-            deferred: !!live && kind !== "entry",
-            method: !live || kind === "entry" ? input.method ?? null : null,
+            deferred: !!live && kind !== "entry" && !input.method,
+            method: input.method ?? null,
             chips: perChips + (i === 0 ? chips - perChips * copies : 0),
             note: input.note ?? menuItem?.title ?? null,
             createdById: actorId,
@@ -315,6 +317,7 @@ export class PaymentsService {
           addonCopies,
           config.addonChips,
         );
+      if (live && !method) await assertCreditRoom(tx, userId, price);
       for (const [index, line] of lines.entries()) {
         await tx.payment.create({
           data: {
@@ -322,8 +325,8 @@ export class PaymentsService {
             userId,
             kind: line.kind,
             amountRub: index === 0 ? price : 0,
-            deferred: !!live,
-            method: !live ? method ?? null : null,
+            deferred: !!live && !method,
+            method: method ?? null,
             chips: line.chips,
             note: line.note,
             createdById: actorId,

@@ -174,12 +174,12 @@ export function useFinishSeason() {
   });
 }
 
-export function usePlayers(search: string, enabled: boolean) {
+export function usePlayers(search: string, enabled: boolean, page = 1, role?: "player") {
   return useQuery({
-    queryKey: keys.players(search),
+    queryKey: [...keys.players(search), page, role],
     queryFn: () =>
-      api.get<Paginated<PublicUser & { status: string; createdAt: string }>>(
-        `/users${query({ search, perPage: 100 })}`,
+      api.get<Paginated<PublicUser & { status: string; createdAt: string; creditLimitRub?: number | null }>>(
+        `/users${query({ search, page, perPage: 100, role })}`,
       ),
     enabled,
   });

@@ -15,11 +15,11 @@ describe("admin password login and staff creation",()=>{
   const responses=[{match:"GET /tournaments",body:[]},{match:"GET /auth/staff",body:[]},{match:"POST /auth/staff",body:{ok:true}}];
   const log=stubApi([{match:"POST /auth/refresh",status:401},{match:"POST /auth/admin/login",body:{accessToken:"access",expiresIn:900,user:admin}},...responses]);
   const view=renderApp("/admin");await screen.findByLabelText("Пароль");fireEvent.change(screen.getByLabelText("Логин"),{target:{value:"Owner"}});fireEvent.change(screen.getByLabelText("Пароль"),{target:{value:"test-password"}});fireEvent.submit(screen.getByLabelText("Пароль").closest("form")!);
-  await screen.findByRole("heading",{name:"Управление клубом"});fireEvent.click(screen.getByRole("tab",{name:"Персонал"}));await screen.findByRole("heading",{name:"Создать сотрудника"});
+  await screen.findByRole("heading",{name:"Обзор"});fireEvent.click(screen.getByRole("tab",{name:"Персонал"}));await screen.findByRole("heading",{name:"Создать сотрудника"});
   fireEvent.change(screen.getByLabelText("Логин"),{target:{value:"Dealer_1"}});fireEvent.change(screen.getByLabelText("Пароль"),{target:{value:"staff-password"}});fireEvent.change(screen.getByLabelText("Роль"),{target:{value:"dealer"}});fireEvent.click(screen.getByRole("button",{name:/^Создать$/}));
   await waitFor(()=>expect(log.find(r=>r.path==="/auth/staff"&&r.method==="POST")?.body).toEqual({nickname:"Dealer_1",password:"staff-password",role:"dealer"}));await screen.findByText("Сотрудник создан.");
   expect(screen.getByLabelText("Пароль")).toHaveValue("");view.unmount();
-  stubApi([{match:"POST /auth/refresh",body:{accessToken:"access",expiresIn:900}},{match:"GET /auth/me",body:admin},...responses]);renderApp("/admin");await screen.findByRole("heading",{name:"Управление клубом"});
+  stubApi([{match:"POST /auth/refresh",body:{accessToken:"access",expiresIn:900}},{match:"GET /auth/me",body:admin},...responses]);renderApp("/admin");await screen.findByRole("heading",{name:"Обзор"});
  });
  it("does not expose the admin workspace to a hostess",async()=>{stubApi([{match:"POST /auth/refresh",body:{accessToken:"access",expiresIn:900}},{match:"GET /auth/me",body:{...admin,role:"hostess"}}]);renderApp("/admin");await screen.findByRole("heading",{name:"Вход для администратора"});expect(screen.queryByRole("tab",{name:"Персонал"})).not.toBeInTheDocument();});
 });

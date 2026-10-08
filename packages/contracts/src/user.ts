@@ -78,6 +78,7 @@ export const UpdateMeInput = z.object({
 export type UpdateMeInput = z.infer<typeof UpdateMeInput>;
 
 export const AdminUpdateUserInput = z.object({
+  creditLimitRub: z.number().int().min(0).max(1_000_000).nullable().optional(),
   nickname: Nickname.optional(),
   displayName: z.string().trim().max(64).nullish(),
   role: UserRole.optional(),

@@ -25,6 +25,7 @@ import {
 import type { RequestUser } from "../common/auth/auth.types";
 import { CurrentUser, Public, Roles } from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
+import { OverviewService } from "./overview.service";
 import { ClubService } from "./club.service";
 import { z } from "zod";
 
@@ -39,7 +40,8 @@ export type PublicClubInfo = Pick<ClubSettings, "infoText" | "timezone" | "venue
 @ApiTags("club")
 @Controller("club")
 export class ClubController {
-  constructor(private readonly club: ClubService) {}
+  constructor(private readonly club: ClubService, private readonly overviewService: OverviewService) {}
+  @Roles("admin") @Get("overview") overview() { return this.overviewService.get(); }
   @Public()
   @Get("hand-of-day")
   handOfDay() {

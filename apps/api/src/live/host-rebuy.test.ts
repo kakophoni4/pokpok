@@ -14,10 +14,13 @@ function desk() {
   state.alerts = [{ id: "bust", userId: "player", kind: "bust", text: "Без стека. К оплате 0 ₽", createdAt: new Date().toISOString(), acknowledgedBy: null }];
   const item = { id: "rebuy", title: "Ребай", kind: "rebuy", isActive: true, priceRub: 1000, chips: 40000 };
   const tx = {
+    $queryRaw: vi.fn().mockResolvedValue([]),
+    user: { findUniqueOrThrow: vi.fn().mockResolvedValue({creditLimitRub:null}) },
+    clubSettings: { findUnique: vi.fn().mockResolvedValue({defaultCreditLimitRub:3000}) },
     tournament: { findUniqueOrThrow: vi.fn().mockResolvedValue({ status: "running", seasonId: null }) },
     clubMenuItem: { findUnique: vi.fn().mockResolvedValue(item), findUniqueOrThrow: vi.fn().mockResolvedValue(item), findMany: vi.fn().mockResolvedValue([item]) },
-    payment: { create: vi.fn().mockResolvedValue({ id: "payment" }), aggregate: vi.fn(async (input: any) => input._sum.chips ? { _sum: { chips: 80000 } } : { _sum: { amountRub: 2000 } }) },
-    cashReceipt: { aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 0 } }) },
+    payment: { groupBy: vi.fn().mockResolvedValue([]), create: vi.fn().mockResolvedValue({ id: "payment" }), aggregate: vi.fn(async (input: any) => input._sum.chips ? { _sum: { chips: 80000 } } : { _sum: { amountRub: 2000 } }) },
+    cashReceipt: { groupBy: vi.fn().mockResolvedValue([]), aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 0 } }) },
     result: { deleteMany: vi.fn() },
   };
   const service = new LiveService({} as never, {} as never, {} as never, {} as never);

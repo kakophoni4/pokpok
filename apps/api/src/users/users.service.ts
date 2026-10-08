@@ -76,6 +76,7 @@ export class UsersService {
     if (!actor) throw new NotFoundException({ code: "USER_NOT_FOUND", message: "Игрок не найден" });
 
     const actorIsAdmin = hasRole(actor.role, "admin");
+    if (input.creditLimitRub !== undefined && !actorIsAdmin) throw new ForbiddenException("Лимит долга меняет только администратор");
     if (input.role !== undefined && !actorIsAdmin) {
       throw new ForbiddenException({
         code: "FORBIDDEN",
@@ -98,6 +99,7 @@ export class UsersService {
     const after = await this.prisma.user.update({
       where: { id: userId },
       data: {
+        ...(input.creditLimitRub === undefined ? {} : { creditLimitRub: input.creditLimitRub }),
         ...(input.nickname === undefined ? {} : { nickname: input.nickname }),
         ...(input.displayName === undefined ? {} : { displayName: input.displayName ?? null }),
         ...(input.role === undefined ? {} : { role: input.role }),
@@ -111,8 +113,8 @@ export class UsersService {
       action: "user.update",
       entity: "User",
       entityId: userId,
-      before: { nickname: before.nickname, role: before.role, status: before.status },
-      after: { nickname: after.nickname, role: after.role, status: after.status },
+      before: { nickname: before.nickname, role: before.role, status: before.status, creditLimitRub: before.creditLimitRub },
+      after: { nickname: after.nickname, role: after.role, status: after.status, creditLimitRub: after.creditLimitRub },
     });
 
     return toMeUser(after as UserWithIdentities);
@@ -148,6 +150,7 @@ export class UsersService {
     return {
       items: rows.map((row) => ({
         ...toPublicUser(row),
+        creditLimitRub: row.creditLimitRub,
         status: row.status,
         createdAt: row.createdAt.toISOString(),
       })),
