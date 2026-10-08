@@ -80,11 +80,13 @@ export function PlayerProfile({
         <Stat label="Очки" value={stats.points.toLocaleString("ru-RU")} />
         <Stat label="Место в рейтинге" value={stats.rank ?? "-"} />
       </div>
-      <div className="profile-stats mb-8 grid grid-cols-2 sm:grid-cols-4">
+      <div className="profile-stats mb-8 grid grid-cols-3">
         <Stat label="Турниров" value={stats.gamesPlayed} />
         <Stat label="Побед" value={stats.wins} />
         <Stat label="Топ-3" value={stats.top3} />
         <Stat label="В призах" value={stats.itm} />
+        <Stat label="Лучшее место" value={stats.bestPlace ?? "-"} />
+        <Stat label="Среднее место" value={stats.avgPlace == null ? "-" : stats.avgPlace.toFixed(1)} />
       </div>
 
       <div className="mb-4">
@@ -117,19 +119,20 @@ export function PlayerProfile({
 
       {achievements && achievements.length > 0 && (
         <div>
-          {(["club", "game"] as const).map((category) => (
+          {(["club", "game"] as const).filter((category) => achievements.some((item) => item.achievement.category === category)).map((category) => (
             <section className="mb-6" key={category}>
               <h2 className="section-heading">
-                {category === "club" ? "Клубные награды" : "Игровые комбинации"}{" "}
+                <span>{category === "club" ? "Клубные награды" : "Игровые комбинации"}{" "}
                 (
                 {
                   achievements.filter(
                     (a) => a.achievement.category === category,
                   ).length
                 }
-                )
+                )</span>
+                <Link to="/achievements" className="profile-all-awards">Все награды ↗</Link>
               </h2>
-              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <ul className="profile-award-strip">
                 {achievements
                   .filter((a) => a.achievement.category === category)
                   .map((granted) => (
