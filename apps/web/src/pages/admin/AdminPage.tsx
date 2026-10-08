@@ -65,7 +65,7 @@ export function AdminPage() {
           { value: "settings", label: "Настройки клуба" },
           { value: "sales", label: "Продажи и журнал" },
           { value: "dealers", label: "Дилеры" },
-          { value: "structures", label: "Структуры" },
+          { value: "structures", label: "Блайнды и перерывы" },
         ] as const)
       : []),
   ];
