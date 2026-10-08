@@ -53,6 +53,9 @@ export type LiveOrder = {
   createdAt: string;
   actorId?: string;
   paymentIds?: string[];
+  requestedById?: string;
+  table?: number | null;
+  seat?: number | null;
 };
 export type BountyRecord = {
   id: string;

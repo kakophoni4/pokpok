@@ -213,7 +213,7 @@ export function LiveDesk({
         quantity,
         requestId,
       });
-      await api.post(`/live/${id}/orders/${requestId}/fulfil`);
+      if (!dealer && can("hostess")) await api.post(`/live/${id}/orders/${requestId}/fulfil`);
     },
     onSuccess: refresh,
     onError: (e) => {
@@ -590,6 +590,7 @@ export function LiveDesk({
               <Button variant="ghost" onClick={() => setSelected("")}>Закрыть</Button>
             </div>
             {dealer && <p className="dealer-selected-meta">{p.state === "playing" ? `Место ${p.seat ?? "—"}` : p.state === "busted" ? "Без стека" : "Завершил игру"}</p>}
+            {dealer && s.orders.filter(o => o.userId === p.userId && o.state === "pending" && (menu.data ?? []).some(m => m.id === o.menuItemId && m.kind === "rebuy")).map(o => <p key={o.id} role="status" className="dealer-rebuy-pending">Ребай ×{o.quantity} · ожидает выдачи хостес</p>)}
             </div>
             <div className={`flex flex-wrap gap-2 mt-4 ${dealer ? "dealer-player-actions" : ""}`}>
               {gameOperator && (
@@ -601,7 +602,7 @@ export function LiveDesk({
                       [1, 2, 3].map((quantity) => (
                         <Button
                           key={quantity}
-                          disabled={order.isPending}
+                          disabled={order.isPending || s.orders.some(o => o.userId === p.userId && o.menuItemId === item.id && o.state === "pending")}
                           onClick={() =>
                             order.mutate({ userId: p.userId, item, quantity })
                           }
@@ -847,13 +848,13 @@ export function LiveDesk({
           </Card>
         )}
       </div>
-      <PendingOrders
+      {!dealer && can("hostess") && <PendingOrders
         id={id}
         orders={s.orders.filter((o) => o.state === "pending")}
         name={name}
         refresh={refresh}
         onError={setError}
-      />
+      />}
       {!dealer && can("hostess") && (
         <LotteryDesk
           id={id}

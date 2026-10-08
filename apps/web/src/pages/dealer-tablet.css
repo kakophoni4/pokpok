@@ -92,3 +92,4 @@
 .dealer-map-footer .concept-button { margin-top:0; }
 .dealer-workspace .dealer-seat { min-height:76px; display:flex; align-items:center; justify-content:center; padding:12px 8px; }
 .dealer-workspace .dealer-seat >strong { font-size:15px; padding-top:0; }
+.dealer-rebuy-pending{margin-top:12px;padding:12px;border:1px solid #cfb77d55;border-radius:9px;background:#cfb77d0b;color:#dac592;font-size:15px;line-height:1.5}

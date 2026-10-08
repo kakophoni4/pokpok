@@ -4,6 +4,7 @@ import type {
   ClubMenuItem,
   PrizeWallet,
   TournamentDetail,
+  LiveOrder,
 } from "@poker/contracts";
 import { usePlayers } from "../lib/queries";
 import { playerLabel } from "../lib/format";
@@ -140,11 +141,13 @@ export function HostPlayerControls({
   userId,
   menu,
   compact = false,
+  pendingOrders = [],
 }: {
   id: string;
   userId: string;
   menu: ClubMenuItem[];
   compact?: boolean;
+  pendingOrders?: LiveOrder[];
 }) {
   const refresh = useDeskRefresh();
   const [search, setSearch] = useState("");
@@ -245,6 +248,7 @@ export function HostPlayerControls({
         {rows.map((m) => (
           <button
             key={m.id}
+            disabled={m.kind === "rebuy" && pendingOrders.some(o => o.userId === userId && o.menuItemId === m.id && o.state === "pending")}
             onClick={() => setItem(m.id)}
             className={`rounded-lg border p-3 text-left ${m.id === itemId ? "border-gold-400 bg-gold-500/10" : "border-white/10 bg-felt-950"}`}
           >

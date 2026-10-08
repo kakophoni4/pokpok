@@ -132,7 +132,7 @@ export class LiveController {
   ) {
     return this.live.orderAction(id, orderId, actor, false);
   }
-  @Roles("dealer") @Post(":id/orders/:orderId/fulfil") fulfil(
+  @Roles("hostess") @Post(":id/orders/:orderId/fulfil") fulfil(
     @Param("id") id: string,
     @Param("orderId") orderId: string,
     @CurrentUser() actor: RequestUser,

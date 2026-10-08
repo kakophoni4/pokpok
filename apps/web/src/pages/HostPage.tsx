@@ -8,6 +8,7 @@ import { api } from "../lib/api";
 import { HostAdmission, HostPlayerControls } from "./LiveHostControls";
 import { AccountPanel, PendingOrders } from "./LivePages";
 import { HostAttention } from "./HostAttention";
+import { HostRebuyAttention } from "./HostRebuyAttention";
 import "./host-workspace.css";
 
 export function HostPage() {
@@ -73,15 +74,16 @@ function HostDesk({ id }: { id: string }) {
   const name = (uid: string) => data.players.find(p => p.id === uid)?.name ?? uid;
   const arrivedIds = seats.map(s => s.userId);
   const pending = (data.state?.orders ?? []).filter(o => o.state === "pending");
+  const pendingRebuys = pending.filter(o => menu.data?.some(m => m.id === o.menuItemId && m.kind === "rebuy"));
   const due = data.balances.reduce((sum, b) => sum + Math.max(0, b.dueRub), 0);
   const selectedSeat = seats.find(s => s.userId === selected);
   return <>
     <div className="host-shift-summary"><span>Участников <b>{arrivedIds.length}</b></span><span>К выдаче <b>{pending.length}</b></span><span>К оплате <b>{due.toLocaleString("ru-RU")} ₽</b></span></div>
-    <HostAttention id={id} alerts={data.state?.alerts ?? []} name={name} onSelect={(userId, final) => { setSelected(userId); setSearch(""); setTab(final ? "account" : "issue"); }} />
+    {pendingRebuys.length ? <HostRebuyAttention key={pendingRebuys[0]!.id} id={id} orders={pendingRebuys} name={name} onSelect={userId => { setSelected(userId); setSearch(""); setTab("issue"); }} /> : <HostAttention id={id} alerts={data.state?.alerts ?? []} name={name} onSelect={(userId, final) => { setSelected(userId); setSearch(""); setTab(final ? "account" : "issue"); }} />}
     <div className="host-desk">
     <section className="host-reception">
       <HostAdmission id={id} arrivedIds={arrivedIds} menu={menu.data ?? []} allowFinish={false} />
-      <PendingOrders id={id} orders={pending} name={name} refresh={refresh} onError={setError} />
+      <PendingOrders id={id} orders={[...pendingRebuys, ...pending.filter(o => !pendingRebuys.some(r => r.id === o.id))]} name={name} refresh={refresh} onError={setError} />
       {error && <p role="alert" className="text-chip-red">{error}</p>}
     </section>
     <section className="host-roster">
@@ -99,7 +101,7 @@ function HostDesk({ id }: { id: string }) {
       {selected ? <div key={selected} className="host-selected">
         <div className="host-detail-heading"><Avatar nickname={name(selected)} size={44} /><div><h2>{name(selected)}</h2><p>{selectedSeat?.table ? `Стол ${selectedSeat.table} · место ${selectedSeat.seat}` : "Расчёт и выдача"}</p></div></div>
         <div className="host-detail-tabs" role="tablist" aria-label="Действия с игроком"><button role="tab" aria-selected={tab === "issue"} onClick={() => setTab("issue")}>Выдача и призы</button><button role="tab" aria-selected={tab === "account"} onClick={() => setTab("account")}>Счёт</button></div>
-        <div className="host-detail-body" role="tabpanel">{tab === "issue" ? <HostPlayerControls id={id} userId={selected} menu={menu.data ?? []} compact /> : <AccountPanel userId={selected} tournamentId={id} />}</div>
+        <div className="host-detail-body" role="tabpanel">{tab === "issue" ? <HostPlayerControls id={id} userId={selected} menu={menu.data ?? []} pendingOrders={pending} compact /> : <AccountPanel userId={selected} tournamentId={id} />}</div>
       </div> : <div className="host-pick"><div className="host-pick-symbol">↗</div><h2>Выберите игрока</h2><p>Выдача, призы и расчёт</p></div>}
     </section>
   </div></>;

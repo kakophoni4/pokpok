@@ -161,7 +161,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
     const existing = await tx.liveTournament.findUnique({ where: { tournamentId: id }, select: { displayCode: true } });
     let displayCode = existing?.displayCode;
     if (!displayCode) {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(83462109)`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(83462109)::text`;
       for (let attempt = 0; attempt < 50; attempt++) {
         const candidate = String(randomInt(100000, 1000000));
         if (!await tx.liveTournament.findUnique({ where: { displayCode: candidate }, select: { tournamentId: true } })) {
@@ -296,7 +296,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
         );
         const users = new Set(
           state.seats
-            .filter((s) => s.table != null && own.has(s.table))
+            .filter((s) => (s.table ?? s.lastTable) != null && own.has((s.table ?? s.lastTable)!))
             .map((s) => s.userId),
         );
         state.orders = state.orders.filter((o) => users.has(o.userId));
@@ -1398,7 +1398,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       if (t.status === "finished" || t.status === "cancelled")
         fail("Вечер завершён");
       if (s.orders.some((o) => o.id === input.requestId)) return { ok: true };
-      this.player(s, userId);
+      const player = this.player(s, userId);
       const item = await tx.clubMenuItem.findUnique({
         where: { id: input.menuItemId },
       });
@@ -1411,6 +1411,8 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       )
         throw new ForbiddenException("Флор может оформить только ребай");
       if (item.kind === "rebuy" && !rebuyOpen(s)) fail("Ребаи закрыты");
+      if (item.kind === "rebuy" && s.orders.some(o => o.userId === userId && o.menuItemId === item.id && o.state === "pending"))
+        fail("Ребай уже ожидает выдачи хостес");
       s.orders.push({
         id: input.requestId,
         userId,
@@ -1420,6 +1422,9 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
         quantity: input.quantity,
         state: "pending",
         createdAt: new Date().toISOString(),
+        requestedById: actor.id,
+        table: player.table ?? player.lastTable ?? null,
+        seat: player.seat,
       });
       await this.save(tx, input.tournamentId, s);
       await this.audit(tx, input.tournamentId, actor, "order", {
@@ -1435,6 +1440,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
     actor: RequestUser,
     fulfil: boolean,
   ) {
+    if (fulfil) staff(actor);
     await this.locked(id, async (tx, s) => {
       if (!s) fail("Вечер не настроен");
       const o = s.orders.find((o) => o.id === orderId);
@@ -1452,13 +1458,6 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
         });
         if (!item.isActive || item.priceRub !== o.priceRub)
           fail("Цена изменилась. Отмените заказ и создайте новый");
-        if (
-          (actor.role === "floor" && item.kind !== "rebuy") ||
-          (actor.role === "dealer" &&
-            item.kind !== "rebuy" &&
-            item.kind !== "addon")
-        )
-          throw new ForbiddenException("Бар выдаёт хостес");
         const season = t.seasonId
           ? await tx.season.findUnique({ where: { id: t.seasonId } })
           : null;
@@ -1478,11 +1477,6 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
                 title: item.title,
               },
             ];
-        if (
-          (actor.role === "dealer" || actor.role === "floor") &&
-          bundle.length
-        )
-          throw new ForbiddenException("Комплекты выдаёт хостес");
         const addonCount = grants
           .filter((g) => g.kind === "addon")
           .reduce((n, g) => n + g.quantity * o.quantity, 0);
@@ -1542,6 +1536,11 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
           player.state = "playing";
           if (player.table === null) assignSeat(s, player);
           await returnToPlay(tx, id, o.userId);
+          // Issuing this rebuy resolves earlier "no chips" signals for the player.
+          for (const alert of s.alerts) {
+            if (alert.userId === o.userId && !alert.acknowledgedBy && alert.text.startsWith("Без стека."))
+              alert.acknowledgedBy = actor.id;
+          }
         }
         player.stack += purchased._sum.chips ?? 0;
         player.measuredAt = new Date().toISOString();
