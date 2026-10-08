@@ -43,27 +43,6 @@ export function LeaderboardPage() {
         <p className="ranking-context">{selected?.title ?? "Текущий сезон"}{standings.data && <span> · {standings.data.length} игроков</span>}</p>
       </header>
 
-      <div className="ranking-tools">
-        <Select
-          className="w-full sm:max-w-72"
-          aria-label="Сезон"
-          value={seasonId}
-          onChange={setSeasonId}
-          options={(seasons.data ?? []).map((season) => ({
-            value: season.id,
-            label: `${season.title}${season.isActive ? " · сейчас" : " · завершён"}`,
-          }))}
-        />
-        <input
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Найти игрока по имени"
-          aria-label="Поиск игрока"
-          className="field ranking-search"
-        />
-      </div>
-
       {seasons.isError && (
         <ErrorState
           error={seasons.error}
@@ -79,18 +58,9 @@ export function LeaderboardPage() {
       {board.isError && (
         <ErrorState error={board.error} onRetry={() => void board.refetch()} />
       )}
-      {board.data?.length === 0 && (
-        <EmptyState
-          title={needle ? "Игрок не найден" : "Рейтинг пока пуст"}
-          description={needle ? "" : "Результатов в этом сезоне пока нет."}
-        />
-      )}
-
-      {board.data && board.data.length > 0 && (
-        <>
-          {!needle && (
-            <div className="season-podium mb-7">
-              {board.data
+      {standings.data && standings.data.length > 0 && (
+            <div className="season-podium mb-7" aria-label="Тройка лидеров сезона">
+              {standings.data
                 .filter((row) => row.rank <= 3)
                 .sort((a, b) => ([2, 1, 3].indexOf(a.rank) - [2, 1, 3].indexOf(b.rank)))
                 .map((row) => (
@@ -118,6 +88,36 @@ export function LeaderboardPage() {
                 ))}
             </div>
           )}
+      <div className="ranking-tools">
+        <Select
+          className="w-full sm:max-w-72"
+          aria-label="Сезон"
+          value={seasonId}
+          onChange={setSeasonId}
+          options={(seasons.data ?? []).map((season) => ({
+            value: season.id,
+            label: `${season.title}${season.isActive ? " · сейчас" : " · завершён"}`,
+          }))}
+        />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Найти игрока по имени"
+          aria-label="Поиск игрока"
+          className="field ranking-search"
+        />
+      </div>
+
+      {board.data?.length === 0 && (
+        <EmptyState
+          title={needle ? "Игрок не найден" : "Рейтинг пока пуст"}
+          description={needle ? "" : "Результатов в этом сезоне пока нет."}
+        />
+      )}
+
+      {board.data && board.data.length > 0 && (
+        <>
           <div className="standings-frame">
             <table
               className="standings-table"
@@ -147,7 +147,7 @@ export function LeaderboardPage() {
                 return (
                   <tr
                     key={row.user.id}
-                    className={cx(isMe && "standing-self")}
+                    className={cx(row.rank <= 3 && `standing-leader standing-leader-${row.rank}`, isMe && "standing-self")}
                   >
                     <td className="rank-cell">
                       <span className={cx("standing-rank nums", row.rank <= 3 && `standing-rank-${row.rank}`)}>

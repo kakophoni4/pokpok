@@ -1,0 +1,11 @@
+{
+  "mode": "built-in image_gen edit",
+  "transparent_background": true,
+  "prompt": "Preserve the exact card faces, ranks, suits, arrangement, photographic lighting and paper texture. Remove all felt and background objects, leaving only the cards on transparent background.",
+  "files": [
+    "royal-flush-cutout-v2.webp",
+    "straight-flush-cutout-v2.webp",
+    "quads-cutout-v2.webp",
+    "hand-of-day-cutout-v2.webp"
+  ]
+}

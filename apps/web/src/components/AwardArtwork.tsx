@@ -1,5 +1,5 @@
 import type { Achievement } from "@poker/contracts";
-import { defaultAwardArt } from "../lib/award-art";
+import { defaultAwardArt, resolveAwardArt } from "../lib/award-art";
 
 export function AwardArtwork({ achievement }: { achievement: Achievement }) {
   if (
@@ -9,7 +9,7 @@ export function AwardArtwork({ achievement }: { achievement: Achievement }) {
     return (
       <img
         className="award-artwork"
-        src={achievement.icon}
+        src={resolveAwardArt(achievement.icon)}
         alt=""
         loading="lazy"
       />
@@ -17,22 +17,23 @@ export function AwardArtwork({ achievement }: { achievement: Achievement }) {
   }
   if (achievement.category === "game") {
     const photographs: Record<string, string> = {
-      royal_flush: "royal-flush-v1",
-      straight_flush: "straight-flush-v1",
-      quads: "quads-v1",
-      hand_of_day: "hand-of-day-v1",
+      royal_flush: "royal-flush-cutout-v2",
+      straight_flush: "straight-flush-cutout-v2",
+      quads: "quads-cutout-v2",
+      hand_of_day: "hand-of-day-cutout-v2",
     };
     return (
       <img
         className="award-artwork combination-artwork combination-photo"
-        src={`/images/combinations/${photographs[achievement.code] ?? "hand-of-day-v1"}.webp`}
+        src={`/images/combinations/${photographs[achievement.code] ?? "hand-of-day-cutout-v2"}.webp`}
         alt=""
         loading="lazy"
         width="960"
         height="640"
       />
     );
-  }  return (
+  }
+  return (
     <img
       className="award-artwork"
       src={defaultAwardArt(achievement)}

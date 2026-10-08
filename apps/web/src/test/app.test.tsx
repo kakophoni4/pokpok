@@ -279,7 +279,8 @@ describe("leaderboard", () => {
     fireEvent.change(screen.getByRole("searchbox", {name:"Поиск игрока"}), {
       target: { value: "Ferz" },
     });
-    expect(screen.queryByText("Ira_Chips")).not.toBeInTheDocument();
+    expect(screen.getByText("Ira_Chips")).toHaveClass("podium-name");
+    expect(screen.getByRole("table")).not.toHaveTextContent("Ira_Chips");
     expect(
       screen.getByText("вы").closest("tr")?.firstElementChild,
     ).toHaveTextContent("2");

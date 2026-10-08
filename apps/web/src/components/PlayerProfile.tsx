@@ -68,7 +68,7 @@ export function PlayerProfile({
                   сезоне ·{" "}
                 </>
               ) : null}
-              <span className="nums">{stats.points}</span> очков
+              <span className="nums">{stats.points.toLocaleString("ru-RU")}</span> очков
             </p>
           </div>
         </div>

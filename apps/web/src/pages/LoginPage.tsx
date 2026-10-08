@@ -92,18 +92,9 @@ export function LoginPage() {
     <div className="login-composition">
       <Card className="login-stage overflow-hidden p-0">
         <section className="login-art" aria-label="CONCEPT poker club">
-          <img src="/images/club-champion.webp" alt="" fetchPriority="high" />
-          <div className="login-art-copy">
-            <h2>
-              Место встречи.
-              <br />
-              Ваша игра.
-            </h2>
-            <span>Гагарина, 25</span>
-          </div>
+          <img src="/images/poker-welcome-v1.webp" alt="" fetchPriority="high" />
         </section>
         <div className="login-form">
-          <p className="eyebrow">Личный кабинет</p>
           <h1>Добро пожаловать</h1>
           <p className="login-subtitle">Ваши турниры, рейтинг и награды.</p>
           <label className="mt-4 flex items-start gap-2 text-left text-sm text-stone-300">

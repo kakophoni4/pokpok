@@ -2279,3 +2279,82 @@ a {
 .public-shell .award-section-game .award-tile { grid-template-rows:auto auto 1fr auto; }
 .public-shell .award-section-game .combination-photo { max-width:none; height:auto; aspect-ratio:2/1; object-fit:cover; border-radius:7px; margin:0 0 6px; }
 .public-shell .award-section-game .achievement-locked .combination-photo { opacity:1; filter:none; }
+/* Final artwork and consistent personal screens. */
+.public-shell .award-section-game .combination-photo { width:100%; max-width:420px; height:210px; aspect-ratio:auto; object-fit:contain; border-radius:0; margin:0 auto 12px; filter:drop-shadow(0 10px 14px #0004); }
+.public-shell .season-podium { min-height:370px; padding:22px 8% 92px; gap:5%; background:linear-gradient(180deg,#08111b20,#08111b00),url('/images/leaderboard-podium-v1.webp') center bottom/100% 100% no-repeat; }
+.public-shell .podium-player { padding:12px 4px; }
+.public-shell .podium-place-1 { transform:translateY(-22px); }
+.public-shell .podium-place-3 { transform:translateY(12px); }
+.public-shell .podium-name { font-size:17px; }
+.public-shell .ranking-tools { flex-direction:row; align-items:center; gap:16px; }
+.public-shell .ranking-tools > div { width:280px; flex:none; }
+.public-shell .ranking-tools > div > button { height:46px; font-size:15px; }
+.public-shell .ranking-tools .ranking-search { height:46px; min-width:0; }
+.public-shell .standings-frame { border-color:#ffffff18; border-radius:14px; background:#0d1724ee; }
+.public-shell .standings-table th { background:#14202e; padding-top:18px; padding-bottom:18px; font-size:14px; }
+.public-shell .standings-table td { border-color:#ffffff0b; height:78px; }
+.public-shell .standing-name { font-size:16px; font-weight:600; color:#eeede8; }
+.public-shell .standings-table .standing-score { font-size:23px; font-weight:700; color:#e5d2ad; }
+.public-shell .standings-table tbody tr:nth-child(even) { background:#ffffff02; }
+.public-shell .standings-table tbody tr:hover { background:#cfb6800a; }
+.public-shell .standing-leader-1 { box-shadow:inset 3px 0 #cfb680; }
+.public-shell .standing-leader-2 { box-shadow:inset 3px 0 #a7b5c6; }
+.public-shell .standing-leader-3 { box-shadow:inset 3px 0 #ae876b; }
+.public-shell .login-stage { min-height:540px; background:#0e1927; }
+.public-shell .login-art::after { background:linear-gradient(90deg,transparent 65%,#0e192745); }
+.public-shell .login-art > img { object-position:center; }
+.public-shell .login-form { padding:48px 40px; align-items:center; }
+.public-shell .login-form h1 { font-size:36px; line-height:1.2; margin:0 0 16px; }
+.public-shell .login-subtitle { font-size:16px; line-height:1.6; margin:0 0 32px; }
+.public-shell .login-form label { font-size:16px; line-height:1.5; }
+.public-shell .login-form > div { max-width:360px; }
+.public-shell .login-form :is(.concept-button,.telegram-signin) { font-size:16px; }
+.club-app:has(.player-profile)::before { background:radial-gradient(ellipse at 50% 0,#17304870,transparent 65%),#080f1b; }
+.club-app:has(.player-profile)::after { display:none; }
+.public-shell .player-profile { max-width:960px; margin:auto; }
+.public-shell .profile-identity { padding:28px; border:1px solid #ffffff16; border-radius:14px; background:linear-gradient(120deg,#142337,#0d1724); }
+.public-shell .profile-identity h1 { font-size:32px; margin:0 0 8px; }
+.public-shell .profile-identity p { font-size:16px; line-height:1.6; }
+.public-shell .profile-settings { border:0; text-align:center; padding:0; margin-top:22px; }
+.public-shell .profile-settings summary { list-style:none; display:inline-block; padding:10px 18px; font-size:14px; border:1px solid #ffffff20; border-radius:8px; cursor:pointer; }
+.public-shell .profile-settings summary::-webkit-details-marker { display:none; }
+.public-shell .profile-settings[open] summary { color:var(--brass); }
+.public-shell .profile-settings > div { text-align:left; }
+.public-shell .player-profile .section-heading { font-size:20px; font-weight:600; margin:30px 0 18px; padding-bottom:14px; }
+.public-shell .profile-summary { border:1px solid #ffffff16; border-radius:12px 12px 0 0; }
+.public-shell .profile-stats { border:1px solid #ffffff16; border-top:0; border-radius:0 0 12px 12px; }
+.public-shell .profile-summary .nums { font-size:38px; font-weight:650; letter-spacing:-.035em; }
+.public-shell .profile-stats .nums { font-size:30px; font-weight:650; letter-spacing:-.035em; }
+.public-shell :is(.profile-summary,.profile-stats) .card > div:last-child { font-size:15px; margin-top:8px; color:#bbc5d1; }
+.public-shell .player-profile .text-sm { font-size:15px; line-height:1.6; }
+.public-shell .player-profile .text-xs { font-size:13px; line-height:1.5; }
+.public-shell .player-profile .combination-photo { object-fit:contain; height:130px; max-width:240px; }
+@media(max-width:640px) {
+ .public-shell .season-podium { min-height:310px; padding:24px 4% 76px; gap:2px; }
+ .public-shell .podium-name { font-size:12px; }
+ .public-shell .podium-place-1 { transform:translateY(-16px); }
+ .public-shell .podium-place-3 { transform:translateY(8px); }
+ .public-shell .ranking-tools { flex-direction:column; align-items:stretch; gap:10px; }
+ .public-shell .ranking-tools > div,.public-shell .ranking-tools > div > button { width:100%; max-width:none; }
+ .public-shell .standings-table th { padding:14px 7px; font-size:12px; }
+ .public-shell .standings-table td { height:70px; }
+ .public-shell .standing-name { font-size:13px; }
+ .public-shell .standings-table .standing-score { font-size:18px; }
+ .public-shell .award-section-game .combination-photo { height:155px; }
+ .public-shell .login-art { min-height:220px; }
+ .public-shell .login-form { padding:32px 22px; }
+ .public-shell .login-form h1 { font-size:28px; }
+ .public-shell .login-subtitle,.public-shell .login-form label { font-size:15px; }
+ .public-shell .profile-identity { padding:24px 16px; }
+ .public-shell .profile-identity h1 { font-size:26px; }
+ .public-shell .profile-identity p { font-size:14px; }
+ .public-shell .profile-summary .nums { font-size:32px; }
+ .public-shell :is(.profile-summary,.profile-stats) .card > div:last-child { font-size:13px; }
+}
+.public-shell .podium-score { padding:2px 12px; border-radius:6px; background:#0b1523db; }
+@media(max-width:640px) {
+ .public-shell .profile-identity > div:first-child { flex-direction:column; gap:14px; text-align:center; }
+ .public-shell .profile-identity > div:first-child > div { width:100%; }
+ .public-shell .profile-identity > div:first-child > :is(img,span[aria-hidden]) { width:64px !important; height:64px !important; font-size:24px !important; }
+ .public-shell .profile-identity p { max-width:240px; margin:0 auto; }
+}
