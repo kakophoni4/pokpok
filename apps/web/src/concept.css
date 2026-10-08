@@ -2419,3 +2419,8 @@ a {
  .public-shell .profile-award-strip .award-artwork { width:78px; height:78px; }
 }
 .public-shell .profile-all-awards { font-size:13px; letter-spacing:0; font-weight:500; color:#cfb680; white-space:nowrap; }
+.public-shell .profile-identity > div:first-child { padding-right:0; }
+.public-shell .profile-settings { position:relative; top:auto; right:auto; text-align:left; margin:20px 0 0; }
+.public-shell .profile-settings summary { display:inline; width:auto; height:auto; padding:0; border:0; border-radius:0; background:none; color:#aab6c6; font-size:13px; }
+.public-shell .profile-settings summary:hover { color:var(--brass); }
+.public-shell .profile-settings > div { position:static; width:auto; max-width:none; margin-top:14px; box-shadow:none; }

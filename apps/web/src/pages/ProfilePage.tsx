@@ -32,13 +32,7 @@ export function ProfilePage() {
         canRevoke={can("hostess")}
         extra={
           <details className="profile-settings mt-4 border-t border-felt-800 pt-3">
-            <summary aria-label="Настройки аккаунта">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                <path d="m9 3-.6 2.3-2 .9-2.1-.7-2 3.4 1.6 1.6v2.3L2.3 15l2 3.4 2.1-.7 2 .9L9 21h4l.6-2.4 2-.9 2.1.7 2-3.4-1.6-1.9v-2.3l1.6-1.6-2-3.4-2.1.7-2-.9L13 3Z" />
-                <circle cx="11" cy="12" r="3" />
-              </svg>
-              <span className="sr-only">Настройки аккаунта</span>
-            </summary>
+            <summary>Настройки аккаунта</summary>
             <div className="space-y-3 pt-3">
               <div className="flex flex-wrap items-center gap-2 text-xs text-stone-400">
                 <span>Привязано:</span>
