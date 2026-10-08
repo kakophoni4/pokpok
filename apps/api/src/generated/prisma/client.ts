@@ -197,3 +197,8 @@ export type DealerTablet = Prisma.DealerTabletModel
  *
  */
 export type DealerShift = Prisma.DealerShiftModel
+/**
+ * Model AdminCredential
+ *
+ */
+export type AdminCredential = Prisma.AdminCredentialModel

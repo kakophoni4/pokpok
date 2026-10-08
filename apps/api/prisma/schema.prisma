@@ -102,6 +102,7 @@ model User {
   identities          Identity[]
   hostCredential      HostCredential?
   floorCredential     FloorCredential?
+  adminCredential     AdminCredential?
   sessions            Session[]
   linkTokens          LinkToken[]
   loginTickets        LoginTicket[]
@@ -147,6 +148,7 @@ model Identity {
 /// Refresh-token sessions. Only the hash is stored, so a database leak cannot
 /// be replayed as a login.
 model Session {
+  staffPassword Boolean @default(false)
   id        String    @id @default(cuid(2))
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -631,4 +633,11 @@ model DealerShift {
   roundingMode String @default("nearest")
   @@index([userId, startedAt])
   @@index([tabletId, endedAt])
+}
+
+model AdminCredential {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  updatedAt DateTime @updatedAt
 }

@@ -14,6 +14,7 @@ import { ConfigService } from "@nestjs/config";
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   AuthProvider,
+  Nickname,
   ConfirmLinkInput,
   LoginTicketLookupInput,
   type LoginTicketPrompt,
@@ -111,6 +112,35 @@ export class AuthController {
   ): Promise<{ ok: true }> {
     return this.auth.setFloorPassword(actor.id, body.userId, body.password);
   }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post("admin/login")
+  async adminLogin(
+    @Body(zodPipe(z.object({ nickname: z.string().trim().min(2).max(24), password: z.string().min(1).max(128) }))) body: { nickname: string; password: string },
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SessionResponse> {
+    return this.finishLogin(await this.auth.loginAsAdmin(body.nickname, body.password, metaOf(request)), response);
+  }
+
+  @Roles("admin")
+  @Post("admin/password")
+  adminPassword(
+    @CurrentUser() actor: RequestUser,
+    @Body(zodPipe(z.object({ userId: z.string().min(1), password: z.string().min(8).max(128) }))) body: { userId: string; password: string },
+  ): Promise<{ ok: true }> {
+    return this.auth.setAdminPassword(actor.id, body.userId, body.password);
+  }
+
+  @Roles("admin")
+  @Post("staff")
+  createStaff(@CurrentUser() actor: RequestUser, @Body(zodPipe(z.object({ nickname: Nickname, password: z.string().min(8).max(128), role: z.enum(["admin", "floor", "hostess", "dealer"]) }))) body: { nickname: string; password: string; role: "admin" | "floor" | "hostess" | "dealer" }) {
+    return this.auth.createStaff(actor.id, body);
+  }
+  @Roles("admin")
+  @Get("staff")
+  staffAccounts() { return this.auth.staffAccounts(); }
 
   @Public()
   @Post("telegram/widget")

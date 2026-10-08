@@ -89,6 +89,8 @@ export class UsersService {
       });
     }
 
+    if (input.role !== undefined && input.role !== before.role) throw new ForbiddenException({ code: "STAFF_CREATION_REQUIRED", message: "Создайте сотрудника с логином и паролем в разделе «Персонал»" });
+
     if (input.nickname && (await this.isNicknameTaken(input.nickname, userId))) {
       throw new ConflictException({ code: "NICKNAME_TAKEN", message: "Такой ник уже занят" });
     }

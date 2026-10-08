@@ -45,8 +45,8 @@ export class TokenService {
     return this.config.get("REFRESH_TOKEN_TTL", { infer: true });
   }
 
-  async issue(user: TokenUser, audience: Audience, meta: SessionMeta = {}): Promise<IssuedSession> {
-    const accessToken = await this.signAccessToken(user, audience);
+  async issue(user: TokenUser, audience: Audience, meta: SessionMeta = {}, staffPassword = false): Promise<IssuedSession> {
+    const accessToken = await this.signAccessToken(user, audience, staffPassword);
     const refreshToken = randomBytes(48).toString("hex");
 
     await this.prisma.session.create({
@@ -54,6 +54,7 @@ export class TokenService {
         userId: user.id,
         tokenHash: hashToken(refreshToken),
         audience,
+        staffPassword,
         userAgent: meta.userAgent?.slice(0, 300) ?? null,
         ip: meta.ip ?? null,
         expiresAt: new Date(Date.now() + this.refreshTtl * 1000),
@@ -80,6 +81,13 @@ export class TokenService {
       throw new UnauthorizedException({ code: "USER_BLOCKED", message: "Аккаунт заблокирован" });
     }
 
+    if (session.user.role !== "player" && !session.staffPassword) {
+      // Existing administrators can set their first password from their current
+      // session. This transition closes as soon as their credential is created.
+      const setupOnly = session.user.role === "admin" && !(await this.prisma.adminCredential.findUnique({ where: { userId: session.user.id } }));
+      if (!setupOnly) throw new UnauthorizedException({ code: "STAFF_PASSWORD_REQUIRED", message: "Войдите по логину и паролю" });
+    }
+
     const user: TokenUser = {
       id: session.user.id,
       role: session.user.role,
@@ -100,6 +108,7 @@ export class TokenService {
           userId: user.id,
           tokenHash: hashToken(nextToken),
           audience,
+          staffPassword: session.staffPassword,
           userAgent: meta.userAgent?.slice(0, 300) ?? session.userAgent,
           ip: meta.ip ?? session.ip,
           expiresAt: new Date(Date.now() + this.refreshTtl * 1000),
@@ -110,7 +119,7 @@ export class TokenService {
     });
 
     return {
-      accessToken: await this.signAccessToken(user, audience),
+      accessToken: await this.signAccessToken(user, audience, session.staffPassword),
       refreshToken: refreshed,
       expiresIn: this.accessTtl,
       user,
@@ -132,12 +141,13 @@ export class TokenService {
     });
   }
 
-  private signAccessToken(user: TokenUser, audience: Audience): Promise<string> {
+  private signAccessToken(user: TokenUser, audience: Audience, staffPassword = false): Promise<string> {
     const claims: Omit<AccessTokenClaims, "iat" | "exp"> = {
       sub: user.id,
       role: user.role,
       nickname: user.nickname,
       aud: audience,
+      ...(staffPassword ? { staffPassword: true } : {}),
     };
     return this.jwt.signAsync(claims, { expiresIn: this.accessTtl });
   }

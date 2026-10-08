@@ -3,11 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { Button } from "../../components/ui";
 
-export function HostAccess({ userId, nickname, role = "hostess" }: { userId: string; nickname: string; role?: "hostess" | "floor" }) {
-  const route = role === "floor" ? "floor" : "host";
-  const label = role === "floor" ? "флора" : "хостес";
+export function HostAccess({ userId, nickname, role = "hostess" }: { userId: string; nickname: string; role?: "hostess" | "floor" | "admin" | "dealer" }) {
+  const route = role === "hostess" ? "host" : role;
+  const label = ({ floor: "флора", hostess: "хостес", admin: "администратора", dealer: "дилера" })[role];
   const [password, setPassword] = useState("");
-  const save = useMutation({ mutationFn: () => api.post(`/auth/${route}/password`, { userId, password }), onSuccess: () => setPassword("") });
+  const save = useMutation({ mutationFn: () => api.post(role === "dealer" ? "/dealer/password" : `/auth/${route}/password`, { userId, password }), onSuccess: () => setPassword("") });
   return <section className="space-y-2 border-t border-white/10 pt-3">
     <p>Вход {label}: <a href={`/${route}`} className="text-gold-500">/{route}</a> · логин <strong>{nickname}</strong></p>
     <form className="flex flex-wrap gap-2" onSubmit={e => { e.preventDefault(); save.mutate(); }}>

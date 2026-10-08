@@ -26,6 +26,7 @@ export type AggregateSession = {
 }
 
 export type SessionMinAggregateOutputType = {
+  staffPassword: boolean | null
   id: string | null
   userId: string | null
   tokenHash: string | null
@@ -38,6 +39,7 @@ export type SessionMinAggregateOutputType = {
 }
 
 export type SessionMaxAggregateOutputType = {
+  staffPassword: boolean | null
   id: string | null
   userId: string | null
   tokenHash: string | null
@@ -50,6 +52,7 @@ export type SessionMaxAggregateOutputType = {
 }
 
 export type SessionCountAggregateOutputType = {
+  staffPassword: number
   id: number
   userId: number
   tokenHash: number
@@ -64,6 +67,7 @@ export type SessionCountAggregateOutputType = {
 
 
 export type SessionMinAggregateInputType = {
+  staffPassword?: true
   id?: true
   userId?: true
   tokenHash?: true
@@ -76,6 +80,7 @@ export type SessionMinAggregateInputType = {
 }
 
 export type SessionMaxAggregateInputType = {
+  staffPassword?: true
   id?: true
   userId?: true
   tokenHash?: true
@@ -88,6 +93,7 @@ export type SessionMaxAggregateInputType = {
 }
 
 export type SessionCountAggregateInputType = {
+  staffPassword?: true
   id?: true
   userId?: true
   tokenHash?: true
@@ -173,6 +179,7 @@ export type SessionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 export type SessionGroupByOutputType = {
+  staffPassword: boolean
   id: string
   userId: string
   tokenHash: string
@@ -206,6 +213,7 @@ export type SessionWhereInput = {
   AND?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
   OR?: Prisma.SessionWhereInput[]
   NOT?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
+  staffPassword?: Prisma.BoolFilter<"Session"> | boolean
   id?: Prisma.StringFilter<"Session"> | string
   userId?: Prisma.StringFilter<"Session"> | string
   tokenHash?: Prisma.StringFilter<"Session"> | string
@@ -219,6 +227,7 @@ export type SessionWhereInput = {
 }
 
 export type SessionOrderByWithRelationInput = {
+  staffPassword?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
@@ -237,6 +246,7 @@ export type SessionWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
   OR?: Prisma.SessionWhereInput[]
   NOT?: Prisma.SessionWhereInput | Prisma.SessionWhereInput[]
+  staffPassword?: Prisma.BoolFilter<"Session"> | boolean
   userId?: Prisma.StringFilter<"Session"> | string
   audience?: Prisma.StringFilter<"Session"> | string
   userAgent?: Prisma.StringNullableFilter<"Session"> | string | null
@@ -248,6 +258,7 @@ export type SessionWhereUniqueInput = Prisma.AtLeast<{
 }, "id" | "tokenHash">
 
 export type SessionOrderByWithAggregationInput = {
+  staffPassword?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
@@ -266,6 +277,7 @@ export type SessionScalarWhereWithAggregatesInput = {
   AND?: Prisma.SessionScalarWhereWithAggregatesInput | Prisma.SessionScalarWhereWithAggregatesInput[]
   OR?: Prisma.SessionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.SessionScalarWhereWithAggregatesInput | Prisma.SessionScalarWhereWithAggregatesInput[]
+  staffPassword?: Prisma.BoolWithAggregatesFilter<"Session"> | boolean
   id?: Prisma.StringWithAggregatesFilter<"Session"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Session"> | string
   tokenHash?: Prisma.StringWithAggregatesFilter<"Session"> | string
@@ -278,6 +290,7 @@ export type SessionScalarWhereWithAggregatesInput = {
 }
 
 export type SessionCreateInput = {
+  staffPassword?: boolean
   id?: string
   tokenHash: string
   audience: string
@@ -290,6 +303,7 @@ export type SessionCreateInput = {
 }
 
 export type SessionUncheckedCreateInput = {
+  staffPassword?: boolean
   id?: string
   userId: string
   tokenHash: string
@@ -302,6 +316,7 @@ export type SessionUncheckedCreateInput = {
 }
 
 export type SessionUpdateInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.StringFieldUpdateOperationsInput | string
@@ -314,6 +329,7 @@ export type SessionUpdateInput = {
 }
 
 export type SessionUncheckedUpdateInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
@@ -326,6 +342,7 @@ export type SessionUncheckedUpdateInput = {
 }
 
 export type SessionCreateManyInput = {
+  staffPassword?: boolean
   id?: string
   userId: string
   tokenHash: string
@@ -338,6 +355,7 @@ export type SessionCreateManyInput = {
 }
 
 export type SessionUpdateManyMutationInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.StringFieldUpdateOperationsInput | string
@@ -349,6 +367,7 @@ export type SessionUpdateManyMutationInput = {
 }
 
 export type SessionUncheckedUpdateManyInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
@@ -371,6 +390,7 @@ export type SessionOrderByRelationAggregateInput = {
 }
 
 export type SessionCountOrderByAggregateInput = {
+  staffPassword?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
@@ -383,6 +403,7 @@ export type SessionCountOrderByAggregateInput = {
 }
 
 export type SessionMaxOrderByAggregateInput = {
+  staffPassword?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
@@ -395,6 +416,7 @@ export type SessionMaxOrderByAggregateInput = {
 }
 
 export type SessionMinOrderByAggregateInput = {
+  staffPassword?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
@@ -453,6 +475,7 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 }
 
 export type SessionCreateWithoutUserInput = {
+  staffPassword?: boolean
   id?: string
   tokenHash: string
   audience: string
@@ -464,6 +487,7 @@ export type SessionCreateWithoutUserInput = {
 }
 
 export type SessionUncheckedCreateWithoutUserInput = {
+  staffPassword?: boolean
   id?: string
   tokenHash: string
   audience: string
@@ -504,6 +528,7 @@ export type SessionScalarWhereInput = {
   AND?: Prisma.SessionScalarWhereInput | Prisma.SessionScalarWhereInput[]
   OR?: Prisma.SessionScalarWhereInput[]
   NOT?: Prisma.SessionScalarWhereInput | Prisma.SessionScalarWhereInput[]
+  staffPassword?: Prisma.BoolFilter<"Session"> | boolean
   id?: Prisma.StringFilter<"Session"> | string
   userId?: Prisma.StringFilter<"Session"> | string
   tokenHash?: Prisma.StringFilter<"Session"> | string
@@ -516,6 +541,7 @@ export type SessionScalarWhereInput = {
 }
 
 export type SessionCreateManyUserInput = {
+  staffPassword?: boolean
   id?: string
   tokenHash: string
   audience: string
@@ -527,6 +553,7 @@ export type SessionCreateManyUserInput = {
 }
 
 export type SessionUpdateWithoutUserInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.StringFieldUpdateOperationsInput | string
@@ -538,6 +565,7 @@ export type SessionUpdateWithoutUserInput = {
 }
 
 export type SessionUncheckedUpdateWithoutUserInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.StringFieldUpdateOperationsInput | string
@@ -549,6 +577,7 @@ export type SessionUncheckedUpdateWithoutUserInput = {
 }
 
 export type SessionUncheckedUpdateManyWithoutUserInput = {
+  staffPassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.StringFieldUpdateOperationsInput | string
@@ -562,6 +591,7 @@ export type SessionUncheckedUpdateManyWithoutUserInput = {
 
 
 export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  staffPassword?: boolean
   id?: boolean
   userId?: boolean
   tokenHash?: boolean
@@ -575,6 +605,7 @@ export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 }, ExtArgs["result"]["session"]>
 
 export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  staffPassword?: boolean
   id?: boolean
   userId?: boolean
   tokenHash?: boolean
@@ -588,6 +619,7 @@ export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 }, ExtArgs["result"]["session"]>
 
 export type SessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  staffPassword?: boolean
   id?: boolean
   userId?: boolean
   tokenHash?: boolean
@@ -601,6 +633,7 @@ export type SessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 }, ExtArgs["result"]["session"]>
 
 export type SessionSelectScalar = {
+  staffPassword?: boolean
   id?: boolean
   userId?: boolean
   tokenHash?: boolean
@@ -612,7 +645,7 @@ export type SessionSelectScalar = {
   createdAt?: boolean
 }
 
-export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tokenHash" | "audience" | "userAgent" | "ip" | "expiresAt" | "revokedAt" | "createdAt", ExtArgs["result"]["session"]>
+export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"staffPassword" | "id" | "userId" | "tokenHash" | "audience" | "userAgent" | "ip" | "expiresAt" | "revokedAt" | "createdAt", ExtArgs["result"]["session"]>
 export type SessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -629,6 +662,7 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    staffPassword: boolean
     id: string
     userId: string
     tokenHash: string
@@ -721,8 +755,8 @@ export interface SessionDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    * // Get first 10 Sessions
    * const sessions = await prisma.session.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const sessionWithIdOnly = await prisma.session.findMany({ select: { id: true } })
+   * // Only select the `staffPassword`
+   * const sessionWithStaffPasswordOnly = await prisma.session.findMany({ select: { staffPassword: true } })
    * 
    */
   findMany<T extends SessionFindManyArgs>(args?: Prisma.SelectSubset<T, SessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -766,9 +800,9 @@ export interface SessionDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    *   ]
    * })
    * 
-   * // Create many Sessions and only return the `id`
-   * const sessionWithIdOnly = await prisma.session.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many Sessions and only return the `staffPassword`
+   * const sessionWithStaffPasswordOnly = await prisma.session.createManyAndReturn({
+   *   select: { staffPassword: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -857,9 +891,9 @@ export interface SessionDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    *   ]
    * })
    * 
-   * // Update zero or more Sessions and only return the `id`
-   * const sessionWithIdOnly = await prisma.session.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more Sessions and only return the `staffPassword`
+   * const sessionWithStaffPasswordOnly = await prisma.session.updateManyAndReturn({
+   *   select: { staffPassword: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1062,6 +1096,7 @@ export interface Prisma__SessionClient<T, Null = never, ExtArgs extends runtime.
  * Fields of the Session model
  */
 export interface SessionFieldRefs {
+  readonly staffPassword: Prisma.FieldRef<"Session", 'Boolean'>
   readonly id: Prisma.FieldRef<"Session", 'String'>
   readonly userId: Prisma.FieldRef<"Session", 'String'>
   readonly tokenHash: Prisma.FieldRef<"Session", 'String'>

@@ -77,7 +77,8 @@ export const ModelName = {
   HostCredential: 'HostCredential',
   DealerCredential: 'DealerCredential',
   DealerTablet: 'DealerTablet',
-  DealerShift: 'DealerShift'
+  DealerShift: 'DealerShift',
+  AdminCredential: 'AdminCredential'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -125,6 +126,7 @@ export type IdentityScalarFieldEnum = (typeof IdentityScalarFieldEnum)[keyof typ
 
 
 export const SessionScalarFieldEnum = {
+  staffPassword: 'staffPassword',
   id: 'id',
   userId: 'userId',
   tokenHash: 'tokenHash',
@@ -502,6 +504,15 @@ export const DealerShiftScalarFieldEnum = {
 } as const
 
 export type DealerShiftScalarFieldEnum = (typeof DealerShiftScalarFieldEnum)[keyof typeof DealerShiftScalarFieldEnum]
+
+
+export const AdminCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminCredentialScalarFieldEnum = (typeof AdminCredentialScalarFieldEnum)[keyof typeof AdminCredentialScalarFieldEnum]
 
 
 export const SortOrder = {

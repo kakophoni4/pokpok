@@ -78,6 +78,14 @@ export function App() {
             <Route path="tv" element={<TVConnectPage />} />
             <Route path="host" element={<HostPage />} />
             <Route path="floor" element={<FloorPage />} />
+              <Route
+                path="admin"
+                element={
+                  <Suspense fallback={<Loading />}>
+                    <AdminPage />
+                  </Suspense>
+                }
+              />
             <Route element={<Layout />}>
               <Route path="dealer/setup" element={<DealerSetupPage />} />
               <Route path="staff" element={<LiveStaffPage />} />
@@ -90,14 +98,6 @@ export function App() {
               <Route path="me" element={<ProfilePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="rules" element={<RulesPage />} />
-              <Route
-                path="admin"
-                element={
-                  <Suspense fallback={<Loading />}>
-                    <AdminPage />
-                  </Suspense>
-                }
-              />
               {import.meta.env.DEV ? (
                 <Route
                   path="dev/evening-preview"

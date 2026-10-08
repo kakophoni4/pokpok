@@ -103,7 +103,7 @@ export class AuthService {
     if (!valid || !user || user.role !== "hostess" || user.status !== "active") {
       throw new UnauthorizedException({ code: "HOST_LOGIN_FAILED", message: "Неверный логин или пароль" });
     }
-    return this.issueFor(user, "web", meta, false);
+    return this.issueFor(user, "web", meta, false, true);
   }
 
   async setHostPassword(actorId: string, userId: string, password: string): Promise<{ ok: true }> {
@@ -127,7 +127,7 @@ export class AuthService {
     if (!valid || !user || user.role !== "floor" || user.status !== "active") {
       throw new UnauthorizedException({ code: "FLOOR_LOGIN_FAILED", message: "Неверный логин или пароль" });
     }
-    return this.issueFor(user, "web", meta, false);
+    return this.issueFor(user, "web", meta, false, true);
   }
 
   async setFloorPassword(actorId: string, userId: string, password: string): Promise<{ ok: true }> {
@@ -141,6 +141,50 @@ export class AuthService {
     });
     await this.audit.record({ actorId, action: "auth.floor.password", entity: "User", entityId: userId });
     return { ok: true };
+  }
+
+  async loginAsAdmin(nickname: string, password: string, meta: SessionMeta = {}): Promise<LoginResult> {
+    const user = await this.prisma.user.findUnique({
+      where: { nickname }, include: { identities: true, adminCredential: true },
+    });
+    const valid = await verifyHostPassword(password, user?.adminCredential?.passwordHash);
+    if (!valid || !user || user.role !== "admin" || user.status !== "active") {
+      throw new UnauthorizedException({ code: "ADMIN_LOGIN_FAILED", message: "Неверный логин или пароль" });
+    }
+    return this.issueFor(user, "web", meta, false, true);
+  }
+
+  async setAdminPassword(actorId: string, userId: string, password: string): Promise<{ ok: true }> {
+    const passwordHash = await hashHostPassword(password);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      if (!user || user.role !== "admin") throw new ForbiddenException("Выберите сотрудника с ролью администратора");
+      await tx.adminCredential.upsert({ where: { userId }, create: { userId, passwordHash }, update: { passwordHash } });
+      await tx.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
+    });
+    await this.audit.record({ actorId, action: "auth.admin.password", entity: "User", entityId: userId });
+    return { ok: true };
+  }
+
+  async createStaff(actorId: string, input: { nickname: string; password: string; role: "admin" | "floor" | "hostess" | "dealer" }) {
+    const passwordHash = await hashHostPassword(input.password);
+    return this.prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${input.nickname.toLowerCase()}))::text`;
+      if (await tx.user.findFirst({ where: { nickname: { equals: input.nickname, mode: "insensitive" } } })) throw new ConflictException({ code: "NICKNAME_TAKEN", message: "Такой логин уже занят" });
+      const user = await tx.user.create({ data: {
+        nickname: input.nickname, role: input.role,
+        ...(input.role === "admin" ? { adminCredential: { create: { passwordHash } } } : {}),
+        ...(input.role === "floor" ? { floorCredential: { create: { passwordHash } } } : {}),
+        ...(input.role === "hostess" ? { hostCredential: { create: { passwordHash } } } : {}),
+      }, include: { identities: true } });
+      if (input.role === "dealer") await tx.dealerCredential.create({ data: { userId: user.id, passwordHash } });
+      await tx.auditLog.create({ data: { actorId, action: "staff.create", entity: "User", entityId: user.id, after: { nickname: input.nickname, role: input.role } } });
+      return toMeUser(user);
+    });
+  }
+  async staffAccounts() {
+    return this.prisma.user.findMany({ where: { role: { not: "player" } }, select: { id: true, nickname: true, role: true, status: true }, orderBy: { nickname: "asc" }, take: 1000 });
   }
 
   static fromTelegram(profile: TelegramProfile): ProviderProfile {
@@ -188,6 +232,7 @@ export class AuthService {
     });
 
     if (existing) {
+      if (existing.user.role !== "player") throw new ForbiddenException({ code: "STAFF_PASSWORD_REQUIRED", message: "Персонал входит по логину и паролю" });
       if (existing.user.status === "blocked") {
         throw new ForbiddenException({
           code: "USER_BLOCKED",
@@ -224,11 +269,14 @@ export class AuthService {
     audience: Audience,
     meta: SessionMeta,
     isNewUser: boolean,
+    staffPassword = false,
   ): Promise<LoginResult> {
+    if (user.role !== "player" && !staffPassword) throw new ForbiddenException({ code: "STAFF_PASSWORD_REQUIRED", message: "Персонал входит по логину и паролю" });
     const session = await this.tokens.issue(
       { id: user.id, role: user.role, nickname: user.nickname },
       audience,
       meta,
+      staffPassword,
     );
 
     return {

@@ -50,6 +50,7 @@ export type AccessTokenClaims = {
   nickname: string;
   /** Which client the session was opened from, for audit and stricter checks. */
   aud: "web" | "miniapp" | "bot";
+  staffPassword?: boolean;
   iat: number;
   exp: number;
 };

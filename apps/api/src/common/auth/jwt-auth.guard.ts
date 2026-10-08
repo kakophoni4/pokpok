@@ -54,6 +54,13 @@ export class JwtAuthGuard implements CanActivate {
         select: { role: true, status: true, nickname: true },
       });
       if (!user || user.status !== "active") throw new UnauthorizedException();
+      if (user.role !== "player") {
+        if (claims.role !== user.role) throw new UnauthorizedException();
+        if (!claims.staffPassword && !(user.role === "dealer" && claims.dealerShiftId)) {
+          const setupOnly = user.role === "admin" && !(await this.db.adminCredential.findUnique({ where: { userId: claims.sub } }));
+          if (!setupOnly) throw new UnauthorizedException();
+        }
+      }
       if (claims.dealerShiftId) await this.dealer.session(claims.dealerShiftId);
       request.user = {
         dealerShiftId: claims.dealerShiftId,

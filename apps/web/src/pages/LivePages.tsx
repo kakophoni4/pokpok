@@ -78,7 +78,7 @@ export function LiveStaffPage({ dealer = false, floorWorkspace = false }: { deal
         <h1 className="text-2xl font-semibold">
           {floorWorkspace ? (rows.find(r => r.id === selected)?.title ?? "Управление турниром") : dealer ? "Стол дилера" : "Управление вечером"}
         </h1>
-        {can("hostess") && (
+        {can("admin") && (
           <Link to="/admin" className="text-gold-400">
             Админка
           </Link>

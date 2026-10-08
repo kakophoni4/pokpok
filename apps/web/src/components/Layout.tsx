@@ -47,7 +47,7 @@ export function Layout() {
     ? [
         { to: "/", label: "Клуб" },
         ...(can("floor") ? [{ to: "/staff", label: "Вечер" }] : []),
-        ...(can("hostess") ? [{ to: "/admin", label: "Управление" }] : []),
+        ...(can("admin") ? [{ to: "/admin", label: "Управление" }] : []),
       ]
     : publicItems;
 
@@ -94,7 +94,7 @@ export function Layout() {
                 {user?.role === "hostess" ? "Хостес" : "Вечер"}
               </NavLink>
             )}
-            {!workspace && can("hostess") && (
+            {!workspace && can("admin") && (
               <NavLink to="/admin" className="text-sm text-stone-300">
                 Админ
               </NavLink>

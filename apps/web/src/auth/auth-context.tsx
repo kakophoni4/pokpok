@@ -41,6 +41,7 @@ type AuthState = {
   loginAsDev: (nickname: string) => Promise<void>;
   loginAsHost: (nickname: string, password: string) => Promise<void>;
   loginAsFloor: (nickname: string, password: string) => Promise<void>;
+  loginAsAdmin: (nickname: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -223,6 +224,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       loginAsFloor: async (nickname, password) => {
         applySession(await api.post<SessionResponse>("/auth/floor/login", { nickname, password }));
+      },
+      loginAsAdmin: async (nickname, password) => {
+        applySession(await api.post<SessionResponse>("/auth/admin/login", { nickname, password }));
       },
 
       logout: async () => {

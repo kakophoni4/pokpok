@@ -1,4 +1,4 @@
-import type { PublicUser, UserRole } from "@poker/contracts";
+import type { PublicUser } from "@poker/contracts";
 import { ROLE_LABELS } from "@poker/contracts";
 import { useState } from "react";
 import { HostAccess } from "./HostAccess";
@@ -111,36 +111,11 @@ function PlayerRow({
                 </Button>
               </div>
               <p className="mt-1 text-xs text-stone-500">
-                Ник подставляется из Telegram при первом входе.
+                Ник игрока в клубе.
               </p>
             </div>
           ) : (
             <p className="text-sm text-stone-400">Ник меняет персонал клуба.</p>
-          )}
-
-          {canEdit && canChangeRole && (
-            <div>
-              <label className="label" htmlFor={`role-${player.id}`}>
-                Роль
-              </label>
-              <select
-                id={`role-${player.id}`}
-                className="field max-w-56"
-                value={player.role}
-                onChange={(event) =>
-                  update.mutate({
-                    id: player.id,
-                    input: { role: event.target.value as UserRole },
-                  })
-                }
-              >
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
           )}
 
           {canEdit && (
