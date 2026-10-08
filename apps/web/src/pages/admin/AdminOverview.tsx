@@ -11,7 +11,7 @@ export function AdminOverview({ navigate }: { navigate: (tab: "game" | "players"
   const [limit, setLimit] = useState<string | null>(null);
   const [page,setPage] = useState(0);
   const [search,setSearch] = useState("");
-  const save = useMutation({ mutationFn: ()=>api.patch("/club/settings", { defaultCreditLimitRub: Number(limit ?? report.data?.defaultCreditLimitRub ?? 3000) }), onSuccess: async ()=>{ setLimit(null); await Promise.all(["club-overview", "club-settings", "credit"].map(key=>qc.invalidateQueries({ queryKey:[key] }))); } });
+  const save = useMutation({ mutationFn: ()=>api.patch("/club/settings", { defaultCreditLimitRub: Number(limit ?? report.data?.defaultCreditLimitRub ?? 3000) }), onSuccess: async ()=>{ setLimit(null); await Promise.all(["club-overview", "club", "credit"].map(key=>qc.invalidateQueries({ queryKey:[key] }))); } });
   if(report.isPending) return <Loading/>;
   if(report.isError) return <ErrorState error={report.error}/>;
   const d=report.data;

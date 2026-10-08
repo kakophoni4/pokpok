@@ -1,5 +1,5 @@
 import { IssuePayment, PlayerCredit, useIssueMethod } from "./IssuePayment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   ClubMenuItem,
@@ -161,6 +161,7 @@ export function HostPlayerControls({
   const [itemId, setItem] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [issueMethod, setIssueMethod] = useIssueMethod();
+  useEffect(()=>{setIssueMethod("");setItem("");setQuantity(1);},[userId]);
   const [purpose, setPurpose] = useState<"purchase" | "prize">("purchase");
   const detail = useQuery({
     queryKey: ["host-detail", id],
@@ -181,8 +182,9 @@ export function HostPlayerControls({
           quantity,
           tournamentId: id,
         });
-      const requestId = crypto.randomUUID();
-      await api.post("/live/orders", {
+      const pending = pendingOrders.find(o=>o.state === "pending" && o.userId === userId && o.menuItemId === itemId && o.quantity === quantity);
+      const requestId = pending?.id ?? crypto.randomUUID();
+      if (!pending) await api.post("/live/orders", {
         userId,
         menuItemId: itemId,
         quantity,
@@ -191,6 +193,7 @@ export function HostPlayerControls({
       });
       return api.post(`/live/${id}/orders/${requestId}/fulfil`, { method: issueMethod || undefined });
     },
+    onError: refresh,
     onSuccess: refresh,
   });
   const prize = useMutation({
@@ -286,7 +289,7 @@ export function HostPlayerControls({
             onClick={() => {
               if (
                 confirm(
-                  `${purpose === "prize" ? "Начислить приз" : "Выдать покупку"}: ${chosen.title} x${quantity}?`,
+                  `${purpose === "prize" ? "Начислить приз" : "Выдать покупку"}: ${chosen.title} x${quantity}${purpose === "purchase" ? issueMethod ? ". Оплата получена" : " в долг" : ""}?`,
                 )
               )
                 issue.mutate();
