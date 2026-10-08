@@ -1,6 +1,7 @@
 import type { PublicUser, UserRole } from "@poker/contracts";
 import { ROLE_LABELS } from "@poker/contracts";
 import { useState } from "react";
+import { HostAccess } from "./HostAccess";
 import { Avatar, Badge, Button, ErrorState, Loading } from "../../components/ui";
 import { playerLabel } from "../../lib/format";
 import { useClubSettings, useGrantPrize, usePlayerPrizes, usePlayers, useRevokePrize, useUpdatePlayer } from "../../lib/queries";
@@ -213,6 +214,7 @@ function PlayerRow({
           {update.isError && (
             <p className="text-xs text-chip-red">{(update.error as Error).message}</p>
           )}
+          {canEdit && canChangeRole && player.role === "hostess" && <HostAccess userId={player.id} nickname={player.nickname} />}
         </div>
       )}
     </li>

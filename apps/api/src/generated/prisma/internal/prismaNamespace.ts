@@ -419,6 +419,7 @@ export const ModelName = {
   Outbox: 'Outbox',
   LiveTournament: 'LiveTournament',
   CashReceipt: 'CashReceipt',
+  HostCredential: 'HostCredential',
   DealerCredential: 'DealerCredential',
   DealerTablet: 'DealerTablet',
   DealerShift: 'DealerShift'
@@ -437,7 +438,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "playerPrize" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox" | "liveTournament" | "cashReceipt" | "dealerCredential" | "dealerTablet" | "dealerShift"
+    modelProps: "user" | "identity" | "session" | "linkToken" | "loginTicket" | "season" | "venue" | "tournament" | "registration" | "result" | "payment" | "playerPrize" | "clubSettings" | "clubMenuItem" | "achievement" | "userAchievement" | "ratingEvent" | "userSeasonStats" | "auditLog" | "outbox" | "liveTournament" | "cashReceipt" | "hostCredential" | "dealerCredential" | "dealerTablet" | "dealerShift"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2069,6 +2070,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HostCredential: {
+      payload: Prisma.$HostCredentialPayload<ExtArgs>
+      fields: Prisma.HostCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HostCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HostCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.HostCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HostCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.HostCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.HostCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.HostCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HostCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.HostCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        update: {
+          args: Prisma.HostCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.HostCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HostCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HostCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.HostCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HostCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.HostCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHostCredential>
+        }
+        groupBy: {
+          args: Prisma.HostCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HostCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HostCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HostCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
     DealerCredential: {
       payload: Prisma.$DealerCredentialPayload<ExtArgs>
       fields: Prisma.DealerCredentialFieldRefs
@@ -2682,6 +2757,15 @@ export const CashReceiptScalarFieldEnum = {
 export type CashReceiptScalarFieldEnum = (typeof CashReceiptScalarFieldEnum)[keyof typeof CashReceiptScalarFieldEnum]
 
 
+export const HostCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HostCredentialScalarFieldEnum = (typeof HostCredentialScalarFieldEnum)[keyof typeof HostCredentialScalarFieldEnum]
+
+
 export const DealerCredentialScalarFieldEnum = {
   userId: 'userId',
   passwordHash: 'passwordHash',
@@ -3148,6 +3232,7 @@ export type GlobalOmitConfig = {
   outbox?: Prisma.OutboxOmit
   liveTournament?: Prisma.LiveTournamentOmit
   cashReceipt?: Prisma.CashReceiptOmit
+  hostCredential?: Prisma.HostCredentialOmit
   dealerCredential?: Prisma.DealerCredentialOmit
   dealerTablet?: Prisma.DealerTabletOmit
   dealerShift?: Prisma.DealerShiftOmit

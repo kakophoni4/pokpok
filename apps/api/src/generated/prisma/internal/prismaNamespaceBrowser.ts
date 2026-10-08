@@ -73,6 +73,7 @@ export const ModelName = {
   Outbox: 'Outbox',
   LiveTournament: 'LiveTournament',
   CashReceipt: 'CashReceipt',
+  HostCredential: 'HostCredential',
   DealerCredential: 'DealerCredential',
   DealerTablet: 'DealerTablet',
   DealerShift: 'DealerShift'
@@ -444,6 +445,15 @@ export const CashReceiptScalarFieldEnum = {
 } as const
 
 export type CashReceiptScalarFieldEnum = (typeof CashReceiptScalarFieldEnum)[keyof typeof CashReceiptScalarFieldEnum]
+
+
+export const HostCredentialScalarFieldEnum = {
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HostCredentialScalarFieldEnum = (typeof HostCredentialScalarFieldEnum)[keyof typeof HostCredentialScalarFieldEnum]
 
 
 export const DealerCredentialScalarFieldEnum = {

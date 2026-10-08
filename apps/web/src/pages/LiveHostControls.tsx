@@ -28,10 +28,12 @@ export function HostAdmission({
   id,
   arrivedIds,
   menu,
+  allowFinish = true,
 }: {
   id: string;
   arrivedIds: string[];
   menu: ClubMenuItem[];
+  allowFinish?: boolean;
 }) {
   const [search, setSearch] = useState("");
   const refresh = useDeskRefresh();
@@ -78,7 +80,7 @@ export function HostAdmission({
     <Card className="host-admission">
       <div className="flex flex-wrap justify-between gap-3 mb-3">
         <h2 className="text-xl font-semibold">Приём игроков</h2>
-        <Button
+        {allowFinish && <Button
           variant="secondary"
           disabled={finish.isPending}
           onClick={() => {
@@ -91,7 +93,7 @@ export function HostAdmission({
           }}
         >
           Завершить вечер
-        </Button>
+        </Button>}
       </div>
       <input
         className="field"
@@ -137,10 +139,12 @@ export function HostPlayerControls({
   id,
   userId,
   menu,
+  compact = false,
 }: {
   id: string;
   userId: string;
   menu: ClubMenuItem[];
+  compact?: boolean;
 }) {
   const refresh = useDeskRefresh();
   const [search, setSearch] = useState("");
@@ -213,8 +217,8 @@ export function HostPlayerControls({
       m.title.toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <section className="mt-5 border-t border-white/10 pt-5 space-y-4">
-      <h3 className="text-lg font-semibold">Касса и призы</h3>
+    <section className={compact ? "host-issue space-y-4" : "mt-5 border-t border-white/10 pt-5 space-y-4"}>
+      {!compact && <h3 className="text-lg font-semibold">Касса и призы</h3>}
       <div className="flex flex-wrap gap-2">
         <Button
           variant={purpose === "purchase" ? "primary" : "secondary"}

@@ -1626,7 +1626,7 @@ export function AccountPanel({
   );
 }
 
-function PendingOrders({
+export function PendingOrders({
   id,
   orders,
   name,
@@ -1665,6 +1665,7 @@ function PendingOrders({
             </Button>
             <Button
               disabled={action.isPending}
+              variant="ghost"
               onClick={() => action.mutate({ orderId: o.id, verb: "cancel" })}
             >
               Отменить

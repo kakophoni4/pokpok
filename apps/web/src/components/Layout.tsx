@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import { platform } from "../platform/platform";
 import { InstallHint } from "./InstallHint";
@@ -51,6 +51,8 @@ export function Layout() {
       ]
     : publicItems;
 
+  if (pathname === "/staff" && user?.role === "hostess") return <Navigate to="/host" replace />;
+
   return (
     <div
       className={cx(
@@ -87,8 +89,8 @@ export function Layout() {
           </nav>
           <div className="header-account flex items-center gap-3">
             {!workspace && can("floor") && (
-              <NavLink to="/staff" className="text-sm text-stone-300">
-                Вечер
+              <NavLink to={user?.role === "hostess" ? "/host" : "/staff"} className="text-sm text-stone-300">
+                {user?.role === "hostess" ? "Хостес" : "Вечер"}
               </NavLink>
             )}
             {!workspace && can("hostess") && (

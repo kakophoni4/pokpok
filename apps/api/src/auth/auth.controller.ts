@@ -27,7 +27,8 @@ import {
 } from "@poker/contracts";
 import type { Request, Response } from "express";
 import { z } from "zod";
-import { CurrentUser, Public } from "../common/auth/decorators";
+import { CurrentUser, Public, Roles } from "../common/auth/decorators";
+import { Throttle } from "@nestjs/throttler";
 import { InternalTokenGuard } from "../common/auth/internal-token.guard";
 import type { RequestUser } from "../common/auth/auth.types";
 import { zodPipe } from "../common/validation/zod.pipe";
@@ -70,6 +71,26 @@ export class AuthController {
     private readonly users: UsersService,
     private readonly config: ConfigService<Env, true>,
   ) {}
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post("host/login")
+  async hostLogin(
+    @Body(zodPipe(z.object({ nickname: z.string().trim().min(2).max(24), password: z.string().min(1).max(128) }))) body: { nickname: string; password: string },
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SessionResponse> {
+    return this.finishLogin(await this.auth.loginAsHost(body.nickname, body.password, metaOf(request)), response);
+  }
+
+  @Roles("admin")
+  @Post("host/password")
+  hostPassword(
+    @CurrentUser() actor: RequestUser,
+    @Body(zodPipe(z.object({ userId: z.string().min(1), password: z.string().min(8).max(128) }))) body: { userId: string; password: string },
+  ): Promise<{ ok: true }> {
+    return this.auth.setHostPassword(actor.id, body.userId, body.password);
+  }
 
   @Public()
   @Post("telegram/widget")

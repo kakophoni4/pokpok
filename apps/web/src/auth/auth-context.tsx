@@ -39,6 +39,7 @@ type AuthState = {
   /** Asks whether the tap happened. A confirmed ticket signs us in on the spot. */
   pollTelegramLogin: (code: string) => Promise<LoginTicketOutcome>;
   loginAsDev: (nickname: string) => Promise<void>;
+  loginAsHost: (nickname: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -213,6 +214,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         applySession(
           await api.post<SessionResponse>("/auth/dev/login", { nickname }),
         );
+      },
+
+      loginAsHost: async (nickname, password) => {
+        applySession(await api.post<SessionResponse>("/auth/host/login", { nickname, password }));
       },
 
       logout: async () => {

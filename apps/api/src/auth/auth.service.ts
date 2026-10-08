@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type {
@@ -21,6 +22,7 @@ import { toMeUser, type UserWithIdentities } from "../users/user.mapper";
 import { UsersService } from "../users/users.service";
 import type { TelegramProfile } from "./telegram.verifier";
 import { type Audience, type SessionMeta, TokenService } from "./token.service";
+import { hashHostPassword, verifyHostPassword } from "./host-password";
 
 export type ProviderProfile = {
   provider: AuthProvider;
@@ -92,6 +94,30 @@ export class AuthService {
     private readonly audit: AuditService,
     private readonly config: ConfigService<Env, true>,
   ) {}
+
+  async loginAsHost(nickname: string, password: string, meta: SessionMeta = {}): Promise<LoginResult> {
+    const user = await this.prisma.user.findUnique({
+      where: { nickname }, include: { identities: true, hostCredential: true },
+    });
+    const valid = await verifyHostPassword(password, user?.hostCredential?.passwordHash);
+    if (!valid || !user || user.role !== "hostess" || user.status !== "active") {
+      throw new UnauthorizedException({ code: "HOST_LOGIN_FAILED", message: "Неверный логин или пароль" });
+    }
+    return this.issueFor(user, "web", meta, false);
+  }
+
+  async setHostPassword(actorId: string, userId: string, password: string): Promise<{ ok: true }> {
+    const passwordHash = await hashHostPassword(password);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      if (!user || user.role !== "hostess") throw new ForbiddenException("Выберите сотрудника с ролью хостес");
+      await tx.hostCredential.upsert({ where: { userId }, create: { userId, passwordHash }, update: { passwordHash } });
+      await tx.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
+    });
+    await this.audit.record({ actorId, action: "auth.host.password", entity: "User", entityId: userId });
+    return { ok: true };
+  }
 
   static fromTelegram(profile: TelegramProfile): ProviderProfile {
     return {
