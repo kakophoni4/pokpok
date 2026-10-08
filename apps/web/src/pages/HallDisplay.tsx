@@ -6,6 +6,7 @@ import { api } from "../lib/api";
 import { ClubBrand } from "../components/ClubBrand";
 import { Button, ErrorState, Loading } from "../components/ui";
 import { DisplayAudio } from "../lib/display-audio";
+import { handOfDayRanks } from "../lib/hand-of-day";
 import {
   clockText,
   cueText,
@@ -32,6 +33,7 @@ export function HallDisplayPage() {
     [enabled, setEnabled] = useState(false),
     [controls, setControls] = useState(false);
   const [audioError, setAudioError] = useState("");
+  const [started, setStarted] = useState(false);
   const [volume, setVolume] = useState(() => {
     try {
       const v = localStorage.getItem("concept-tv-volume");
@@ -78,10 +80,19 @@ export function HallDisplayPage() {
       audio.current.play("resume");
       setEnabled(true);
       setAudioError("");
+      return true;
     } catch (error) {
       setAudioError(error instanceof Error ? error.message : "Звук недоступен");
       setEnabled(false);
+      return false;
     }
+  }
+  async function startScreen(withAudio: boolean) {
+    // Fullscreen and audio must both start inside the remote's button gesture.
+    if (screen.current?.requestFullscreen && !document.fullscreenElement) {
+      void screen.current.requestFullscreen().catch(() => {});
+    }
+    if (!withAudio || await enableAudio()) setStarted(true);
   }
   function changeVolume(value: number) {
     setVolume(value);
@@ -121,7 +132,7 @@ export function HallDisplayPage() {
     .slice(0, clock.index + 1)
     .filter((l) => !l.break).length;
   const paused = !clock.running && !clock.complete;
-  const handCards = view.handOfDay?.match(/(?:10|[2-9TJQKA])[♠♥♦♣]/gi);
+  const handCards = handOfDayRanks(view.handOfDay);
   return (
     <main
       ref={screen}
@@ -131,7 +142,6 @@ export function HallDisplayPage() {
       <header className="hall-header">
         <ClubBrand />
         <div className="hall-event">
-          <span>ТУРНИР</span>
           <h1>{view.title}</h1>
         </div>
         <div className="hall-status">
@@ -238,12 +248,9 @@ export function HallDisplayPage() {
               )}
             </div>
             {!!handCards?.length && (
-              <div className="hall-cards">
+              <div className="hall-cards" aria-label={`Рука дня: ${handCards.join(" и ")}`}>
                 {handCards.map((card, i) => (
-                  <span key={i} className={/[♥♦]/.test(card) ? "red" : ""}>
-                    {card.slice(0, -1)}
-                    <b>{card.slice(-1)}</b>
-                  </span>
+                  <span key={i}>{card}</span>
                 ))}
               </div>
             )}
@@ -271,6 +278,17 @@ export function HallDisplayPage() {
           <strong>{view.paidPlaces ?? "-"}</strong>
         </div>
       </footer>
+      {!started && (
+        <section className="hall-launch" aria-label="Запуск телевизора">
+          <div className="hall-launch-card">
+            <ClubBrand />
+            <p className="hall-launch-label">ЭКРАН ЗАЛА</p>
+            <Button autoFocus onClick={() => void startScreen(true)}>Начать показ со звуком</Button>
+            <Button variant="secondary" onClick={() => void startScreen(false)}>Показать без звука</Button>
+            {audioError && <p role="alert">{audioError}</p>}
+          </div>
+        </section>
+      )}
       {notice && notice.until > now && (
         <div className="hall-notice" role="status">
           {notice.text}
