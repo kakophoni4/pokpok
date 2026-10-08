@@ -2479,3 +2479,6 @@ a {
  .public-shell .profile-history-list > li > span:last-child { font-size:17px; }
  .public-shell .profile-prize-summary > p { font-size:15px; }
 }
+.public-shell .profile-history { scroll-margin-top:90px; }
+.public-shell .profile-history-pagination { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 0; }
+.public-shell .profile-history-pagination > span { color:#b6c1d0; font-size:14px; font-variant-numeric:tabular-nums; }

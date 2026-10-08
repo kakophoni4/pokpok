@@ -27,12 +27,14 @@ export type AggregateLiveTournament = {
 export type LiveTournamentMinAggregateOutputType = {
   tournamentId: string | null
   displayToken: string | null
+  displayCode: string | null
   updatedAt: Date | null
 }
 
 export type LiveTournamentMaxAggregateOutputType = {
   tournamentId: string | null
   displayToken: string | null
+  displayCode: string | null
   updatedAt: Date | null
 }
 
@@ -40,6 +42,7 @@ export type LiveTournamentCountAggregateOutputType = {
   tournamentId: number
   state: number
   displayToken: number
+  displayCode: number
   updatedAt: number
   _all: number
 }
@@ -48,12 +51,14 @@ export type LiveTournamentCountAggregateOutputType = {
 export type LiveTournamentMinAggregateInputType = {
   tournamentId?: true
   displayToken?: true
+  displayCode?: true
   updatedAt?: true
 }
 
 export type LiveTournamentMaxAggregateInputType = {
   tournamentId?: true
   displayToken?: true
+  displayCode?: true
   updatedAt?: true
 }
 
@@ -61,6 +66,7 @@ export type LiveTournamentCountAggregateInputType = {
   tournamentId?: true
   state?: true
   displayToken?: true
+  displayCode?: true
   updatedAt?: true
   _all?: true
 }
@@ -141,6 +147,7 @@ export type LiveTournamentGroupByOutputType = {
   tournamentId: string
   state: runtime.JsonValue
   displayToken: string
+  displayCode: string | null
   updatedAt: Date
   _count: LiveTournamentCountAggregateOutputType | null
   _min: LiveTournamentMinAggregateOutputType | null
@@ -169,6 +176,7 @@ export type LiveTournamentWhereInput = {
   tournamentId?: Prisma.StringFilter<"LiveTournament"> | string
   state?: Prisma.JsonFilter<"LiveTournament">
   displayToken?: Prisma.StringFilter<"LiveTournament"> | string
+  displayCode?: Prisma.StringNullableFilter<"LiveTournament"> | string | null
   updatedAt?: Prisma.DateTimeFilter<"LiveTournament"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
 }
@@ -177,6 +185,7 @@ export type LiveTournamentOrderByWithRelationInput = {
   tournamentId?: Prisma.SortOrder
   state?: Prisma.SortOrder
   displayToken?: Prisma.SortOrder
+  displayCode?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tournament?: Prisma.TournamentOrderByWithRelationInput
 }
@@ -184,18 +193,20 @@ export type LiveTournamentOrderByWithRelationInput = {
 export type LiveTournamentWhereUniqueInput = Prisma.AtLeast<{
   tournamentId?: string
   displayToken?: string
+  displayCode?: string
   AND?: Prisma.LiveTournamentWhereInput | Prisma.LiveTournamentWhereInput[]
   OR?: Prisma.LiveTournamentWhereInput[]
   NOT?: Prisma.LiveTournamentWhereInput | Prisma.LiveTournamentWhereInput[]
   state?: Prisma.JsonFilter<"LiveTournament">
   updatedAt?: Prisma.DateTimeFilter<"LiveTournament"> | Date | string
   tournament?: Prisma.XOR<Prisma.TournamentScalarRelationFilter, Prisma.TournamentWhereInput>
-}, "tournamentId" | "displayToken">
+}, "tournamentId" | "displayToken" | "displayCode">
 
 export type LiveTournamentOrderByWithAggregationInput = {
   tournamentId?: Prisma.SortOrder
   state?: Prisma.SortOrder
   displayToken?: Prisma.SortOrder
+  displayCode?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.LiveTournamentCountOrderByAggregateInput
   _max?: Prisma.LiveTournamentMaxOrderByAggregateInput
@@ -209,12 +220,14 @@ export type LiveTournamentScalarWhereWithAggregatesInput = {
   tournamentId?: Prisma.StringWithAggregatesFilter<"LiveTournament"> | string
   state?: Prisma.JsonWithAggregatesFilter<"LiveTournament">
   displayToken?: Prisma.StringWithAggregatesFilter<"LiveTournament"> | string
+  displayCode?: Prisma.StringNullableWithAggregatesFilter<"LiveTournament"> | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LiveTournament"> | Date | string
 }
 
 export type LiveTournamentCreateInput = {
   state: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: string
+  displayCode?: string | null
   updatedAt?: Date | string
   tournament: Prisma.TournamentCreateNestedOneWithoutLiveInput
 }
@@ -223,12 +236,14 @@ export type LiveTournamentUncheckedCreateInput = {
   tournamentId: string
   state: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: string
+  displayCode?: string | null
   updatedAt?: Date | string
 }
 
 export type LiveTournamentUpdateInput = {
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tournament?: Prisma.TournamentUpdateOneRequiredWithoutLiveNestedInput
 }
@@ -237,6 +252,7 @@ export type LiveTournamentUncheckedUpdateInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -244,12 +260,14 @@ export type LiveTournamentCreateManyInput = {
   tournamentId: string
   state: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: string
+  displayCode?: string | null
   updatedAt?: Date | string
 }
 
 export type LiveTournamentUpdateManyMutationInput = {
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -257,6 +275,7 @@ export type LiveTournamentUncheckedUpdateManyInput = {
   tournamentId?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -269,18 +288,21 @@ export type LiveTournamentCountOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   state?: Prisma.SortOrder
   displayToken?: Prisma.SortOrder
+  displayCode?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type LiveTournamentMaxOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   displayToken?: Prisma.SortOrder
+  displayCode?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type LiveTournamentMinOrderByAggregateInput = {
   tournamentId?: Prisma.SortOrder
   displayToken?: Prisma.SortOrder
+  displayCode?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -319,12 +341,14 @@ export type LiveTournamentUncheckedUpdateOneWithoutTournamentNestedInput = {
 export type LiveTournamentCreateWithoutTournamentInput = {
   state: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: string
+  displayCode?: string | null
   updatedAt?: Date | string
 }
 
 export type LiveTournamentUncheckedCreateWithoutTournamentInput = {
   state: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: string
+  displayCode?: string | null
   updatedAt?: Date | string
 }
 
@@ -347,12 +371,14 @@ export type LiveTournamentUpdateToOneWithWhereWithoutTournamentInput = {
 export type LiveTournamentUpdateWithoutTournamentInput = {
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LiveTournamentUncheckedUpdateWithoutTournamentInput = {
   state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   displayToken?: Prisma.StringFieldUpdateOperationsInput | string
+  displayCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -362,6 +388,7 @@ export type LiveTournamentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   tournamentId?: boolean
   state?: boolean
   displayToken?: boolean
+  displayCode?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveTournament"]>
@@ -370,6 +397,7 @@ export type LiveTournamentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   tournamentId?: boolean
   state?: boolean
   displayToken?: boolean
+  displayCode?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveTournament"]>
@@ -378,6 +406,7 @@ export type LiveTournamentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   tournamentId?: boolean
   state?: boolean
   displayToken?: boolean
+  displayCode?: boolean
   updatedAt?: boolean
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveTournament"]>
@@ -386,10 +415,11 @@ export type LiveTournamentSelectScalar = {
   tournamentId?: boolean
   state?: boolean
   displayToken?: boolean
+  displayCode?: boolean
   updatedAt?: boolean
 }
 
-export type LiveTournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tournamentId" | "state" | "displayToken" | "updatedAt", ExtArgs["result"]["liveTournament"]>
+export type LiveTournamentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tournamentId" | "state" | "displayToken" | "displayCode" | "updatedAt", ExtArgs["result"]["liveTournament"]>
 export type LiveTournamentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tournament?: boolean | Prisma.TournamentDefaultArgs<ExtArgs>
 }
@@ -409,6 +439,7 @@ export type $LiveTournamentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     tournamentId: string
     state: runtime.JsonValue
     displayToken: string
+    displayCode: string | null
     updatedAt: Date
   }, ExtArgs["result"]["liveTournament"]>
   composites: {}
@@ -837,6 +868,7 @@ export interface LiveTournamentFieldRefs {
   readonly tournamentId: Prisma.FieldRef<"LiveTournament", 'String'>
   readonly state: Prisma.FieldRef<"LiveTournament", 'Json'>
   readonly displayToken: Prisma.FieldRef<"LiveTournament", 'String'>
+  readonly displayCode: Prisma.FieldRef<"LiveTournament", 'String'>
   readonly updatedAt: Prisma.FieldRef<"LiveTournament", 'DateTime'>
 }
     

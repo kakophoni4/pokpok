@@ -17,6 +17,7 @@ import type { RequestUser } from "../common/auth/auth.types";
 import { CurrentUser, Public, Roles } from "../common/auth/decorators";
 import { zodPipe } from "../common/validation/zod.pipe";
 import { z } from "zod";
+import { Throttle } from "@nestjs/throttler";
 import { LiveService } from "./live.service";
 
 @Controller("live")
@@ -84,6 +85,11 @@ export class LiveController {
     @Body(zodPipe(PlaceOrderInput)) body: PlaceOrderInput,
   ) {
     return this.live.placeOrder(actor, body);
+  }
+  @Public() @Post("display/connect") @Throttle({ default: { limit: 10, ttl: 60000 } }) connectDisplay(
+    @Body(zodPipe(z.object({ code: z.string().regex(/^\d{6}$/) }))) body: { code: string },
+  ) {
+    return this.live.connectDisplay(body.code);
   }
   @Public() @Get("display/:id") display(
     @Param("id") id: string,

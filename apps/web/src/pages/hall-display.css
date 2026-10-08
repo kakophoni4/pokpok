@@ -545,3 +545,30 @@
 .hall-cards > span:first-child { transform:rotate(-4deg); }
 .hall-cards > span:last-child { transform:rotate(4deg); }
 @media(max-width:850px) { .hall-digits { font-size:min(24vw,26vh); } .hall-cards > span { width:58px; height:78px; font-size:34px; } }
+.hall-pairing { min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; background:radial-gradient(ellipse at 50% 30%,#19334f,#070f1c 70%); color:#f4f1e8; font-family:var(--font-ui); }
+.hall-code-label { font-size:24px; font-weight:600; margin-top:12px; }
+.hall-code-input { width:100%; height:88px; border:1px solid #cfb57770; border-radius:10px; text-align:center; font-size:42px; letter-spacing:.2em; font-weight:650; font-variant-numeric:tabular-nums; background:#08121f; color:#f4f1e8; padding:12px 8px 12px 16px; }
+.hall-code-input::placeholder { color:#5d7088; }
+.hall-pairing :is(input,button):focus-visible { outline:3px solid #eee2c5; outline-offset:5px; }
+.tv-connection-instructions { display:flex; flex-direction:column; gap:10px; padding:18px 0; }
+.tv-connection-instructions p { font-size:15px; }
+.tv-connection-instructions a { color:#cfb577; text-decoration:underline; }
+.tv-connection-instructions > span { color:#aebccc; font-size:13px; }
+.tv-connection-instructions > strong { font-size:32px; font-weight:650; letter-spacing:.15em; color:#e4d1aa; }
+/* Labels must be legible from across the room. */
+.hall-blinds span,.hall-next span,.hall-stats span,.hall-hand strong { font-size:clamp(18px,1.35vw,27px); color:#bdc9d8; }
+.hall-next strong { font-size:clamp(24px,1.8vw,36px); }
+.hall-control-toggle { font-size:clamp(16px,1.1vw,22px); }
+.hall-cards > span { width:5.4vw; height:8.1vw; border:0; border-radius:6px; background:transparent url('/images/tv-card-blank-v1.webp') center / 100% 100% no-repeat; box-shadow:0 8px 18px #0005; font-size:3.3vw; }
+@media(max-width:850px) { .hall-cards > span { width:64px; height:96px; font-size:38px; } }
+@font-face { font-family:Unbounded; src:url('/fonts/UnboundedVariable.ttf') format('truetype'); font-weight:200 900; font-style:normal; font-display:swap; }
+.hall-event h1 { font-family:Unbounded,var(--font-ui); font-weight:550; font-size:clamp(22px,1.7vw,34px); letter-spacing:-.035em; line-height:1.4; }
+@media(min-width:801px) and (min-aspect-ratio:1/1) {
+ .hall-ranking { display:flex; flex-direction:column; }
+ .hall-ranking ol { display:grid; grid-auto-rows:minmax(0,1fr); flex:1; min-height:0; }
+ .hall-ranking li { padding:0; font-size:clamp(12px,1.05vw,21px); line-height:1.25; }
+ .hall-ranking li > span { font-family:var(--font-ui); font-size:.85em; font-variant-numeric:tabular-nums; }
+ .hall-hand { padding:1.5vh 1.6vw; }
+ .hall-cards > span { width:4.8vw; height:7.2vw; }
+}
+@media(min-width:801px) and (min-aspect-ratio:1/1) { .hall-ranking ol { grid-template-rows:repeat(17,minmax(0,1fr)); } }

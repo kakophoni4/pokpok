@@ -5,7 +5,7 @@ import type {
 } from "@poker/contracts";
 import { walletLabel } from "@poker/contracts";
 import { Link } from "react-router-dom";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { AwardArtwork } from "./AwardArtwork";
 import { AchievementIcon } from "./AchievementIcon";
 import {
@@ -48,6 +48,15 @@ export function PlayerProfile({
   extra?: React.ReactNode;
   canRevoke?: boolean;
 }) {
+  const [historyPage, setHistoryPage] = useState(0);
+  const historySection = useRef<HTMLElement>(null);
+  useEffect(() => setHistoryPage(0), [stats.user.id, stats.seasonId]);
+  const historyPages = Math.ceil(stats.history.length / 10);
+  const currentHistoryPage = Math.min(historyPage, Math.max(0, historyPages - 1));
+  function changeHistoryPage(page: number) {
+    setHistoryPage(page);
+    historySection.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+  }
   return (
     <div className="player-profile">
       <Card className="profile-identity mb-4">
@@ -148,14 +157,14 @@ export function PlayerProfile({
         </div>
       )}
 
-      <section className="profile-history">
+      <section className="profile-history" ref={historySection}>
         <h2 className="section-heading">История</h2>
 
         {stats.history.length === 0 ? (
           <EmptyState title="Игр пока не было" description="" />
         ) : (
           <ul className="profile-history-list divide-y divide-felt-800">
-            {stats.history.map((event) => (
+            {stats.history.slice(currentHistoryPage * 10, (currentHistoryPage + 1) * 10).map((event) => (
               <li key={event.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex h-10 w-12 shrink-0 items-center justify-center">
                   {event.tournament ? (
@@ -216,6 +225,13 @@ export function PlayerProfile({
               </li>
             ))}
           </ul>
+        )}
+        {historyPages > 1 && (
+          <nav className="profile-history-pagination" aria-label="Страницы истории">
+            <Button size="sm" variant="ghost" disabled={currentHistoryPage === 0} onClick={() => changeHistoryPage(currentHistoryPage - 1)}>Назад</Button>
+            <span aria-live="polite">{currentHistoryPage + 1} / {historyPages}</span>
+            <Button size="sm" variant="ghost" disabled={currentHistoryPage === historyPages - 1} onClick={() => changeHistoryPage(currentHistoryPage + 1)}>Далее</Button>
+          </nav>
         )}
       </section>
     </div>

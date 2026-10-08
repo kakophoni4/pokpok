@@ -2660,6 +2660,7 @@ export const LiveTournamentScalarFieldEnum = {
   tournamentId: 'tournamentId',
   state: 'state',
   displayToken: 'displayToken',
+  displayCode: 'displayCode',
   updatedAt: 'updatedAt'
 } as const
 

@@ -330,11 +330,16 @@ export function LiveDesk({
                   action.mutate({ type: "editLevel", index, level })
                 }
               />
-              {can("admin") && !dealer && v.displayToken && (
+              {can("floor") && !dealer && v.displayToken && (
                 <details className="w-full text-sm text-stone-300">
                   <summary className="cursor-pointer">
                     Подключение телевизора
                   </summary>
+                  {v.displayCode && <div className="tv-connection-instructions">
+                    <p>На телевизоре откройте <a href="/tv" target="_blank" rel="noreferrer">{window.location.host}/tv</a></p>
+                    <span>Код турнира</span>
+                    <strong className="nums">{v.displayCode}</strong>
+                  </div>}
                   <a
                     className="text-gold-400 p-2"
                     href={`/display/${id}?token=${encodeURIComponent(v.displayToken)}`}

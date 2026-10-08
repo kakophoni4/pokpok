@@ -35,6 +35,7 @@ const HallDisplayPage = lazy(() =>
     default: module.HallDisplayPage,
   })),
 );
+const TVConnectPage = lazy(() => import("./pages/TVConnectPage").then((module) => ({ default: module.TVConnectPage })));
 const LiveStaffPage = lazy(() =>
   import("./pages/LivePages").then((module) => ({
     default: module.LiveStaffPage,
@@ -72,6 +73,7 @@ export function App() {
           <Routes>
             <Route path="dealer" element={<DealerTabletPage />} />
             <Route path="display/:id" element={<HallDisplayPage />} />
+            <Route path="tv" element={<TVConnectPage />} />
             <Route element={<Layout />}>
               <Route path="dealer/setup" element={<DealerSetupPage />} />
               <Route path="staff" element={<LiveStaffPage />} />

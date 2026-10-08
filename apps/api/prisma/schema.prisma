@@ -565,6 +565,7 @@ model LiveTournament {
   tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   state Json
   displayToken String @unique @default(uuid())
+  displayCode String? @unique
   updatedAt DateTime @updatedAt
 }
 

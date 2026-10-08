@@ -14,12 +14,12 @@ import {
   projectDisplayClock,
 } from "../lib/display-clock";
 import "./hall-display.css";
+import type { TVConnection } from "./TVConnectPage";
 
 const number = (n: number) => n.toLocaleString("ru-RU");
-export function HallDisplayPage() {
-  const { id } = useParams(),
-    [search] = useSearchParams(),
-    token = search.get("token") ?? "";
+export function HallDisplayPage({ connection, onDisconnect }: { connection?: TVConnection; onDisconnect?: () => void } = {}) {
+  const params = useParams(), [search] = useSearchParams();
+  const id = connection?.id ?? params.id, token = connection?.token ?? search.get("token") ?? "";
   const query = useQuery({
     queryKey: ["display", id, token],
     queryFn: () =>
@@ -114,6 +114,7 @@ export function HallDisplayPage() {
     return (
       <div className="hall-state">
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
+        {onDisconnect && <Button onClick={onDisconnect}>Ввести другой код</Button>}
       </div>
     );
   if (!clock || !view.state)
@@ -144,10 +145,10 @@ export function HallDisplayPage() {
         <div className="hall-event">
           <h1>{view.title}</h1>
         </div>
-        <div className="hall-status">
-          <i className={fresh ? "" : "offline"} />
-          {fresh ? "В ЭФИРЕ" : "НЕТ СВЯЗИ"}
-        </div>
+        {!fresh && <div className="hall-status" role="status">
+          <i className="offline" />
+          НЕТ СВЯЗИ
+        </div>}
       </header>
       <div className="hall-body">
         <section className="hall-clock">
@@ -225,10 +226,10 @@ export function HallDisplayPage() {
           <div className="hall-ranking">
             <div className="hall-section-title">
               <span>Рейтинг сезона</span>
-              <span>ТОП {Math.min(8, view.leaderboard.length)}</span>
+              <span>ТОП 17</span>
             </div>
             <ol>
-              {view.leaderboard.slice(0, 8).map((p, i) => (
+              {view.leaderboard.slice(0, 17).map((p, i) => (
                 <li key={`${p.name}-${i}`}>
                   <span>{String(i + 1).padStart(2, "0")}</span>
                   <strong>{p.name}</strong>
@@ -306,6 +307,7 @@ export function HallDisplayPage() {
       {controls && (
         <section className="hall-controls" aria-label="Настройки экрана">
           <h2>Экран турнира</h2>
+          {onDisconnect && <Button variant="secondary" onClick={onDisconnect}>Сменить турнир</Button>}
           <div className="flex gap-2">
             <Button
               onClick={() => {
@@ -336,10 +338,6 @@ export function HallDisplayPage() {
               onChange={(e) => changeVolume(Number(e.target.value))}
             />
           </label>
-          <p>
-            За 1 минуту и 10 секунд до смены уровня, при перерыве, паузе и
-            продолжении.
-          </p>
           <Button
             variant="secondary"
             onClick={() => {

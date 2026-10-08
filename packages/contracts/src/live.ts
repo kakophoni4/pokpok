@@ -138,6 +138,7 @@ export type LiveView = {
   players: { id: string; name: string; place?: number | null }[];
   balances: { userId: string; dueRub: number }[];
   displayToken?: string;
+  displayCode?: string | null;
   leaderboard: { name: string; points: number }[];
 };
 

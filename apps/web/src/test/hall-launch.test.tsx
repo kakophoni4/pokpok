@@ -13,18 +13,26 @@ vi.mock("../lib/display-audio", () => ({ DisplayAudio: class {
   stop() {}
   dispose() {}
 } }));
-function show() {
+function show(leaderboard: LiveView["leaderboard"] = []) {
   const level = DEFAULT_LIVE_CONFIG.levels[0]!;
   const view: LiveView = {
     id:"test", title:"Тестовый турнир", status:"running", serverTime:new Date().toISOString(),
     state:{config:DEFAULT_LIVE_CONFIG, clock:{running:false,elapsedSeconds:0,startedAt:null},tables:[],seats:[],orders:[],bounties:[],alerts:[]},
-    clock:{index:0,remaining:level.seconds,elapsed:0,level,next:null,complete:false},players:[],balances:[],leaderboard:[],
+    clock:{index:0,remaining:level.seconds,elapsed:0,level,next:null,complete:false},players:[],balances:[],leaderboard,
   };
   const client = new QueryClient({defaultOptions:{queries:{enabled:false}}});
   client.setQueryData(["display","test",""],view);
   render(<MemoryRouter initialEntries={["/display/test"]}><QueryClientProvider client={client}><Routes><Route path="/display/:id" element={<HallDisplayPage/>}/></Routes></QueryClientProvider></MemoryRouter>);
 }
 describe("TV launch", () => {
+  it("shows exactly the top seventeen without the redundant live label", () => {
+    show(Array.from({length:18},(_,i)=>({name:`Игрок ${i+1}`,points:1800-i*100})));
+    fireEvent.click(screen.getByRole("button",{name:"Показать без звука"}));
+    expect(screen.getByText("ТОП 17")).toBeInTheDocument();
+    expect(screen.getByText("Игрок 17")).toBeInTheDocument();
+    expect(screen.queryByText("Игрок 18")).not.toBeInTheDocument();
+    expect(screen.queryByText("В ЭФИРЕ")).not.toBeInTheDocument();
+  });
   it("waits for a user gesture to enable sound and does not start the game clock", async () => {
     show();
     expect(audio.enable).not.toHaveBeenCalled();

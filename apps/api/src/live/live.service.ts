@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import {
   ConflictException,
   ForbiddenException,
@@ -158,10 +158,23 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
     );
   }
   private async save(tx: Tx, id: string, state: LiveState) {
+    const existing = await tx.liveTournament.findUnique({ where: { tournamentId: id }, select: { displayCode: true } });
+    let displayCode = existing?.displayCode;
+    if (!displayCode) {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(83462109)`;
+      for (let attempt = 0; attempt < 50; attempt++) {
+        const candidate = String(randomInt(100000, 1000000));
+        if (!await tx.liveTournament.findUnique({ where: { displayCode: candidate }, select: { tournamentId: true } })) {
+          displayCode = candidate;
+          break;
+        }
+      }
+      if (!displayCode) fail("Не удалось создать код телевизора. Повторите попытку.");
+    }
     await tx.liveTournament.upsert({
       where: { tournamentId: id },
-      create: { tournamentId: id, state: state as never },
-      update: { state: state as never },
+      create: { tournamentId: id, state: state as never, displayCode },
+      update: { state: state as never, displayCode },
     });
   }
   private async audit(
@@ -260,7 +273,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
           where: { seasonId: t.seasonId },
           include: { user: true },
           orderBy: { points: "desc" },
-          take: 10,
+          take: 17,
         })
       : [];
     if (state) {
@@ -314,10 +327,19 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
         name: formatPlayerName(r.user.displayName, r.user.nickname),
         points: r.points,
       })),
-      ...(actor && hasRole(actor.role, "admin")
-        ? { displayToken: t.live?.displayToken }
+      ...(actor && hasRole(actor.role, "floor")
+        ? { displayToken: t.live?.displayToken, displayCode: t.live?.displayCode }
         : {}),
     };
+  }
+  async connectDisplay(code: string) {
+    const live = await this.db.liveTournament.findUnique({
+      where: { displayCode: code },
+      select: { tournamentId: true, displayToken: true, tournament: { select: { status: true } } },
+    });
+    if (!live || live.tournament.status === "cancelled" || live.tournament.status === "draft")
+      throw new NotFoundException("Код турнира не найден");
+    return { id: live.tournamentId, token: live.displayToken };
   }
   async action(id: string, actor: RequestUser, input: LiveAction) {
     if (actor.role === "dealer" && actor.dealerTournamentId !== id)
