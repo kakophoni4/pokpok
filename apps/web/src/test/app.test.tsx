@@ -225,6 +225,25 @@ describe("registration", () => {
 });
 
 describe("leaderboard", () => {
+  it("limits standings to top 25 and preserves the actual rank of the signed-in player", async () => {
+    const rows = Array.from({ length: 30 }, (_, index) => ({
+      rank: index + 1,
+      user: index === 29 ? ME : player(`other${index + 1}`, `Player${index + 1}`),
+      points: 10000 - index * 100, gamesPlayed: 6, wins: 1, top3: 2, itm: 3, avgPlace: 5, bestPlace: 1,
+    }));
+    stubApi([SIGNED_IN, { match: "GET /auth/me", body: ME }, ACTIVE_SEASON,
+      { match: "GET /seasons", body: [SEASON] },
+      { match: "GET /rating/leaderboard", body: rows },
+    ]);
+    renderApp("/rating");
+    expect(await screen.findByText("Моя позиция")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toHaveTextContent("Player25");
+    expect(screen.getByRole("table")).not.toHaveTextContent("Player26");
+    expect(screen.getByText("вы").closest("tr")?.firstElementChild).toHaveTextContent("30");
+    fireEvent.change(screen.getByRole("searchbox", { name: "Поиск игрока" }), { target: { value: "Player25" } });
+    expect(screen.getByRole("table")).toHaveTextContent("Player25");
+    expect(screen.getByText("Моя позиция")).toBeInTheDocument();
+  });
   it("shows an empty state rather than loading forever when no season exists", async () => {
     stubApi([ANONYMOUS, { match: "GET /seasons", body: [] }]);
     renderApp("/rating");

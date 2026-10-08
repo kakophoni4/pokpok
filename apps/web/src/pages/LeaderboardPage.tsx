@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
 import {
@@ -23,8 +23,8 @@ export function LeaderboardPage() {
     ...standings,
     data: standings.data?.filter(
       (row) =>
-        !needle ||
-        playerLabel(row.user).toLocaleLowerCase("ru-RU").includes(needle),
+        (row.rank > 25 && row.user.id === user?.id) ||
+        (row.rank <= 25 && (!needle || playerLabel(row.user).toLocaleLowerCase("ru-RU").includes(needle))),
     ),
   };
 
@@ -116,6 +116,7 @@ export function LeaderboardPage() {
 
       {board.data && board.data.length > 0 && (
         <>
+          <p className="standings-caption">Топ-25 игроков</p>
           <div className="standings-frame">
             <table
               className="standings-table"
@@ -143,8 +144,9 @@ export function LeaderboardPage() {
               {board.data.map((row) => {
                 const isMe = row.user.id === user?.id;
                 return (
+                  <Fragment key={row.user.id}>
+                  {row.rank > 25 && <tr className="standing-personal-divider"><td colSpan={6}>Моя позиция</td></tr>}
                   <tr
-                    key={row.user.id}
                     className={cx(row.rank <= 3 && `standing-leader standing-leader-${row.rank}`, isMe && "standing-self")}
                   >
                     <td className="rank-cell">
@@ -183,6 +185,7 @@ export function LeaderboardPage() {
                       {row.avgPlace == null ? "-" : row.avgPlace.toFixed(1)}
                     </td>
                   </tr>
+                  </Fragment>
                 );
               })}
             </tbody>

@@ -2358,3 +2358,22 @@ a {
  .public-shell .profile-identity > div:first-child > :is(img,span[aria-hidden]) { width:64px !important; height:64px !important; font-size:24px !important; }
  .public-shell .profile-identity p { max-width:240px; margin:0 auto; }
 }
+.public-shell .standings-caption { font-size:14px; font-weight:600; color:#bcc7d4; margin:0 0 12px; }
+.public-shell .standings-frame { background:#0d1724; }
+.public-shell .standing-rank { border:0; border-radius:0; background:none; font-size:16px; width:auto; height:auto; font-weight:600; }
+.public-shell .standings-table .standing-personal-divider td { height:auto; padding:14px 22px; background:#192536; color:#cfb680; font-size:14px; font-weight:600; text-align:left; }
+@media(max-width:640px) {
+ .public-shell .standings-table .rank-column { width:38px; }
+ .public-shell .standings-table .score-column { width:82px; }
+ .public-shell .standings-table .games-column { width:42px; }
+ .public-shell .standings-table th { padding:14px 10px; font-size:12px; }
+ .public-shell .standings-table td { padding:15px 10px; height:66px; font-size:13px; }
+ .public-shell .standings-table .rank-cell { padding:0 6px; }
+ .public-shell .standing-player > img,.public-shell .standing-player > span[aria-hidden] { display:none; }
+ .public-shell .standing-player { gap:4px; }
+ .public-shell .standing-name { font-size:13px; font-weight:550; }
+ .public-shell .standings-table .standing-score { font-size:16px; font-weight:650; }
+ .public-shell .standing-you { font-size:10px; padding:2px 3px; }
+ .public-shell .standing-leader { box-shadow:none; }
+ .public-shell .standings-table .standing-personal-divider td { padding:12px 14px; }
+}
