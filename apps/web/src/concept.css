@@ -2275,3 +2275,7 @@ a {
  .public-shell .podium-name { font-size:12px; margin-top:12px; }
  .public-shell .podium-score { font-size:clamp(17px,5vw,22px); }
 }
+
+.public-shell .award-section-game .award-tile { grid-template-rows:auto auto 1fr auto; }
+.public-shell .award-section-game .combination-photo { max-width:none; height:auto; aspect-ratio:2/1; object-fit:cover; border-radius:7px; margin:0 0 6px; }
+.public-shell .award-section-game .achievement-locked .combination-photo { opacity:1; filter:none; }
