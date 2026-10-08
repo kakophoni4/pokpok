@@ -79,6 +79,9 @@ export type LiveAlert = {
   text: string;
   createdAt: string;
   acknowledgedBy: string | null;
+  kind?: "bust" | "purchase";
+  table?: number | null;
+  seat?: number | null;
 };
 export type LiveState = {
   config: LiveConfig;

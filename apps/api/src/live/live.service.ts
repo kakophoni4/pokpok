@@ -570,6 +570,8 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
             const p = this.player(s, input.userId);
             if (p.state !== "playing" && !(p.state === "busted" && input.final))
               fail("Игрок уже выбыл");
+            const sourceTable = p.table ?? p.lastTable;
+            const sourceSeat = p.seat;
             p.lastTable = p.table ?? p.lastTable;
             p.state = input.final || !rebuyOpen(s) ? "eliminated" : "busted";
             p.bustedAt = new Date().toISOString();
@@ -580,6 +582,9 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
             p.wantsMove = false;
             s.alerts.push({
               id: randomUUID(),
+              kind: "bust",
+              table: sourceTable,
+              seat: sourceSeat,
               userId: p.userId,
               text: `${p.state === "eliminated" ? "Завершил игру" : "Без стека"}. К оплате ${Math.max(0, await dueFor(tx, p.userId, id))} ₽`,
               createdAt: new Date().toISOString(),

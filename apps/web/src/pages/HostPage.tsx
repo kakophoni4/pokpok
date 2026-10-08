@@ -7,6 +7,7 @@ import { Avatar, Button, Card, ErrorState, Loading } from "../components/ui";
 import { api } from "../lib/api";
 import { HostAdmission, HostPlayerControls } from "./LiveHostControls";
 import { AccountPanel, PendingOrders } from "./LivePages";
+import { HostAttention } from "./HostAttention";
 import "./host-workspace.css";
 
 export function HostPage() {
@@ -62,7 +63,7 @@ function HostDesk({ id }: { id: string }) {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"issue" | "account">("issue");
   const [error, setError] = useState("");
-  const view = useQuery({ queryKey: ["live", id], queryFn: () => api.get<LiveView>(`/live/${id}`), refetchInterval: 5000 });
+  const view = useQuery({ queryKey: ["live", id], queryFn: () => api.get<LiveView>(`/live/${id}`), refetchInterval: 2000 });
   const menu = useQuery({ queryKey: ["live-menu"], queryFn: () => api.get<ClubMenuItem[]>("/club/menu-public") });
   const refresh = () => { for (const key of ["live", "account", "host-detail", "prizes"]) void qc.invalidateQueries({ queryKey: [key] }); };
   if (view.isPending || menu.isPending) return <Loading />;
@@ -76,6 +77,7 @@ function HostDesk({ id }: { id: string }) {
   const selectedSeat = seats.find(s => s.userId === selected);
   return <>
     <div className="host-shift-summary"><span>Участников <b>{arrivedIds.length}</b></span><span>К выдаче <b>{pending.length}</b></span><span>К оплате <b>{due.toLocaleString("ru-RU")} ₽</b></span></div>
+    <HostAttention id={id} alerts={data.state?.alerts ?? []} name={name} onSelect={(userId, final) => { setSelected(userId); setSearch(""); setTab(final ? "account" : "issue"); }} />
     <div className="host-desk">
     <section className="host-reception">
       <HostAdmission id={id} arrivedIds={arrivedIds} menu={menu.data ?? []} allowFinish={false} />
