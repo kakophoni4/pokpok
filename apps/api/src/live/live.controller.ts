@@ -60,6 +60,9 @@ export class LiveController {
   @Get("account/me") account(@CurrentUser() actor: RequestUser) {
     return this.live.account(actor.id);
   }
+  @Roles("hostess") @Get("cash/today") hostCash(@CurrentUser() actor: RequestUser) {
+    return this.live.hostCash(actor);
+  }
   @Roles("hostess") @Get("account/:userId") playerAccount(
     @Param("userId") id: string,
   ) {

@@ -108,6 +108,7 @@ export class PaymentsService {
         bundle,
         config,
         units,
+        input.method,
       );
       await this.audit.record({
         actorId,
@@ -184,6 +185,7 @@ export class PaymentsService {
             amountRub:
               perAmount + (i === 0 ? amountRub - perAmount * copies : 0),
             deferred: !!live && kind !== "entry",
+            method: !live || kind === "entry" ? input.method ?? null : null,
             chips: perChips + (i === 0 ? chips - perChips * copies : 0),
             note: input.note ?? menuItem?.title ?? null,
             createdById: actorId,
@@ -217,6 +219,7 @@ export class PaymentsService {
         amountRub,
         chips,
         multiplier: units,
+        method: input.method ?? null,
         menuItemId: menuItem?.id ?? null,
       },
     });
@@ -237,6 +240,7 @@ export class PaymentsService {
     bundle: PromoGrant[],
     config: EffectiveConfig,
     units: number,
+    method?: "cash" | "terminal",
   ): Promise<void> {
     const catalogue = await this.prisma.clubMenuItem.findMany();
     const byId = new Map(catalogue.map((item) => [item.id, item]));
@@ -319,6 +323,7 @@ export class PaymentsService {
             kind: line.kind,
             amountRub: index === 0 ? price : 0,
             deferred: !!live,
+            method: !live ? method ?? null : null,
             chips: line.chips,
             note: line.note,
             createdById: actorId,

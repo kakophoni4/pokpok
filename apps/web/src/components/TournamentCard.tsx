@@ -15,7 +15,7 @@ export function TournamentCard({ tournament: t, featured = false, coverId = t.co
   const full = t.capacity != null && t.registeredCount >= t.capacity;
   const progress = t.capacity ? Math.min(100, t.registeredCount / t.capacity * 100) : 0;
   return (
-    <li className={`schedule-event ${featured ? "schedule-event-featured" : ""} ${registered ? "schedule-event-registered" : ""}`}>
+    <li className={`schedule-event ${finished ? "schedule-event-finished" : ""} ${featured ? "schedule-event-featured" : ""} ${registered ? "schedule-event-registered" : ""}`}>
       <img className="event-cover" src={tournamentCoverUrl(coverId)} alt="" loading={featured ? "eager" : "lazy"} decoding="async" />
       <div className="event-content">
       {featured && <p className="event-feature-label">Ближайшая игра</p>}

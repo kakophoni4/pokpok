@@ -1489,18 +1489,20 @@ export function AccountPanel({
       }),
     onSuccess: () => {
       setAmount("");
+      void qc.invalidateQueries({ queryKey: ["host-cash"] });
       void qc.invalidateQueries({ queryKey: ["account"] });
       void qc.invalidateQueries({ queryKey: ["live"] });
     },
   });
   const cancel = useMutation({
     mutationFn: (id: string) => api.delete(`/live/receipts/${id}`),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["account"] }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["account"] }); void qc.invalidateQueries({ queryKey: ["live"] }); void qc.invalidateQueries({ queryKey: ["host-cash"] }); },
   });
   const cancelPurchase = useMutation({
     mutationFn: (paymentId: string) =>
       api.delete(`/tournaments/${tournamentId}/payments/${paymentId}`),
     onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["host-cash"] });
       void qc.invalidateQueries({ queryKey: ["account"] });
       void qc.invalidateQueries({ queryKey: ["live"] });
     },

@@ -9,6 +9,7 @@ import { HostAdmission, HostPlayerControls } from "./LiveHostControls";
 import { AccountPanel, PendingOrders } from "./LivePages";
 import { HostAttention } from "./HostAttention";
 import { HostRebuyAttention } from "./HostRebuyAttention";
+import { HostCash } from "./HostCash";
 import "./host-workspace.css";
 
 export function HostPage() {
@@ -50,6 +51,7 @@ function HostWorkspace() {
     <main>
       {events.isPending && <Loading />}
       {events.isError && <ErrorState error={events.error} />}
+      <HostCash />
       {event ? <>
         <div className="host-event-heading"><h1>{event.title}</h1>{active.length > 1 && <select className="field" aria-label="Турнир" value={event.id} onChange={e => setSelectedEvent(e.target.value)}>{active.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}</select>}</div>
         <HostDesk key={event.id} id={event.id} />

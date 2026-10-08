@@ -215,6 +215,7 @@ export type RegisterInput = z.infer<typeof RegisterInput>;
 export const AddPaymentInput = z.object({
   userId: Id,
   kind: PaymentKind,
+  method: z.enum(["cash", "terminal"]).optional(),
   /** When set, price and chips come from this till item. */
   menuItemId: Id.optional(),
   amountRub: z.number().int().min(0).max(1_000_000),

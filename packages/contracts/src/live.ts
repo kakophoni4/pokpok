@@ -268,6 +268,15 @@ export const ReceiptInput = z.object({
 });
 export type ReceiptInput = z.infer<typeof ReceiptInput>;
 
+export type HostCashDay = {
+  date: string;
+  cashRub: number;
+  terminalRub: number;
+  unspecifiedRub: number;
+  paidRub: number;
+  items: { kind: string; title: string; quantity: number; prizeQuantity: number; chargedRub: number }[];
+};
+
 export const DEFAULT_LIVE_CONFIG: LiveConfig = {
   maxTables: 3,
   seatsPerTable: 9,

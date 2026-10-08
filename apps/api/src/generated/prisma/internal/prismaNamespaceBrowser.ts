@@ -255,6 +255,7 @@ export const PaymentScalarFieldEnum = {
   kind: 'kind',
   amountRub: 'amountRub',
   deferred: 'deferred',
+  method: 'method',
   chips: 'chips',
   note: 'note',
   createdById: 'createdById',

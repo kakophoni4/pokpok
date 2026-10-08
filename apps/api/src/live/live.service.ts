@@ -40,6 +40,7 @@ import {
   effectiveConfig,
 } from "../tournaments/tournament-config";
 import { assertNoPastDebt, dueFor } from "./accounts";
+import { cashDayReport, clubDay } from "./host-cash";
 import {
   assignSeat,
   automaticPlaces,
@@ -1336,6 +1337,16 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       creditRub: accounts.reduce((n, a) => n + Math.max(0, -a.dueRub), 0),
       accounts,
     };
+  }
+  async hostCash(actor: RequestUser) {
+    staff(actor);
+    const day = clubDay();
+    const where = { createdAt: { gte: day.start, lt: day.end }, voidedAt: null };
+    return this.db.$transaction(async tx => {
+      const purchases = await tx.payment.findMany({ where, select: { kind: true, note: true, amountRub: true, deferred: true, method: true, prize: { select: { id: true } } } });
+      const receipts = await tx.cashReceipt.findMany({ where, select: { amountRub: true, method: true } });
+      return cashDayReport(day.date, purchases, receipts);
+    }, { isolationLevel: "RepeatableRead" });
   }
   async receipt(actor: RequestUser, input: ReceiptInput) {
     staff(actor);

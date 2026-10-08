@@ -21,6 +21,7 @@ function useDeskRefresh() {
       "host-detail",
       "prizes",
       "tournaments",
+      "host-cash",
     ])
       void qc.invalidateQueries({ queryKey: [key] });
   };
@@ -37,6 +38,7 @@ export function HostAdmission({
   allowFinish?: boolean;
 }) {
   const [search, setSearch] = useState("");
+  const [method, setMethod] = useState<"cash" | "terminal">("cash");
   const refresh = useDeskRefresh();
   const directory = usePlayers(search, search.trim().length >= 2);
   const detail = useQuery({
@@ -59,6 +61,7 @@ export function HostAdmission({
       await api.post(`/tournaments/${id}/payments`, {
         userId,
         kind: "entry",
+        method,
         menuItemId: entry?.id,
         amountRub: entry?.priceRub ?? 500,
       });
@@ -104,6 +107,9 @@ export function HostAdmission({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      <select className="field host-entry-method" aria-label="Оплата входа" value={method} onChange={e => setMethod(e.target.value as "cash" | "terminal")}>
+        <option value="cash">Наличные</option><option value="terminal">Карта</option>
+      </select>
       <div className="max-h-64 overflow-y-auto mt-3 divide-y divide-white/10">
         {candidates
           .filter((u) => !arrivedIds.includes(u.id))
@@ -118,7 +124,7 @@ export function HostAdmission({
                 onClick={() => {
                   if (
                     confirm(
-                      `Принять оплату входа ${entry?.priceRub ?? 0} ₽ от ${u.name} и посадить игрока?`,
+                      `Принять оплату входа ${entry?.priceRub ?? 0} ₽ (${method === "cash" ? "наличные" : "карта"}) от ${u.name} и посадить игрока?`,
                     )
                   )
                     enter.mutate(u.id);

@@ -330,6 +330,8 @@ model Payment {
   amountRub    Int
   /// Existing records remain paid. New deferred purchases create a debt.
   deferred     Boolean @default(false)
+  /// Null for historical payments whose collection method was not recorded.
+  method       String?
   /// Chips this line handed out, copied in at the time: later changes to the
   /// stack size must not silently rewrite a finished evening.
   chips        Int         @default(0)
