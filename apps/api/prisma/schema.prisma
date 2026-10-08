@@ -101,6 +101,7 @@ model User {
 
   identities          Identity[]
   hostCredential      HostCredential?
+  floorCredential     FloorCredential?
   sessions            Session[]
   linkTokens          LinkToken[]
   loginTickets        LoginTicket[]
@@ -585,6 +586,13 @@ model CashReceipt {
   voidedAt DateTime?
   createdAt DateTime @default(now())
   @@index([userId, tournamentId])
+}
+
+model FloorCredential {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  updatedAt DateTime @updatedAt
 }
 
 model HostCredential {

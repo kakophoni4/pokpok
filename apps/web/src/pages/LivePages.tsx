@@ -43,7 +43,7 @@ type PlayerLive = {
   }[];
 };
 
-export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
+export function LiveStaffPage({ dealer = false, floorWorkspace = false }: { dealer?: boolean; floorWorkspace?: boolean }) {
   const { user, status, can } = useAuth();
   const [id, setId] = useState("");
   const [completed, setCompleted] = useState(false);
@@ -70,13 +70,13 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
     completed
       ? t.status === "finished"
       : !["finished", "cancelled", "draft"].includes(t.status),
-  );
+  ).sort((a, b) => Number(b.status === "running") - Number(a.status === "running") || Date.parse(a.startsAt) - Date.parse(b.startsAt));
   const selected = rows.some((r) => r.id === id) ? id : (rows[0]?.id ?? "");
   return (
     <div className="live-workspace space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">
-          {dealer ? "Стол дилера" : "Управление вечером"}
+          {floorWorkspace ? (rows.find(r => r.id === selected)?.title ?? "Управление турниром") : dealer ? "Стол дилера" : "Управление вечером"}
         </h1>
         {can("hostess") && (
           <Link to="/admin" className="text-gold-400">
@@ -84,8 +84,8 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
           </Link>
         )}
       </div>
-      <div className="event-pickerbar">
-        {!dealer && (
+      {(!floorWorkspace || rows.length > 1) && <div className="event-pickerbar">
+        {!dealer && !floorWorkspace && (
           <Tabs
             value={completed ? "past" : "current"}
             onChange={(value) => setCompleted(value === "past")}
@@ -108,7 +108,7 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
             </option>
           ))}
         </select>
-      </div>
+      </div>}
       {!dealer && can("floor") && (
         <details className="hand-day-settings">
           <summary>Рука дня</summary>
@@ -140,6 +140,7 @@ export function LiveStaffPage({ dealer = false }: { dealer?: boolean }) {
               id={selected}
               dealer={dealer}
               actorId={user!.id}
+              floorWorkspace={floorWorkspace}
             />
           </fieldset>
         </>
@@ -154,13 +155,15 @@ export function LiveDesk({
   id,
   dealer = false,
   actorId,
+  floorWorkspace = false,
 }: {
   id: string;
   dealer?: boolean;
   actorId: string;
+  floorWorkspace?: boolean;
 }) {
   const { can, user } = useAuth();
-  const isFloor = !dealer && user?.role === "floor";
+  const isFloor = !dealer && (floorWorkspace || user?.role === "floor");
   const gameOperator = dealer || isFloor;
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -295,7 +298,7 @@ export function LiveDesk({
             <div className="flex flex-wrap gap-2">
               {(
                 [
-                  ["start", "Запустить"],
+                  ["start", s.clock.elapsedSeconds > 0 ? "Продолжить" : "Запустить"],
                   ["pause", "Пауза"],
                   ["next", "Следующий уровень"],
                   ["previous", "Предыдущий уровень"],
@@ -310,10 +313,10 @@ export function LiveDesk({
                 <Button
                   key={command}
                   variant={command === "start" ? "primary" : "secondary"}
-                  disabled={action.isPending}
+                  disabled={action.isPending || (command === "start" && s.clock.running) || (command === "pause" && !s.clock.running)}
                   onClick={() => {
                     if (
-                      (command === "previous" || command === "skipBreak") &&
+                      (command === "next" || command === "previous" || command === "skipBreak") &&
                       !confirm(`${label}?`)
                     )
                       return;
@@ -372,12 +375,12 @@ export function LiveDesk({
                     {staff.data?.find((p) => p.id === t.dealerId)?.name ??
                       "Без дилера"}
                   </span>
-                  <Link
+                  {!isFloor && <Link
                     className="btn"
                     to={`/dealer/setup?event=${id}&table=${t.number}`}
                   >
                     Настроить планшет
-                  </Link>
+                  </Link>}
                   {occupied(t.number) === 0 && (
                     <Button
                       variant="secondary"
@@ -420,7 +423,7 @@ export function LiveDesk({
           </Card>
         )}
         {!dealer &&
-          can("hostess") &&
+          can("hostess") && !isFloor &&
           s.alerts.some((a) => !a.acknowledgedBy) && (
             <Card className="desk-alerts">
               <h2 className="font-semibold mb-3">Требуют внимания</h2>
@@ -448,7 +451,7 @@ export function LiveDesk({
               </div>
             </Card>
           )}
-        {!dealer && can("hostess") && (
+        {!dealer && !isFloor && can("hostess") && (
           <HostAdmission
             id={id}
             arrivedIds={s.seats.map((p) => p.userId)}
@@ -580,6 +583,7 @@ export function LiveDesk({
             )}
         </div>
         {dealer && !p && <Card className="dealer-player-empty"><span className="dealer-empty-symbol" aria-hidden>♠</span><h2>Выберите игрока</h2><p>Нажмите на его место за столом.</p></Card>}
+        {floorWorkspace && !p && <Card className="floor-player-empty"><h2>Выберите игрока</h2><p>Пересадка, исправление вылета и результат.</p></Card>}
         {p && (
           <Card
             className={dealer ? "dealer-player-panel" : "desk-player-detail"}
@@ -590,7 +594,7 @@ export function LiveDesk({
               <Button variant="ghost" onClick={() => setSelected("")}>Закрыть</Button>
             </div>
             {dealer && <p className="dealer-selected-meta">{p.state === "playing" ? `Место ${p.seat ?? "—"}` : p.state === "busted" ? "Без стека" : "Завершил игру"}</p>}
-            {dealer && s.orders.filter(o => o.userId === p.userId && o.state === "pending" && (menu.data ?? []).some(m => m.id === o.menuItemId && m.kind === "rebuy")).map(o => <p key={o.id} role="status" className="dealer-rebuy-pending">Ребай ×{o.quantity} · ожидает выдачи хостес</p>)}
+            {gameOperator && s.orders.filter(o => o.userId === p.userId && o.state === "pending" && (menu.data ?? []).some(m => m.id === o.menuItemId && m.kind === "rebuy")).map(o => <p key={o.id} role="status" className="dealer-rebuy-pending">Ребай ×{o.quantity} · ожидает выдачи хостес</p>)}
             </div>
             <div className={`flex flex-wrap gap-2 mt-4 ${dealer ? "dealer-player-actions" : ""}`}>
               {gameOperator && (
@@ -688,7 +692,7 @@ export function LiveDesk({
                 </>
               )}
             </div>
-            <div className="flex flex-wrap gap-2 mt-3">
+            {p.state === "playing" && <div className="floor-move-actions flex flex-wrap gap-2 mt-3">
               {s.tables
                 .filter(
                   (t) =>
@@ -756,7 +760,7 @@ export function LiveDesk({
                       Обмен с {name(q.userId)}
                     </Button>
                   ))}
-            </div>
+            </div>}
             {dealer ? <details className="dealer-awards"><summary>Игровые комбинации</summary><HandAwards id={id} userId={p.userId} /></details> : <HandAwards id={id} userId={p.userId} />}
             {isFloor && (
               <label className="label mt-4">
@@ -806,7 +810,7 @@ export function LiveDesk({
               </label>
             )}
 
-            {!dealer && can("hostess") && (
+            {!dealer && !isFloor && can("hostess") && (
               <HostPlayerControls
                 key={p.userId}
                 id={id}
@@ -842,20 +846,20 @@ export function LiveDesk({
                 </select>
               </div>
             )}
-            {!dealer && can("hostess") && (
+            {!dealer && !isFloor && can("hostess") && (
               <AccountPanel userId={p.userId} tournamentId={id} />
             )}
           </Card>
         )}
       </div>
-      {!dealer && can("hostess") && <PendingOrders
+      {!dealer && !isFloor && can("hostess") && <PendingOrders
         id={id}
         orders={s.orders.filter((o) => o.state === "pending")}
         name={name}
         refresh={refresh}
         onError={setError}
       />}
-      {!dealer && can("hostess") && (
+      {!dealer && !isFloor && can("hostess") && (
         <LotteryDesk
           id={id}
           bounties={s.bounties}

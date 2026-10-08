@@ -52,6 +52,7 @@ export function Layout() {
     : publicItems;
 
   if (pathname === "/staff" && user?.role === "hostess") return <Navigate to="/host" replace />;
+  if (pathname === "/staff" && user?.role !== "admin") return <Navigate to="/floor" replace />;
 
   return (
     <div

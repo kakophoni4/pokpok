@@ -93,6 +93,26 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post("floor/login")
+  async floorLogin(
+    @Body(zodPipe(z.object({ nickname: z.string().trim().min(2).max(24), password: z.string().min(1).max(128) }))) body: { nickname: string; password: string },
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SessionResponse> {
+    return this.finishLogin(await this.auth.loginAsFloor(body.nickname, body.password, metaOf(request)), response);
+  }
+
+  @Roles("admin")
+  @Post("floor/password")
+  floorPassword(
+    @CurrentUser() actor: RequestUser,
+    @Body(zodPipe(z.object({ userId: z.string().min(1), password: z.string().min(8).max(128) }))) body: { userId: string; password: string },
+  ): Promise<{ ok: true }> {
+    return this.auth.setFloorPassword(actor.id, body.userId, body.password);
+  }
+
+  @Public()
   @Post("telegram/widget")
   @ApiOperation({ summary: "Login from the Telegram Login Widget on the website" })
   async telegramWidget(

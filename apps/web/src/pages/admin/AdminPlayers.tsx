@@ -215,6 +215,7 @@ function PlayerRow({
             <p className="text-xs text-chip-red">{(update.error as Error).message}</p>
           )}
           {canEdit && canChangeRole && player.role === "hostess" && <HostAccess userId={player.id} nickname={player.nickname} />}
+          {canEdit && canChangeRole && player.role === "floor" && <HostAccess userId={player.id} nickname={player.nickname} role="floor" />}
         </div>
       )}
     </li>

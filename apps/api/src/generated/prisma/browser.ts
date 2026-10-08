@@ -151,6 +151,11 @@ export type LiveTournament = Prisma.LiveTournamentModel
  */
 export type CashReceipt = Prisma.CashReceiptModel
 /**
+ * Model FloorCredential
+ *
+ */
+export type FloorCredential = Prisma.FloorCredentialModel
+/**
  * Model HostCredential
  *
  */

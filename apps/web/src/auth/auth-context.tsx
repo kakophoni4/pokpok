@@ -40,6 +40,7 @@ type AuthState = {
   pollTelegramLogin: (code: string) => Promise<LoginTicketOutcome>;
   loginAsDev: (nickname: string) => Promise<void>;
   loginAsHost: (nickname: string, password: string) => Promise<void>;
+  loginAsFloor: (nickname: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -218,6 +219,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       loginAsHost: async (nickname, password) => {
         applySession(await api.post<SessionResponse>("/auth/host/login", { nickname, password }));
+      },
+
+      loginAsFloor: async (nickname, password) => {
+        applySession(await api.post<SessionResponse>("/auth/floor/login", { nickname, password }));
       },
 
       logout: async () => {

@@ -119,6 +119,30 @@ export class AuthService {
     return { ok: true };
   }
 
+  async loginAsFloor(nickname: string, password: string, meta: SessionMeta = {}): Promise<LoginResult> {
+    const user = await this.prisma.user.findUnique({
+      where: { nickname }, include: { identities: true, floorCredential: true },
+    });
+    const valid = await verifyHostPassword(password, user?.floorCredential?.passwordHash);
+    if (!valid || !user || user.role !== "floor" || user.status !== "active") {
+      throw new UnauthorizedException({ code: "FLOOR_LOGIN_FAILED", message: "Неверный логин или пароль" });
+    }
+    return this.issueFor(user, "web", meta, false);
+  }
+
+  async setFloorPassword(actorId: string, userId: string, password: string): Promise<{ ok: true }> {
+    const passwordHash = await hashHostPassword(password);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      if (!user || user.role !== "floor") throw new ForbiddenException("Выберите сотрудника с ролью флор");
+      await tx.floorCredential.upsert({ where: { userId }, create: { userId, passwordHash }, update: { passwordHash } });
+      await tx.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
+    });
+    await this.audit.record({ actorId, action: "auth.floor.password", entity: "User", entityId: userId });
+    return { ok: true };
+  }
+
   static fromTelegram(profile: TelegramProfile): ProviderProfile {
     return {
       provider: "telegram",

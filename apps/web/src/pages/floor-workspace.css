@@ -1,0 +1,28 @@
+.floor-workspace { min-height:100dvh; background:linear-gradient(140deg,#101e2d,#080f19 70%); color:var(--text); }
+.floor-workspace > main { max-width:1440px; margin:auto; padding:24px; }
+.floor-workspace h1 { font-size:26px; line-height:1.25; letter-spacing:-.5px; }
+.floor-workspace h2 { font-size:18px; line-height:1.4; }
+.floor-workspace .field, .floor-workspace .btn, .floor-workspace .concept-button { font-size:15px; min-height:44px; }
+.floor-workspace .card { background:#101b29; }
+.floor-workspace .hand-day-settings { margin:16px 0; padding:12px 16px; border:1px solid var(--line); border-radius:10px; font-size:15px; }
+.floor-workspace .clock-workbench { grid-template-columns:minmax(280px,.8fr) minmax(0,1.5fr); }
+.floor-workspace .clock-actions > div { gap:10px; align-content:start; }
+.floor-workspace .clock-actions > div > .concept-button { flex:1 1 calc(33.333% - 10px); }
+.floor-workspace .clock-workbench > .card:first-child > div { display:grid; grid-template-columns:1fr; gap:10px; }
+.floor-workspace .clock-workbench > .card:first-child > div > strong { font-size:44px; line-height:1.1; letter-spacing:-1px; }
+.floor-workspace .desk-overview .table-control-panel { max-height:none; }
+.floor-workspace .desk-overview .table-control-panel > div { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:12px; }
+.floor-workspace .desk-overview .table-control-item { padding:14px; gap:12px; border:1px solid var(--line); border-radius:10px; }
+.floor-workspace .desk-overview .table-control-item > span:first-child { font-size:16px; font-weight:600; }
+.floor-workspace .desk-overview .table-control-item .concept-button { font-size:14px; min-height:42px; }
+.floor-workspace .desk-body { display:grid; grid-template-columns:minmax(300px,1fr) minmax(320px,1fr); gap:20px; align-items:start; }
+.floor-workspace .desk-roster { position:static; padding:18px; border:1px solid var(--line); border-radius:12px; background:#101b29; }
+.floor-workspace .live-player-list { max-height:480px; scrollbar-width:thin; }
+.floor-workspace .live-player-list > button { min-height:66px; font-size:16px; gap:6px; }
+.floor-workspace .live-player-list > button > span:last-child { font-size:14px; }
+.floor-workspace .desk-player-detail { padding:20px; }
+.floor-workspace .desk-player-detail .label { font-size:14px; }
+.floor-workspace .floor-move-actions { max-height:180px; overflow:auto; scrollbar-width:thin; padding:8px 0; border-block:1px solid var(--line); }
+.floor-player-empty { display:grid; place-content:center; text-align:center; min-height:240px; color:var(--muted); }
+.floor-player-empty h2 { color:var(--text); margin-bottom:8px; }
+@media(max-width:760px) { .floor-workspace > main { padding:16px; } .floor-workspace .clock-workbench,.floor-workspace .desk-body { grid-template-columns:1fr; } .floor-workspace .live-player-list { max-height:320px; } }
