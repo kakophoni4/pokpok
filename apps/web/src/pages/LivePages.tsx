@@ -1513,8 +1513,14 @@ export function AccountPanel({
   const a = account.data!;
   return (
     <section className="account-ledger space-y-3 mt-4">
-      <h2 className="text-xl font-semibold">Счёт · {money(a.debtRub)}</h2>
+      {!userId ? (
+        <div className="personal-balance">
+          <h2>К оплате</h2>
+          <p className="nums">{money(a.debtRub)}</p>
+        </div>
+      ) : <h2 className="text-xl font-semibold">Счёт · {money(a.debtRub)}</h2>}
       {a.creditRub > 0 && <p>Переплата: {money(a.creditRub)}</p>}
+      {!userId && a.accounts.length === 0 && <p className="account-empty">Начислений пока нет</p>}
       {a.accounts
         .filter((a) => !tournamentId || a.tournamentId === tournamentId)
         .map((a) => (

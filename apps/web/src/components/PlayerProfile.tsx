@@ -96,9 +96,9 @@ export function PlayerProfile({
       </div>
 
       {wallet && wallet.total > 0 && (
-        <section className="mb-4">
+        <section className="profile-prizes mb-4">
           <h2 className="section-heading">Призы ({wallet.total})</h2>
-          <Card>
+          <Card className="profile-prize-summary">
             <p className="text-sm text-gold-400">{walletLabel(wallet.lines)}</p>
 
             {wallet.history.length > 0 && (
@@ -148,13 +148,13 @@ export function PlayerProfile({
         </div>
       )}
 
-      <section>
+      <section className="profile-history">
         <h2 className="section-heading">История</h2>
 
         {stats.history.length === 0 ? (
           <EmptyState title="Игр пока не было" description="" />
         ) : (
-          <ul className="card divide-y divide-felt-800">
+          <ul className="profile-history-list divide-y divide-felt-800">
             {stats.history.map((event) => (
               <li key={event.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex h-10 w-12 shrink-0 items-center justify-center">

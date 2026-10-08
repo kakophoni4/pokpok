@@ -2442,3 +2442,40 @@ a {
  .public-shell .login-form h1 { font-size:26px; }
  .public-shell .login-subtitle { font-size:14px; margin-bottom:22px; }
 }
+/* Personal account follows one left alignment within a centered container. */
+.club-app:has(.account-page)::before { background:radial-gradient(ellipse at 50% 0,#17304870,transparent 65%),#080f1b; }
+.club-app:has(.account-page)::after { display:none; }
+.public-shell .account-page { max-width:720px; margin:12px auto; }
+.public-shell .account-page > h1 { text-align:left; font-size:30px; line-height:1.2; margin:0 0 24px; }
+.public-shell .account-page .account-ledger { padding:28px; border:1px solid #ffffff18; background:#101c2b; border-radius:14px; }
+.public-shell .personal-balance h2 { font-size:15px; font-weight:500; color:#bbc6d4; margin:0 0 10px; }
+.public-shell .personal-balance > p { font-size:38px; line-height:1.2; font-weight:650; letter-spacing:-.035em; color:#e6d3ad; margin:0; }
+.public-shell .account-page .account-empty { font-size:14px; color:#aeb9c9; border-top:1px solid #ffffff14; padding-top:20px; margin-top:22px; }
+.public-shell .account-page .account-ledger > details { border-top:1px solid #ffffff16; padding:16px 0 0; margin-top:18px; font-size:15px; line-height:1.6; }
+.public-shell .account-page .account-ledger summary { cursor:pointer; color:#e5e7eb; }
+.public-shell .account-page .account-ledger > p { font-size:15px; line-height:1.6; }
+@media(max-width:640px) {
+ .public-shell .account-page { margin:8px auto; }
+ .public-shell .account-page > h1 { font-size:26px; margin-bottom:20px; }
+ .public-shell .account-page .account-ledger { padding:22px; }
+ .public-shell .personal-balance > p { font-size:34px; }
+}
+.public-shell .profile-prize-summary { border:0; border-bottom:1px solid #ffffff18; border-radius:0; background:none; padding:20px 0; }
+.public-shell .profile-prize-summary > p { font-size:16px; color:#e0cca6; }
+.public-shell .profile-prize-summary ul { border-color:#ffffff14; padding-top:16px; }
+.public-shell .profile-prize-summary li { padding:6px 0; }
+.public-shell .profile-history-list { background:none; border-bottom:1px solid #ffffff18; }
+.public-shell .profile-history-list > li { padding:20px 0; gap:18px; border-color:#ffffff14; }
+.public-shell .profile-history-list > li > span:first-child { justify-content:flex-start; width:40px; }
+.public-shell .profile-history-list > li > div > :is(a,p:first-child) { font-size:16px; line-height:1.5; font-weight:550; }
+.public-shell .profile-history-list > li > div > p:last-child { margin-top:5px; font-size:13px; color:#a5b1c1; }
+.public-shell .profile-history-list > li > span:last-child { font-size:20px; }
+.public-shell .profile-history > .card { border:0; border-radius:0; border-bottom:1px solid #ffffff18; background:none; padding:24px 0; text-align:left; }
+@media(max-width:640px) {
+ .public-shell .profile-history-list > li { gap:10px; padding:18px 0; }
+ .public-shell .profile-history-list > li > span:first-child { width:28px; }
+ .public-shell .profile-history-list > li > div > :is(a,p:first-child) { font-size:14px; }
+ .public-shell .profile-history-list > li > div > p:last-child { font-size:12px; }
+ .public-shell .profile-history-list > li > span:last-child { font-size:17px; }
+ .public-shell .profile-prize-summary > p { font-size:15px; }
+}
