@@ -1,6 +1,3 @@
-import type { ClubVenue } from "@poker/contracts";
-import { useClubInfo } from "../lib/queries";
-
 const ICONS = {
   trophy: <><path d="M8 4h8v5a4 4 0 0 1-8 0V4Zm0 2H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3M12 13v5m-4 2h8m-6-2h4"/></>,
   pin: <><path d="M18 10c0 5-6 10-6 10S6 15 6 10a6 6 0 1 1 12 0Z"/><circle cx="12" cy="10" r="2"/></>,
@@ -8,12 +5,10 @@ const ICONS = {
   age: <><circle cx="12" cy="12" r="8"/><path d="M7 10h1v5m3-3c-2-3 4-3 2 0-3 4 4 4 1 0m3-2v4m-2-2h4"/></>,
 };
 
-export function ClubOverview({ fallbackVenues = [] }: { fallbackVenues?: ClubVenue[] }) {
-  const info = useClubInfo();
-  const addresses = info.data?.venues ?? fallbackVenues;
+export function ClubOverview() {
   const cards = [
     { title: "Рейтинговые турниры", icon: "trophy" as const, image: "/images/club-overview/tournaments-v1.webp", className: "club-fact-tournaments", content: <p>Очки за результаты и игровые комбинации.</p> },
-    { title: "Адрес", icon: "pin" as const, image: "/images/club-overview/venue-v1.webp", className: "club-fact-address", content: addresses.length ? addresses.map(venue => <p key={venue.id}>{venue.address ?? venue.title}</p>) : <p>{info.data?.venues ? "Адрес уточняется" : "Ульяновск, ул. Гагарина, 25"}</p> },
+    { title: "Адрес", icon: "pin" as const, image: "/images/club-overview/venue-v1.webp", className: "club-fact-address", content: <p>Ульяновск, ул. Гагарина, 25</p> },
     { title: "Texas Hold’em", icon: "cards" as const, image: "/images/club-overview/holdem-v1.webp", className: "club-fact-format", content: <p>Безлимитный холдем.<br/>Большой блайнд + анте.</p> },
     { title: "Участие 18+", icon: "age" as const, image: "/images/club-overview/adults-v1.webp", className: "club-fact-age", content: <p>При себе - документ, удостоверяющий личность.</p> },
   ];

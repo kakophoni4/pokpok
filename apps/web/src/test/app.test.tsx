@@ -45,21 +45,6 @@ describe("schedule", () => {
     expect(screen.getByText(/40\s000/)).toBeInTheDocument();
     expect(screen.queryByText(/9 призовых мест/)).not.toBeInTheDocument();
   });
-  it("filters schedule cards by their actual venue", async () => {
-    stubApi([
-      ANONYMOUS, ACTIVE_SEASON,
-      { match: "GET /tournaments?scope=upcoming", body: [
-        tournament(),
-        tournament({ id: "t2", title: "Игра на набережной", venue: { id: "v2", title: "Вторая площадка", address: "Набережная, 7" } }),
-      ] },
-    ]);
-    renderApp("/");
-    fireEvent.click(await screen.findByRole("button", { name: "Набережная, 7" }));
-    expect(screen.getByText("Игра на набережной")).toBeInTheDocument();
-    expect(screen.queryByText("Weekly Freezeout #16")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Все адреса" }));
-    expect(screen.getByText("Weekly Freezeout #16")).toBeInTheDocument();
-  });
   it("keeps private account links out of guest navigation", async () => {
     stubApi([
       ANONYMOUS, ACTIVE_SEASON,
@@ -123,7 +108,8 @@ describe("schedule", () => {
     expect(screen.getByText(/\+ 2 в ожидании/)).toBeInTheDocument();
     // A full table must say so rather than offering a seat that does not exist.
     expect(screen.getByText("Мест нет")).toBeInTheDocument();
-    expect(screen.getByText("Сезон 2026")).toBeInTheDocument();
+    expect(screen.getByRole("heading", {name:"Расписание турниров"})).toBeInTheDocument();
+    expect(screen.queryByRole("group", {name:"Место проведения"})).not.toBeInTheDocument();
   });
 
   it("asks anonymous visitors to sign in instead of offering registration", async () => {
@@ -290,7 +276,7 @@ describe("leaderboard", () => {
     expect(screen.getByRole("button", { name: "Сезон" })).toHaveTextContent(
       "Сезон 2026 · сейчас",
     );
-    fireEvent.change(screen.getByPlaceholderText("Поиск по имени"), {
+    fireEvent.change(screen.getByRole("searchbox", {name:"Поиск игрока"}), {
       target: { value: "Ferz" },
     });
     expect(screen.queryByText("Ira_Chips")).not.toBeInTheDocument();

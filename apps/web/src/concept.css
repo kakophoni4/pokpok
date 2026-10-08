@@ -2238,3 +2238,40 @@ a {
  .public-shell .event-status { padding:5px 10px; border-radius:5px; background:#091321d9; }
  .public-shell .event-enrollment-line > span:last-child { padding:2px 6px; border-radius:4px; background:#091321b3; color:var(--cream); }
 }
+
+/* One club: editorial section bars and a shared winners podium. */
+.public-shell .schedule-heading { display:block; margin:6px 0 22px; text-align:left; }
+.public-shell .schedule-heading > .section-masthead:first-child { display:flex; flex-direction:row; justify-content:space-between; align-items:center; gap:20px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.public-shell .schedule-heading .section-masthead h1,.public-shell .ranking-heading h1 { font-size:14px; line-height:1.5; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:#c7d0dc; margin:0; }
+.section-masthead p,.ranking-context { font-size:13px; line-height:1.5; color:#aebac9; margin:0; }
+.public-shell .schedule-heading .segment-tabs { margin-top:14px; justify-content:flex-start; }
+.public-shell .ranking-heading { flex-direction:row; justify-content:space-between; align-items:center; text-align:left; padding-bottom:14px; margin:6px 0 18px; gap:20px; }
+.public-shell .ranking-tools { display:flex; flex-direction:column; align-items:stretch; gap:14px; margin:0 0 24px; }
+.public-shell .ranking-tools > div > button { max-width:280px; height:38px; padding-top:6px; padding-bottom:6px; font-size:14px; background:#101a28; border-color:#ffffff20; }
+.public-shell .ranking-tools .ranking-search { max-width:none; width:100%; height:44px; font-size:15px; background:#0e1825; border-color:#ffffff20; padding-left:16px; }
+.public-shell .season-podium { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; align-items:end; padding:30px 80px 22px; margin:0 0 24px; border:1px solid #cfb68024; border-radius:14px; background:radial-gradient(ellipse at 50% 100%,#cfb68018,transparent 65%),linear-gradient(145deg,#102139,#09121f); }
+.public-shell .podium-player { display:flex; flex-direction:column; align-items:center; text-align:center; border:0; border-radius:0; padding:18px 10px 12px; background:none; overflow:visible; }
+.public-shell .podium-player::before { display:none; }
+.public-shell .podium-player:hover { background:#ffffff04; }
+.public-shell .podium-rank { align-self:center; margin:0 0 12px; letter-spacing:0; width:28px; height:28px; display:grid; place-items:center; border:1px solid #bbc9d650; border-radius:50%; font-size:13px; font-weight:650; color:#c9d2df; background:#172639; }
+.public-shell .podium-rank::after { display:none; }
+.public-shell .podium-place-1 { padding-top:0; transform:translateY(-10px); }
+.public-shell .podium-place-1 .podium-rank { background:var(--brass); color:#152033; border-color:var(--brass); }
+.public-shell .podium-place-3 .podium-rank { color:#d3ab83; border-color:#d3ab8350; }
+.public-shell .podium-player > img,.public-shell .podium-player > span[aria-hidden] { width:72px !important; height:72px !important; font-size:24px !important; border:3px solid #9aabc34d; box-shadow:0 8px 24px #0005; }
+.public-shell .podium-place-1 > img,.public-shell .podium-place-1 > span[aria-hidden] { width:86px !important; height:86px !important; border-color:#cfb680ab; }
+.public-shell .podium-name { font-size:16px; margin-top:14px; width:100%; }
+.public-shell .podium-score { font-size:28px; margin-top:5px; line-height:1.35; }
+.public-shell .podium-unit { font-size:12px; margin-top:2px; }
+@media(max-width:639px) {
+ .public-shell .schedule-heading > .section-masthead:first-child,.public-shell .ranking-heading { align-items:flex-start; gap:8px; flex-direction:column; }
+ .public-shell .schedule-heading .section-masthead h1,.public-shell .ranking-heading h1 { font-size:13px; letter-spacing:.07em; }
+ .section-masthead p,.ranking-context { font-size:12px; }
+ .public-shell .schedule-heading .segment-tabs { margin-top:10px; }
+ .public-shell .season-podium { padding:22px 5px 14px; gap:2px; }
+ .public-shell .podium-player { padding:18px 5px 10px; }
+ .public-shell .podium-player > img,.public-shell .podium-player > span[aria-hidden] { width:52px !important; height:52px !important; font-size:18px !important; }
+ .public-shell .podium-place-1 > img,.public-shell .podium-place-1 > span[aria-hidden] { width:64px !important; height:64px !important; }
+ .public-shell .podium-name { font-size:12px; margin-top:12px; }
+ .public-shell .podium-score { font-size:clamp(17px,5vw,22px); }
+}

@@ -39,18 +39,11 @@ export function LeaderboardPage() {
   return (
     <section className="leaderboard-page">
       <header className="ranking-heading">
-        <div>
-          <p className="ranking-eyebrow">{selected?.title ?? "CONCEPT"}</p>
-          <h1>Рейтинг</h1>
-        </div>
-        {standings.data && (
-          <span className="ranking-total">
-            Игроков <strong>{standings.data.length}</strong>
-          </span>
-        )}
+        <h1>Рейтинг клуба</h1>
+        <p className="ranking-context">{selected?.title ?? "Текущий сезон"}{standings.data && <span> · {standings.data.length} игроков</span>}</p>
       </header>
 
-      <div className="ranking-tools mb-4 flex flex-wrap items-center gap-3">
+      <div className="ranking-tools">
         <Select
           className="w-full sm:max-w-72"
           aria-label="Сезон"
@@ -65,9 +58,9 @@ export function LeaderboardPage() {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Поиск по имени"
+          placeholder="Найти игрока по имени"
           aria-label="Поиск игрока"
-          className="field w-full sm:max-w-52"
+          className="field ranking-search"
         />
       </div>
 
@@ -99,6 +92,7 @@ export function LeaderboardPage() {
             <div className="season-podium mb-7">
               {board.data
                 .filter((row) => row.rank <= 3)
+                .sort((a, b) => ([2, 1, 3].indexOf(a.rank) - [2, 1, 3].indexOf(b.rank)))
                 .map((row) => (
                   <Link
                     className={`podium-player podium-place-${row.rank}`}
@@ -111,7 +105,7 @@ export function LeaderboardPage() {
                     <Avatar
                       nickname={playerLabel(row.user)}
                       url={row.user.avatarUrl}
-                      size={56}
+                      size={72}
                     />
                     <strong className="podium-name">
                       {playerLabel(row.user)}
