@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api, setAccessToken } from "../lib/api";
 import { Button, Card } from "../components/ui";
+import { ClubBrand } from "../components/ClubBrand";
 import { LiveDesk } from "./LivePages";
 type Shift = {
   accessToken: string;
@@ -87,12 +88,10 @@ export function DealerTabletPage() {
     }
   };
   return (
-    <main className="mx-auto max-w-7xl p-4 sm:p-6 space-y-5">
+    <main className="dealer-shell mx-auto max-w-7xl p-4 sm:p-6 space-y-5">
       <header className="flex items-center justify-between">
         <div>
-          <div className="text-gold-400 font-semibold tracking-widest">
-            CONCEPT
-          </div>
+          <ClubBrand />
           <h1 className="text-2xl font-semibold">
             Стол{shift ? ` ${shift.table}` : ""}
           </h1>

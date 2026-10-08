@@ -1,0 +1,27 @@
+{
+  "mode": "built-in image_gen",
+  "created": "2026-10-08",
+  "hero": {
+    "file": "concept-felt-v3.webp",
+    "prompt": "Use case: photorealistic-natural. Asset: wide cinematic website hero photograph for CONCEPT poker club, deep midnight navy and muted champagne gold brand. Create an exceptionally art-directed still life photographed with a full-frame 85mm macro lens, tactile midnight-blue woven poker felt. At the right half, close-up elegant stacks of navy and ivory ceramic poker chips with thin subtle brass edge accents; two authentic ivory playing cards lying naturally partially cropped beneath chips, a clearly correct spade ace corner and another face-down card with restrained navy geometric back. Warm narrow side lighting picks up ceramic edges and felt fibers, deep inky blue shadows. Right-hand composition deliberately supports website headline on the left: left 45 percent calm, dark, uncluttered, gently lit navy felt. Low camera angle, high-end editorial product photography, rich material detail, photographic grain barely perceptible. Wide landscape 1536x1024 or wider. No people, no text, no logo, no casino neon, no glowing edges, no floating objects, no smoke, no orange teal grading, no excessive gold, no illustration. Sophisticated quiet luxury, believable physical objects. Keep foreground sharp and background subtly soft."
+  },
+  "awards": {
+    "files": [
+      "award-medallion-v3.webp",
+      "award-trophy-v3.webp",
+      "award-crown-v3.webp"
+    ],
+    "prompt": "Use case: product-mockup. Asset: premium poker club achievement award icon, one object isolated on transparent background, square canvas. Photorealistic small collectible sculpture, brushed champagne brass with midnight navy enamel, finely machined edges, refined modern design, no cheap plastic, no cartoon, no sparkles, no glow, no text or numbers. 3/4 view frontal, soft studio directional light, tight composition centered with 12% margin, dark recesses and clearly readable silhouette even at 96 pixels. ",
+    "subjects": [
+      "Circular spade poker medallion",
+      "Angular handled poker trophy cup",
+      "Five-pointed crown with navy enamel"
+    ]
+  },
+  "fonts": {
+    "display": "Oswald variable, SIL OFL",
+    "source": "https://github.com/google/fonts/tree/main/ofl/oswald",
+    "body": "Inter (existing self-hosted font)"
+  },
+  "processing": "Format-only WebP encoding, quality 88. Original logo displayed through an SVG alpha filter without changing letterforms."
+}

@@ -62,57 +62,49 @@ export function AwardArtwork({ achievement }: { achievement: Achievement }) {
               y="-29"
               fontSize="16"
               fontFamily="Georgia"
-              fill="#101b30"
+              fill={
+                achievement.code === "quads" && (i === 1 || i === 2)
+                  ? "#9e4149"
+                  : "#101b30"
+              }
             >
               {value}
             </text>
-            <path
-              d="M0 -18C-8 -10 -18 -4 -18 5a10 10 0 0 0 18 6 10 10 0 0 0 18-6c0-9-10-15-18-23Zm-3 24-4 14H7L3 6Z"
-              fill="#101b30"
-              transform="translate(0 3) scale(.62)"
-            />
+            <text
+              x="0"
+              y="15"
+              textAnchor="middle"
+              fontSize="32"
+              fontFamily="Georgia"
+              fill={
+                achievement.code === "quads" && (i === 1 || i === 2)
+                  ? "#9e4149"
+                  : "#101b30"
+              }
+            >
+              {achievement.code === "quads"
+                ? ["♠", "♥", "♦", "♣"][i]
+                : "♠"}
+            </text>
           </g>
         ))}
       </svg>
     );
   }
+  const key = `${achievement.code} ${achievement.title}`.toLowerCase();
+  const art = /win|victory|побед|чемпион/.test(key)
+    ? "trophy"
+    : /final|legend|финал|легенд|корол/.test(key)
+      ? "crown"
+      : "medallion";
   return (
-    <svg className="award-artwork" viewBox="0 0 180 160" aria-hidden="true">
-      <defs>
-        <linearGradient id={`${id}metal`} x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#f1dfad" />
-          <stop offset=".28" stopColor="#b89a5f" />
-          <stop offset=".55" stopColor="#ead3a0" />
-          <stop offset="1" stopColor="#775b2b" />
-        </linearGradient>
-      </defs>
-      <path
-        d="m54 17 29 4 7 51-28-6Zm72 0-29 4-7 51 28-6Z"
-        fill="#183763"
-        stroke="#536788"
-      />
-      <circle
-        cx="90"
-        cy="96"
-        r="47"
-        fill="#050b18"
-        stroke="#28364b"
-        strokeWidth="4"
-      />
-      <circle cx="90" cy="92" r="44" fill={`url(#${id}metal)`} />
-      <circle cx="90" cy="92" r="37" fill="#18273a" stroke="#e5ca8b" />
-      <circle
-        cx="90"
-        cy="92"
-        r="32"
-        fill="none"
-        stroke="#b49b64"
-        strokeDasharray="1 4"
-      />
-      <path
-        d="M90 67c-10 10-22 17-22 29a13 13 0 0 0 22 9 13 13 0 0 0 22-9c0-12-12-19-22-29Zm-3 34-5 17h16l-5-17Z"
-        fill={`url(#${id}metal)`}
-      />
-    </svg>
+    <img
+      className="award-artwork"
+      src={`/images/award-${art}-v3.webp`}
+      alt=""
+      loading="lazy"
+      width="180"
+      height="180"
+    />
   );
 }

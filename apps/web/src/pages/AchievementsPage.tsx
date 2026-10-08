@@ -22,7 +22,7 @@ export function AchievementsPage() {
   return (
     <>
       <PageHeader
-        title="Достижения"
+        title="Награды клуба"
         subtitle={
           user
             ? `У вас ${ownedCodes.size} из ${catalogue.data?.length ?? 0}`
@@ -44,11 +44,14 @@ export function AchievementsPage() {
       {catalogue.data && catalogue.data.length > 0 && (
         <div className="space-y-10">
           {(["club", "game"] as const).map((category) => (
-            <section key={category}>
-              <h2 className="text-xl font-semibold border-b border-white/10 pb-4 mb-5">
+            <section
+              key={category}
+              className={`award-section award-section-${category}`}
+            >
+              <h2 className="section-heading award-section-heading">
                 {category === "club" ? "Клубные награды" : "Игровые комбинации"}
               </h2>
-              <ul className="grid grid-cols-3 gap-x-3 gap-y-8 sm:grid-cols-4 py-3">
+              <ul className="award-gallery">
                 {catalogue.data
                   .filter((a) => a.category === category)
                   .map((achievement) => {
@@ -61,22 +64,28 @@ export function AchievementsPage() {
                       <li
                         key={achievement.id}
                         className={cx(
-                          "flex flex-col items-center text-center min-w-0",
-                          !owned && "achievement-locked",
+                          "award-tile flex flex-col items-center text-center min-w-0",
+                          user && !owned && "achievement-locked",
                         )}
                       >
                         <AwardArtwork achievement={achievement} />
-                        <h3 className="mt-3 text-sm font-medium leading-5 min-h-10">
+                        <h3 className="mt-3 text-sm font-medium leading-5 ">
                           {achievement.title}
                         </h3>
-                        <p className="mt-1 text-xs text-stone-400 leading-5 line-clamp-3 min-h-[3.75rem]">
+                        <p className="mt-1 text-xs text-stone-400 leading-5 ">
                           {achievement.description}
                         </p>
-                        <span className="mt-2 text-sm tabular-nums text-gold-400 border-t border-white/10 pt-2 w-16">
-                          {formatPoints(achievement.ratingPoints)}
-                        </span>
+                        {achievement.ratingPoints !== 0 && (
+                          <span className="award-points mt-2 text-sm tabular-nums text-gold-400 border-t border-white/10 pt-2 w-16">
+                            {formatPoints(achievement.ratingPoints)}
+                          </span>
+                        )}
                         <span className="text-xs text-stone-400 mt-1">
-                          {owned ? `Получено ${count}` : "Не получено"}
+                          {owned
+                            ? `Получено ${count}`
+                            : user
+                              ? "Не получено"
+                              : ""}
                         </span>
                       </li>
                     );

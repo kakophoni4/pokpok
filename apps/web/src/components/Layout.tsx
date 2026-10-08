@@ -18,8 +18,8 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Расписание" },
   { to: "/rating", label: "Рейтинг" },
-  { to: "/achievements", label: "Ачивки" },
-  { to: "/me", label: "Кабинет" },
+  { to: "/achievements", label: "Награды" },
+  { to: "/me", label: "Профиль" },
   { to: "/account", label: "Мой счёт" },
   { to: "/dealer", label: "Стол", dealerOnly: true },
   { to: "/staff", label: "Вечер", floorOnly: true },
@@ -39,10 +39,17 @@ export function Layout() {
       (!item.dealerOnly || user?.role === "dealer" || can("hostess")) &&
       (!item.floorOnly || can("floor")),
   );
-  const shell = pathname.startsWith("/staff") ? "max-w-7xl" : "max-w-5xl";
+  const workspace = /^\/(staff|admin|dealer)/.test(pathname);
+  const shell = workspace ? "workspace-shell" : "public-shell";
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div
+      className={cx(
+        "club-app flex min-h-dvh flex-col",
+        workspace && "workspace-app",
+        pathname === "/login" && "login-app",
+      )}
+    >
       <LegalNotice />
       <header
         className="club-header sticky top-0 z-20 border-b border-gold-500/20"
@@ -62,7 +69,14 @@ export function Layout() {
             <ClubBrand />
           </button>
 
-          <div className="flex items-center gap-3">
+          <nav className="desktop-nav" aria-label="Разделы клуба">
+            {items.map((item) => (
+              <NavLink key={item.to} to={item.to} end={item.to === "/"}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="header-account flex items-center gap-3">
             {can("floor") && (
               <NavLink to="/staff" className="text-sm text-stone-300">
                 Вечер
@@ -75,6 +89,7 @@ export function Layout() {
             )}
             {user ? (
               <button
+                aria-label="Личный кабинет"
                 onClick={() => navigate("/me")}
                 className="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 transition hover:bg-felt-800"
               >
@@ -98,14 +113,16 @@ export function Layout() {
         </div>
       </header>
 
-      <main className={cx("mx-auto w-full flex-1 px-4 pt-5 pb-28", shell)}>
+      <main
+        className={cx("club-main mx-auto w-full flex-1 px-4 pt-5 pb-28", shell)}
+      >
         <InstallHint />
         <Outlet />
       </main>
 
       <footer
         className={cx(
-          "mx-auto w-full px-4 pb-24 text-center text-sm text-stone-400",
+          "club-footer mx-auto w-full px-4 pb-24 text-center text-sm text-stone-400",
           shell,
         )}
       >
@@ -115,7 +132,7 @@ export function Layout() {
       </footer>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-20"
+        className="mobile-navigation fixed inset-x-0 bottom-0 z-20"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className={cx("club-bottom-nav flex", shell)}>

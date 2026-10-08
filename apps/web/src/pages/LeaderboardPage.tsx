@@ -32,7 +32,7 @@ export function LeaderboardPage() {
     <>
       <PageHeader title="Рейтинг" subtitle={selected?.title} />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="ranking-tools mb-4 flex flex-wrap items-center gap-3">
         <Select
           className="w-full sm:max-w-72"
           aria-label="Сезон"
@@ -77,7 +77,7 @@ export function LeaderboardPage() {
                     key={row.user.id}
                     to={`/player/${row.user.id}`}
                   >
-                    <span className="podium-rank">
+                    <span className="podium-rank" aria-label="Место">
                       {String(row.rank).padStart(2, "0")}
                     </span>
                     <Avatar
@@ -96,7 +96,7 @@ export function LeaderboardPage() {
                 ))}
             </div>
           )}
-          <div className="overflow-hidden border-t border-white/15">
+          <div className="ranking-table overflow-hidden border-t border-white/15">
             <div className="grid grid-cols-[2.5rem_1fr_4rem_3.25rem] gap-2 border-b border-gold-500/20 px-3 py-3 text-sm text-stone-300 sm:grid-cols-[2.5rem_1fr_4rem_3.25rem_3.5rem_4.5rem]">
               <span className="text-center">#</span>
               <span>Игрок</span>

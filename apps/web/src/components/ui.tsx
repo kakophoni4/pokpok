@@ -38,6 +38,7 @@ export function Button({
       {...rest}
       disabled={disabled || loading}
       className={cx(
+        `concept-button concept-button-${variant}`,
         "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-400",
         "disabled:cursor-not-allowed disabled:opacity-50",
         size === "sm"
@@ -157,7 +158,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="mb-5 flex items-start justify-between gap-4">
+    <header className="page-heading mb-5 flex items-start justify-between gap-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-stone-400">{subtitle}</p>}
@@ -177,7 +178,7 @@ export function Stat({
   hint?: string;
 }) {
   return (
-    <div className="card px-3 py-3 text-center">
+    <div className="card stat-cell px-3 py-3 text-center">
       <div className="nums text-xl font-semibold text-gold-400">{value}</div>
       <div className="mt-0.5 text-sm text-stone-400">{label}</div>
       {hint && <div className="mt-0.5 text-sm text-stone-500">{hint}</div>}

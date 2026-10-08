@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { DEFAULT_LIVE_CONFIG } from "@poker/contracts";
 import type {
   AccountView,
@@ -271,7 +271,7 @@ export function LiveDesk({
   );
   return (
     <div className="space-y-5">
-      {!dealer && <ClockPanel view={v} />}
+      {!dealer && <ClockPanel view={v} compact />}
       {!dealer && can("admin") && s.seats.length === 0 && (
         <Button onClick={() => setSetup(true)}>
           Настроить уровни и формат
@@ -304,6 +304,7 @@ export function LiveDesk({
             ).map(([command, label]) => (
               <Button
                 key={command}
+                variant={command === "start" ? "primary" : "secondary"}
                 disabled={action.isPending}
                 onClick={() => {
                   if (
@@ -1954,86 +1955,7 @@ function PlayerOrders() {
   );
 }
 
-export function HallDisplayPage() {
-  const { id } = useParams();
-  const [search] = useSearchParams();
-  const token = search.get("token") ?? "";
-  const view = useQuery({
-    queryKey: ["display", id, token],
-    queryFn: () =>
-      api.get<LiveView>(
-        `/live/display/${id}?token=${encodeURIComponent(token)}`,
-      ),
-    refetchInterval: 5000,
-  });
-  if (view.isPending) return <Loading />;
-  if (view.isError) return <ErrorState error={view.error} />;
-  const v = view.data!,
-    s = v.state;
-  if (!s) return <p>Вечер не настроен</p>;
-  const active = s.seats.filter((p) => p.state === "playing");
-  const avg = active.length
-    ? Math.round(active.reduce((n, p) => n + p.stack, 0) / active.length)
-    : 0;
-  return (
-    <main className="min-h-dvh bg-felt-950 p-5 sm:p-10 space-y-6">
-      <h1 className="text-3xl text-center font-semibold">{v.title}</h1>
-      <ClockPanel view={v} television />
-      {v.handOfDay && (
-        <Card>
-          <p className="text-gold-400 text-xl">Рука дня</p>
-          <strong className="text-4xl">{v.handOfDay}</strong>
-        </Card>
-      )}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-xl">
-        <div>
-          В игре<strong className="block text-3xl">{active.length}</strong>
-        </div>
-        <div>
-          Участников<strong className="block text-3xl">{s.seats.length}</strong>
-        </div>
-        <div>
-          Столов
-          <strong className="block text-3xl">
-            {s.tables.filter((t) => t.open).length}
-          </strong>
-        </div>
-        <div>
-          Средний стек
-          <strong className="block text-3xl">
-            {avg.toLocaleString("ru-RU")}
-          </strong>
-        </div>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-6">
-        <Card>
-          <h2 className="text-xl mb-3">Рейтинг сезона</h2>
-          {v.leaderboard.map((r, i) => (
-            <div key={i} className="flex justify-between gap-3 py-2">
-              <span>
-                {i + 1}. {r.name}
-              </span>
-              <span>{r.points.toLocaleString("ru-RU")}</span>
-            </div>
-          ))}
-        </Card>
-        <Card>
-          <h2 className="text-xl mb-3">Стеки по последнему замеру</h2>
-          {active
-            .slice()
-            .sort((a, b) => b.stack - a.stack)
-            .slice(0, 10)
-            .map((p) => (
-              <div key={p.userId} className="flex justify-between gap-3 py-2">
-                <span>{v.players.find((u) => u.id === p.userId)?.name}</span>
-                <span>{p.stack.toLocaleString("ru-RU")}</span>
-              </div>
-            ))}
-        </Card>
-      </div>
-    </main>
-  );
-}
+export { HallDisplayPage } from "./HallDisplay";
 
 function DealerSeatMap({
   view,

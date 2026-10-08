@@ -1,0 +1,520 @@
+.hall-state {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  background: #070f1c;
+}
+.hall-display {
+  --hall-gold: #cfb577;
+  min-height: 100dvh;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #070f1c;
+  color: #f4f1e8;
+  padding: 3vh 3vw 4.5vh;
+  gap: 3vh;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+.hall-display:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #081222e8 30%, #081222e0),
+    url("/images/concept-felt-v3.webp") 100% 45% / cover;
+  z-index: -1;
+}
+.hall-header {
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+  border-bottom: 1px solid #ffffff22;
+  padding-bottom: 2.7vh;
+  min-width: 0;
+}
+.hall-header .concept-wordmark {
+  width: 15vw;
+  height: 2.6vw;
+}
+.hall-event {
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid #ffffff22;
+  padding-left: 3vw;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.hall-event > span {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #b5a17a;
+}
+.hall-event h1 {
+  font-size: clamp(17px, 1.7vw, 32px);
+  font-weight: 450;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hall-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #a8b6c9;
+  white-space: nowrap;
+}
+.hall-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9eb89d;
+}
+.hall-status .offline {
+  background: #e0a265;
+}
+.hall-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2.35fr) minmax(250px, 1fr);
+  gap: 3vw;
+  min-height: 0;
+}
+.hall-clock {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+.hall-level {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--hall-gold);
+  text-transform: uppercase;
+  font-size: clamp(18px, 2vw, 38px);
+  font-family: Oswald;
+  letter-spacing: 0.035em;
+  line-height: 1.2;
+}
+.hall-level > span:last-child {
+  font-family: Inter, sans-serif;
+  font-size: clamp(9px, 0.75vw, 16px);
+  letter-spacing: 0.13em;
+  color: #a6b1c2;
+}
+.hall-digits {
+  font-family: Oswald, sans-serif;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  font-size: min(21vw, 34vh);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+  text-align: center;
+  margin: 1vh 0 3vh;
+  color: #f3f0e8;
+}
+.hall-countdown {
+  color: #e0c483;
+}
+.hall-paused .hall-digits {
+  color: #a8b2c1;
+}
+.hall-progress {
+  height: 3px;
+  background: #ffffff0d;
+  margin-bottom: 3.6vh;
+  overflow: hidden;
+}
+.hall-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--hall-gold);
+  transition: width 0.25s linear;
+}
+.hall-blinds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 4vh;
+  text-align: center;
+}
+.hall-blinds > div + div {
+  border-left: 1px solid #ffffff1f;
+}
+.hall-blinds span {
+  display: block;
+  font-size: clamp(11px, 0.9vw, 18px);
+  color: #a0aec2;
+  margin-bottom: 1vh;
+}
+.hall-blinds strong {
+  font-family: Oswald, sans-serif;
+  font-size: clamp(32px, 4.4vw, 88px);
+  font-weight: 400;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.hall-next {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid #ffffff1a;
+  padding-top: 2.3vh;
+}
+.hall-next > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.hall-next > div:last-child {
+  text-align: right;
+}
+.hall-next span {
+  font-size: clamp(10px, 0.8vw, 16px);
+  color: #9facc1;
+}
+.hall-next strong {
+  font-size: clamp(18px, 1.65vw, 34px);
+  font-weight: 450;
+  font-variant-numeric: tabular-nums;
+}
+.hall-sidebar {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #ffffff1c;
+  padding-left: 3vw;
+  min-height: 0;
+  gap: 2vh;
+}
+.hall-ranking {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.hall-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--hall-gold);
+  text-transform: uppercase;
+  font-size: clamp(12px, 1vw, 22px);
+  letter-spacing: 0.09em;
+  font-family: Oswald, sans-serif;
+}
+.hall-section-title > span:last-child {
+  font-family: Inter, sans-serif;
+  color: #97a6bc;
+  font-size: clamp(8px, 0.6vw, 14px);
+}
+.hall-ranking ol {
+  margin-top: 1.4vh;
+}
+.hall-ranking li {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr) auto;
+  gap: 0.8vw;
+  align-items: center;
+  padding: 1.05vh 0;
+  border-bottom: 1px solid #ffffff12;
+  font-size: clamp(13px, 1.12vw, 23px);
+}
+.hall-ranking li > span {
+  color: #788ba6;
+  font-family: Oswald;
+}
+.hall-ranking li strong {
+  font-weight: 450;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hall-ranking li b {
+  font-weight: 450;
+  color: #d0b67e;
+  font-variant-numeric: tabular-nums;
+}
+.hall-ranking li:first-child > span {
+  color: var(--hall-gold);
+}
+.hall-hand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid #c3a76a33;
+  border-radius: 9px;
+  padding: 2vh 1.4vw;
+  background: #15263d60;
+}
+.hall-hand strong {
+  display: block;
+  font-size: clamp(14px, 1.6vw, 32px);
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+  font-weight: 450;
+}
+.hall-cards {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+.hall-cards > span {
+  background: #e8e1cf;
+  color: #152139;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 3.6vw;
+  height: 5vw;
+  font-family: Georgia, serif;
+  font-size: 2.1vw;
+  line-height: 1.05;
+  box-shadow: 0 3px 8px #0004;
+}
+.hall-cards > span:first-child {
+  transform: rotate(-5deg);
+}
+.hall-cards > span:last-child {
+  transform: rotate(5deg);
+}
+.hall-cards > span.red {
+  color: #9e4149;
+}
+.hall-cards b {
+  font-size: 1.7vw;
+  font-weight: 400;
+}
+.hall-stats {
+  border-top: 1px solid #ffffff24;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding-top: 2.6vh;
+}
+.hall-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 2vw;
+  border-left: 1px solid #ffffff16;
+}
+.hall-stats > div:first-child {
+  padding-left: 0;
+  border: 0;
+}
+.hall-stats span {
+  font-size: clamp(11px, 0.85vw, 18px);
+  color: #9cabc0;
+}
+.hall-stats strong {
+  font-family: Oswald, sans-serif;
+  font-size: clamp(29px, 3.1vw, 60px);
+  font-weight: 400;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.hall-stats small {
+  font-family: Inter, sans-serif;
+  font-size: 0.4em;
+  color: #758ba8;
+  font-weight: 400;
+}
+.hall-break-title {
+  font-family: Oswald;
+  font-size: 4.4vw;
+  text-align: center;
+  color: var(--hall-gold);
+  margin-bottom: 4vh;
+  text-transform: uppercase;
+}
+.hall-empty {
+  color: #9cabc0;
+  font-size: 14px;
+  margin-top: 25px;
+}
+.hall-control-toggle {
+  position: absolute;
+  bottom: 9px;
+  right: 3vw;
+  font-size: 10px;
+  color: #94a2b8;
+  opacity: 0.55;
+}
+.hall-control-toggle:hover,
+.hall-control-toggle:focus-within {
+  opacity: 1;
+}
+.hall-controls {
+  position: absolute;
+  z-index: 5;
+  right: 3vw;
+  bottom: 40px;
+  background: #14233b;
+  border: 1px solid #536179;
+  border-radius: 12px;
+  padding: 26px;
+  box-shadow: 0 15px 70px #0008;
+  max-width: 410px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  font-size: 14px;
+}
+.hall-controls h2 {
+  font-size: 20px;
+}
+.hall-controls p {
+  color: #a4b3c8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.hall-controls label {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.hall-controls input {
+  accent-color: #c3a76a;
+  min-width: 0;
+}
+.hall-close {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  font-size: 26px;
+  color: #a4b3c8;
+}
+.hall-notice {
+  position: absolute;
+  z-index: 3;
+  bottom: 19vh;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #d5bd83;
+  color: #0b172a;
+  font-size: clamp(17px, 1.6vw, 30px);
+  padding: 14px 32px;
+  border-radius: 7px;
+  box-shadow: 0 4px 30px #0008;
+  white-space: nowrap;
+}
+@media (max-width: 800px), (max-aspect-ratio: 1/1) {
+  .hall-display {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+    padding: 22px 20px 48px;
+    gap: 25px;
+  }
+  .hall-header .concept-wordmark {
+    width: 125px;
+    height: 24px;
+  }
+  .hall-event > span,
+  .hall-status {
+    display: none;
+  }
+  .hall-event h1 {
+    font-size: 16px;
+  }
+  .hall-body {
+    grid-template-columns: 1fr;
+  }
+  .hall-digits {
+    font-size: 30vw;
+  }
+  .hall-sidebar {
+    border: 0;
+    padding: 20px 0 0;
+    border-top: 1px solid #ffffff20;
+  }
+  .hall-level {
+    font-size: 22px;
+  }
+  .hall-blinds strong {
+    font-size: 9vw;
+  }
+  .hall-hand {
+    padding: 18px;
+  }
+  .hall-cards > span {
+    width: 45px;
+    height: 64px;
+    font-size: 27px;
+  }
+  .hall-cards b {
+    font-size: 24px;
+  }
+  .hall-stats {
+    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hall-stats > div {
+    border: 0;
+    padding: 10px 0;
+  }
+  .hall-ranking li {
+    padding: 12px 0;
+  }
+  .hall-controls {
+    left: 16px;
+    right: 16px;
+    bottom: 38px;
+  }
+  .hall-notice {
+    position: fixed;
+    bottom: 110px;
+    font-size: 14px;
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+@media (min-width: 801px) and (min-aspect-ratio: 1/1) {
+  .hall-clock {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) 3px auto auto;
+    gap: 2vh;
+    align-content: stretch;
+    justify-content: stretch;
+    min-height: 0;
+  }
+  .hall-digits {
+    font-size: min(19vw, 29vh);
+    line-height: 1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .hall-progress {
+    margin: 0;
+    height: 3px;
+  }
+  .hall-blinds {
+    margin: 0;
+    padding: 1vh 0;
+  }
+  .hall-next {
+    padding-top: 1.3vh;
+    gap: 20px;
+  }
+  .hall-break-title {
+    margin: 0;
+    line-height: 1.3;
+  }
+}

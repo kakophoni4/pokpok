@@ -49,7 +49,7 @@ export function PlayerProfile({
 }) {
   return (
     <>
-      <Card className="mb-4">
+      <Card className="profile-identity mb-4">
         <div className="flex items-center gap-3">
           <Avatar
             nickname={playerLabel(stats.user)}

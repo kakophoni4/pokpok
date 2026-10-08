@@ -1,0 +1,1163 @@
+@font-face {
+  font-family: Oswald;
+  src: url("/fonts/OswaldVariable.ttf") format("truetype");
+  font-weight: 200 700;
+  font-display: swap;
+}
+:root {
+  --ink: #070f1c;
+  --panel: #101c2e;
+  --line: #ffffff14;
+  --cream: #f3f0e8;
+  --muted: #9da8b8;
+  --brass: #c3a76a;
+}
+body {
+  background: var(--ink);
+  color: var(--cream);
+  letter-spacing: -0.015em;
+}
+::selection {
+  background: #c3a76a66;
+  color: #fff;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button:not(:disabled),
+a {
+  cursor: pointer;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 4px;
+}
+.public-shell {
+  max-width: 1200px;
+}
+.workspace-shell {
+  max-width: 1480px;
+}
+.club-header {
+  background: #070f1cf5;
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+}
+.club-header > div {
+  min-height: 58px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+.concept-wordmark {
+  width: 176px;
+  height: 30px;
+  display: block;
+  overflow: visible;
+  flex: none;
+}
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 14px;
+  color: #a4afbf;
+}
+.desktop-nav a {
+  padding: 18px 0;
+  position: relative;
+  transition: color 0.2s;
+}
+.desktop-nav a:hover,
+.desktop-nav a.active {
+  color: var(--cream);
+}
+.desktop-nav a.active:after {
+  content: "";
+  height: 2px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  background: var(--brass);
+}
+.header-account > button {
+  font-size: 14px;
+}
+.header-account a:hover {
+  color: var(--brass);
+}
+.club-main {
+  padding: 36px 32px 60px;
+}
+.club-footer {
+  border-top: 1px solid var(--line);
+  padding: 24px 32px 32px;
+  text-align: left;
+  font-size: 12px;
+}
+.club-footer:before {
+  content: "CONCEPT / Ульяновск";
+  float: right;
+  color: #a0acbe;
+  letter-spacing: 0.06em;
+}
+.mobile-navigation {
+  display: none;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.field {
+  background: #0b1525;
+  border-color: #ffffff20;
+  border-radius: 7px;
+  min-height: 44px;
+  box-shadow: none;
+  font-weight: 400;
+}
+.field:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px #c3a76a15;
+}
+.concept-button {
+  min-height: 42px;
+  border-radius: 7px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+  border: 1px solid transparent;
+}
+.concept-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.concept-button-primary {
+  background: #c3a76a;
+  color: #07101e;
+}
+.concept-button-primary:hover {
+  background: #dbc28d;
+}
+.concept-button-secondary {
+  background: #17263c;
+  border-color: #ffffff17;
+  color: var(--cream);
+}
+.concept-button-secondary:hover {
+  background: #22354e;
+}
+.concept-button-ghost {
+  background: transparent;
+}
+.concept-button-danger {
+  background: #813e46;
+  border-color: #c7737c;
+  color: #fff;
+}
+.page-heading {
+  align-items: end;
+  margin: 0 0 24px;
+  gap: 20px;
+}
+.page-heading h1 {
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1.15;
+  font-weight: 450;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+.page-heading p {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.eyebrow,
+.section-heading {
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.editorial-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 13px;
+  color: var(--cream);
+  border-bottom: 1px solid #c3a76a70;
+  padding-bottom: 10px;
+}
+.editorial-link span {
+  font-size: 22px;
+  color: var(--brass);
+}
+.club-cover {
+  height: 410px;
+  min-height: 0;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 44px;
+  background: #091320;
+  border: 1px solid #ffffff12;
+}
+.club-cover-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 53%;
+  z-index: 0;
+}
+.club-cover:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #060e1ce8 0%,
+    #060e1c80 40%,
+    transparent 78%
+  );
+  z-index: 1;
+}
+.club-cover-content {
+  position: relative;
+  z-index: 2;
+  padding: 36px 42px;
+}
+.club-cover h1 {
+  font-family: Oswald, sans-serif;
+  font-size: 68px;
+  line-height: 1.09;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  font-weight: 450;
+  margin: 25px 0 28px;
+}
+.club-cover h1 span {
+  color: #d0b576;
+}
+.cover-caption {
+  position: absolute;
+  z-index: 2;
+  bottom: 20px;
+  right: 24px;
+  display: flex;
+  gap: 22px;
+  color: #e9e3d1;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 8px #000;
+}
+.cover-caption span:first-child {
+  color: #c9b788;
+}
+.schedule-grid {
+  gap: 18px;
+}
+.tournament-card {
+  position: relative;
+  overflow: hidden;
+  background: #111e30;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tournament-card > a {
+  display: block;
+  padding: 22px 24px;
+}
+.tournament-card > a:hover {
+  background: #15243a;
+}
+.tournament-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tournament-topline time {
+  color: var(--brass);
+}
+.tournament-main {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.tournament-time {
+  font-family: Oswald, sans-serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--cream);
+}
+.tournament-main h3 {
+  font-weight: 550;
+  font-size: 18px;
+  line-height: 1.25;
+}
+.tournament-main p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 7px;
+}
+.tournament-metadata {
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 24px;
+  padding-top: 15px;
+  font-size: 12px;
+  color: #abb8ca;
+}
+.tournament-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 24px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+.tournament-footer button {
+  min-width: 130px;
+}
+.tournament-registration {
+  color: #a4c6b0;
+}
+.tournament-capacity {
+  font-variant-numeric: tabular-nums;
+}
+.login-app .club-main {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+.login-app .mobile-navigation {
+  display: none;
+}
+.login-app .club-footer {
+  padding-bottom: 24px;
+}
+.login-stage {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  min-height: 580px;
+  border-radius: 12px;
+  background: #101b2d;
+  overflow: hidden;
+  border: 1px solid #ffffff17;
+}
+.login-art {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+}
+.login-art > img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 68% 50%;
+  z-index: -2;
+}
+.login-art:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #050b17f2, transparent 80%);
+  z-index: -1;
+}
+.login-art-copy {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+}
+.login-art-copy h2 {
+  font-family: Oswald, sans-serif;
+  font-size: 49px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  margin: 20px 0 24px;
+  font-weight: 450;
+  letter-spacing: -0.025em;
+}
+.login-art-copy > span {
+  font-size: 12px;
+  color: #b0bac9;
+}
+.login-form {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px;
+}
+.login-form h1 {
+  font-family: Oswald, sans-serif;
+  font-size: 61px;
+  line-height: 1.12;
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  margin: 21px 0 18px;
+}
+.login-subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 26px;
+  max-width: 240px;
+}
+.login-form label {
+  margin: 0;
+  font-size: 13px;
+  align-items: center;
+}
+.login-form input[type="checkbox"] {
+  accent-color: var(--brass);
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin: 0;
+}
+.login-form .concept-button,
+.telegram-signin {
+  width: 100%;
+  min-height: 52px;
+  font-size: 14px;
+}
+.telegram-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  color: #0b1525;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.telegram-signin:hover {
+  background: #d9c493;
+}
+.login-form .concept-button:disabled {
+  opacity: 1;
+  background: #2a3546;
+  color: #adb5c2;
+  border-color: #ffffff10;
+}
+.ranking-tools {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.season-podium {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.podium-player {
+  border: 0;
+  border-radius: 0;
+  padding: 34px 16px 28px;
+  background: #101c2e;
+  position: relative;
+  min-height: 220px;
+}
+.podium-place-1 {
+  background: #152742;
+}
+.podium-place-1:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 20px;
+  width: 2px;
+  height: 36px;
+  background: var(--brass);
+}
+.podium-rank {
+  font-family: Oswald, sans-serif;
+  font-weight: 350;
+  font-size: 46px;
+  line-height: 1;
+  top: 18px;
+  left: 18px;
+  color: #ffffff18;
+}
+.podium-place-1 .podium-rank {
+  color: #c3a76a66;
+}
+.podium-player > span.nums {
+  font-family: Oswald, sans-serif;
+  font-weight: 450;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+  color: #e4d7b9;
+}
+.ranking-table {
+  background: #0c1727;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.ranking-table > div {
+  background: #131f31;
+  color: #a4afbd;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.ranking-table li {
+  padding-top: 17px;
+  padding-bottom: 17px;
+  border-color: var(--line);
+}
+.ranking-table li:hover {
+  background: #142238;
+}
+.ranking-table li > span:first-child {
+  font-family: Oswald;
+  font-size: 22px;
+  font-weight: 400;
+}
+.award-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0;
+  align-items: stretch;
+}
+.award-tile {
+  position: relative;
+  background: #101c2e;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 23px 15px 20px;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.award-tile:hover {
+  background: #14253c;
+  border-color: #c3a76a50;
+}
+.award-artwork {
+  width: 100%;
+  height: 160px;
+  max-width: 180px;
+  object-fit: contain;
+  transition:
+    transform 0.3s,
+    filter 0.3s;
+}
+.award-tile:hover .award-artwork {
+  transform: translateY(-3px);
+}
+.achievement-locked .award-artwork {
+  filter: saturate(0.55);
+  opacity: 0.72;
+}
+.award-tile h3 {
+  font-size: 15px;
+  font-weight: 550;
+  min-height: 40px;
+  max-width: 100%;
+  margin-top: 18px;
+}
+.award-tile > p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #a5b0c0;
+  flex: 1;
+  min-height: 40px;
+  margin-bottom: 12px;
+  max-width: 190px;
+}
+.award-tile > span:nth-last-child(2) {
+  font-family: Oswald;
+  font-size: 22px;
+  font-weight: 400;
+  width: auto;
+  min-width: 65px;
+  border-color: #c3a76a33;
+}
+.award-section-heading {
+  margin-top: 35px;
+  margin-bottom: 22px;
+}
+.award-section-game .award-tile {
+  background: #0d1726;
+}
+.profile-identity {
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  background: #11233d;
+  border-color: #ffffff17;
+}
+.profile-identity:before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 38%;
+  height: 100%;
+  background:
+    linear-gradient(90deg, #11233d, transparent),
+    url("/images/concept-felt-v3.webp") 90% 50% / cover;
+  opacity: 0.36;
+  pointer-events: none;
+}
+.profile-identity > div {
+  position: relative;
+}
+.profile-identity h1 {
+  font-family: Oswald, sans-serif;
+  font-size: 38px;
+  font-weight: 450;
+}
+.profile-summary {
+  border: 1px solid var(--line);
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+  background: #101c2e;
+}
+.profile-summary .card {
+  background: transparent;
+  border: 0;
+  padding: 25px;
+  text-align: left;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+}
+.profile-summary .nums {
+  font-family: Oswald;
+  font-size: 54px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #e1c58c;
+}
+.profile-summary .card:last-child {
+  border: 0;
+}
+.profile-stats {
+  background: #101c2e;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+.profile-stats .card {
+  background: transparent;
+  border: 0 !important;
+  border-right: 1px solid var(--line) !important;
+  border-radius: 0;
+  padding: 20px 25px;
+  text-align: left;
+}
+.profile-stats .nums {
+  font-family: Oswald;
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--cream);
+}
+.workspace-app .page-heading h1 {
+  font-size: 34px;
+}
+.workspace-app .club-main {
+  padding-top: 24px;
+}
+.workspace-app .card {
+  border-radius: 9px;
+}
+.workspace-app .field {
+  min-height: 42px;
+}
+.workspace-app .concept-button {
+  min-height: 40px;
+}
+@media (min-width: 1600px) {
+  .public-shell {
+    max-width: 1280px;
+  }
+  .club-cover {
+    height: 440px;
+  }
+  .club-cover h1 {
+    font-size: 76px;
+  }
+}
+@media (max-width: 1000px) {
+  .desktop-nav {
+    gap: 19px;
+  }
+  .header-account {
+    gap: 9px;
+  }
+  .header-account > button span {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .club-main {
+    padding: 28px 24px 50px;
+  }
+  .club-header > div {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .login-form {
+    min-width: 0;
+    padding: 40px 32px;
+  }
+  .award-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none;
+  }
+  .club-header > div {
+    min-height: 49px;
+    padding: 0 20px 11px;
+  }
+  .concept-wordmark {
+    width: 148px;
+    height: 25px;
+  }
+  .header-account > button > span:last-child {
+    display: none;
+  }
+  .club-main {
+    padding: 22px 20px 40px;
+  }
+  .club-footer {
+    margin-bottom: 78px;
+    padding: 20px;
+    font-size: 11px;
+  }
+  .club-footer:before {
+    font-size: 10px;
+  }
+  .mobile-navigation {
+    display: block;
+    background: #0c1727fa;
+    backdrop-filter: blur(18px);
+    border-top: 1px solid #ffffff16;
+    padding: 0 6px;
+  }
+  .club-bottom-nav {
+    margin: 0 auto;
+    padding: 6px 2px 8px;
+    max-width: 560px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    gap: 0;
+  }
+  .club-nav-item {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 0;
+    min-height: 56px;
+    border-radius: 8px;
+    color: #8f9fb5;
+  }
+  .club-nav-item .club-nav-label {
+    display: block !important;
+    font-size: 10px;
+    line-height: 1.1;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .club-nav-item.nav-active {
+    background: #c3a76a0b;
+    color: #e0c791;
+    box-shadow: none;
+  }
+  .club-nav-item svg {
+    width: 21px;
+    height: 21px;
+  }
+  .page-heading {
+    margin-bottom: 21px;
+  }
+  .page-heading h1 {
+    font-size: 34px;
+  }
+  .page-heading p {
+    font-size: 12px;
+  }
+  .club-cover {
+    height: 325px;
+    margin-bottom: 31px;
+    margin-left: -4px;
+    margin-right: -4px;
+    border-radius: 10px;
+  }
+  .club-cover-photo {
+    object-position: 61% 60%;
+    width: 100%;
+  }
+  .club-cover:after {
+    content: "";
+    position: absolute;
+    background:
+      linear-gradient(90deg, #050d1ae0 0%, #050d1a65 60%, transparent),
+      linear-gradient(0deg, #050d1a70, transparent 50%);
+  }
+  .club-cover-content {
+    padding: 26px;
+  }
+  .club-cover h1 {
+    font-size: 47px;
+    margin-top: 24px;
+    margin-bottom: 25px;
+  }
+  .club-cover .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+  }
+  .cover-caption {
+    bottom: 16px;
+    right: 18px;
+    font-size: 9px;
+  }
+  .cover-caption span:first-child {
+    display: none;
+  }
+  .editorial-link {
+    font-size: 12px;
+  }
+  .tournament-card > a {
+    padding: 20px;
+  }
+  .tournament-topline {
+    margin-bottom: 17px;
+    font-size: 10px;
+  }
+  .tournament-time {
+    font-size: 40px;
+  }
+  .tournament-main {
+    gap: 18px;
+  }
+  .tournament-main h3 {
+    font-size: 16px;
+  }
+  .tournament-metadata {
+    margin-top: 20px;
+    font-size: 11px;
+  }
+  .tournament-footer {
+    padding: 14px 20px;
+  }
+  .login-app .club-main {
+    padding: 20px 16px 30px;
+  }
+  .login-app .club-footer {
+    margin-bottom: 0;
+  }
+  .login-stage {
+    padding: 0;
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .login-art {
+    height: 200px;
+  }
+  .login-art > img {
+    object-position: 60% 52%;
+  }
+  .login-art-copy {
+    padding: 25px;
+  }
+  .login-art-copy h2 {
+    font-size: 30px;
+    margin: 12px 0;
+  }
+  .login-art-copy > span {
+    display: none;
+  }
+  .login-art-copy .eyebrow {
+    font-size: 9px;
+  }
+  .login-form {
+    min-width: 0;
+    padding: 30px 26px 36px;
+  }
+  .login-form h1 {
+    font-size: 44px;
+    margin: 14px 0;
+  }
+
+  .login-subtitle {
+    margin-bottom: 22px;
+    font-size: 13px;
+  }
+  .login-form label {
+    font-size: 12px;
+  }
+  .season-podium {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+  }
+  .podium-player {
+    padding: 40px 8px 20px;
+    min-height: 200px;
+  }
+  .podium-player > img,
+  .podium-player > span[aria-hidden] {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+  }
+  .podium-rank {
+    font-size: 30px;
+    top: 12px;
+    left: 11px;
+  }
+  .podium-player strong {
+    font-size: 12px;
+    margin-top: 15px;
+  }
+  .podium-player > span.nums {
+    font-size: 25px;
+  }
+  .podium-player > span:last-child {
+    font-size: 10px;
+  }
+  .ranking-tools {
+    gap: 10px;
+  }
+  .ranking-tools input {
+    max-width: none;
+    flex: 1;
+    min-width: 120px;
+  }
+  .ranking-tools > div {
+    flex: 1;
+    min-width: 160px;
+  }
+  .ranking-table li {
+    padding-left: 8px;
+    padding-right: 8px;
+    grid-template-columns: 26px minmax(0, 1fr) 61px 27px;
+    font-size: 13px;
+    gap: 7px;
+  }
+  .ranking-table > div {
+    grid-template-columns: 26px minmax(0, 1fr) 61px 27px;
+    gap: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .ranking-table li img {
+    width: 30px;
+    height: 30px;
+  }
+  .ranking-table li a {
+    gap: 7px;
+  }
+  .ranking-table li > span:first-child {
+    font-size: 18px;
+  }
+  .award-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .award-tile {
+    padding: 18px 12px 17px;
+  }
+  .award-artwork {
+    height: 130px;
+  }
+  .award-tile h3 {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 13px;
+    min-height: 38px;
+  }
+  .award-tile > p {
+    font-size: 11px;
+    min-height: 38px;
+  }
+  .award-section-heading {
+    font-size: 10px;
+    margin-top: 28px;
+    letter-spacing: 0.12em;
+  }
+  .profile-identity {
+    padding: 22px;
+  }
+  .profile-identity h1 {
+    font-size: 30px;
+  }
+  .profile-identity img {
+    width: 60px;
+    height: 60px;
+  }
+  .profile-summary .card {
+    padding: 20px;
+  }
+  .profile-summary .nums {
+    font-size: 40px;
+  }
+  .profile-summary .card > div:last-child {
+    font-size: 11px;
+  }
+  .profile-stats .card {
+    padding: 16px 20px;
+  }
+  .profile-stats .card > div:last-child {
+    font-size: 11px;
+  }
+  .workspace-app .club-main {
+    padding: 20px 12px 36px;
+  }
+  .workspace-app .page-heading h1 {
+    font-size: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .award-section-club .award-gallery {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+.award-tile .award-points {
+  font-family: Oswald;
+  font-size: 22px;
+  font-weight: 400;
+  width: auto;
+  min-width: 65px;
+  border-color: #c3a76a33;
+}
+.dealer-shell {
+  min-height: 100dvh;
+}
+.dealer-shell > header {
+  border-bottom: 1px solid #ffffff18;
+  padding: 12px 4px 24px;
+  align-items: center;
+}
+.dealer-shell > header h1 {
+  font-family: Oswald;
+  font-size: 32px;
+  margin-top: 16px;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.dealer-table-felt {
+  background:
+    linear-gradient(#0d2c50ee, #0a233ff2),
+    url(/images/concept-felt-v3.webp) center/cover;
+  border-color: #17253b;
+  box-shadow:
+    inset 0 0 0 1px #c3a76a88,
+    0 12px 35px #0005;
+}
+.dealer-seat {
+  border-radius: 9px;
+  border-color: #b39a6040;
+  background: #111e31;
+}
+.dealer-seat-selected {
+  border-color: #d4b673;
+  background: #243b59;
+}
+.dealer-shell > form {
+  margin-top: 60px;
+  padding: 32px;
+}
+.dealer-shell > form h2 {
+  font-family: Oswald;
+  font-size: 32px;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.dealer-shell > form button {
+  width: 100%;
+  min-height: 46px;
+}
+
+.profile-stats .card:last-child {
+  border-right: 0 !important;
+}
+@media (max-width: 639px) {
+  .profile-stats .card:nth-child(2n) {
+    border-right: 0 !important;
+  }
+  .profile-stats .card:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line) !important;
+  }
+}
+
+.workspace-app h1 {
+  font-family: Oswald, sans-serif;
+  font-size: 32px;
+  font-weight: 450;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}

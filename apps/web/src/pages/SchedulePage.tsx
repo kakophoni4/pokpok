@@ -8,7 +8,7 @@ import {
   Tabs,
 } from "../components/ui";
 import { useActiveSeason, useTournaments } from "../lib/queries";
-import { ClubBrand } from "../components/ClubBrand";
+import { Link } from "react-router-dom";
 
 export function SchedulePage() {
   const [scope, setScope] = useState<"upcoming" | "past">("upcoming");
@@ -17,26 +17,32 @@ export function SchedulePage() {
 
   return (
     <>
-      <section className="club-cover mb-7" aria-label="CONCEPT poker club">
+      <section className="club-cover" aria-label="CONCEPT poker club">
         <img
-          src="/images/club-blue.png"
+          src="/images/concept-felt-v3.webp"
           className="club-cover-photo"
-          alt="За игровым столом CONCEPT"
+          alt="Фишки и карты на синем сукне"
           fetchPriority="high"
         />
         <div className="club-cover-content">
-          <ClubBrand />
-          <p className="text-sm tracking-[.18em] uppercase mt-3 text-white/75">
-            Poker club
-          </p>
-          <p className="text-sm text-white/60 mt-6">Гагарина, 25</p>
+          <p className="eyebrow">Ульяновск · Poker club</p>
+          <h1>
+            Увидимся
+            <br />
+            <span>за столом.</span>
+          </h1>
+          <Link to="/rating" className="editorial-link">
+            Рейтинг сезона <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
+        <div className="cover-caption">
+          <span>CONCEPT</span>
+          <span>Гагарина, 25</span>
         </div>
       </section>
       <PageHeader
-        title="Расписание игр"
-        subtitle={
-          season.data ? `${season.data.title} - идёт сейчас` : undefined
-        }
+        title={scope === "upcoming" ? "Ближайшие игры" : "Прошедшие игры"}
+        subtitle={season.data ? season.data.title : undefined}
       />
 
       <Tabs
@@ -72,7 +78,7 @@ export function SchedulePage() {
       )}
 
       {tournaments.data && tournaments.data.length > 0 && (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="schedule-grid grid gap-4 sm:grid-cols-2">
           {tournaments.data.map((tournament) => (
             <TournamentCard key={tournament.id} tournament={tournament} />
           ))}

@@ -89,17 +89,28 @@ export function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <Card className="overflow-hidden p-0 text-center">
-        {/* The photo's own aspect ratio, so the four aces are never cropped. */}
-        <div
-          className="aspect-[16/9] bg-cover bg-center"
-          style={{ backgroundImage: "url(/images/club-blue.png)" }}
-          aria-hidden
-        />
-        <div className="p-5">
-          <h1 className="text-xl font-semibold">Вход в клуб</h1>
-
+    <div className="login-composition">
+      <Card className="login-stage overflow-hidden p-0">
+        <section className="login-art" aria-label="CONCEPT poker club">
+          <img src="/images/concept-felt-v3.webp" alt="" fetchPriority="high" />
+          <div className="login-art-copy">
+            <p className="eyebrow">CONCEPT · Ульяновск</p>
+            <h2>
+              Покерный клуб.
+              <br />
+              Ульяновск.
+            </h2>
+            <span>Гагарина, 25</span>
+          </div>
+        </section>
+        <div className="login-form">
+          <p className="eyebrow">Личный кабинет</p>
+          <h1>
+            Добро
+            <br />
+            пожаловать.
+          </h1>
+          <p className="login-subtitle">Ваши турниры, рейтинг и награды.</p>
           <label className="mt-4 flex items-start gap-2 text-left text-sm text-stone-300">
             <input
               type="checkbox"
@@ -147,7 +158,7 @@ export function LoginPage() {
                 rel="noreferrer"
                 onClick={telegram.follow}
                 aria-disabled={telegram.ticket == null}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-4 py-3 font-semibold text-white transition hover:brightness-110 aria-disabled:pointer-events-none aria-disabled:opacity-60"
+                className="telegram-signin aria-disabled:pointer-events-none aria-disabled:opacity-60"
               >
                 Войти через Telegram
               </a>
