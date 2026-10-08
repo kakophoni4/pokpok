@@ -9,7 +9,7 @@ describe("dealer signal for hostess", () => {
     const state = initialState(DEFAULT_LIVE_CONFIG);
     state.tables[0] = { number: 1, open: true, dealerId: "dealer", breakRequested: false };
     state.seats = [1, 2, 3, 4].map(n => ({ userId: `p${n}`, table: 1, seat: n, state: "playing" as const, stack: 40000, arrivedAt: new Date().toISOString(), wantsMove: false }));
-    const tx = { tournament: { findUniqueOrThrow: vi.fn().mockResolvedValue({ status: "running", paidPlaces: 3 }) }, payment: { aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 1000 } }) }, cashReceipt: { aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 750 } }) }, result: { findUnique: vi.fn().mockResolvedValue({ id: "existing" }) } };
+    const tx = { tournament: { findUniqueOrThrow: vi.fn().mockResolvedValue({ status: "running", paidPlaces: 3 }) }, payment: { aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 1000 } }) }, cashReceipt: { aggregate: vi.fn().mockResolvedValue({ _sum: { amountRub: 750 } }) }, result: { findUnique: vi.fn().mockResolvedValue({ id: "existing" }), deleteMany: vi.fn() } };
     vi.spyOn(service, "locked").mockImplementation(async (_id, work) => work(tx as never, state));
     vi.spyOn(service as any, "save").mockResolvedValue(undefined);
     vi.spyOn(service as any, "audit").mockResolvedValue(undefined);
@@ -20,5 +20,12 @@ describe("dealer signal for hostess", () => {
     expect(state.alerts[0]).toMatchObject({ kind: "bust", table: 1, seat: 1, userId: "p1", acknowledgedBy: null, text: `${final ? "Завершил игру" : "Без стека"}. К оплате 250 ₽` });
     expect(notify.mock.calls[0]?.[1]).toBe("p1");
     expect(notify.mock.calls[0]?.[2]).toBe("player.busted");
+    const floor = { id: "floor", role: "floor" as const, nickname: "Floor", audience: "web" as const };
+    await expect(service.action("event", floor, { type: "stack", userId: "p1", stack: 90000 })).rejects.toMatchObject({ status: 403 });
+    await expect(service.action("event", floor, { type: "restore", userId: "p1", stack: 90000 })).rejects.toMatchObject({ status: 403 });
+    await service.action("event", floor, { type: "restore", userId: "p1" });
+    expect(state.seats[0]).toMatchObject({ state: "playing", stack: 40000, table: 1 });
+    expect(state.alerts[0]?.acknowledgedBy).toBe("floor");
+    expect(state.seats[0]).not.toHaveProperty("stackBeforeBust");
   });
 });

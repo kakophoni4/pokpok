@@ -58,11 +58,12 @@ describe("standalone floor workspace", () => {
   it("checks clock state, confirms level changes and requests rebuy without issuing it", async () => {
     const now = new Date().toISOString();
     const event = { id: "event", title: "Турнир клуба", status: "running", startsAt: now, paidPlaces: 3 };
-    const state = { config: DEFAULT_LIVE_CONFIG, clock: { running: false, elapsedSeconds: 10 }, tables: [{ number: 1, open: true, dealerId: "dealer" }], seats: [{ userId: "player", table: 1, seat: 1, state: "playing", stack: 40000 }], orders: [], alerts: [], bounties: [] };
+    const state = { config: DEFAULT_LIVE_CONFIG, clock: { running: false, elapsedSeconds: 10 }, tables: [{ number: 1, open: true, dealerId: "dealer" }, { number: 2, open: true, dealerId: "dealer2" }], seats: [{ userId: "player", table: 1, seat: 1, state: "playing", stack: 40000 }, { userId: "other", table: 2, seat: 1, state: "playing", stack: 40000 }], orders: [], alerts: [], bounties: [] };
     const log = stubApi([
       { match: "POST /auth/refresh", body: { accessToken: "access", expiresIn: 900 } },
       { match: "GET /auth/me", body: floor },
       { match: "GET /tournaments", body: [event] },
+      { match: "GET /live/event/achievements", body: [] },
       { match: "GET /live/event", body: { ...event, serverTime: now, state, players: [{ id: "player", name: "Игрок А." }], balances: [], clock: { level: DEFAULT_LIVE_CONFIG.levels[0], index: 0, remaining: 1190 }, displayCode: "123456", displayToken: "test" } },
       { match: "GET /live/staff", body: [{ id: "dealer", name: "Дилер", role: "dealer" }] },
       { match: "GET /club/menu-public", body: [{ id: "rebuy", title: "Ребай", kind: "rebuy", isFixed: true, priceRub: 1000 }] },
@@ -80,6 +81,11 @@ describe("standalone floor workspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "Следующий уровень" }));
     await vi.waitFor(() => expect(log.find(r => r.path === "/live/event/actions")?.body).toEqual({ type: "clock", command: "next" }));
     fireEvent.click(screen.getByRole("button", { name: /Игрок А./ }));
+    expect(screen.queryByLabelText("Стек")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Обменять места" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Игрок для обмена местами"), { target: { value: "other" } });
+    fireEvent.click(screen.getByRole("button", { name: "Обменять места" }));
+    await vi.waitFor(() => expect(log.some(r => JSON.stringify(r.body) === JSON.stringify({ type: "move", userId: "player", targetTable: 2, swapUserId: "other" }))).toBe(true));
     fireEvent.click(await screen.findByRole("button", { name: "Ребай x2" }));
     await vi.waitFor(() => expect(log.find(r => r.path === "/live/orders")?.body).toMatchObject({ userId: "player", quantity: 2 }));
     expect(log.some(r => r.path.endsWith("/fulfil"))).toBe(false);

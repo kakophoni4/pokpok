@@ -22,7 +22,9 @@
 .floor-workspace .live-player-list > button > span:last-child { font-size:14px; }
 .floor-workspace .desk-player-detail { padding:20px; }
 .floor-workspace .desk-player-detail .label { font-size:14px; }
-.floor-workspace .floor-move-actions { max-height:180px; overflow:auto; scrollbar-width:thin; padding:8px 0; border-block:1px solid var(--line); }
+.floor-workspace .floor-move-actions { padding:12px 0; border-block:1px solid var(--line); }
+.seat-swap-controls { display:flex; flex-wrap:wrap; align-items:center; gap:10px; width:100%; }
+.seat-swap-controls .field { flex:1 1 220px; min-width:0; }
 .floor-player-empty { display:grid; place-content:center; text-align:center; min-height:240px; color:var(--muted); }
 .floor-player-empty h2 { color:var(--text); margin-bottom:8px; }
 @media(max-width:760px) { .floor-workspace > main { padding:16px; } .floor-workspace .clock-workbench,.floor-workspace .desk-body { grid-template-columns:1fr; } .floor-workspace .live-player-list { max-height:320px; } }

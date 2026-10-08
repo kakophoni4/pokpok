@@ -168,6 +168,8 @@ export function LiveDesk({
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("");
+  const [swapUserId, setSwapUserId] = useState("");
+  useEffect(() => setSwapUserId(""), [selected]);
   const [activeTable, setTable] = useState(0);
   const [error, setError] = useState("");
   const [setup, setSetup] = useState(false);
@@ -268,6 +270,11 @@ export function LiveDesk({
     (p) => p.state === "playing" && p.table === table,
   );
   const p = s.seats.find((p) => p.userId === selected);
+  const swapCandidates = p && (p.wantsMove || isFloor) ? s.seats.filter(q =>
+    (q.wantsMove || isFloor) && q.table !== p.table && q.table != null && q.state === "playing"
+    && s.tables.some(t => t.number === q.table && t.open && t.dealerId),
+  ) : [];
+  const swapPlayer = swapCandidates.find(q => q.userId === swapUserId);
   const occupied = (n: number) =>
     s.seats.filter((p) => p.state === "playing" && p.table === n).length;
   const targets = s.tables.filter(
@@ -647,18 +654,14 @@ export function LiveDesk({
               {!dealer && p.state !== "playing" && (
                 <Button
                   onClick={() => {
-                    const n = prompt("Стек для исправления ошибочного вылета");
                     if (
-                      n &&
-                      Number(n) > 0 &&
                       confirm(
-                        `Вернуть ${name(p.userId)} в игру со стеком ${Number(n)}? Призовое место будет снято.`,
+                        `Отменить ошибочный вылет ${name(p.userId)} и вернуть игрока в игру? Призовое место будет снято.`,
                       )
                     )
                       action.mutate({
                         type: "restore",
                         userId: p.userId,
-                        stack: Number(n),
                       });
                   }}
                 >
@@ -667,14 +670,6 @@ export function LiveDesk({
               )}
               {gameOperator && (
                 <>
-                  {!dealer && <StackEditor
-                    key={p.userId}
-                    stack={p.stack}
-                    busy={action.isPending}
-                    onSave={(stack) =>
-                      action.mutate({ type: "stack", userId: p.userId, stack })
-                    }
-                  />}
                   <Button
                     disabled={action.isPending}
                     onClick={() =>
@@ -692,11 +687,13 @@ export function LiveDesk({
                 </>
               )}
             </div>
-            {p.state === "playing" && <div className="floor-move-actions flex flex-wrap gap-2 mt-3">
+            {p.state === "playing" && p.table != null && <div className="floor-move-actions flex flex-wrap gap-2 mt-3">
+              <h3 className="w-full font-semibold">Пересадка</h3>
               {s.tables
                 .filter(
                   (t) =>
                     t.open &&
+                    t.dealerId &&
                     t.number !== p.table &&
                     occupied(t.number) < s.config.seatsPerTable,
                 )
@@ -729,39 +726,21 @@ export function LiveDesk({
                         });
                     }}
                   >
-                    На стол {t.number}
+                    Пересадить на стол {t.number}
                   </Button>
                 ))}
-              {(p.wantsMove || isFloor) &&
-                s.seats
-                  .filter(
-                    (q) =>
-                      (q.wantsMove || isFloor) &&
-                      q.table !== p.table &&
-                      q.table != null &&
-                      q.state === "playing",
-                  )
-                  .map((q) => (
-                    <Button
-                      key={q.userId}
-                      disabled={action.isPending}
-                      onClick={() => {
-                        if (
-                          confirm("Подтвердить обмен местами между раздачами?")
-                        )
-                          action.mutate({
-                            type: "move",
-                            userId: p.userId,
-                            targetTable: q.table!,
-                            swapUserId: q.userId,
-                          });
-                      }}
-                    >
-                      Обмен с {name(q.userId)}
-                    </Button>
-                  ))}
+              {swapCandidates.length > 0 && <div className="seat-swap-controls">
+                <select className="field" aria-label="Игрок для обмена местами" value={swapPlayer?.userId ?? ""} onChange={e => setSwapUserId(e.target.value)}>
+                  <option value="">С кем обменять места</option>
+                  {swapCandidates.map(q => <option key={q.userId} value={q.userId}>{name(q.userId)} · стол {q.table}, место {q.seat}</option>)}
+                </select>
+                <Button variant="secondary" disabled={!swapPlayer || action.isPending} onClick={() => {
+                  if (swapPlayer && confirm(`Обменять места ${name(p.userId)} и ${name(swapPlayer.userId)} между раздачами?`))
+                    action.mutate({ type: "move", userId: p.userId, targetTable: swapPlayer.table!, swapUserId: swapPlayer.userId });
+                }}>Обменять места</Button>
+              </div>}
             </div>}
-            {dealer ? <details className="dealer-awards"><summary>Игровые комбинации</summary><HandAwards id={id} userId={p.userId} /></details> : <HandAwards id={id} userId={p.userId} />}
+            {dealer ? <details className="dealer-awards"><summary>Игровые комбинации</summary><HandAwards key={p.userId} id={id} userId={p.userId} name={name(p.userId)} /></details> : <HandAwards key={p.userId} id={id} userId={p.userId} name={name(p.userId)} />}
             {isFloor && (
               <label className="label mt-4">
                 Призовое место
@@ -1817,7 +1796,21 @@ function LotteryDesk({
   );
 }
 
-function HandAwards({ id, userId }: { id: string; userId: string }) {
+export function HandAwards({ id, userId, name }: { id: string; userId: string; name: string }) {
+  const qc = useQueryClient();
+  const history = useQuery({
+    queryKey: ["live-hand-history", id, userId],
+    queryFn: () => api.get<{ id: string; title: string; points: number; grantedAt: string; grantedBy: string | null; canRevoke: boolean }[]>(`/live/${id}/achievements?userId=${encodeURIComponent(userId)}`),
+    refetchInterval: 5000,
+  });
+  const refresh = () => {
+    for (const key of ["live-hand-history", "live", "leaderboard", "player", "achievements"]) void qc.invalidateQueries({ queryKey: [key] });
+  };
+  const revoke = useMutation({
+    mutationFn: (grantId: string) => api.post(`/live/${id}/achievements/${grantId}/revoke`),
+    onSuccess: () => { setError(""); setNotice("Ошибочная запись отменена"); refresh(); },
+    onError: (e) => setError(e.message),
+  });
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const awards = useQuery({
@@ -1832,6 +1825,7 @@ function HandAwards({ id, userId }: { id: string; userId: string }) {
       api.post(`/live/${id}/achievement`, { userId, achievementId }),
     onError: (e) => setError(e.message),
     onSuccess: (_, achievementId) => {
+      refresh();
       setError("");
       setNotice(
         `${awards.data?.find((a) => a.id === achievementId)?.title ?? "Ачивка"} - выдана`,
@@ -1847,8 +1841,8 @@ function HandAwards({ id, userId }: { id: string; userId: string }) {
           .map((a) => (
             <Button
               key={a.id}
-              disabled={mutation.isPending}
-              onClick={() => mutation.mutate(a.id)}
+              disabled={mutation.isPending || revoke.isPending}
+              onClick={() => { if (confirm(`Записать «${a.title}» игроку ${name}?`)) mutation.mutate(a.id); }}
             >
               {a.title}
             </Button>
@@ -1862,6 +1856,18 @@ function HandAwards({ id, userId }: { id: string; userId: string }) {
         </p>
       )}
       {error && <p role="alert">{error}</p>}
+      <section className="hand-award-history mt-4" aria-label="Записанные комбинации">
+        <h4 className="font-semibold">Записано в этом турнире</h4>
+        {history.isPending && <Loading />}
+        {history.isError && <p role="alert">Не удалось загрузить записанные комбинации</p>}
+        {history.data?.length === 0 && <p className="text-stone-400 mt-2">Пока нет записей</p>}
+        {history.data?.map(row => <div key={row.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 py-3">
+          <div><strong>{row.title} · {row.points > 0 ? "+" : ""}{row.points}</strong><p className="text-sm text-stone-400">{new Date(row.grantedAt).toLocaleTimeString("ru-RU", { timeZone: "Europe/Astrakhan", hour: "2-digit", minute: "2-digit" })}{row.grantedBy ? ` · ${row.grantedBy}` : ""}</p></div>
+          {row.canRevoke ? <Button variant="secondary" disabled={mutation.isPending || revoke.isPending} onClick={() => {
+            if (confirm(`Отменить «${row.title}» у ${name}? Начисленные за эту запись очки будут сняты.`)) revoke.mutate(row.id);
+          }}>Отменить запись</Button> : <span className="text-sm text-stone-400">Отменяет флор</span>}
+        </div>)}
+      </section>
     </div>
   );
 }
@@ -2144,49 +2150,5 @@ function DealerSeatMap({
         );
       })}
     </div>
-  );
-}
-
-function StackEditor({
-  stack,
-  busy,
-  onSave,
-}: {
-  stack: number;
-  busy: boolean;
-  onSave: (stack: number) => void;
-}) {
-  const [value, setValue] = useState(String(stack));
-  useEffect(() => setValue(String(stack)), [stack]);
-  return (
-    <form
-      className="flex items-end gap-2 w-full"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (Number(value) > 0 && Number.isInteger(Number(value)))
-          onSave(Number(value));
-      }}
-    >
-      <label className="label mb-0 flex-1">
-        Стек
-        <input
-          className="field mt-1"
-          type="number"
-          min="1"
-          step="1"
-          inputMode="numeric"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </label>
-      <Button
-        type="submit"
-        disabled={
-          busy || Number(value) <= 0 || !Number.isInteger(Number(value))
-        }
-      >
-        Сохранить
-      </Button>
-    </form>
   );
 }

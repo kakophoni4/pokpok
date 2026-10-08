@@ -25,7 +25,7 @@ describe('dealer tablet selection',()=>{
   expect(post.mock.calls[0]?.[1]).toMatchObject({userId:'p1',quantity:2,tournamentId:'event'});
   const order={id:'request',userId:'p1',menuItemId:'rebuy',title:'Ребай',quantity:2,priceRub:1000,state:'pending' as const,createdAt:new Date().toISOString()};
   await act(async()=>client.setQueryData(['live','event'],{...view,state:{...view.state!,orders:[order]}}));
-  expect(await screen.findByRole('status')).toHaveTextContent('Ребай ×2 · ожидает выдачи хостес');
+  expect(await screen.findByText('Ребай ×2 · ожидает выдачи хостес')).toHaveAttribute('role','status');
   expect(screen.getByRole('button',{name:'Ребай x1'})).toBeDisabled();
   expect(screen.queryByRole('button',{name:'Выдано'})).not.toBeInTheDocument();
  });

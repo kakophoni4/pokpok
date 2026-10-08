@@ -125,6 +125,20 @@ export class LiveController {
   ) {
     return this.live.grantHand(id, actor, body.userId, body.achievementId);
   }
+  @Roles("dealer") @Get(":id/achievements") handHistory(
+    @Param("id") id: string,
+    @CurrentUser() actor: RequestUser,
+    @Query("userId", zodPipe(z.string().min(1))) userId: string,
+  ) {
+    return this.live.handHistory(id, actor, userId);
+  }
+  @Roles("dealer") @Post(":id/achievements/:grantId/revoke") revokeHand(
+    @Param("id") id: string,
+    @Param("grantId") grantId: string,
+    @CurrentUser() actor: RequestUser,
+  ) {
+    return this.live.revokeHand(id, actor, grantId);
+  }
   @Post(":id/orders/:orderId/cancel") cancel(
     @Param("id") id: string,
     @Param("orderId") orderId: string,

@@ -572,6 +572,7 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
               fail("Игрок уже выбыл");
             const sourceTable = p.table ?? p.lastTable;
             const sourceSeat = p.seat;
+            if (p.state === "playing") p.stackBeforeBust = p.stack;
             p.lastTable = p.table ?? p.lastTable;
             p.state = input.final || !rebuyOpen(s) ? "eliminated" : "busted";
             p.bustedAt = new Date().toISOString();
@@ -665,6 +666,8 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
           }
           case "restore": {
             floor(actor);
+            if (actor.role === "floor" && input.stack !== undefined)
+              throw new ForbiddenException("Флор не вводит стеки");
             const p = this.player(s, input.userId);
             if (p.state === "playing") fail("Игрок уже в игре");
             p.state = "playing";
@@ -673,13 +676,16 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
             await tx.result.deleteMany({
               where: { tournamentId: id, userId: input.userId },
             });
-            p.stack = input.stack;
-            p.measuredAt = new Date().toISOString();
+            p.stack = input.stack ?? p.stackBeforeBust ?? p.stack;
+            delete p.stackBeforeBust;
+            for (const alert of s.alerts) {
+              if (alert.userId === p.userId && !alert.acknowledgedBy && alert.kind === "bust") alert.acknowledgedBy = actor.id;
+            }
             assignSeat(s, p);
             break;
           }
           case "stack":
-            floor(actor);
+            if (!hasRole(actor.role, "admin")) throw new ForbiddenException("Стеки вручную не заполняются");
             this.access(s, actor, input.userId);
             Object.assign(this.player(s, input.userId), {
               stack: input.stack,
@@ -1644,6 +1650,44 @@ export class LiveService implements OnModuleInit, OnModuleDestroy {
       tournamentId: id,
     });
   }
+  async handHistory(id: string, actor: RequestUser, userId: string) {
+    if (actor.role === "dealer" && actor.dealerTournamentId !== id)
+      throw new ForbiddenException("Доступен только ваш вечер");
+    return this.locked(id, async (tx, s) => {
+      if (!s) fail("Вечер не настроен");
+      this.access(s, actor, userId);
+      const rows = await tx.userAchievement.findMany({
+        where: { tournamentId: id, userId, achievement: { category: "game" } },
+        include: { achievement: true, grantedBy: true, ratingEvents: { select: { points: true } } },
+        orderBy: { grantedAt: "desc" },
+      });
+      return rows.filter(row => row.achievement.rule == null).map(row => ({
+        id: row.id, title: row.achievement.title,
+        points: row.ratingEvents.reduce((sum, event) => sum + event.points, 0),
+        grantedAt: row.grantedAt.toISOString(),
+        grantedBy: row.grantedBy ? formatPlayerName(row.grantedBy.displayName, row.grantedBy.nickname) : null,
+        canRevoke: actor.role !== "dealer" || row.grantedById === actor.id,
+      }));
+    });
+  }
+
+  async revokeHand(id: string, actor: RequestUser, grantId: string) {
+    if (actor.role === "dealer" && actor.dealerTournamentId !== id)
+      throw new ForbiddenException("Доступен только ваш вечер");
+    await this.locked(id, async (tx, s) => {
+      if (!s) fail("Вечер не настроен");
+      const row = await tx.userAchievement.findUnique({ where: { id: grantId }, include: { achievement: true } });
+      if (!row || row.tournamentId !== id || row.achievement.category !== "game" || row.achievement.rule != null)
+        throw new NotFoundException("Запись комбинации не найдена");
+      this.access(s, actor, row.userId);
+      if (actor.role === "dealer" && row.grantedById !== actor.id)
+        throw new ForbiddenException("Чужую запись отменяет флор");
+      const tournament = await tx.tournament.findUniqueOrThrow({ where: { id } });
+      if (["finished", "cancelled"].includes(tournament.status)) fail("Вечер завершён. Обратитесь к администратору");
+    });
+    return this.achievements.revoke(actor.id, grantId);
+  }
+
   private async remind() {
     if (this.reminding) return;
     this.reminding = true;

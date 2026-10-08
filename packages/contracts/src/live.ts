@@ -29,6 +29,7 @@ export type LiveSeat = {
   lastTable?: number;
   state: "playing" | "busted" | "eliminated";
   stack: number;
+  stackBeforeBust?: number;
   measuredAt: string;
   arrivedAt: string;
   eliminatedAt?: string;
@@ -194,7 +195,7 @@ export const LiveAction = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("restore"),
     userId: z.string().min(1),
-    stack: z.number().int().positive(),
+    stack: z.number().int().positive().optional(),
   }),
   z.object({
     type: z.literal("stack"),
