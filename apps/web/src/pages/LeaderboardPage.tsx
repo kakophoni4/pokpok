@@ -67,11 +67,9 @@ export function LeaderboardPage() {
                   <Link
                     className={`podium-player podium-place-${row.rank}`}
                     key={row.user.id}
+                    aria-label={`${row.rank} место: ${playerLabel(row.user)}, ${row.points.toLocaleString("ru-RU")} очков`}
                     to={`/player/${row.user.id}`}
                   >
-                    <span className="podium-rank" aria-label={`Место ${row.rank}`}>
-                      {String(row.rank).padStart(2, "0")}
-                    </span>
                     <Avatar
                       nickname={playerLabel(row.user)}
                       url={row.user.avatarUrl}
