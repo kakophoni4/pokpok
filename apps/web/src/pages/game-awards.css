@@ -1,0 +1,13 @@
+.public-shell .award-section-game .award-gallery{gap:32px 40px}
+.public-shell .award-section-game .award-tile{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:200px auto;gap:18px 16px;background:none;border:0;border-radius:0;box-shadow:none;padding:0 12px 18px;align-items:center;text-align:left}
+.public-shell .award-section-game .award-tile:hover{background:none;border-color:transparent;box-shadow:none}
+.public-shell .award-section-game .award-tile .combination-photo{width:100%;max-width:360px;height:200px;aspect-ratio:auto;object-fit:contain;margin:0;grid-row:1;grid-column:1/-1;filter:drop-shadow(0 8px 12px #0003)}
+.public-shell .award-section-game .award-tile h3{grid-column:1;grid-row:2;min-height:0;margin:0;font-size:18px;font-weight:600;line-height:1.4}
+.public-shell .award-section-game .award-tile>.award-points{grid-column:2;grid-row:2;margin:0;padding:0;border:0;width:auto;font-size:23px;font-weight:550;line-height:1.4;color:var(--brass);white-space:nowrap}
+@media(max-width:640px){
+ .public-shell .award-section-game .award-gallery{gap:28px 20px}
+ .public-shell .award-section-game .award-tile{grid-template-rows:160px auto;padding:0 0 12px;gap:14px 10px}
+ .public-shell .award-section-game .award-tile .combination-photo{height:160px;max-width:300px}
+ .public-shell .award-section-game .award-tile h3{font-size:16px}
+ .public-shell .award-section-game .award-tile>.award-points{font-size:20px}
+}

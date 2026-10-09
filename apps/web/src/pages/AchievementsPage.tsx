@@ -9,6 +9,7 @@ import {
 } from "../components/ui";
 import { formatPoints } from "../lib/format";
 import { useAchievements, useUserAchievements } from "../lib/queries";
+import "./game-awards.css";
 
 export function AchievementsPage() {
   const { user } = useAuth();
@@ -80,28 +81,28 @@ export function AchievementsPage() {
                         key={achievement.id}
                         className={cx(
                           "award-tile flex flex-col items-center text-center min-w-0",
-                          user && !owned && "achievement-locked",
+                          category === "club" && user && !owned && "achievement-locked",
                         )}
                       >
                         <AwardArtwork achievement={achievement} />
                         <h3 className="mt-3 text-sm font-medium leading-5 ">
-                          {achievement.title}
+                          {achievement.code === "royal_flush" ? "Флеш-рояль" : achievement.title}
                         </h3>
-                        <p className="mt-1 text-xs text-stone-400 leading-5 ">
+                        {category === "club" && <p className="mt-1 text-xs text-stone-400 leading-5 ">
                           {achievement.description}
-                        </p>
-                        {achievement.ratingPoints !== 0 && (
+                        </p>}
+                        {(category === "game" || achievement.ratingPoints !== 0) && (
                           <span className="award-points mt-2 text-sm tabular-nums text-gold-400 border-t border-white/10 pt-2 w-16">
                             {formatPoints(achievement.ratingPoints)}
                           </span>
                         )}
-                        <span className="text-xs text-stone-400 mt-1">
+                        {category === "club" && <span className="text-xs text-stone-400 mt-1">
                           {owned
                             ? `Получено ${count}`
                             : user
                               ? "Не получено"
                               : ""}
-                        </span>
+                        </span>}
                       </li>
                     );
                   })}
