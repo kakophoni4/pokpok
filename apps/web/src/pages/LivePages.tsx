@@ -16,6 +16,8 @@ import { useAuth } from "../auth/auth-context";
 import { api } from "../lib/api";
 import { Button, Card, ErrorState, Loading, Tabs } from "../components/ui";
 import { HostAdmission, HostPlayerControls } from "./LiveHostControls";
+import { PlayerLedger } from "../components/PlayerLedger";
+import "./player-finance-rating.css";
 
 const money = (n: number) => `${n.toLocaleString("ru-RU")} ₽`;
 const time = (n: number) =>
@@ -1156,6 +1158,7 @@ export function AccountPanel({
   if (account.isPending) return <Loading />;
   if (account.isError) return <ErrorState error={account.error} />;
   const a = account.data!;
+  if (!userId) return <PlayerLedger account={a}/>;
   return (
     <section className="account-ledger space-y-3 mt-4">
       {!userId ? (

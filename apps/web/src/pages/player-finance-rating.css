@@ -1,0 +1,139 @@
+/* Player data stays readable against quiet, solid surfaces. */
+.club-app:has(.leaderboard-page)::before{background:radial-gradient(ellipse at 50% 0,#17304840,transparent 65%),#080f1b}
+.club-app:has(.leaderboard-page)::after{display:none}
+.public-shell .leaderboard-page{max-width:1000px;margin:8px auto 0;min-width:0}
+.public-shell .leaderboard-page .ranking-heading{margin:0 0 20px;padding:0 0 18px}
+.public-shell .leaderboard-page .ranking-heading h1{font-size:15px;letter-spacing:.08em;color:#e0e5ec}
+.public-shell .leaderboard-page .ranking-context{font-size:14px;color:#aab7c9}
+.public-shell .leaderboard-page .season-podium{position:relative;isolation:isolate;min-height:360px;padding:44px 13% 116px;gap:3%;align-items:start;border:1px solid #d1b87d28;border-radius:16px;background:#0b1523 url('/images/leaderboard-podium-concept-v2.webp') center/100% 100% no-repeat;overflow:hidden}
+.public-shell .leaderboard-page .podium-player{grid-row:1;min-width:0;padding:22px 4px 8px;border-radius:10px;transform:none;background:none}
+.public-shell .leaderboard-page .podium-place-1{padding-top:0}
+.public-shell .leaderboard-page .podium-place-3{padding-top:34px}
+.public-shell .leaderboard-page .podium-player:hover{background:#ffffff04}
+.public-shell .leaderboard-page .podium-player>img,.public-shell .leaderboard-page .podium-player>span[aria-hidden]{width:68px!important;height:68px!important;font-size:23px!important;border:2px solid #a9b8ca80;box-shadow:0 0 0 5px #ffffff05,0 8px 22px #0006}
+.public-shell .leaderboard-page .podium-place-1>img,.public-shell .leaderboard-page .podium-place-1>span[aria-hidden]{width:82px!important;height:82px!important;border-color:#dec78f;box-shadow:0 0 0 5px #d1b87d12,0 8px 24px #0006}
+.public-shell .leaderboard-page .podium-place-3>img,.public-shell .leaderboard-page .podium-place-3>span[aria-hidden]{border-color:#b78d70}
+.public-shell .leaderboard-page .podium-name{font-size:16px;line-height:1.4;margin-top:14px;text-shadow:0 2px 10px #000}
+.public-shell .leaderboard-page .podium-score{font-size:28px;font-weight:650;line-height:1.2;margin-top:8px;padding:0;background:none;letter-spacing:-.035em;text-shadow:0 2px 10px #000}
+.public-shell .leaderboard-page .podium-unit{font-size:13px;color:#b0bdcd;margin-top:5px}
+.public-shell .leaderboard-page .ranking-tools{gap:12px;margin-bottom:22px}
+.public-shell .leaderboard-page .ranking-tools .ranking-search{border-radius:10px;background:#101b29;height:46px}
+.public-shell .leaderboard-page .standings-caption{font-size:14px;margin-bottom:12px;color:#b6c3d3}
+.public-shell .leaderboard-page .standings-frame{border:1px solid #ffffff16;border-radius:14px;box-shadow:0 12px 32px #0001;background:#0d1826;overflow:hidden}
+.public-shell .leaderboard-page .standings-table{width:100%;table-layout:fixed}
+.public-shell .leaderboard-page .standings-table .rank-column{width:64px}
+.public-shell .leaderboard-page .standings-table .score-column{width:145px}
+.public-shell .leaderboard-page .standings-table .games-column{width:70px}
+.public-shell .leaderboard-page .standings-table .wins-column{width:84px}
+.public-shell .leaderboard-page .standings-table .average-column{width:100px}
+.public-shell .leaderboard-page .standings-table th{padding:16px 20px;background:#142130;font-size:13px;font-weight:500;color:#adbbcd;white-space:nowrap}
+.public-shell .leaderboard-page .standings-table td{height:72px;padding:14px 20px;font-size:15px;color:#bcc8d8;border-color:#ffffff0b}
+.public-shell .leaderboard-page .standings-table .rank-cell{padding:0 10px;text-align:center}
+.public-shell .leaderboard-page .standing-rank{font-size:15px;color:#95a7be}
+.public-shell .leaderboard-page .standing-rank-1{color:#e0c88d}
+.public-shell .leaderboard-page .standing-rank-2{color:#cad4df}
+.public-shell .leaderboard-page .standing-rank-3{color:#c59b7d}
+.public-shell .leaderboard-page .standing-player{gap:12px;min-width:0}
+.public-shell .leaderboard-page .standing-player>img,.public-shell .leaderboard-page .standing-player>span[aria-hidden]{flex:none}
+.public-shell .leaderboard-page .standing-name{font-size:15px;font-weight:550;line-height:1.4}
+.public-shell .leaderboard-page .standings-table .standing-score{font-size:20px;font-weight:650;letter-spacing:-.025em;color:#ece4d4;white-space:nowrap}
+.public-shell .leaderboard-page .standing-leader{box-shadow:none;background:none}
+.public-shell .leaderboard-page .standings-table tbody tr:nth-child(even){background:#ffffff02}
+.public-shell .leaderboard-page .standings-table tbody tr:hover{background:#ffffff04}
+.public-shell .leaderboard-page .standings-table .standing-self{background:#cfb6800c;box-shadow:inset 2px 0 #cfb680}
+.public-shell .leaderboard-page .standing-you{font-size:11px;padding:2px 5px}
+.public-shell .leaderboard-page .standings-table .standing-personal-divider td{height:auto;padding:12px 20px;background:#152537;color:#d1b87d;font-size:13px}
+.public-shell .account-page{max-width:800px;margin:8px auto 0}
+.public-shell .account-page>h1{font-size:30px;font-weight:650;letter-spacing:-.03em;margin-bottom:24px}
+.player-ledger{min-width:0}
+.balance-card{position:relative;overflow:hidden;border:1px solid #d1b87d30;border-radius:16px;padding:28px 30px;background:radial-gradient(ellipse at 100% 0,#cfb68010,transparent 65%),#101d2c}
+.balance-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.balance-topline h2{font-size:15px;font-weight:500;color:#bdc9d8;margin:0}
+.balance-status{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;color:#a6c4b6;background:#8bbfa210;border:1px solid #8bbfa220;padding:6px 10px;border-radius:20px}
+.balance-due .balance-status{color:#dec58e;background:#cfb6800a;border-color:#cfb68030}
+.balance-amount{font-size:52px;line-height:1.1;font-weight:650;letter-spacing:-.05em;color:#f0e5cf;margin:22px 0 28px}
+.balance-clear .balance-amount{color:#eeeae2}
+.balance-credit{font-size:14px;color:#a9c4b8;margin:0 0 22px}
+.balance-credit strong{font-weight:550;margin-left:12px}
+.balance-totals{display:grid;grid-template-columns:1fr 1fr;gap:24px;border-top:1px solid #ffffff12;padding-top:22px}
+.balance-totals>div{display:flex;flex-direction:column;gap:8px}
+.balance-totals>div+div{border-left:1px solid #ffffff12;padding-left:24px}
+.balance-totals span{font-size:13px;color:#a4b3c6}
+.balance-totals strong{font-size:20px;font-weight:550;letter-spacing:-.02em;color:#dce3ec}
+.ledger-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px 0 14px}
+.ledger-heading h2{font-size:16px;font-weight:600;margin:0;color:#e0e6ef}
+.ledger-heading>span{font-size:13px;color:#9dacc0}
+.ledger-empty{display:flex;align-items:center;flex-direction:column;text-align:center;padding:36px 20px;border:1px dashed #ffffff1c;border-radius:14px;background:#101b2710;color:#b9a77f}
+.ledger-empty h3{font-size:16px;font-weight:550;color:#d3dce7;margin:16px 0 7px}
+.ledger-empty p{font-size:14px;line-height:1.6;color:#99aabd;max-width:280px;margin:0}
+.ledger-events{border:1px solid #ffffff16;border-radius:14px;overflow:hidden;background:#0e1927}
+.ledger-event+.ledger-event{border-top:1px solid #ffffff12}
+.ledger-event summary{display:flex;align-items:center;gap:18px;padding:20px 22px;cursor:pointer;list-style:none}
+.ledger-event summary::-webkit-details-marker{display:none}
+.ledger-event summary:hover{background:#ffffff03}
+.ledger-event-title{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px}
+.ledger-event-title strong{font-size:15px;font-weight:550;line-height:1.5;overflow-wrap:anywhere;color:#e4e9ef}
+.ledger-event-title>span,.ledger-event-balance>span{font-size:12px;color:#94a5bb}
+.ledger-event-balance{display:flex;flex-direction:column;gap:6px;text-align:right;flex-shrink:0}
+.ledger-event-balance strong{font-size:17px;font-weight:600;color:#dfcda7;white-space:nowrap}
+.ledger-chevron{font-size:19px;color:#9bacc1;transition:transform .15s}
+.ledger-event[open] .ledger-chevron{transform:rotate(180deg)}
+.ledger-event-body{border-top:1px solid #ffffff0b;padding:0 22px 8px}
+.ledger-event-totals{display:flex;flex-wrap:wrap;gap:10px 20px;padding:16px 0;border-bottom:1px solid #ffffff10;font-size:12px;color:#95a6bd}
+.ledger-event-totals b{font-weight:500;color:#c3d0df;margin-left:6px;white-space:nowrap}
+.ledger-event-totals>a{margin-left:auto;color:#d1b87d}
+.ledger-event-body ul{list-style:none;padding:0;margin:0}
+.ledger-event-body li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0}
+.ledger-event-body li+li{border-top:1px solid #ffffff0b}
+.ledger-event-body li>div{min-width:0;display:flex;flex-direction:column;gap:5px}
+.ledger-event-body li strong{font-size:14px;font-weight:500;overflow-wrap:anywhere;line-height:1.5}
+.ledger-event-body li>div>span{font-size:12px;color:#98a9be;line-height:1.5}
+.ledger-operation-amount{font-size:15px;font-weight:550;white-space:nowrap;color:#dfe5ef}
+.ledger-operation-amount.ledger-payment{color:#a5c7b6}
+.ledger-voided{opacity:.5}.ledger-voided strong,.ledger-voided .ledger-operation-amount{text-decoration:line-through}
+.account-page>div.space-y-4>.card{background:#101d2c;border:1px solid #ffffff16;border-radius:14px;padding:24px}
+@media(max-width:760px){
+ .public-shell .leaderboard-page .standings-table .extra-stat{display:none}
+ .public-shell .leaderboard-page .standings-table .score-column{width:112px}
+ .public-shell .leaderboard-page .standings-table .games-column{width:54px}
+ .public-shell .leaderboard-page .standings-table th,.public-shell .leaderboard-page .standings-table td{padding-left:14px;padding-right:14px}
+}
+@media(max-width:640px){
+ .public-shell .leaderboard-page .ranking-heading{gap:7px;align-items:flex-start}
+ .public-shell .leaderboard-page .ranking-heading h1{font-size:14px}
+ .public-shell .leaderboard-page .ranking-context{font-size:13px}
+ .public-shell .leaderboard-page .season-podium{min-height:300px;padding:32px 4% 98px;gap:0;border-radius:14px}
+ .public-shell .leaderboard-page .podium-player{padding:20px 3px 0}
+ .public-shell .leaderboard-page .podium-place-1{padding-top:0}
+ .public-shell .leaderboard-page .podium-place-3{padding-top:30px}
+ .public-shell .leaderboard-page .podium-player>img,.public-shell .leaderboard-page .podium-player>span[aria-hidden]{width:48px!important;height:48px!important;font-size:17px!important}
+ .public-shell .leaderboard-page .podium-place-1>img,.public-shell .leaderboard-page .podium-place-1>span[aria-hidden]{width:60px!important;height:60px!important;font-size:21px!important}
+ .public-shell .leaderboard-page .podium-name{font-size:12px;margin-top:13px}
+ .public-shell .leaderboard-page .podium-score{font-size:clamp(17px,5vw,22px);margin-top:7px}
+ .public-shell .leaderboard-page .podium-unit{font-size:11px;margin-top:4px}
+ .public-shell .leaderboard-page .standings-table .rank-column{width:40px}
+ .public-shell .leaderboard-page .standings-table .score-column{width:92px}
+ .public-shell .leaderboard-page .standings-table .games-column{width:44px}
+ .public-shell .leaderboard-page .standings-table th{font-size:12px;padding:14px 8px}
+ .public-shell .leaderboard-page .standings-table td{height:64px;padding:12px 8px;font-size:13px}
+ .public-shell .leaderboard-page .standing-player>img,.public-shell .leaderboard-page .standing-player>span[aria-hidden]{display:none}
+ .public-shell .leaderboard-page .standing-player{gap:5px}
+ .public-shell .leaderboard-page .standing-name{font-size:13px}
+ .public-shell .leaderboard-page .standings-table .standing-score{font-size:17px}
+ .public-shell .leaderboard-page .standing-rank{font-size:13px}
+ .public-shell .leaderboard-page .standing-you{font-size:10px;padding:1px 3px}
+ .public-shell .account-page>h1{font-size:28px;margin-bottom:20px}
+ .balance-card{padding:22px;border-radius:14px}
+ .balance-topline{align-items:flex-start;gap:8px}
+ .balance-status{font-size:11px;padding:5px 8px}
+ .balance-amount{font-size:44px;margin:24px 0}
+ .balance-totals{gap:16px;padding-top:18px}
+ .balance-totals>div+div{padding-left:16px}
+ .balance-totals span{font-size:12px;line-height:1.5}
+ .balance-totals strong{font-size:18px}
+ .ledger-heading{margin-top:26px}.ledger-heading h2{font-size:15px}
+ .ledger-event summary{padding:18px 16px;gap:12px}
+ .ledger-event-title strong{font-size:14px}.ledger-event-balance strong{font-size:16px}
+ .ledger-event-body{padding:0 16px 6px}
+ .ledger-event-totals{gap:10px 14px}.ledger-event-totals>a{margin-left:0}
+}

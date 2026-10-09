@@ -11,6 +11,7 @@ import {
 } from "../components/ui";
 import { playerLabel } from "../lib/format";
 import { useLeaderboard, useSeasons } from "../lib/queries";
+import "./player-finance-rating.css";
 
 export function LeaderboardPage() {
   const [seasonId, setSeasonId] = useState("");
@@ -66,6 +67,7 @@ export function LeaderboardPage() {
                 .map((row) => (
                   <Link
                     className={`podium-player podium-place-${row.rank}`}
+                    style={{gridColumn:row.rank===1?2:row.rank===2?1:3}}
                     key={row.user.id}
                     aria-label={`${row.rank} место: ${playerLabel(row.user)}, ${row.points.toLocaleString("ru-RU")} очков`}
                     to={`/player/${row.user.id}`}
