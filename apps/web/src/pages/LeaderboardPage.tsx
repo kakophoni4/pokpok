@@ -83,7 +83,6 @@ export function LeaderboardPage() {
                     <span className="podium-score nums">
                       {row.points.toLocaleString("ru-RU")}
                     </span>
-                    <span className="podium-unit">очков</span>
                   </Link>
                 ))}
             </div>
