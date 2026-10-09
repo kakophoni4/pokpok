@@ -86,7 +86,7 @@ a {
   display: block;
   width: 154px;
   height: 27px;
-  overflow: visible;
+  overflow: hidden;
   flex: none;
 }
 .desktop-nav {
