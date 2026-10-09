@@ -10,9 +10,6 @@ import { ClubBrand } from "./ClubBrand";
 type NavItem = {
   to: string;
   label: string;
-  staffOnly?: boolean;
-  dealerOnly?: boolean;
-  floorOnly?: boolean;
   authenticatedOnly?: boolean;
 };
 
@@ -22,9 +19,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/achievements", label: "Награды" },
   { to: "/me", label: "Профиль", authenticatedOnly: true },
   { to: "/account", label: "Мой счёт", authenticatedOnly: true },
-  { to: "/dealer", label: "Стол", dealerOnly: true },
-  { to: "/staff", label: "Вечер", floorOnly: true },
-  { to: "/admin", label: "Админ", staffOnly: true },
 ];
 
 export function Layout() {
@@ -33,13 +27,7 @@ export function Layout() {
   const { pathname } = useLocation();
   const publicItems = NAV_ITEMS.filter(
     (item) =>
-      !item.staffOnly &&
-      !item.floorOnly &&
-      !item.dealerOnly &&
-      (!item.authenticatedOnly || status === "authenticated") &&
-      (!item.staffOnly || can("hostess")) &&
-      (!item.dealerOnly || user?.role === "dealer" || can("hostess")) &&
-      (!item.floorOnly || can("floor")),
+      !item.authenticatedOnly || status === "authenticated",
   );
   const workspace = /^\/(staff|admin|dealer)/.test(pathname);
   const shell = workspace ? "workspace-shell" : "public-shell";
@@ -89,16 +77,6 @@ export function Layout() {
             ))}
           </nav>
           <div className="header-account flex items-center gap-3">
-            {!workspace && can("floor") && (
-              <NavLink to={user?.role === "hostess" ? "/host" : "/staff"} className="text-sm text-stone-300">
-                {user?.role === "hostess" ? "Хостес" : "Вечер"}
-              </NavLink>
-            )}
-            {!workspace && can("admin") && (
-              <NavLink to="/admin" className="text-sm text-stone-300">
-                Админ
-              </NavLink>
-            )}
             {user ? (
               <button
                 aria-label="Личный кабинет"

@@ -31,6 +31,19 @@ describe("tournament roster", () => {
 });
 
 describe("schedule", () => {
+  it.each(["admin", "floor", "hostess", "dealer"] as const)("keeps staff panels out of player navigation for %s sessions", async role => {
+    stubApi([
+      { ...SIGNED_IN, body: { ...SIGNED_IN.body, user: { ...ME, role } } },
+      { match: "GET /auth/me", body: { ...ME, role } },
+      ACTIVE_SEASON,
+      { match: "GET /tournaments?scope=upcoming", body: [] },
+    ]);
+    renderApp("/");
+    expect(await screen.findByText("Игр пока не назначено")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Личный кабинет" })).toBeInTheDocument());
+    expect(document.querySelector('a[href="/admin"], a[href="/staff"], a[href="/host"], a[href="/floor"], a[href="/dealer"]')).toBeNull();
+    expect(screen.getAllByRole("link", { name: /^Профиль$/ }).length).toBeGreaterThan(0);
+  });
   it("loads tournament parameters only when its card is expanded", async () => {
     const calls = stubApi([
       ANONYMOUS, ACTIVE_SEASON,
