@@ -54,12 +54,9 @@ export class JwtAuthGuard implements CanActivate {
         select: { role: true, status: true, nickname: true },
       });
       if (!user || user.status !== "active") throw new UnauthorizedException();
-      if (user.role !== "player") {
+      const staffSession = !!claims.staffPassword || (user.role === "dealer" && !!claims.dealerShiftId);
+      if (staffSession) {
         if (claims.role !== user.role) throw new UnauthorizedException();
-        if (!claims.staffPassword && !(user.role === "dealer" && claims.dealerShiftId)) {
-          const setupOnly = user.role === "admin" && !(await this.db.adminCredential.findUnique({ where: { userId: claims.sub } }));
-          if (!setupOnly) throw new UnauthorizedException();
-        }
       }
       if (claims.dealerShiftId) await this.dealer.session(claims.dealerShiftId);
       request.user = {
@@ -67,7 +64,7 @@ export class JwtAuthGuard implements CanActivate {
         dealerTable: claims.dealerTable,
         dealerTournamentId: claims.dealerTournamentId,
         id: claims.sub,
-        role: user.role,
+        role: staffSession ? user.role : "player",
         nickname: user.nickname,
         audience: claims.aud,
       };

@@ -232,7 +232,6 @@ export class AuthService {
     });
 
     if (existing) {
-      if (existing.user.role !== "player") throw new ForbiddenException({ code: "STAFF_PASSWORD_REQUIRED", message: "Персонал входит по логину и паролю" });
       if (existing.user.status === "blocked") {
         throw new ForbiddenException({
           code: "USER_BLOCKED",
@@ -271,9 +270,9 @@ export class AuthService {
     isNewUser: boolean,
     staffPassword = false,
   ): Promise<LoginResult> {
-    if (user.role !== "player" && !staffPassword) throw new ForbiddenException({ code: "STAFF_PASSWORD_REQUIRED", message: "Персонал входит по логину и паролю" });
+    const role = staffPassword ? user.role : "player";
     const session = await this.tokens.issue(
-      { id: user.id, role: user.role, nickname: user.nickname },
+      { id: user.id, role, nickname: user.nickname },
       audience,
       meta,
       staffPassword,
@@ -283,7 +282,7 @@ export class AuthService {
       accessToken: session.accessToken,
       refreshToken: session.refreshToken,
       expiresIn: session.expiresIn,
-      user: toMeUser(user),
+      user: { ...toMeUser(user), role },
       isNewUser,
     };
   }

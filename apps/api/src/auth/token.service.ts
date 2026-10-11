@@ -46,7 +46,7 @@ export class TokenService {
   }
 
   async issue(user: TokenUser, audience: Audience, meta: SessionMeta = {}, staffPassword = false): Promise<IssuedSession> {
-    const accessToken = await this.signAccessToken(user, audience, staffPassword);
+    const accessToken = await this.signAccessToken({ ...user, role: staffPassword ? user.role : "player" }, audience, staffPassword);
     const refreshToken = randomBytes(48).toString("hex");
 
     await this.prisma.session.create({
@@ -81,16 +81,9 @@ export class TokenService {
       throw new UnauthorizedException({ code: "USER_BLOCKED", message: "Аккаунт заблокирован" });
     }
 
-    if (session.user.role !== "player" && !session.staffPassword) {
-      // Existing administrators can set their first password from their current
-      // session. This transition closes as soon as their credential is created.
-      const setupOnly = session.user.role === "admin" && !(await this.prisma.adminCredential.findUnique({ where: { userId: session.user.id } }));
-      if (!setupOnly) throw new UnauthorizedException({ code: "STAFF_PASSWORD_REQUIRED", message: "Войдите по логину и паролю" });
-    }
-
     const user: TokenUser = {
       id: session.user.id,
-      role: session.user.role,
+      role: session.staffPassword ? session.user.role : "player",
       nickname: session.user.nickname,
     };
     const audience = session.audience as Audience;

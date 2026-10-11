@@ -219,7 +219,7 @@ export class AuthController {
     return {
       accessToken: rotated.accessToken,
       expiresIn: rotated.expiresIn,
-      user: await this.users.getMe(rotated.user.id),
+      user: { ...await this.users.getMe(rotated.user.id), role: rotated.user.role },
       isNewUser: false,
     };
   }
@@ -239,8 +239,8 @@ export class AuthController {
 
   @Get("me")
   @ApiOperation({ summary: "Profile of the signed-in user" })
-  me(@CurrentUser() user: RequestUser): Promise<MeUser> {
-    return this.users.getMe(user.id);
+  async me(@CurrentUser() user: RequestUser): Promise<MeUser> {
+    return { ...await this.users.getMe(user.id), role: user.role };
   }
 
   @Post("link/:provider")
