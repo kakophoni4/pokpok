@@ -88,6 +88,7 @@ services:
       args:
         # Baked into the JavaScript bundle, so changing it needs a rebuild.
         VITE_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+        VITE_CAST_APPLICATION_ID: ${CAST_APPLICATION_ID:-}
     restart: unless-stopped
     depends_on:
       - api

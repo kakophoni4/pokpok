@@ -1,4 +1,5 @@
 import { DealerSetupPage } from "./pages/DealerSetupPage";
+import { CastReceiverPage } from "./pages/CastReceiverPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -73,6 +74,7 @@ export function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="cast-receiver" element={<CastReceiverPage />} />
             <Route path="dealer" element={<DealerTabletPage />} />
             <Route path="display/:id" element={<HallDisplayPage />} />
             <Route path="tv" element={<TVConnectPage />} />

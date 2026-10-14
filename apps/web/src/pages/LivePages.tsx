@@ -1,4 +1,5 @@
 import { IssuePayment } from "./IssuePayment";
+import { CastScreenButton } from "../components/CastScreenButton";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate } from "react-router-dom";
@@ -347,6 +348,7 @@ export function LiveDesk({
                   <summary className="cursor-pointer">
                     Подключение телевизора
                   </summary>
+                  <CastScreenButton connection={{ id, token: v.displayToken }} />
                   {v.displayCode && <div className="tv-connection-instructions">
                     <p>На телевизоре откройте <a href="/tv" target="_blank" rel="noreferrer">{window.location.host}/tv</a></p>
                     <span>Код турнира</span>

@@ -17,7 +17,7 @@ import "./hall-display.css";
 import type { TVConnection } from "./TVConnectPage";
 
 const number = (n: number) => n.toLocaleString("ru-RU");
-export function HallDisplayPage({ connection, onDisconnect }: { connection?: TVConnection; onDisconnect?: () => void } = {}) {
+export function HallDisplayPage({ connection, onDisconnect, receiverMode = false }: { connection?: TVConnection; onDisconnect?: () => void; receiverMode?: boolean } = {}) {
   const params = useParams(), [search] = useSearchParams();
   const id = connection?.id ?? params.id, token = connection?.token ?? search.get("token") ?? "";
   const query = useQuery({
@@ -33,7 +33,7 @@ export function HallDisplayPage({ connection, onDisconnect }: { connection?: TVC
     [enabled, setEnabled] = useState(false),
     [controls, setControls] = useState(false);
   const [audioError, setAudioError] = useState("");
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(receiverMode);
   const [volume, setVolume] = useState(() => {
     try {
       const v = localStorage.getItem("concept-tv-volume");
@@ -53,6 +53,12 @@ export function HallDisplayPage({ connection, onDisconnect }: { connection?: TVC
     ? projectDisplayClock(view, now, query.dataUpdatedAt)
     : null;
   const fresh = !!view && !query.isError && now - query.dataUpdatedAt < 15000;
+  const receiverAudioAttempted = useRef(false);
+  useEffect(() => {
+    if (!receiverMode || !view || receiverAudioAttempted.current) return;
+    receiverAudioAttempted.current = true;
+    void enableAudio();
+  }, [receiverMode, !!view]);
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(t);

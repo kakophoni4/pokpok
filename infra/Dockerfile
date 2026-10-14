@@ -30,8 +30,10 @@ COPY . .
 # Leave VITE_API_URL empty so the site calls /api on its own origin via Caddy.
 ARG VITE_TELEGRAM_BOT_USERNAME=""
 ARG VITE_API_URL=""
+ARG VITE_CAST_APPLICATION_ID=""
 ENV VITE_TELEGRAM_BOT_USERNAME=$VITE_TELEGRAM_BOT_USERNAME
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_CAST_APPLICATION_ID=$VITE_CAST_APPLICATION_ID
 
 # Generating the Prisma client reads the schema and connects to nothing, but the
 # config file it loads insists on a URL being present. This placeholder satisfies
