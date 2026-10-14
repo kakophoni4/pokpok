@@ -6,6 +6,9 @@
 # lives in an httpOnly cookie, and same-origin means no CORS setup and no
 # third-party-cookie problems inside the Telegram Mini App webview.
 
+# Additional sites are kept outside this repository and survive poker releases.
+import /etc/caddy/extra/*.caddy
+
 {$PUBLIC_URL} {
 	encode zstd gzip
 
